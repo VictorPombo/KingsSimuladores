@@ -1,0 +1,24 @@
+{
+  "name": "kingssimuladores",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VictorPombo/KingsSimuladores.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VictorPombo/KingsSimuladores/issues"
+  },
+  "homepage": "https://github.com/VictorPombo/KingsSimuladores#readme",
+  "devDependencies": {
+    "vercel": "^50.38.3"
+  }
+}
