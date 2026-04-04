@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kings Hub — Production Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg-primary:#06080f;--bg-secondary:#0c1018;--bg-card:#0f1420;--bg-card-hover:#131928;
+--border:#1a2035;--border-accent:#1e2a45;
+--text-primary:#e8ecf4;--text-secondary:#8892a8;--text-muted:#556078;
+--accent:#00e5ff;--accent-glow:rgba(0,229,255,.15);--accent-dim:rgba(0,229,255,.08);
+--red:#ff3b5c;--orange:#ff8c42;--yellow:#ffd166;--green:#06d6a0;--purple:#8b5cf6;
+--success:#06d6a0;--warning:#ffd166;--danger:#ff3b5c;--info:#00e5ff;
+--radius:12px;--radius-sm:8px;--radius-xs:6px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6;overflow-x:hidden}
+.font-display{font-family:'Rajdhani',sans-serif}
+.font-mono{font-family:'JetBrains Mono',monospace}
+
+/* HEADER */
+.header{position:sticky;top:0;z-index:100;background:rgba(6,8,15,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:16px}
+.logo{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.5rem;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px}
+.header-right{display:flex;align-items:center;gap:20px}
+.header-stat{text-align:center}
+.header-stat-value{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;color:var(--accent)}
+.header-stat-label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.status-badge.active{background:rgba(6,214,160,.12);color:var(--green);border:1px solid rgba(6,214,160,.25)}
+.status-badge .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* GLOBAL PROGRESS */
+.global-progress{padding:24px 32px;background:var(--bg-secondary);border-bottom:1px solid var(--border)}
+.global-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.global-progress-title{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:600;color:var(--text-secondary)}
+.global-progress-pct{font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--accent)}
+.progress-bar-track{width:100%;height:8px;background:var(--bg-card);border-radius:4px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:4px;transition:width 1.5s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
+.progress-bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:shimmer 2s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.progress-bar-fill.accent{background:linear-gradient(90deg,var(--accent),var(--purple))}
+.progress-stats{display:flex;gap:32px;margin-top:12px}
+.progress-stat{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-secondary)}
+.progress-dot{width:10px;height:10px;border-radius:3px}
+
+/* MAIN */
+.main{max-width:1400px;margin:0 auto;padding:32px}
+
+/* SECTION */
+.section{margin-bottom:40px}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.section-icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.section-title{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:.5px}
+.section-badge{margin-left:auto;font-size:.7rem;padding:4px 10px;border-radius:12px;font-weight:600}
+
+/* DECISIONS BANNER */
+.decisions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px}
+.decision-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;display:flex;align-items:flex-start;gap:12px}
+.decision-card.resolved{border-left:3px solid var(--green)}
+.decision-card.pending{border-left:3px solid var(--yellow)}
+.decision-card.decided{border-left:3px solid var(--accent)}
+.decision-icon{font-size:1.2rem;flex-shrink:0;margin-top:2px}
+.decision-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px}
+.decision-label.green{color:var(--green)}
+.decision-label.yellow{color:var(--yellow)}
+.decision-label.accent{color:var(--accent)}
+.decision-value{font-size:.85rem;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.decision-note{font-size:.72rem;color:var(--text-muted);line-height:1.4}
+
+/* PHASE CARDS */
+.phase-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;transition:all .3s ease}
+.phase-card:hover{border-color:var(--border-accent);background:var(--bg-card-hover);transform:translateY(-1px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.phase-header{padding:20px 24px;display:flex;align-items:center;gap:16px;cursor:pointer;user-select:none}
+.phase-number{font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:800;min-width:48px;color:var(--text-muted)}
+.phase-info{flex:1}
+.phase-name{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:2px}
+.phase-meta{font-size:.75rem;color:var(--text-muted);display:flex;gap:16px;flex-wrap:wrap}
+.phase-progress{width:200px}
+.phase-pct{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;text-align:right;margin-bottom:4px}
+.phase-bar{height:4px;background:var(--bg-primary);border-radius:2px;overflow:hidden}
+.phase-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.phase-status{padding:4px 10px;border-radius:var(--radius-xs);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.phase-status.todo{background:rgba(85,96,120,.15);color:var(--text-muted);border:1px solid rgba(85,96,120,.25)}
+.phase-status.progress{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.2)}
+.phase-status.done{background:rgba(6,214,160,.1);color:var(--green);border:1px solid rgba(6,214,160,.2)}
+.phase-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.22,1,.36,1)}
+.phase-card.open .phase-body{max-height:4000px}
+.phase-card.open{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-dim),0 8px 32px rgba(0,0,0,.4)}
+.phase-content{padding:0 24px 24px;border-top:1px solid var(--border)}
+
+/* TASKS */
+.task-group{margin-top:16px}
+.task-group-title{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:10px;font-weight:600}
+.task{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:var(--radius-xs);margin-bottom:4px;font-size:.85rem;transition:background .2s}
+.task:hover{background:rgba(255,255,255,.03)}
+.task-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:.65rem}
+.task-check.done{background:var(--green);border-color:var(--green);color:#000}
+.task-check.wip{background:var(--accent);border-color:var(--accent);color:#000;animation:pulse 2s infinite}
+.task-text{color:var(--text-secondary);flex:1}
+.task-text.done{text-decoration:line-through;opacity:.5}
+.task-priority{font-size:.6rem;padding:2px 6px;border-radius:3px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.task-priority.critical{background:rgba(255,59,92,.15);color:var(--red)}
+.task-priority.high{background:rgba(255,140,66,.15);color:var(--orange)}
+.task-priority.medium{background:rgba(255,209,102,.15);color:var(--yellow)}
+.task-priority.low{background:rgba(139,92,246,.12);color:var(--purple)}
+
+/* VERIFY */
+.verify-block{background:rgba(6,214,160,.04);border:1px solid rgba(6,214,160,.12);border-radius:var(--radius-sm);padding:16px;margin-top:16px}
+.verify-title{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--green);margin-bottom:8px;font-weight:700}
+.verify-item{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-secondary);padding:3px 0;display:flex;align-items:center;gap:8px}
+
+/* WAVE */
+.wave-block{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-top:12px}
+.wave-title{font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:10px}
+.wave-plans{display:flex;gap:8px;flex-wrap:wrap}
+.wave-plan{flex:1;min-width:140px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;font-size:.75rem}
+.wave-plan-id{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent);font-size:.7rem}
+.wave-plan-name{color:var(--text-secondary);margin-top:2px}
+
+/* TECH STACK */
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.tech-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center;transition:all .3s}
+.tech-item:hover{border-color:var(--accent);transform:translateY(-2px)}
+.tech-name{font-weight:600;font-size:.85rem;margin-bottom:2px}
+.tech-role{font-size:.7rem;color:var(--text-muted)}
+
+/* INTEGRATION */
+.int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.int-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.int-card.pending{border-style:dashed;border-color:var(--yellow);opacity:.8}
+.int-icon{font-size:1.5rem;margin-bottom:8px}
+.int-name{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:4px}
+.int-desc{font-size:.78rem;color:var(--text-secondary);line-height:1.5}
+.int-status{display:inline-flex;align-items:center;gap:5px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-top:8px;padding:3px 8px;border-radius:4px}
+.int-status.active{background:rgba(6,214,160,.1);color:var(--green)}
+.int-status.decide{background:rgba(255,209,102,.1);color:var(--yellow)}
+.int-status.skip{background:rgba(85,96,120,.1);color:var(--text-muted)}
+
+/* RISK TABLE */
+.risk-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.8rem}
+.risk-table th{text-align:left;padding:10px 14px;background:var(--bg-card);color:var(--text-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
+.risk-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+.risk-table tr:hover td{background:var(--bg-card-hover)}
+.risk-level{padding:2px 8px;border-radius:3px;font-size:.65rem;font-weight:700;text-transform:uppercase}
+.risk-level.high{background:rgba(255,59,92,.12);color:var(--red)}
+.risk-level.medium{background:rgba(255,140,66,.12);color:var(--orange)}
+.risk-level.low{background:rgba(6,214,160,.12);color:var(--green)}
+
+/* SEEDS */
+.seed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.seed-card{background:var(--bg-card);border:1px dashed var(--border-accent);border-radius:var(--radius-sm);padding:16px;transition:all .3s}
+.seed-card:hover{border-color:var(--accent);border-style:solid}
+.seed-idea{font-size:.85rem;font-weight:500;margin-bottom:6px}
+.seed-trigger{font-size:.72rem;color:var(--text-muted);font-style:italic}
+
+/* DB */
+.db-table-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.db-table-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px}
+.db-table-name{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.9rem;color:var(--accent);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.db-field{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text-muted);padding:2px 0;display:flex;gap:8px}
+.db-field .fname{color:var(--text-secondary)}
+.db-field .type{color:var(--purple)}
+.db-field .constraint{color:var(--orange);font-size:.65rem}
+
+/* ENV */
+.env-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:12px}
+.env-card-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.env-card-icon{width:32px;height:32px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;font-size:1rem}
+.env-card-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.05rem}
+.env-card-badge{margin-left:auto;font-size:.6rem;padding:3px 8px;border-radius:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.env-row{display:flex;align-items:flex-start;gap:12px;padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius-xs);margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.env-key{color:var(--accent);font-weight:600;min-width:260px;flex-shrink:0}
+.env-val{color:var(--text-secondary);word-break:break-all}
+.env-val .masked{color:var(--text-muted);font-style:italic}
+.env-val .placeholder{color:var(--yellow)}
+.env-section-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);font-weight:700;margin:16px 0 8px;padding-left:4px}
+
+/* CODE BLOCK */
+.cmd-block{background:#0a0e18;border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin:8px 0;overflow-x:auto}
+.cmd-block code{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);line-height:1.8;white-space:pre}
+.cmd-block .comment{color:var(--text-muted)}
+.cmd-block .prompt{color:var(--accent)}
+.cmd-block .keyword{color:var(--purple)}
+.cmd-block .string{color:var(--yellow)}
+
+/* SQL BLOCK */
+.sql-block{background:#080d16;border:1px solid rgba(139,92,246,.2);border-radius:var(--radius-sm);padding:16px;margin:8px 0;overflow-x:auto}
+.sql-block code{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#c9d1d9;line-height:1.8;white-space:pre}
+.sql-kw{color:#ff79c6}
+.sql-type{color:#8be9fd}
+.sql-str{color:#f1fa8c}
+.sql-comment{color:#6272a4}
+.sql-fn{color:#50fa7b}
+
+/* STEP GRID */
+.step-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:12px;counter-reset:step-counter}
+.step-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;position:relative;counter-increment:step-counter}
+.step-card::before{content:counter(step-counter);position:absolute;top:12px;right:14px;font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:800;color:rgba(0,229,255,.08)}
+.step-number{font-family:'Rajdhani',sans-serif;font-size:.75rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.step-title{font-weight:600;font-size:.9rem;margin-bottom:4px}
+.step-desc{font-size:.78rem;color:var(--text-secondary);line-height:1.5}
+
+/* DEPLOY FLOW */
+.deploy-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.deploy-node{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 16px;font-size:.8rem;font-weight:500;text-align:center}
+.deploy-node.active{border-color:var(--accent);color:var(--accent)}
+.deploy-arrow{color:var(--text-muted);font-size:1.2rem}
+
+/* CYCLE */
+.cycle-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.cycle-step{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xs);padding:8px 14px;font-size:.75rem;font-weight:600;text-align:center;flex:1;min-width:100px}
+.cycle-step.active-cycle{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* ALERT BOX */
+.alert{padding:12px 16px;border-radius:var(--radius-xs);font-size:.78rem;margin:10px 0;line-height:1.5}
+.alert.info{background:var(--accent-dim);border:1px solid rgba(0,229,255,.15);color:var(--text-secondary)}
+.alert.warn{background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.2);color:var(--text-secondary)}
+.alert.danger{background:rgba(255,59,92,.06);border:1px solid rgba(255,59,92,.15);color:var(--text-secondary)}
+.alert.success{background:rgba(6,214,160,.06);border:1px solid rgba(6,214,160,.15);color:var(--text-secondary)}
+
+/* FOOTER */
+.footer{text-align:center;padding:40px;color:var(--text-muted);font-size:.75rem;border-top:1px solid var(--border)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+.header{padding:12px 16px;flex-direction:column;gap:12px}
+.main{padding:16px}
+.phase-header{flex-wrap:wrap}
+.phase-progress{width:100%}
+.progress-stats{flex-wrap:wrap;gap:16px}
+.wave-plans{flex-direction:column}
+.env-row{flex-direction:column;gap:4px}
+.env-key{min-width:auto}
+.deploy-flow{flex-direction:column}
+.deploy-arrow{transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div>
+      <div class="logo">KINGS HUB</div>
+      <div class="logo-sub">Production Dashboard</div>
+    </div>
+    <span class="status-badge active"><span class="pulse"></span> Em Desenvolvimento</span>
+  </div>
+  <div class="header-right">
+    <div class="header-stat"><div class="header-stat-value">7</div><div class="header-stat-label">Fases</div></div>
+    <div class="header-stat"><div class="header-stat-value">48</div><div class="header-stat-label">Tasks</div></div>
+    <div class="header-stat"><div class="header-stat-value">~15</div><div class="header-stat-label">Semanas</div></div>
+    <div class="header-stat"><div class="header-stat-value">Pro</div><div class="header-stat-label">Supabase</div></div>
+  </div>
+</header>
+
+<div class="global-progress">
+  <div class="global-progress-header">
+    <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
+    <span class="global-progress-pct font-display">18%</span>
+  </div>
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill accent" style="width:18%"></div>
+  </div>
+  <div class="progress-stats">
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 10 concluídas</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 1 em progresso</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 37 pendentes</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--red)"></span> 0 bloqueadas</div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ══════════════════════════════════════════
+     ARQUITETURA CONSTRUÍDA — STATUS REAL
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(0,229,255,.12);color:var(--accent)">🏗️</div>
+    <span class="section-title">Arquitetura do Monorepo — Construída</span>
+    <span class="section-badge" style="background:rgba(6,214,160,.1);color:var(--green)">✅ Operacional</span>
+  </div>
+
+  <div class="alert success">✅ <strong style="color:var(--green)">Monorepo Turborepo funcionando!</strong> 3 apps Next.js 14 + 4 packages compartilhados. Todos rodando simultaneamente em <code>turbo dev</code>.</div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin:16px 0">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
+      <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:8px;font-weight:700">🟢 apps/kings-store</div>
+      <div style="font-size:1rem;font-weight:700;font-family:var(--font-display);color:var(--text-primary)">Kings Simuladores — B2C</div>
+      <div style="font-size:.78rem;color:var(--text-secondary);margin-top:4px">Next.js 14 · App Router · Porto 3000</div>
+      <div style="font-size:.72rem;color:var(--green);margin-top:6px">✓ Supabase conectado · ✓ Design system aplicado · ✓ GET / 200</div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
+      <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--purple);margin-bottom:8px;font-weight:700">🟢 apps/msu-marketplace</div>
+      <div style="font-size:1rem;font-weight:700;font-family:var(--font-display);color:var(--text-primary)">Meu Simulador Usado — C2C</div>
+      <div style="font-size:.78rem;color:var(--text-secondary);margin-top:4px">Next.js 14 · App Router · Porto 3001</div>
+      <div style="font-size:.72rem;color:var(--green);margin-top:6px">✓ Branding MSU (purple gradient) · ✓ Middleware de sessão</div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
+      <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--yellow);margin-bottom:8px;font-weight:700">🟡 apps/admin</div>
+      <div style="font-size:1rem;font-weight:700;font-family:var(--font-display);color:var(--text-primary)">Kings Hub — Painel Admin</div>
+      <div style="font-size:.78rem;color:var(--text-secondary);margin-top:4px">Next.js 14 · App Router · Porto 3002</div>
+      <div style="font-size:.72rem;color:var(--yellow);margin-top:6px">✓ Middleware role check · ⚠ Login/Auth real pendente</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:8px 0 0">
+    <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700">@kings/db</div>
+      <div style="font-size:.75rem;color:var(--text-secondary);margin-top:4px">Supabase client (browser + server + admin + middleware) + TypeScript types 11 tabelas</div>
+    </div>
+    <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700">@kings/ui</div>
+      <div style="font-size:.75rem;color:var(--text-secondary);margin-top:4px">Design system: globals.css (52 tokens) + Button, Card, Input, Badge, Spinner, Container</div>
+    </div>
+    <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700">@kings/config</div>
+      <div style="font-size:.75rem;color:var(--text-secondary);margin-top:4px">TypeScript base + Next.js extends compartilhados</div>
+    </div>
+    <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700">@kings/utils</div>
+      <div style="font-size:.75rem;color:var(--text-secondary);margin-top:4px">formatPrice, slugify, formatCpfCnpj, formatCep, calculateInstallments, BRAND_CONFIG</div>
+    </div>
+  </div>
+
+  <div class="sql-block" style="margin-top:16px;font-size:.72rem"><code><span class="sql-comment"># Estrutura do Monorepo</span>
+KingsSimuladores/
+├── apps/
+│   ├── kings-store/          ← B2C (porto 3000) ✅
+│   ├── msu-marketplace/      ← C2C (porto 3001) ✅
+│   └── admin/                ← Painel (porto 3002) ⚠️
+├── packages/
+│   ├── db/                   ← @kings/db ✅
+│   ├── ui/                   ← @kings/ui ✅
+│   ├── config/               ← @kings/config ✅
+│   └── utils/                ← @kings/utils ✅
+├── supabase/
+│   └── migrations/
+│       ├── 001_initial_schema.sql  ← 11 tabelas + RLS ✅
+│       └── 002_fix_brands_rls.sql  ← Correção RLS ⚠️
+├── turbo.json                ✅
+├── package.json (workspaces) ✅
+├── .env.local (symlinked)    ✅
+└── dashboard.html            ← Você está aqui!</code></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DECISÕES DO PROJETO — TUDO RESOLVIDO
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(6,214,160,.12);color:var(--green)">✅</div>
+    <span class="section-title">Decisões do Projeto</span>
+    <span class="section-badge" style="background:rgba(6,214,160,.1);color:var(--green)">Definidas — Sem Perguntas Abertas</span>
+  </div>
+
+  <div class="decisions-grid">
+    <div class="decision-card resolved">
+      <div class="decision-icon">🚀</div>
+      <div>
+        <div class="decision-label green">Lançamento</div>
+        <div class="decision-value">Kings + MSU simultâneos</div>
+        <div class="decision-note">Ambos os sites vão ao ar ao mesmo tempo. Mesmas fases, mesmo deploy.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">⚡</div>
+      <div>
+        <div class="decision-label green">Supabase</div>
+        <div class="decision-value">Plano Pro (pago)</div>
+        <div class="decision-note">RLS, Edge Functions, Realtime e Storage sem limitações do Free tier.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">🖥️</div>
+      <div>
+        <div class="decision-label green">Painel Admin</div>
+        <div class="decision-value">admin.kingssimuladores.com.br</div>
+        <div class="decision-note">3º projeto na Vercel. Mesmo repositório, app separado em apps/admin.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">💰</div>
+      <div>
+        <div class="decision-label green">Pagamentos</div>
+        <div class="decision-value">Mercado Pago</div>
+        <div class="decision-note">Checkout transparente (Pix/Boleto/Cartão 12x) + Split Payment para marketplace.</div>
+      </div>
+    </div>
+    <div class="decision-card decided">
+      <div class="decision-icon">🧾</div>
+      <div>
+        <div class="decision-label accent">NF-e — A Decidir</div>
+        <div class="decision-value">NFe.io recomendado</div>
+        <div class="decision-note">Melhor API, SDK em Node.js, suporte a multi-CNPJ. Confirmar antes da Fase 3.</div>
+      </div>
+    </div>
+    <div class="decision-card decided">
+      <div class="decision-icon">📦</div>
+      <div>
+        <div class="decision-label accent">ERP — Não utilizar Olist</div>
+        <div class="decision-value">Estoque gerenciado internamente</div>
+        <div class="decision-note">Gestão de estoque direta no Supabase via painel admin. Sem integração ERP externa por ora.</div>
+      </div>
+    </div>
+    <div class="decision-card decided">
+      <div class="decision-icon">🔄</div>
+      <div>
+        <div class="decision-label accent">Migração — A Decidir</div>
+        <div class="decision-value">Script de migração preparado</div>
+        <div class="decision-note">A IA deve criar scripts prontos para Loja Integrada → Supabase e Firebase → Supabase. Decisão de quando executar fica para a Fase 7.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">🌐</div>
+      <div>
+        <div class="decision-label green">Domínios</div>
+        <div class="decision-value">3 projetos na Vercel</div>
+        <div class="decision-note">kingssimuladores.com.br / meusimuladorusado.com.br / admin.kingssimuladores.com.br</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     AMBIENTE & INFRAESTRUTURA
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(6,214,160,.12);color:var(--green)">🔗</div>
+    <span class="section-title">Ambiente & Infraestrutura</span>
+    <span class="section-badge" style="background:rgba(6,214,160,.1);color:var(--green)">Configurado ✓</span>
+  </div>
+
+  <!-- Supabase -->
+  <div class="env-card">
+    <div class="env-card-header">
+      <div class="env-card-icon" style="background:rgba(0,229,255,.1);color:var(--accent)">⚡</div>
+      <span class="env-card-title">Supabase — Banco de Dados Central (Plano Pro)</span>
+      <span class="env-card-badge" style="background:rgba(6,214,160,.12);color:var(--green)">Conectado</span>
+    </div>
+    <div class="env-row"><span class="env-key">Projeto ID</span><span class="env-val">mlrcaugthlkscusyxqrf</span></div>
+    <div class="env-row"><span class="env-key">Dashboard</span><span class="env-val"><a href="https://supabase.com/dashboard/project/mlrcaugthlkscusyxqrf" target="_blank" style="color:var(--accent)">supabase.com/dashboard/project/mlrcaugthlkscusyxqrf</a></span></div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPABASE_URL</span><span class="env-val">https://mlrcaugthlkscusyxqrf.supabase.co</span></div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPABASE_ANON_KEY</span><span class="env-val"><span class="masked">eyJhbGci... (em .env.local)</span></span></div>
+    <div class="env-row"><span class="env-key">SUPABASE_SERVICE_ROLE_KEY</span><span class="env-val"><span class="masked">eyJhbGci... (em .env.local — NUNCA no frontend)</span></span></div>
+    <div class="alert danger" style="margin-top:12px">⚠️ <strong style="color:var(--red)">Segurança:</strong> As chaves reais ficam somente em <code style="color:var(--accent)">.env.local</code> (no .gitignore). Na Vercel: <strong>Settings → Environment Variables</strong> nos 3 projetos.</div>
+  </div>
+
+  <!-- Todas as variáveis de ambiente do projeto -->
+  <div class="env-card">
+    <div class="env-card-header">
+      <div class="env-card-icon" style="background:rgba(139,92,246,.1);color:var(--purple)">🔑</div>
+      <span class="env-card-title">Todas as Variáveis de Ambiente (.env.local completo)</span>
+      <span class="env-card-badge" style="background:rgba(255,209,102,.1);color:var(--yellow)">Preencher</span>
+    </div>
+    <div class="alert info">💡 Copie este bloco para o <code>.env.local</code> na raiz do projeto e preencha os valores marcados em amarelo. Os mesmos valores devem ser adicionados na Vercel em <strong>Settings → Environment Variables</strong> para os 3 projetos.</div>
+
+    <div class="env-section-label">── Supabase (já configurado)</div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPABASE_URL</span><span class="env-val">https://mlrcaugthlkscusyxqrf.supabase.co</span></div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPABASE_ANON_KEY</span><span class="env-val"><span class="masked">Copiar do Supabase Dashboard → Settings → API</span></span></div>
+    <div class="env-row"><span class="env-key">SUPABASE_SERVICE_ROLE_KEY</span><span class="env-val"><span class="masked">Copiar do Supabase Dashboard → Settings → API</span></span></div>
+
+    <div class="env-section-label">── Mercado Pago</div>
+    <div class="env-row"><span class="env-key">MP_ACCESS_TOKEN</span><span class="env-val"><span class="placeholder">APP_USR-xxxx (Mercado Pago → Credenciais)</span></span></div>
+    <div class="env-row"><span class="env-key">MP_PUBLIC_KEY</span><span class="env-val"><span class="placeholder">APP_USR-xxxx (para uso no frontend)</span></span></div>
+    <div class="env-row"><span class="env-key">MP_WEBHOOK_SECRET</span><span class="env-val"><span class="placeholder">Gerado ao criar webhook no MP</span></span></div>
+
+    <div class="env-section-label">── Melhor Envio</div>
+    <div class="env-row"><span class="env-key">MELHOR_ENVIO_TOKEN</span><span class="env-val"><span class="placeholder">Bearer token da conta Melhor Envio</span></span></div>
+    <div class="env-row"><span class="env-key">MELHOR_ENVIO_SANDBOX</span><span class="env-val">true <span class="masked">(mudar para false em produção)</span></span></div>
+
+    <div class="env-section-label">── NF-e (NFe.io — recomendado)</div>
+    <div class="env-row"><span class="env-key">NFEIO_API_KEY</span><span class="env-val"><span class="placeholder">Chave da API NFe.io (nfe.io/account)</span></span></div>
+    <div class="env-row"><span class="env-key">NFEIO_COMPANY_ID_KINGS</span><span class="env-val"><span class="placeholder">ID da empresa Kings no NFe.io</span></span></div>
+    <div class="env-row"><span class="env-key">NFEIO_COMPANY_ID_MSU</span><span class="env-val"><span class="placeholder">ID da empresa MSU no NFe.io (se CNPJ diferente)</span></span></div>
+
+    <div class="env-section-label">── Z-API (WhatsApp)</div>
+    <div class="env-row"><span class="env-key">ZAPI_INSTANCE_ID</span><span class="env-val"><span class="placeholder">ID da instância Z-API</span></span></div>
+    <div class="env-row"><span class="env-key">ZAPI_TOKEN</span><span class="env-val"><span class="placeholder">Token da instância Z-API</span></span></div>
+    <div class="env-row"><span class="env-key">ZAPI_CLIENT_TOKEN</span><span class="env-val"><span class="placeholder">Client token de segurança Z-API</span></span></div>
+
+    <div class="env-section-label">── Resend (E-mail)</div>
+    <div class="env-row"><span class="env-key">RESEND_API_KEY</span><span class="env-val"><span class="placeholder">re_xxxx (resend.com → API Keys)</span></span></div>
+    <div class="env-row"><span class="env-key">RESEND_FROM_KINGS</span><span class="env-val"><span class="placeholder">noreply@kingssimuladores.com.br</span></span></div>
+    <div class="env-row"><span class="env-key">RESEND_FROM_MSU</span><span class="env-val"><span class="placeholder">noreply@meusimuladorusado.com.br</span></span></div>
+
+    <div class="env-section-label">── URLs dos Sites</div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_KINGS</span><span class="env-val">https://kingssimuladores.com.br</span></div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_MSU</span><span class="env-val">https://meusimuladorusado.com.br</span></div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_ADMIN</span><span class="env-val">https://admin.kingssimuladores.com.br</span></div>
+  </div>
+
+  <!-- Vercel -->
+  <div class="env-card">
+    <div class="env-card-header">
+      <div class="env-card-icon" style="background:rgba(139,92,246,.1);color:var(--purple)">▲</div>
+      <span class="env-card-title">Vercel — 3 Projetos</span>
+      <span class="env-card-badge" style="background:rgba(0,229,255,.1);color:var(--accent)">3 Projetos</span>
+    </div>
+    <div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px">Cada push na branch <code style="color:var(--accent)">main</code> dispara deploy automático nos 3 projetos.</div>
+    <div class="deploy-flow">
+      <div class="deploy-node active">git push origin main</div>
+      <span class="deploy-arrow">→</span>
+      <div class="deploy-node">Vercel Build</div>
+      <span class="deploy-arrow">→</span>
+      <div class="deploy-node">Next.js SSR/SSG</div>
+      <span class="deploy-arrow">→</span>
+      <div class="deploy-node active">3 Sites Live</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:16px">
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid var(--border)">
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 1</div>
+        <div style="font-size:.85rem;font-weight:600">kingssimuladores.com.br</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/kings-store</div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid var(--border)">
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 2</div>
+        <div style="font-size:.85rem;font-weight:600">meusimuladorusado.com.br</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/msu-marketplace</div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid rgba(0,229,255,.2)">
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 3 — Novo</div>
+        <div style="font-size:.85rem;font-weight:600">admin.kingssimuladores.com.br</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/admin</div>
+      </div>
+    </div>
+    <div class="alert info" style="margin-top:12px">💡 <strong style="color:var(--accent)">Setup Vercel:</strong> Importar repo → em cada projeto, definir o <strong>Root Directory</strong> para o app correspondente. Adicionar as variáveis de ambiente em todos os 3 projetos.</div>
+  </div>
+
+  <!-- GitHub -->
+  <div class="env-card">
+    <div class="env-card-header">
+      <div class="env-card-icon" style="background:rgba(255,255,255,.06);color:var(--text-primary)">📦</div>
+      <span class="env-card-title">GitHub — Repositório</span>
+      <span class="env-card-badge" style="background:rgba(6,214,160,.12);color:var(--green)">Ativo</span>
+    </div>
+    <div class="env-row"><span class="env-key">Repositório</span><span class="env-val"><a href="https://github.com/VictorPombo/KingsSimuladores" target="_blank" style="color:var(--accent)">github.com/VictorPombo/KingsSimuladores</a></span></div>
+    <div class="env-row"><span class="env-key">Branch principal</span><span class="env-val">main</span></div>
+    <div class="env-row"><span class="env-key">Diretório local</span><span class="env-val">/Users/hadi/Documents/KingsSimuladores/</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     BANCO DE DADOS — SQL COMPLETO
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(0,229,255,.12);color:var(--accent)">🧠</div>
+    <span class="section-title">Banco de Dados — Schema Aplicado</span>
+    <span class="section-badge" style="background:rgba(6,214,160,.1);color:var(--green)">✅ Executado</span>
+  </div>
+
+  <div class="alert success">✅ <strong style="color:var(--green)">SQL Executado com sucesso!</strong> 11 tabelas criadas, RLS ativo, triggers funcionando, 2 marcas inseridas. Arquivo: <code>supabase/migrations/001_initial_schema.sql</code>. Correção de RLS pendente: <code>supabase/migrations/002_fix_brands_rls.sql</code> (brands + coupons precisam de SELECT público).</div>
+
+  <!-- BLOCO 1: Extensions + Enums -->
+  <div style="margin-bottom:6px;font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Bloco 1 — Extensions & Enums</div>
+  <div class="sql-block"><code><span class="sql-comment">-- ═══════════════════════════════════════════
+-- BLOCO 1: Extensions e tipos customizados
+-- ═══════════════════════════════════════════</span>
+<span class="sql-kw">CREATE EXTENSION IF NOT EXISTS</span> <span class="sql-str">"uuid-ossp"</span>;
+<span class="sql-kw">CREATE EXTENSION IF NOT EXISTS</span> <span class="sql-str">"pg_trgm"</span>; <span class="sql-comment">-- busca full-text</span>
+
+<span class="sql-kw">CREATE TYPE</span> user_role <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'client'</span>, <span class="sql-str">'seller'</span>, <span class="sql-str">'admin'</span>);
+<span class="sql-kw">CREATE TYPE</span> brand_name <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'kings'</span>, <span class="sql-str">'msu'</span>);
+<span class="sql-kw">CREATE TYPE</span> product_status <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'active'</span>, <span class="sql-str">'draft'</span>, <span class="sql-str">'archived'</span>);
+<span class="sql-kw">CREATE TYPE</span> listing_status <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'pending_review'</span>, <span class="sql-str">'active'</span>, <span class="sql-str">'sold'</span>, <span class="sql-str">'rejected'</span>);
+<span class="sql-kw">CREATE TYPE</span> listing_condition <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'like_new'</span>, <span class="sql-str">'good'</span>, <span class="sql-str">'fair'</span>);
+<span class="sql-kw">CREATE TYPE</span> order_status <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'pending'</span>, <span class="sql-str">'paid'</span>, <span class="sql-str">'shipped'</span>, <span class="sql-str">'delivered'</span>, <span class="sql-str">'cancelled'</span>);
+<span class="sql-kw">CREATE TYPE</span> order_type <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'direct'</span>, <span class="sql-str">'marketplace'</span>);
+<span class="sql-kw">CREATE TYPE</span> invoice_status <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'pending'</span>, <span class="sql-str">'issued'</span>, <span class="sql-str">'cancelled'</span>);
+<span class="sql-kw">CREATE TYPE</span> payout_status <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'pending'</span>, <span class="sql-str">'paid'</span>);
+<span class="sql-kw">CREATE TYPE</span> coupon_type <span class="sql-kw">AS ENUM</span> (<span class="sql-str">'percent'</span>, <span class="sql-str">'fixed'</span>, <span class="sql-str">'shipping'</span>);</code></div>
+
+  <!-- BLOCO 2: Tabelas principais -->
+  <div style="margin:16px 0 6px;font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Bloco 2 — Tabelas Principais</div>
+  <div class="sql-block"><code><span class="sql-comment">-- ═══════════════════════════════════════════
+-- BLOCO 2: Tabelas (rodar em ordem)
+-- ═══════════════════════════════════════════</span>
+
+<span class="sql-comment">-- 1. brands (precisa existir antes de products)</span>
+<span class="sql-kw">CREATE TABLE</span> brands (
+  id          <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  name        brand_name <span class="sql-kw">UNIQUE NOT NULL</span>,
+  cnpj        <span class="sql-type">TEXT NOT NULL</span>,
+  display_name <span class="sql-type">TEXT NOT NULL</span>,
+  settings    <span class="sql-type">JSONB DEFAULT</span> <span class="sql-str">'{}'</span>,
+  created_at  <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>()
+);
+
+<span class="sql-comment">-- 2. profiles (espelho do auth.users)</span>
+<span class="sql-kw">CREATE TABLE</span> profiles (
+  id          <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  auth_id     <span class="sql-type">UUID UNIQUE NOT NULL REFERENCES</span> auth.users (<span class="sql-type">id</span>) <span class="sql-kw">ON DELETE CASCADE</span>,
+  full_name   <span class="sql-type">TEXT</span>,
+  cpf_cnpj    <span class="sql-type">TEXT</span>,
+  phone       <span class="sql-type">TEXT</span>,
+  email       <span class="sql-type">TEXT</span>,
+  role        user_role <span class="sql-kw">DEFAULT</span> <span class="sql-str">'client'</span>,
+  addresses   <span class="sql-type">JSONB DEFAULT</span> <span class="sql-str">'[]'</span>,
+  avatar_url  <span class="sql-type">TEXT</span>,
+  created_at  <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>(),
+  updated_at  <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>()
+);
+
+<span class="sql-comment">-- 3. categories</span>
+<span class="sql-kw">CREATE TABLE</span> categories (
+  id          <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  name        <span class="sql-type">TEXT NOT NULL</span>,
+  slug        <span class="sql-type">TEXT UNIQUE NOT NULL</span>,
+  parent_id   <span class="sql-type">UUID REFERENCES</span> categories (id),
+  brand_scope brand_name,  <span class="sql-comment">-- NULL = ambas as marcas</span>
+  sort_order  <span class="sql-type">INT DEFAULT</span> 0
+);
+
+<span class="sql-comment">-- 4. products</span>
+<span class="sql-kw">CREATE TABLE</span> products (
+  id              <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  brand_id        <span class="sql-type">UUID NOT NULL REFERENCES</span> brands (id),
+  category_id     <span class="sql-type">UUID REFERENCES</span> categories (id),
+  title           <span class="sql-type">TEXT NOT NULL</span>,
+  description     <span class="sql-type">TEXT</span>,
+  slug            <span class="sql-type">TEXT UNIQUE NOT NULL</span>,
+  price           <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  price_compare   <span class="sql-type">NUMERIC(10,2)</span>,
+  stock           <span class="sql-type">INT NOT NULL DEFAULT</span> 0,
+  sku             <span class="sql-type">TEXT UNIQUE</span>,
+  cnpj_emitente   <span class="sql-type">TEXT NOT NULL</span>,
+  status          product_status <span class="sql-kw">DEFAULT</span> <span class="sql-str">'draft'</span>,
+  attributes      <span class="sql-type">JSONB DEFAULT</span> <span class="sql-str">'{}'</span>,
+  images          <span class="sql-type">TEXT[]  DEFAULT</span> <span class="sql-str">'{}'</span>,
+  weight_kg       <span class="sql-type">NUMERIC(6,3)</span>,
+  dimensions_cm   <span class="sql-type">JSONB</span>,  <span class="sql-comment">-- {width, height, length}</span>
+  created_at      <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>(),
+  updated_at      <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>()
+);
+
+<span class="sql-comment">-- 5. marketplace_listings</span>
+<span class="sql-kw">CREATE TABLE</span> marketplace_listings (
+  id               <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  seller_id        <span class="sql-type">UUID NOT NULL REFERENCES</span> profiles (id),
+  title            <span class="sql-type">TEXT NOT NULL</span>,
+  description      <span class="sql-type">TEXT</span>,
+  price            <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  condition        listing_condition <span class="sql-kw">NOT NULL</span>,
+  status           listing_status <span class="sql-kw">DEFAULT</span> <span class="sql-str">'pending_review'</span>,
+  images           <span class="sql-type">TEXT[] DEFAULT</span> <span class="sql-str">'{}'</span>,
+  rejection_reason <span class="sql-type">TEXT</span>,
+  commission_rate  <span class="sql-type">NUMERIC(4,2) NOT NULL DEFAULT</span> 10.00,
+  shipping_options <span class="sql-type">JSONB DEFAULT</span> <span class="sql-str">'{}'</span>,
+  category_id      <span class="sql-type">UUID REFERENCES</span> categories (id),
+  created_at       <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>(),
+  updated_at       <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>()
+);
+
+<span class="sql-comment">-- 6. orders</span>
+<span class="sql-kw">CREATE TABLE</span> orders (
+  id               <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  customer_id      <span class="sql-type">UUID NOT NULL REFERENCES</span> profiles (id),
+  brand_origin     brand_name <span class="sql-kw">NOT NULL</span>,
+  order_type       order_type <span class="sql-kw">DEFAULT</span> <span class="sql-str">'direct'</span>,
+  status           order_status <span class="sql-kw">DEFAULT</span> <span class="sql-str">'pending'</span>,
+  subtotal         <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  shipping_cost    <span class="sql-type">NUMERIC(10,2) DEFAULT</span> 0,
+  discount         <span class="sql-type">NUMERIC(10,2) DEFAULT</span> 0,
+  total            <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  payment_method   <span class="sql-type">TEXT</span>,
+  payment_id       <span class="sql-type">TEXT</span>,  <span class="sql-comment">-- ID do Mercado Pago</span>
+  preference_id    <span class="sql-type">TEXT</span>,  <span class="sql-comment">-- preference_id do MP</span>
+  cnpj_emitente    <span class="sql-type">TEXT</span>,
+  shipping_address <span class="sql-type">JSONB</span>,
+  tracking_code    <span class="sql-type">TEXT</span>,
+  coupon_id        <span class="sql-type">UUID</span>,
+  notes            <span class="sql-type">TEXT</span>,
+  created_at       <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>(),
+  updated_at       <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>()
+);
+
+<span class="sql-comment">-- 7. order_items</span>
+<span class="sql-kw">CREATE TABLE</span> order_items (
+  id           <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  order_id     <span class="sql-type">UUID NOT NULL REFERENCES</span> orders (id) <span class="sql-kw">ON DELETE CASCADE</span>,
+  product_id   <span class="sql-type">UUID REFERENCES</span> products (id),
+  listing_id   <span class="sql-type">UUID REFERENCES</span> marketplace_listings (id),
+  quantity     <span class="sql-type">INT NOT NULL DEFAULT</span> 1,
+  unit_price   <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  total_price  <span class="sql-type">NUMERIC(10,2) NOT NULL</span>
+);
+
+<span class="sql-comment">-- 8. invoices</span>
+<span class="sql-kw">CREATE TABLE</span> invoices (
+  id             <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  order_id       <span class="sql-type">UUID NOT NULL REFERENCES</span> orders (id),
+  cnpj_emitente  <span class="sql-type">TEXT NOT NULL</span>,
+  nfe_number     <span class="sql-type">TEXT</span>,
+  nfe_key        <span class="sql-type">TEXT</span>,
+  status         invoice_status <span class="sql-kw">DEFAULT</span> <span class="sql-str">'pending'</span>,
+  xml_url        <span class="sql-type">TEXT</span>,
+  pdf_url        <span class="sql-type">TEXT</span>,
+  provider_id    <span class="sql-type">TEXT</span>,  <span class="sql-comment">-- ID retornado pelo NFe.io</span>
+  issued_at      <span class="sql-type">TIMESTAMPTZ</span>,
+  created_at     <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>()
+);
+
+<span class="sql-comment">-- 9. commissions</span>
+<span class="sql-kw">CREATE TABLE</span> commissions (
+  id                <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  order_id          <span class="sql-type">UUID NOT NULL REFERENCES</span> orders (id),
+  seller_id         <span class="sql-type">UUID NOT NULL REFERENCES</span> profiles (id),
+  sale_amount       <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  commission_rate   <span class="sql-type">NUMERIC(4,2) NOT NULL</span>,
+  commission_amount <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  seller_payout     <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  payout_status     payout_status <span class="sql-kw">DEFAULT</span> <span class="sql-str">'pending'</span>,
+  paid_at           <span class="sql-type">TIMESTAMPTZ</span>,
+  created_at        <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>()
+);
+
+<span class="sql-comment">-- 10. cart</span>
+<span class="sql-kw">CREATE TABLE</span> cart (
+  id          <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  customer_id <span class="sql-type">UUID NOT NULL REFERENCES</span> profiles (id) <span class="sql-kw">ON DELETE CASCADE</span>,
+  brand       brand_name <span class="sql-kw">NOT NULL</span>,
+  items       <span class="sql-type">JSONB DEFAULT</span> <span class="sql-str">'[]'</span>,
+  updated_at  <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>(),
+  <span class="sql-kw">UNIQUE</span> (customer_id, brand)
+);
+
+<span class="sql-comment">-- 11. coupons</span>
+<span class="sql-kw">CREATE TABLE</span> coupons (
+  id          <span class="sql-type">UUID</span> <span class="sql-kw">PRIMARY KEY DEFAULT</span> <span class="sql-fn">uuid_generate_v4</span>(),
+  code        <span class="sql-type">TEXT UNIQUE NOT NULL</span>,
+  brand_scope brand_name,  <span class="sql-comment">-- NULL = ambas</span>
+  type        coupon_type <span class="sql-kw">NOT NULL</span>,
+  value       <span class="sql-type">NUMERIC(10,2) NOT NULL</span>,
+  usage_limit <span class="sql-type">INT</span>,
+  usage_count <span class="sql-type">INT DEFAULT</span> 0,
+  expires_at  <span class="sql-type">TIMESTAMPTZ</span>,
+  is_active   <span class="sql-type">BOOLEAN DEFAULT TRUE</span>,
+  created_at  <span class="sql-type">TIMESTAMPTZ DEFAULT NOW</span>()
+);</code></div>
+
+  <!-- BLOCO 3: Indexes -->
+  <div style="margin:16px 0 6px;font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Bloco 3 — Indexes (Performance)</div>
+  <div class="sql-block"><code><span class="sql-comment">-- Indexes para performance</span>
+<span class="sql-kw">CREATE INDEX</span> idx_products_brand <span class="sql-kw">ON</span> products (brand_id);
+<span class="sql-kw">CREATE INDEX</span> idx_products_status <span class="sql-kw">ON</span> products (status);
+<span class="sql-kw">CREATE INDEX</span> idx_products_slug <span class="sql-kw">ON</span> products (slug);
+<span class="sql-kw">CREATE INDEX</span> idx_products_search <span class="sql-kw">ON</span> products <span class="sql-kw">USING GIN</span> (to_tsvector(<span class="sql-str">'portuguese'</span>, title || <span class="sql-str">' '</span> || <span class="sql-fn">COALESCE</span>(description, <span class="sql-str">''</span>)));
+<span class="sql-kw">CREATE INDEX</span> idx_listings_status <span class="sql-kw">ON</span> marketplace_listings (status);
+<span class="sql-kw">CREATE INDEX</span> idx_listings_seller <span class="sql-kw">ON</span> marketplace_listings (seller_id);
+<span class="sql-kw">CREATE INDEX</span> idx_orders_customer <span class="sql-kw">ON</span> orders (customer_id);
+<span class="sql-kw">CREATE INDEX</span> idx_orders_status <span class="sql-kw">ON</span> orders (status);
+<span class="sql-kw">CREATE INDEX</span> idx_orders_payment_id <span class="sql-kw">ON</span> orders (payment_id);
+<span class="sql-kw">CREATE INDEX</span> idx_profiles_auth <span class="sql-kw">ON</span> profiles (auth_id);</code></div>
+
+  <!-- BLOCO 4: RLS -->
+  <div style="margin:16px 0 6px;font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Bloco 4 — Row Level Security (RLS)</div>
+  <div class="sql-block"><code><span class="sql-comment">-- ═══════════════════════════════════════════
+-- BLOCO 4: RLS — Segurança por linha
+-- ═══════════════════════════════════════════</span>
+
+<span class="sql-comment">-- Habilitar RLS em todas as tabelas</span>
+<span class="sql-kw">ALTER TABLE</span> profiles <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-kw">ALTER TABLE</span> products <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-kw">ALTER TABLE</span> categories <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-kw">ALTER TABLE</span> marketplace_listings <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-kw">ALTER TABLE</span> orders <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-kw">ALTER TABLE</span> order_items <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-kw">ALTER TABLE</span> invoices <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-kw">ALTER TABLE</span> commissions <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="sql-kw">ALTER TABLE</span> cart <span class="sql-kw">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="sql-comment">-- PROFILES: cada usuário vê só o próprio perfil; admin vê todos</span>
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"profiles_select"</span> <span class="sql-kw">ON</span> profiles <span class="sql-kw">FOR SELECT USING</span> (
+  auth_id = auth.<span class="sql-fn">uid</span>() <span class="sql-kw">OR</span>
+  <span class="sql-fn">EXISTS</span> (<span class="sql-kw">SELECT</span> 1 <span class="sql-kw">FROM</span> profiles p <span class="sql-kw">WHERE</span> p.auth_id = auth.<span class="sql-fn">uid</span>() <span class="sql-kw">AND</span> p.role = <span class="sql-str">'admin'</span>)
+);
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"profiles_update"</span> <span class="sql-kw">ON</span> profiles <span class="sql-kw">FOR UPDATE USING</span> (auth_id = auth.<span class="sql-fn">uid</span>());
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"profiles_insert"</span> <span class="sql-kw">ON</span> profiles <span class="sql-kw">FOR INSERT WITH CHECK</span> (auth_id = auth.<span class="sql-fn">uid</span>());
+
+<span class="sql-comment">-- PRODUCTS: públicos para leitura; escrita só para admin</span>
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"products_select"</span> <span class="sql-kw">ON</span> products <span class="sql-kw">FOR SELECT USING</span> (status = <span class="sql-str">'active'</span> <span class="sql-kw">OR</span>
+  <span class="sql-fn">EXISTS</span> (<span class="sql-kw">SELECT</span> 1 <span class="sql-kw">FROM</span> profiles p <span class="sql-kw">WHERE</span> p.auth_id = auth.<span class="sql-fn">uid</span>() <span class="sql-kw">AND</span> p.role = <span class="sql-str">'admin'</span>)
+);
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"products_admin"</span> <span class="sql-kw">ON</span> products <span class="sql-kw">FOR ALL USING</span> (
+  <span class="sql-fn">EXISTS</span> (<span class="sql-kw">SELECT</span> 1 <span class="sql-kw">FROM</span> profiles p <span class="sql-kw">WHERE</span> p.auth_id = auth.<span class="sql-fn">uid</span>() <span class="sql-kw">AND</span> p.role = <span class="sql-str">'admin'</span>)
+);
+
+<span class="sql-comment">-- CATEGORIES: públicas para leitura</span>
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"categories_select"</span> <span class="sql-kw">ON</span> categories <span class="sql-kw">FOR SELECT USING</span> (<span class="sql-kw">TRUE</span>);
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"categories_admin"</span> <span class="sql-kw">ON</span> categories <span class="sql-kw">FOR ALL USING</span> (
+  <span class="sql-fn">EXISTS</span> (<span class="sql-kw">SELECT</span> 1 <span class="sql-kw">FROM</span> profiles p <span class="sql-kw">WHERE</span> p.auth_id = auth.<span class="sql-fn">uid</span>() <span class="sql-kw">AND</span> p.role = <span class="sql-str">'admin'</span>)
+);
+
+<span class="sql-comment">-- MARKETPLACE LISTINGS: públicos ativos; vendedor edita os seus; admin tudo</span>
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"listings_select"</span> <span class="sql-kw">ON</span> marketplace_listings <span class="sql-kw">FOR SELECT USING</span> (
+  status = <span class="sql-str">'active'</span> <span class="sql-kw">OR</span>
+  seller_id = (<span class="sql-kw">SELECT</span> id <span class="sql-kw">FROM</span> profiles <span class="sql-kw">WHERE</span> auth_id = auth.<span class="sql-fn">uid</span>()) <span class="sql-kw">OR</span>
+  <span class="sql-fn">EXISTS</span> (<span class="sql-kw">SELECT</span> 1 <span class="sql-kw">FROM</span> profiles p <span class="sql-kw">WHERE</span> p.auth_id = auth.<span class="sql-fn">uid</span>() <span class="sql-kw">AND</span> p.role = <span class="sql-str">'admin'</span>)
+);
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"listings_seller"</span> <span class="sql-kw">ON</span> marketplace_listings <span class="sql-kw">FOR ALL USING</span> (
+  seller_id = (<span class="sql-kw">SELECT</span> id <span class="sql-kw">FROM</span> profiles <span class="sql-kw">WHERE</span> auth_id = auth.<span class="sql-fn">uid</span>())
+);
+
+<span class="sql-comment">-- ORDERS: cada cliente vê os próprios; admin vê todos</span>
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"orders_select"</span> <span class="sql-kw">ON</span> orders <span class="sql-kw">FOR SELECT USING</span> (
+  customer_id = (<span class="sql-kw">SELECT</span> id <span class="sql-kw">FROM</span> profiles <span class="sql-kw">WHERE</span> auth_id = auth.<span class="sql-fn">uid</span>()) <span class="sql-kw">OR</span>
+  <span class="sql-fn">EXISTS</span> (<span class="sql-kw">SELECT</span> 1 <span class="sql-kw">FROM</span> profiles p <span class="sql-kw">WHERE</span> p.auth_id = auth.<span class="sql-fn">uid</span>() <span class="sql-kw">AND</span> p.role = <span class="sql-str">'admin'</span>)
+);
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"orders_insert"</span> <span class="sql-kw">ON</span> orders <span class="sql-kw">FOR INSERT WITH CHECK</span> (
+  customer_id = (<span class="sql-kw">SELECT</span> id <span class="sql-kw">FROM</span> profiles <span class="sql-kw">WHERE</span> auth_id = auth.<span class="sql-fn">uid</span>())
+);
+
+<span class="sql-comment">-- CART: cada usuário acessa só o próprio</span>
+<span class="sql-kw">CREATE POLICY</span> <span class="sql-str">"cart_own"</span> <span class="sql-kw">ON</span> cart <span class="sql-kw">FOR ALL USING</span> (
+  customer_id = (<span class="sql-kw">SELECT</span> id <span class="sql-kw">FROM</span> profiles <span class="sql-kw">WHERE</span> auth_id = auth.<span class="sql-fn">uid</span>())
+);</code></div>
+
+  <!-- BLOCO 5: Triggers -->
+  <div style="margin:16px 0 6px;font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Bloco 5 — Triggers (Automações)</div>
+  <div class="sql-block"><code><span class="sql-comment">-- ═══════════════════════════════════════════
+-- BLOCO 5: Triggers automáticos
+-- ═══════════════════════════════════════════</span>
+
+<span class="sql-comment">-- Criar perfil automaticamente quando usuário se registra</span>
+<span class="sql-kw">CREATE OR REPLACE FUNCTION</span> <span class="sql-fn">handle_new_user</span>() <span class="sql-kw">RETURNS TRIGGER AS</span> $$
+<span class="sql-kw">BEGIN</span>
+  <span class="sql-kw">INSERT INTO</span> profiles (auth_id, email, full_name)
+  <span class="sql-kw">VALUES</span> (
+    NEW.id,
+    NEW.email,
+    NEW.raw_user_meta_data->>><span class="sql-str">'full_name'</span>
+  );
+  <span class="sql-kw">RETURN NEW</span>;
+<span class="sql-kw">END</span>;
+$$ <span class="sql-kw">LANGUAGE</span> plpgsql <span class="sql-kw">SECURITY DEFINER</span>;
+
+<span class="sql-kw">CREATE TRIGGER</span> on_auth_user_created
+  <span class="sql-kw">AFTER INSERT ON</span> auth.users
+  <span class="sql-kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="sql-fn">handle_new_user</span>();
+
+<span class="sql-comment">-- Atualizar updated_at automaticamente</span>
+<span class="sql-kw">CREATE OR REPLACE FUNCTION</span> <span class="sql-fn">set_updated_at</span>() <span class="sql-kw">RETURNS TRIGGER AS</span> $$
+<span class="sql-kw">BEGIN</span>
+  NEW.updated_at = <span class="sql-fn">NOW</span>();
+  <span class="sql-kw">RETURN NEW</span>;
+<span class="sql-kw">END</span>;
+$$ <span class="sql-kw">LANGUAGE</span> plpgsql;
+
+<span class="sql-kw">CREATE TRIGGER</span> set_profiles_updated_at <span class="sql-kw">BEFORE UPDATE ON</span> profiles <span class="sql-kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="sql-fn">set_updated_at</span>();
+<span class="sql-kw">CREATE TRIGGER</span> set_products_updated_at <span class="sql-kw">BEFORE UPDATE ON</span> products <span class="sql-kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="sql-fn">set_updated_at</span>();
+<span class="sql-kw">CREATE TRIGGER</span> set_orders_updated_at <span class="sql-kw">BEFORE UPDATE ON</span> orders <span class="sql-kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="sql-fn">set_updated_at</span>();
+<span class="sql-kw">CREATE TRIGGER</span> set_listings_updated_at <span class="sql-kw">BEFORE UPDATE ON</span> marketplace_listings <span class="sql-kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="sql-fn">set_updated_at</span>();
+
+<span class="sql-comment">-- Decrementar estoque ao confirmar pedido</span>
+<span class="sql-kw">CREATE OR REPLACE FUNCTION</span> <span class="sql-fn">decrement_stock_on_payment</span>() <span class="sql-kw">RETURNS TRIGGER AS</span> $$
+<span class="sql-kw">BEGIN</span>
+  <span class="sql-kw">IF</span> NEW.status = <span class="sql-str">'paid'</span> <span class="sql-kw">AND</span> OLD.status = <span class="sql-str">'pending'</span> <span class="sql-kw">THEN</span>
+    <span class="sql-kw">UPDATE</span> products p
+    <span class="sql-kw">SET</span> stock = stock - oi.quantity
+    <span class="sql-kw">FROM</span> order_items oi
+    <span class="sql-kw">WHERE</span> oi.order_id = NEW.id <span class="sql-kw">AND</span> oi.product_id = p.id;
+  <span class="sql-kw">END IF</span>;
+  <span class="sql-kw">RETURN NEW</span>;
+<span class="sql-kw">END</span>;
+$$ <span class="sql-kw">LANGUAGE</span> plpgsql <span class="sql-kw">SECURITY DEFINER</span>;
+
+<span class="sql-kw">CREATE TRIGGER</span> on_order_paid
+  <span class="sql-kw">AFTER UPDATE ON</span> orders
+  <span class="sql-kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="sql-fn">decrement_stock_on_payment</span>();
+
+<span class="sql-comment">-- Seed: inserir as 2 marcas iniciais</span>
+<span class="sql-kw">INSERT INTO</span> brands (name, cnpj, display_name, settings) <span class="sql-kw">VALUES</span>
+  (<span class="sql-str">'kings'</span>, <span class="sql-str">'00.000.000/0001-00'</span>, <span class="sql-str">'Kings Simuladores'</span>, <span class="sql-str">'{"primary_color":"#00e5ff"}'</span>),
+  (<span class="sql-str">'msu'</span>,   <span class="sql-str">'00.000.000/0002-00'</span>, <span class="sql-str">'Meu Simulador Usado'</span>, <span class="sql-str">'{"primary_color":"#8b5cf6"}'</span>);
+<span class="sql-comment">-- ⚠️ Substituir os CNPJs pelos reais antes de rodar em produção</span></code></div>
+
+  <div class="alert success">✅ <strong style="color:var(--green)">Após rodar os 5 blocos:</strong> O banco estará completo com 11 tabelas, RLS ativo, triggers automáticos e as 2 marcas inseridas. A conexão via <code>@supabase/ssr</code> no código já funciona sem configuração adicional.</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     QUICK START
+══════════════════════════════════════════ -->
+<div class="section" style="counter-reset:step-counter">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(255,140,66,.12);color:var(--orange)">⚡</div>
+    <span class="section-title">Quick Start — Ordem Exata de Execução</span>
+    <span class="section-badge" style="background:rgba(255,140,66,.1);color:var(--orange)">Seguir em ordem</span>
+  </div>
+
+  <div class="alert warn">⚠️ <strong style="color:var(--yellow)">Importante:</strong> Execute os passos abaixo nesta ordem exata. Cada passo depende do anterior. Não pular etapas.</div>
+
+  <div class="step-grid">
+    <div class="step-card">
+      <div class="step-number">Passo 1 — Banco</div>
+      <div class="step-title">Rodar SQL no Supabase</div>
+      <div class="step-desc">Abrir SQL Editor no Supabase e rodar os 5 blocos SQL acima em ordem. Verificar que as 11 tabelas aparecem no Table Editor.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Passo 2 — Monorepo</div>
+      <div class="step-title">Inicializar Turborepo + 3 apps</div>
+      <div class="step-desc">Criar estrutura monorepo com apps/kings-store, apps/msu-marketplace, apps/admin e os packages compartilhados (ui, db, config, utils, payments, shipping, notifications).</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Passo 3 — .env.local</div>
+      <div class="step-title">Preencher variáveis de ambiente</div>
+      <div class="step-desc">Criar .env.local na raiz com todas as variáveis da seção acima. Valores do Supabase: Dashboard → Settings → API. MP: painel do Mercado Pago.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Passo 4 — Supabase Client</div>
+      <div class="step-title">Configurar packages/db</div>
+      <div class="step-desc">Instalar @supabase/supabase-js e @supabase/ssr. Criar client para server components, client components e middleware separadamente.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Passo 5 — Auth</div>
+      <div class="step-title">Configurar Supabase Auth</div>
+      <div class="step-desc">No Supabase Dashboard → Authentication → Providers: habilitar Email, Google e Apple. Configurar URLs de redirect (localhost + domínios de produção).</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Passo 6 — Design System</div>
+      <div class="step-title">Criar @kings/ui</div>
+      <div class="step-desc">Package compartilhado com Tailwind v4, tokens de cor/spacing/tipografia, componentes base. Disponível nos 3 apps via workspace.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Passo 7 — Vercel</div>
+      <div class="step-title">Configurar os 3 projetos</div>
+      <div class="step-desc">Importar repo no Vercel 3 vezes. Em cada projeto: Root Directory = apps/kings-store (ou msu-marketplace, ou admin). Adicionar todas as env vars.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Passo 8 — Verificar</div>
+      <div class="step-title">Teste de ponta a ponta</div>
+      <div class="step-desc">Rodar turbo dev local. Registrar usuário → confirmar que profile foi criado no Supabase pelo trigger → fazer logout → login → checar sessão.</div>
+    </div>
+  </div>
+
+  <div class="cmd-block" style="margin-top:16px">
+    <code><span class="comment"># ── PASSO 2: Criar monorepo ──────────────────────────</span>
+<span class="prompt">$</span> npx -y create-turbo@latest ./
+<span class="prompt">$</span> cd apps
+<span class="prompt">$</span> npx -y create-next-app@14 kings-store --ts --app --tailwind --eslint --src-dir --import-alias <span class="string">"@/*"</span>
+<span class="prompt">$</span> npx -y create-next-app@14 msu-marketplace --ts --app --tailwind --eslint --src-dir --import-alias <span class="string">"@/*"</span>
+<span class="prompt">$</span> npx -y create-next-app@14 admin --ts --app --tailwind --eslint --src-dir --import-alias <span class="string">"@/*"</span>
+
+<span class="comment"># ── PASSO 4: Instalar Supabase ───────────────────────</span>
+<span class="prompt">$</span> npm install @supabase/supabase-js @supabase/ssr
+<span class="comment"># Em packages/db/src/server.ts:</span>
+<span class="comment"># import { createServerClient } from '@supabase/ssr'</span>
+<span class="comment"># Em packages/db/src/client.ts:</span>
+<span class="comment"># import { createBrowserClient } from '@supabase/ssr'</span>
+
+<span class="comment"># ── PASSO 4: Gerar types TypeScript do banco ─────────</span>
+<span class="prompt">$</span> npx supabase gen types typescript --project-id mlrcaugthlkscusyxqrf > packages/db/src/database.types.ts
+
+<span class="comment"># ── Rodar local ──────────────────────────────────────</span>
+<span class="prompt">$</span> npx turbo dev
+
+<span class="comment"># ── Deploy ───────────────────────────────────────────</span>
+<span class="prompt">$</span> git add . && git commit -m <span class="string">"feat: monorepo setup + supabase + auth"</span> && git push</code>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     GSD WORKFLOW
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(139,92,246,.12);color:var(--purple)">🔄</div>
+    <span class="section-title">Ciclo de Desenvolvimento — GSD</span>
+  </div>
+  <div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px">Para cada fase do projeto, seguir este ciclo rigoroso:</div>
+  <div class="cycle-grid">
+    <div class="cycle-step active-cycle">1. DISCUSS<br><span style="font-size:.65rem;font-weight:400;color:var(--text-muted)">Definir escopo</span></div>
+    <div class="cycle-step">2. RESEARCH<br><span style="font-size:.65rem;font-weight:400;color:var(--text-muted)">APIs + Libs</span></div>
+    <div class="cycle-step">3. UI-SPEC<br><span style="font-size:.65rem;font-weight:400;color:var(--text-muted)">Design contract</span></div>
+    <div class="cycle-step">4. PLAN<br><span style="font-size:.65rem;font-weight:400;color:var(--text-muted)">Planos atômicos</span></div>
+    <div class="cycle-step">5. EXECUTE<br><span style="font-size:.65rem;font-weight:400;color:var(--text-muted)">Ondas paralelas</span></div>
+    <div class="cycle-step">6. VERIFY<br><span style="font-size:.65rem;font-weight:400;color:var(--text-muted)">Testes + Review</span></div>
+    <div class="cycle-step">7. SHIP<br><span style="font-size:.65rem;font-weight:400;color:var(--text-muted)">Deploy + PR</span></div>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(139,92,246,.12);color:var(--purple)">⚡</div>
+    <span class="section-title">Tech Stack</span>
+  </div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">Next.js 14</div><div class="tech-role">Frontend (App Router)</div></div>
+    <div class="tech-item"><div class="tech-name">TypeScript</div><div class="tech-role">100% tipado</div></div>
+    <div class="tech-item"><div class="tech-name">Supabase Pro</div><div class="tech-role">Auth + DB + Storage</div></div>
+    <div class="tech-item"><div class="tech-name">PostgreSQL</div><div class="tech-role">Banco único + RLS</div></div>
+    <div class="tech-item"><div class="tech-name">Tailwind v4</div><div class="tech-role">Design System</div></div>
+    <div class="tech-item"><div class="tech-name">Turborepo</div><div class="tech-role">Monorepo (3 apps)</div></div>
+    <div class="tech-item"><div class="tech-name">Mercado Pago</div><div class="tech-role">Pagamentos + Split</div></div>
+    <div class="tech-item"><div class="tech-name">Vercel</div><div class="tech-role">3 projetos em deploy</div></div>
+    <div class="tech-item"><div class="tech-name">NFe.io</div><div class="tech-role">NF-e automática</div></div>
+    <div class="tech-item"><div class="tech-name">Melhor Envio</div><div class="tech-role">Frete + Etiqueta</div></div>
+    <div class="tech-item"><div class="tech-name">Z-API</div><div class="tech-role">WhatsApp</div></div>
+    <div class="tech-item"><div class="tech-name">Resend</div><div class="tech-role">E-mail transacional</div></div>
+  </div>
+</div>
+
+<!-- FASES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:var(--accent-glow);color:var(--accent)">🚀</div>
+    <span class="section-title">Fases de Desenvolvimento</span>
+    <span class="section-badge" style="background:var(--accent-dim);color:var(--accent)">GSD-Style</span>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase-card open" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">01</span>
+      <div class="phase-info">
+        <div class="phase-name">Foundation & Architecture</div>
+        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 CRÍTICA</span><span>🚀 Kings + MSU simultâneos</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--accent)">75%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:75%;background:var(--accent)"></div></div>
+      </div>
+      <span class="phase-status progress">Em Progresso</span>
+    </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="wave-block"><div class="wave-title">WAVE 1 (paralelo)</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">01-01</div><div class="wave-plan-name">Monorepo + Next.js Setup (3 apps)</div></div>
+        <div class="wave-plan"><div class="wave-plan-id">01-02</div><div class="wave-plan-name">Design System @kings/ui</div></div>
+      </div></div>
+      <div class="wave-block"><div class="wave-title">WAVE 2 (depende de Wave 1)</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">01-03</div><div class="wave-plan-name">SQL Migrations (blocos 1–5 acima)</div></div>
+        <div class="wave-plan"><div class="wave-plan-id">01-04</div><div class="wave-plan-name">Auth + RLS + Triggers</div></div>
+      </div></div>
+      <div class="wave-block"><div class="wave-title">WAVE 3 (depende de Wave 2)</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">01-05</div><div class="wave-plan-name">Deploy Vercel (3 projetos)</div></div>
+      </div></div>
+      <div class="task-group"><div class="task-group-title">Tasks</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Repositório configurado</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Supabase Pro conectado</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">SQL migrations executadas — 11 tabelas + RLS + triggers + 2 marcas (001_initial_schema.sql)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Turborepo inicializado com 3 apps (kings-store:3000, msu-marketplace:3001, admin:3002)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Packages criados: @kings/db, @kings/ui, @kings/config, @kings/utils</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Design system @kings/ui — globals.css (tokens) + Button, Card, Input, Badge, Spinner, Container</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">TypeScript types manuais para 11 tabelas (database.types.ts)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Middleware Next.js de sessão Supabase (graceful) + middleware admin com role check</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">.env.local configurado (Supabase URL + keys) — symlinked nos 3 apps</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Deploy na Vercel — 3 projetos com Root Directory correto</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Adicionar env vars na Vercel nos 3 projetos</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Rodar 002_fix_brands_rls.sql no Supabase (RLS público para brands e coupons)</span><span class="task-priority critical">P0</span></div>
+      </div>
+      <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação — Resultados</div>
+        <div class="verify-item" style="color:var(--green)">✅ 11 tabelas criadas no Supabase — Success. No rows returned</div>
+        <div class="verify-item" style="color:var(--green)">✅ turbo dev roda 3 apps simultâneos (3000, 3001, 3002) sem erro</div>
+        <div class="verify-item" style="color:var(--green)">✅ Kings Store GET / 200 — Supabase "Conectado ✓"</div>
+        <div class="verify-item" style="color:var(--green)">✅ MSU Marketplace renderizando com branding purple</div>
+        <div class="verify-item" style="color:var(--green)">✅ @kings/ui + @kings/utils integrados (componentes + formatPrice)</div>
+        <div class="verify-item" style="color:var(--green)">✅ Auth middleware graceful (skip quando env vars ausentes)</div>
+        <div class="verify-item" style="color:var(--yellow)">⚠️ Pendente: Admin login page criada, falta rota de auth real</div>
+        <div class="verify-item" style="color:var(--yellow)">⚠️ Pendente: Rodar 002_fix_brands_rls.sql para brands aparecerem na query anônima</div>
+        <div class="verify-item">▸ Pendente: Deploy Vercel (3 projetos)</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase-card" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">02</span>
+      <div class="phase-info">
+        <div class="phase-name">Core E-commerce — Kings Store</div>
+        <div class="phase-meta"><span>⏱ 3 semanas</span><span>📦 6 planos</span><span>🔥 ALTA</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%;background:var(--text-muted)"></div></div>
+      </div>
+      <span class="phase-status todo">Aguardando</span>
+    </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="wave-block"><div class="wave-title">WAVE 1</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">02-01</div><div class="wave-plan-name">Layout Kings Header/Footer</div></div>
+        <div class="wave-plan"><div class="wave-plan-id">02-02</div><div class="wave-plan-name">Catálogo + Filtros</div></div>
+      </div></div>
+      <div class="wave-block"><div class="wave-title">WAVE 2</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">02-03</div><div class="wave-plan-name">Página de Produto</div></div>
+        <div class="wave-plan"><div class="wave-plan-id">02-04</div><div class="wave-plan-name">Carrinho Persistente</div></div>
+      </div></div>
+      <div class="wave-block"><div class="wave-title">WAVE 3</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">02-05</div><div class="wave-plan-name">Checkout + Mercado Pago</div></div>
+        <div class="wave-plan"><div class="wave-plan-id">02-06</div><div class="wave-plan-name">Área do Cliente</div></div>
+      </div></div>
+      <div class="task-group"><div class="task-group-title">Tasks</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Layout base Kings (header, footer, navegação por nível — Iniciante/Premium/Pro/Semi)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Catálogo com filtros (marca, preço, categoria, plataforma) — busca full-text via pg_trgm</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Página de produto (galeria, variantes, cálculo de frete, parcelas 12x)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Carrinho persistente (tabela cart no Supabase + localStorage fallback)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Checkout transparente (Mercado Pago — Pix, Boleto, Cartão) com preference_id</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Cálculo de frete dinâmico (Melhor Envio) com cotação em tempo real</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Fluxo de pedido (criação na tabela orders → pagamento → status)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Área do cliente (pedidos, perfil, endereços) com dados de profiles + orders</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
+        <div class="verify-item">▸ Catálogo carrega produtos da tabela products (brand_id = Kings)</div>
+        <div class="verify-item">▸ Checkout MP sandbox: Pix gera QRCode, Cartão processa e retorna status</div>
+        <div class="verify-item">▸ Pedido aparece em orders com status 'paid' após pagamento sandbox</div>
+        <div class="verify-item">▸ Trigger decrementa estoque em products após pedido pago</div>
+        <div class="verify-item">▸ Carrinho persiste ao fechar e reabrir o browser (Supabase)</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase-card" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">03</span>
+      <div class="phase-info">
+        <div class="phase-name">Integrações Críticas</div>
+        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 ALTA</span><span>⚡ Confirmar NFe.io antes de iniciar</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+      </div>
+      <span class="phase-status todo">Aguardando</span>
+    </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="alert warn">⚠️ <strong style="color:var(--yellow)">Antes de iniciar esta fase:</strong> Criar conta no NFe.io (nfe.io), cadastrar os CNPJs das empresas e adicionar NFEIO_API_KEY no .env.local e na Vercel.</div>
+      <div class="task-group"><div class="task-group-title">Tasks</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Webhook Mercado Pago em /api/webhooks/mercadopago — atualiza orders.status + dispara triggers</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Emissão de NF-e via NFe.io — automática ao status 'paid'. Dupla para pedidos mistos (2 CNPJs)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Geração de etiqueta Melhor Envio após pagamento confirmado</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Notificações WhatsApp via Z-API: pedido confirmado, enviado, entregue</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Notificações E-mail via Resend: confirmação + NF em PDF anexo</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
+        <div class="verify-item">▸ Webhook recebe POST do MP, valida assinatura e atualiza orders.status</div>
+        <div class="verify-item">▸ NF emitida: invoices.status muda para 'issued', pdf_url preenchido</div>
+        <div class="verify-item">▸ WhatsApp + E-mail chegam ao comprador com dados do pedido</div>
+        <div class="verify-item">▸ Pedido com 2 CNPJs gera 2 registros em invoices</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase-card" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">04</span>
+      <div class="phase-info">
+        <div class="phase-name">Marketplace — Meu Simulador Usado</div>
+        <div class="phase-meta"><span>⏱ 3 semanas</span><span>📦 6 planos</span><span>🔥 ALTA</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+      </div>
+      <span class="phase-status todo">Aguardando</span>
+    </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="wave-block"><div class="wave-title">WAVE 1</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">04-01</div><div class="wave-plan-name">Layout MSU (identidade própria)</div></div>
+        <div class="wave-plan"><div class="wave-plan-id">04-02</div><div class="wave-plan-name">Cadastro de Anúncios</div></div>
+      </div></div>
+      <div class="wave-block"><div class="wave-title">WAVE 2</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">04-03</div><div class="wave-plan-name">Listagem + Busca/Filtros</div></div>
+        <div class="wave-plan"><div class="wave-plan-id">04-04</div><div class="wave-plan-name">Moderação Admin</div></div>
+      </div></div>
+      <div class="wave-block"><div class="wave-title">WAVE 3</div><div class="wave-plans">
+        <div class="wave-plan"><div class="wave-plan-id">04-05</div><div class="wave-plan-name">Checkout Split Payment</div></div>
+        <div class="wave-plan"><div class="wave-plan-id">04-06</div><div class="wave-plan-name">Avaliações + Perfil Vendedor</div></div>
+      </div></div>
+      <div class="task-group"><div class="task-group-title">Tasks</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Layout MSU (identidade visual racing/community, distinta da Kings)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Cadastro de anúncio — grava em marketplace_listings com status 'pending_review'</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Painel admin de moderação — aprova/rejeita listings com rejection_reason</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Listagem pública (status='active') com busca full-text e filtros</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Checkout com Split Payment MP — comissão retida, restante ao vendedor</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Registro de comissão em tabela commissions após pagamento</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Sistema de avaliação (estrelas + texto) pós-compra</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Perfil público do vendedor com anúncios ativos e média de avaliações</span><span class="task-priority medium">P2</span></div>
+      </div>
+      <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
+        <div class="verify-item">▸ Anúncio criado aparece em marketplace_listings com status 'pending_review'</div>
+        <div class="verify-item">▸ Admin aprova → status muda para 'active' → aparece na listagem pública</div>
+        <div class="verify-item">▸ Split Payment: commissions.seller_payout = price - commission_amount</div>
+        <div class="verify-item">▸ Listing muda para status 'sold' após compra confirmada</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PHASE 5 -->
+  <div class="phase-card" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">05</span>
+      <div class="phase-info">
+        <div class="phase-name">Admin Dashboard (admin.kingssimuladores.com.br)</div>
+        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 6 planos</span><span>🔥 MÉDIA</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+      </div>
+      <span class="phase-status todo">Aguardando</span>
+    </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="alert info">💡 O admin usa o mesmo Supabase. Acesso restrito a profiles com role='admin'. Domínio: <strong>admin.kingssimuladores.com.br</strong> — 3º projeto na Vercel.</div>
+      <div class="task-group"><div class="task-group-title">Tasks</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Dashboard financeiro por brand_origin (Kings vs MSU) com totais de orders</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Gestão unificada de pedidos (tabela orders filtrável por status/marca/data)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">CRUD de produtos + gestão de estoque + bulk import via CSV</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Fila de moderação de anúncios MSU (listings com status 'pending_review')</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Gestão de comissões — lista commissions com payout_status e ação de marcar como pago</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Relatórios: vendas por período, frete, conversão, top produtos</span><span class="task-priority medium">P2</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PHASE 6 -->
+  <div class="phase-card" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">06</span>
+      <div class="phase-info">
+        <div class="phase-name">Otimização Comercial</div>
+        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 MÉDIA</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+      </div>
+      <span class="phase-status todo">Aguardando</span>
+    </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="task-group"><div class="task-group-title">Tasks</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Recuperação de carrinho abandonado — Z-API (1h) + Resend (24h)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Upsell/Cross-sell inteligente no checkout ("comprou volante → sugere cockpit")</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Cupons avançados (tabela coupons — por marca, categoria, first-buy, frete grátis)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">SEO avançado (schema markup JSON-LD, sitemap dinâmico, meta tags SSR Next.js)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Integração Google Shopping / TikTok Shopping (feed de produtos)</span><span class="task-priority medium">P2</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PHASE 7 -->
+  <div class="phase-card" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">07</span>
+      <div class="phase-info">
+        <div class="phase-name">Testes, Migração & Go Live</div>
+        <div class="phase-meta"><span>⏱ 1–2 semanas</span><span>📦 7 planos</span><span>🔥 CRÍTICA</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+      </div>
+      <span class="phase-status todo">Aguardando</span>
+    </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="alert decided" style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15)">📦 <strong style="color:var(--accent)">Migração de dados:</strong> Scripts de migração devem ser criados durante as fases anteriores e testados em staging. A decisão de <em>quando</em> executar a migração real (Loja Integrada → Supabase e Firebase → Supabase) será tomada nesta fase.</div>
+      <div class="task-group"><div class="task-group-title">Tasks</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Testes E2E — Playwright — fluxo completo: browse → cart → checkout → confirm → NF</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Testes de carga — k6 — 100 compras simultâneas sem degradação</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Compra real em sandbox MP (cartão, Pix, boleto) — fluxo completo</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Script de migração: Loja Integrada → tabela products do Supabase</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Script de migração: Firebase (MSU) → tabelas profiles + marketplace_listings</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">301 redirects de todas as URLs antigas para as novas (next.config.js)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">DNS swap — Kings + MSU + Admin simultâneos — Go Live 🚀</span><span class="task-priority critical">P0</span></div>
+      </div>
+      <div class="verify-block"><div class="verify-title">✅ Critérios de Go Live</div>
+        <div class="verify-item">▸ 0 erros nos testes E2E em produção (staging)</div>
+        <div class="verify-item">▸ Compra real com cartão/Pix processada e NF emitida</div>
+        <div class="verify-item">▸ Dados migrados: produtos visíveis na loja, anúncios no marketplace</div>
+        <div class="verify-item">▸ URLs antigas redirecionam corretamente (301)</div>
+        <div class="verify-item">▸ 3 domínios respondendo com SSL válido</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- INTEGRAÇÕES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(255,140,66,.12);color:var(--orange)">🔌</div>
+    <span class="section-title">Integrações Externas</span>
+  </div>
+  <div class="int-grid">
+    <div class="int-card">
+      <div class="int-icon">💰</div><div class="int-name">Mercado Pago</div>
+      <div class="int-desc">Checkout transparente (Pix, Boleto, Cartão 12x). Split Payment para marketplace. Webhooks de status em /api/webhooks/mercadopago.</div>
+      <div class="int-status active">✓ Definido</div>
+    </div>
+    <div class="int-card">
+      <div class="int-icon">📦</div><div class="int-name">Melhor Envio</div>
+      <div class="int-desc">Cotação em tempo real na página de produto. Geração de etiqueta após pagamento. Rastreio via webhook.</div>
+      <div class="int-status active">✓ Definido</div>
+    </div>
+    <div class="int-card">
+      <div class="int-icon">🧾</div><div class="int-name">NFe.io</div>
+      <div class="int-desc">Emissão automática por CNPJ. NF dupla para pedidos com 2 CNPJs. PDF enviado por e-mail ao comprador. Criar conta em nfe.io antes da Fase 3.</div>
+      <div class="int-status decide">⚡ Confirmar conta</div>
+    </div>
+    <div class="int-card">
+      <div class="int-icon">📊</div><div class="int-name">ERP / Estoque</div>
+      <div class="int-desc">Gerenciado internamente via tabela products no Supabase + painel admin. Sem integração externa por ora. Olist pode ser adicionado futuramente se necessário.</div>
+      <div class="int-status skip">— Interno</div>
+    </div>
+    <div class="int-card">
+      <div class="int-icon">📱</div><div class="int-name">Z-API (WhatsApp)</div>
+      <div class="int-desc">Notificações transacionais: pedido confirmado, enviado, entregue. Recuperação de carrinho abandonado (1h após abandono).</div>
+      <div class="int-status active">✓ Definido</div>
+    </div>
+    <div class="int-card">
+      <div class="int-icon">✉️</div><div class="int-name">Resend (E-mail)</div>
+      <div class="int-desc">Confirmação de pedido + NF em PDF. Recuperação de carrinho (24h). Domínios: noreply@kingssimuladores.com.br e noreply@meusimuladorusado.com.br.</div>
+      <div class="int-status active">✓ Definido</div>
+    </div>
+  </div>
+</div>
+
+<!-- RISCOS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(255,59,92,.12);color:var(--red)">⚠️</div>
+    <span class="section-title">Riscos e Mitigações</span>
+  </div>
+  <table class="risk-table">
+    <thead><tr><th>Risco</th><th>Prob.</th><th>Impacto</th><th>Mitigação</th></tr></thead>
+    <tbody>
+      <tr><td>NF dupla falhar (2 CNPJs)</td><td><span class="risk-level medium">Média</span></td><td><span class="risk-level high">Alto</span></td><td>Fila de retry com dead-letter. NF manual como fallback. Log em invoices.status</td></tr>
+      <tr><td>Split Payment complexo</td><td><span class="risk-level medium">Média</span></td><td><span class="risk-level high">Alto</span></td><td>Sandbox exaustivo antes de produção. Logs de commissions detalhados</td></tr>
+      <tr><td>Webhook MP duplicado</td><td><span class="risk-level high">Alta</span></td><td><span class="risk-level medium">Médio</span></td><td>Idempotency key: checar payment_id em orders antes de processar</td></tr>
+      <tr><td>SEO perder ranking na migração</td><td><span class="risk-level high">Alta</span></td><td><span class="risk-level high">Alto</span></td><td>301 redirects completos. Schema markup JSON-LD. Sitemap dinâmico</td></tr>
+      <tr><td>Migração de dados corrompida</td><td><span class="risk-level medium">Média</span></td><td><span class="risk-level high">Alto</span></td><td>Scripts testados em staging. Backup completo antes da execução. Rollback plan</td></tr>
+      <tr><td>NFe.io não configurado no prazo</td><td><span class="risk-level medium">Média</span></td><td><span class="risk-level high">Alto</span></td><td>Criar conta NFe.io antes de iniciar Fase 3. Emissão manual como fallback temporário</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SEEDS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(6,214,160,.12);color:var(--green)">🌱</div>
+    <span class="section-title">Seeds — Ideias Futuras</span>
+  </div>
+  <div class="seed-grid">
+    <div class="seed-card"><div class="seed-idea">💬 Chat comprador/vendedor no marketplace</div><div class="seed-trigger">Trigger: sistema de avaliação maduro</div></div>
+    <div class="seed-card"><div class="seed-idea">🏅 Ranking de vendedores com badges</div><div class="seed-trigger">Trigger: 50+ vendedores ativos</div></div>
+    <div class="seed-card"><div class="seed-idea">🔨 Sistema de leilão para peças raras</div><div class="seed-trigger">Trigger: marketplace com alto volume</div></div>
+    <div class="seed-card"><div class="seed-idea">🏎️ Integração GRIDHUB (perfil de piloto)</div><div class="seed-trigger">Trigger: GRIDHUB v2 estável</div></div>
+    <div class="seed-card"><div class="seed-idea">📲 PWA para acesso offline do catálogo</div><div class="seed-trigger">Trigger: SEO e conversão otimizados</div></div>
+    <div class="seed-card"><div class="seed-idea">🤝 Programa de afiliados para influencers</div><div class="seed-trigger">Trigger: GMV > R$100k/mês</div></div>
+    <div class="seed-card"><div class="seed-idea">📊 ERP Olist (sync bidirecional de estoque)</div><div class="seed-trigger">Trigger: volume de pedidos justificar automação</div></div>
+  </div>
+</div>
+
+</main>
+
+<footer class="footer">
+  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date"></span></p>
+  <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (3 projetos)</p>
+  <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Lançamento simultâneo · Supabase Pro · Admin em admin.kingssimuladores.com.br · NFe.io · Sem Olist por ora · Estoque interno</p>
+</footer>
+
+<script>
+document.getElementById('update-date').textContent = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+/**
+ * @kings/ui — Design System Globals
+ *
+ * Tokens de design para Kings Hub.
+ * Importar em cada app: import '@kings/ui/globals.css'
+ */
+
+/* ═══════════ CSS Custom Properties (Design Tokens) ═══════════ */
+:root {
+  /* Backgrounds */
+  --bg-primary: #06080f;
+  --bg-secondary: #0c1018;
+  --bg-card: #0f1420;
+  --bg-card-hover: #131928;
+  --bg-elevated: #161d2e;
+
+  /* Borders */
+  --border: #1a2035;
+  --border-accent: #1e2a45;
+  --border-focus: #00e5ff;
+
+  /* Text */
+  --text-primary: #e8ecf4;
+  --text-secondary: #8892a8;
+  --text-muted: #556078;
+  --text-inverse: #06080f;
+
+  /* Brand Colors */
+  --kings-primary: #00e5ff;
+  --kings-primary-hover: #00ccee;
+  --kings-secondary: #8b5cf6;
+  --msu-primary: #8b5cf6;
+  --msu-primary-hover: #7c3aed;
+  --msu-secondary: #00e5ff;
+
+  /* Accent */
+  --accent: #00e5ff;
+  --accent-glow: rgba(0, 229, 255, 0.15);
+  --accent-dim: rgba(0, 229, 255, 0.08);
+
+  /* Semantic */
+  --success: #06d6a0;
+  --warning: #ffd166;
+  --danger: #ff3b5c;
+  --info: #00e5ff;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #00e5ff, #8b5cf6);
+  --gradient-kings: linear-gradient(135deg, #00e5ff 0%, #0097a7 100%);
+  --gradient-msu: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(0, 229, 255, 0.15);
+
+  /* Typography */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Z-Index Scale */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+}
+
+/* ═══════════ Base Reset ═══════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--kings-primary-hover);
+}
+
+/* ═══════════ Typography ═══════════ */
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════ Utility Classes ═══════════ */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass {
+  background: rgba(15, 20, 32, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+/* ═══════════ Animations ═══════════ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-pulse { animation: pulse 2s infinite; }
+
+/* ═══════════ Scrollbar ═══════════ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
