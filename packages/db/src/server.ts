@@ -5,6 +5,7 @@
  * Lê cookies para manter a sessão do usuário.
  */
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from './database.types'
 
@@ -26,7 +27,7 @@ export async function createServerSupabaseClient() {
       getAll() {
         return cookieStore.getAll()
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: { name: string; value: string; options: any }[]) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options)
@@ -44,7 +45,6 @@ export async function createServerSupabaseClient() {
  * NUNCA usar no frontend. Apenas em Server Actions / Route Handlers.
  */
 export function createAdminClient() {
-  const { createClient } = require('@supabase/supabase-js')
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
