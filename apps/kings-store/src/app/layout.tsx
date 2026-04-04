@@ -1,5 +1,9 @@
 import type { Metadata } from 'next'
 import '@kings/ui/globals.css'
+import { Header } from '../components/layout/Header'
+import { Footer } from '../components/layout/Footer'
+import { CartProvider } from '../contexts/CartContext'
+import { CartDrawer } from '../components/cart/CartDrawer'
 
 export const metadata: Metadata = {
   title: 'Kings Simuladores — Simuladores de Corrida Premium',
@@ -35,7 +39,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {children}
+        <CartProvider>
+          <CartDrawer />
+          <Header />
+          {children}
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   )

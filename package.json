@@ -2,16 +2,21 @@
   "name": "kingshub-next",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/three": "^0.183.1",
+    "lucide-react": "^1.7.0",
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",
@@ -25,6 +30,7 @@
     "eslint-config-next": "14.2.35",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.0.0",
+    "turbo": "latest",
     "typescript": "^5"
   }
 }

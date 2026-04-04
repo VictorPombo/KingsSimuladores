@@ -6,6 +6,9 @@
  */
 import React from 'react'
 
+export * from './ProductCard'
+export * from './StreamingBackground'
+
 /* ═══════════ Button ═══════════ */
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger'

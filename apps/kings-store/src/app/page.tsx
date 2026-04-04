@@ -1,4 +1,5 @@
-import { Button, Card, Container, Badge } from '@kings/ui'
+import { Button, Card, Container, StreamingBackground } from '@kings/ui'
+import Link from 'next/link'
 import { createServerSupabaseClient } from '@kings/db'
 import { formatPrice } from '@kings/utils'
 
@@ -19,93 +20,64 @@ export default async function HomePage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
-      {/* Header */}
-      <header
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          background: 'rgba(6, 8, 15, 0.95)',
-          backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--border)',
-          padding: '16px 0',
-        }}
-      >
-        <Container
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <h1
-            className="gradient-text"
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.5rem',
-              fontWeight: 800,
-            }}
-          >
-            KINGS SIMULADORES
-          </h1>
-          <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-            <a href="/produtos" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Produtos
-            </a>
-            <a href="/categorias" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Categorias
-            </a>
-            <Button variant="secondary" size="sm">
-              Entrar
-            </Button>
-          </nav>
-        </Container>
-      </header>
-
+    <div style={{ minHeight: 'calc(100vh - 80px)' }}>
       {/* Hero */}
-      <section
-        style={{
-          padding: '80px 0',
-          textAlign: 'center',
-          background: 'radial-gradient(ellipse at top, rgba(0,229,255,.05) 0%, transparent 60%)',
-        }}
-      >
-        <Container>
-          <Badge variant="info">🏎️ Simuladores de Corrida Premium</Badge>
-          <h2
-            className="gradient-text"
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              fontWeight: 800,
-              marginTop: '16px',
-              lineHeight: 1.1,
-            }}
-          >
-            A experiência de pilotar
-            <br />
-            como nunca antes.
-          </h2>
-          <p
-            style={{
-              color: 'var(--text-secondary)',
-              fontSize: '1.1rem',
-              maxWidth: '600px',
-              margin: '20px auto 32px',
-            }}
-          >
-            Cockpits, volantes, pedais e acessórios das melhores marcas do mundo.
-            Até 12x sem juros.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <Button size="lg">Ver Catálogo</Button>
-            <Button variant="secondary" size="lg">
-              Já tenho conta
-            </Button>
+      <header style={{ position: 'relative', width: '100%', minHeight: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'var(--bg-primary)' }}>
+        
+        {/* BACKGROUND REATIVO E SUTIL */}
+        <StreamingBackground />
+        
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+          {/* Malha (Grid) bem sutil para textura tecnológica */}
+          <div style={{ 
+            position: 'absolute', inset: 0, 
+            background: 'linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)',
+            backgroundSize: '4rem 4rem',
+            maskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
+            opacity: 0.3 
+          }}></div>
+        </div>
+
+        {/* CONTEÚDO PRINCIPAL */}
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 16px', maxWidth: '896px', margin: '0 auto', marginTop: '-10vh' }}>
+          
+          {/* Badge superior com Backdrop Blur */}
+          <div style={{ marginBottom: '32px', padding: '8px 16px', borderRadius: '9999px', border: '1px solid var(--border)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(4px)' }}>
+            <span style={{ fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, color: 'var(--accent)' }}>🏎️ Simuladores de Corrida Premium</span>
           </div>
-        </Container>
-      </section>
+
+          {/* Título Principal */}
+          <h1 className="font-display" style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '24px', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+            A experiência de pilotar <br/>
+            <span className="gradient-text">
+              como nunca antes.
+            </span>
+          </h1>
+
+          {/* Subtítulo */}
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto 40px', fontWeight: 400 }}>
+            Cockpits, volantes, pedais e acessórios das melhores marcas do mundo. <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Até 12x sem juros.</span>
+          </p>
+
+          {/* Botões usando o componente nativo */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
+            <Link href="/produtos" style={{ textDecoration: 'none' }}>
+              <Button size="lg" style={{ boxShadow: '0 0 20px rgba(0,229,255,0.2)' }}>
+                VER CATÁLOGO
+              </Button>
+            </Link>
+            <Link href="/account" style={{ textDecoration: 'none' }}>
+              <Button variant="secondary" size="lg">
+                JÁ TENHO CONTA
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Overlay gradiente na parte inferior */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '128px', background: 'linear-gradient(to top, var(--bg-primary), transparent)', zIndex: 1, pointerEvents: 'none' }}></div>
+      </header>
 
       {/* Status Cards */}
       <section style={{ padding: '40px 0' }}>
@@ -121,7 +93,7 @@ export default async function HomePage() {
               <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                 Supabase
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'var(--font-display)' }}>
+              <div className="font-display" style={{ fontSize: '1.2rem', fontWeight: 700 }}>
                 {connectionStatus}
               </div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
@@ -132,7 +104,7 @@ export default async function HomePage() {
               <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                 App
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'var(--font-display)' }}>
+              <div className="font-display" style={{ fontSize: '1.2rem', fontWeight: 700 }}>
                 Kings Store
               </div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
@@ -143,7 +115,7 @@ export default async function HomePage() {
               <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                 Exemplo
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'var(--font-display)' }}>
+              <div className="font-display" style={{ fontSize: '1.2rem', fontWeight: 700 }}>
                 {formatPrice(4999.90)}
               </div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
@@ -153,21 +125,6 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
-
-      {/* Footer */}
-      <footer
-        style={{
-          borderTop: '1px solid var(--border)',
-          padding: '24px 0',
-          textAlign: 'center',
-          color: 'var(--text-muted)',
-          fontSize: '0.78rem',
-        }}
-      >
-        <Container>
-          Kings Simuladores © {new Date().getFullYear()} — Todos os direitos reservados
-        </Container>
-      </footer>
     </div>
   )
 }
