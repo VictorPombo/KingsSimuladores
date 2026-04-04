@@ -1,24 +1,30 @@
 {
-  "name": "kingssimuladores",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "kingshub-next",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/VictorPombo/KingsSimuladores.git"
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/three": "^0.183.1",
+    "next": "14.2.35",
+    "react": "^18",
+    "react-dom": "^18",
+    "three": "^0.183.2"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/VictorPombo/KingsSimuladores/issues"
-  },
-  "homepage": "https://github.com/VictorPombo/KingsSimuladores#readme",
   "devDependencies": {
-    "vercel": "^50.38.3"
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5"
   }
 }
