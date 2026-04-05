@@ -24,3 +24,5 @@ build/
 
 # Next.js
 .next/
+.turbo/
+supabase/.temp/

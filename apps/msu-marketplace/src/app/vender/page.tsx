@@ -20,24 +20,26 @@ export default function VenderPage() {
     e.preventDefault()
     setIsSubmitting(true)
     
-    // Simulating Supabase insert to marketplace_listings
-    await new Promise(resolve => setTimeout(resolve, 800))
-    
-    /**
-     * FAKE INSERT FOR WAVE 1:
-     * supabase.from('marketplace_listings').insert({
-     *    seller_id: user.id,
-     *    title: form.title,
-     *    price: parseFloat(form.price),
-     *    condition: form.condition,
-     *    images: [form.imageUrl],
-     *    description: form.description,
-     *    status: 'pending_review'
-     * })
-     */
-     
-    setSuccess(true)
-    setIsSubmitting(false)
+    try {
+      const res = await fetch('/api/vender', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title,
+          price: parseFloat(form.price),
+          condition: form.condition,
+          imageUrl: form.imageUrl,
+          description: form.description
+        })
+      })
+
+      if (!res.ok) throw new Error('Falha ao anunciar')
+      setSuccess(true)
+    } catch (e) {
+      alert('Erro ao enviar anúncio. Tente novamente.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (success) {

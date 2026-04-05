@@ -35,6 +35,9 @@ export function Header() {
           <Link href="/produtos" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s' }}>
             Explorar Anúncios
           </Link>
+          <Link href="/account" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s' }}>
+            Minha Garagem
+          </Link>
           <Link href="/vender" style={{ textDecoration: 'none' }}>
             <Button style={{ background: 'var(--accent)', color: '#000', padding: '0.5rem 1rem' }}>
               + Anunciar Grátis
