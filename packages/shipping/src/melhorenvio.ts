@@ -1,38 +1,44 @@
 /**
- * MOCK: Melhor Envio API
- * REMOVE LATER: Substituir por API real após o sistema estar 100% funcional.
+ * Melhor Envio API Mock/Stub for Development
  */
-export const calculateShippingMock = async (data: any) => {
-  console.log("[MOCK SHIPPING] Calculando frete para:", data);
+
+interface Dimensions {
+  weight: number
+  width: number
+  height: number
+  length: number
+}
+
+export async function calculateShipping(fromPostalCode: string, toPostalCode: string, dimensions: Dimensions[]) {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 600))
+  
+  // Fake freight calculation based on postal code ends
+  const ending = parseInt(toPostalCode.slice(-1) || '0')
+  const basePrice = 85.00 + (ending * 5)
+  const baseDays = 4 + (ending % 3)
+  
   return [
     {
       id: 1,
-      name: "Correios PAC",
-      price: "25.00",
-      custom_price: "25.00",
-      discount: "0.00",
-      currency: "BRL",
-      delivery_time: 7,
-      error: null
+      name: 'PAC',
+      company: 'Correios',
+      price: basePrice.toFixed(2),
+      custom_delivery_time: baseDays + 5,
     },
     {
       id: 2,
-      name: "Correios SEDEX",
-      price: "45.00",
-      custom_price: "45.00",
-      discount: "0.00",
-      currency: "BRL",
-      delivery_time: 3,
-      error: null
+      name: 'SEDEX',
+      company: 'Correios',
+      price: (basePrice * 1.8).toFixed(2),
+      custom_delivery_time: baseDays,
+    },
+    {
+      id: 3,
+      name: '.Package',
+      company: 'JadLog',
+      price: (basePrice * 0.9).toFixed(2),
+      custom_delivery_time: baseDays + 2,
     }
-  ];
-};
-
-export const generateLabelMock = async (orderId: string) => {
-  console.log("[MOCK SHIPPING] Gerando etiqueta para pedido:", orderId);
-  return {
-    success: true,
-    tracking_code: "ME" + Math.floor(Math.random() * 10000000) + "BR",
-    label_url: "https://mock.melhorenvio.com.br/label/print"
-  };
-};
+  ]
+}

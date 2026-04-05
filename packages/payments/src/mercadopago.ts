@@ -1,18 +1,24 @@
 /**
- * MOCK: Mercado Pago API
- * REMOVE LATER: Substituir por API real após o sistema estar 100% funcional.
+ * Mercado Pago API Mock/Stub for Development
+ * Subsitute with @mercadopago/sdk-nodejs later when API keys are available
  */
-export const createPaymentMock = async (data: any) => {
-  console.log("[MOCK MP] Criando pagamento para:", data);
+export async function createPreference(items: any[], customer: any) {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 800))
+  
+  // Return a dummy preference ID for checkout usage
   return {
-    id: "mock_payment_123",
-    status: "approved", // Simular como aprovado instantaneamente pro dev
-    transaction_amount: data.transaction_amount || 0,
-    point_of_interaction: {
-      transaction_data: {
-        qr_code: "00020101021126580014br.gov.bcb.pix...",
-        ticket_url: "https://www.mercadopago.com.br/mock/ticket"
-      }
-    }
-  };
-};
+    id: 'mock_pref_123456789_abcdef',
+    init_point: 'https://sandbox.mercadopago.com.br/checkout/mock',
+    sandbox_init_point: 'https://sandbox.mercadopago.com.br/checkout/mock',
+  }
+}
+
+export async function capturePayment(paymentId: string) {
+  await new Promise(resolve => setTimeout(resolve, 500))
+  return {
+    status: 'approved',
+    status_detail: 'accredited',
+    id: paymentId,
+  }
+}
