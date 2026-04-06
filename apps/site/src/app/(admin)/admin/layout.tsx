@@ -18,7 +18,7 @@ export default function AdminLayout({
           <Link href="/" style={{ padding: '0.75rem 1rem', borderRadius: '0.5rem', textDecoration: 'none', color: 'var(--accent, #00e5ff)', fontSize: '0.85rem' }}>← Voltar ao Site</Link>
         </div>
       </aside>
-      <main style={{ flex: 1, padding: '2rem', background: 'var(--bg-primary, #06080f)' }}>
+      <main style={{ flex: 1, padding: '2rem', background: 'transparent' }}>
         {children}
       </main>
     </div>

@@ -22,22 +22,11 @@ export default async function HomePage() {
   return (
     <div style={{ minHeight: 'calc(100vh - 80px)' }}>
       {/* Hero */}
-      <header style={{ position: 'relative', width: '100%', minHeight: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'var(--bg-primary)' }}>
+      <header style={{ position: 'relative', width: '100%', minHeight: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         
         {/* BACKGROUND REATIVO E SUTIL */}
 
-        
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          {/* Malha (Grid) bem sutil para textura tecnológica */}
-          <div style={{ 
-            position: 'absolute', inset: 0, 
-            background: 'linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)',
-            backgroundSize: '4rem 4rem',
-            maskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
-            opacity: 0.3 
-          }}></div>
-        </div>
+
 
         {/* CONTEÚDO PRINCIPAL */}
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 16px', maxWidth: '896px', margin: '0 auto', marginTop: '-10vh' }}>
@@ -76,7 +65,7 @@ export default async function HomePage() {
         </div>
 
         {/* Overlay gradiente na parte inferior */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '128px', background: 'linear-gradient(to top, var(--bg-primary), transparent)', zIndex: 1, pointerEvents: 'none' }}></div>
+        {/* Overlay removed to show grid freely */}
       </header>
 
       {/* Status Cards */}

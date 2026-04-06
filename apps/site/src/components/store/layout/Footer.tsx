@@ -6,7 +6,7 @@ export function Footer() {
       style={{
         borderTop: '1px solid var(--border)',
         padding: '40px 0',
-        background: 'var(--bg-secondary)',
+        background: 'transparent',
         color: 'var(--text-muted)',
       }}
     >

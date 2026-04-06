@@ -94,7 +94,7 @@ export default function CheckoutPage() {
   const valorFrete = selectedFrete ? parseFloat(selectedFrete.price) : 0
 
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: '#06080F', paddingTop: '100px' }}>
+    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
 
       
       <Container style={{ position: 'relative', zIndex: 1, paddingBottom: '100px' }}>

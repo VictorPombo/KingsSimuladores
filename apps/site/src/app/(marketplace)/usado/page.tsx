@@ -44,13 +44,13 @@ const mockListings = [
 
 export default function Home() {
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '80px' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '80px' }}>
       
       {/* Hero Section */}
       <section style={{ 
         position: 'relative',
         padding: '6rem 0',
-        background: 'linear-gradient(to bottom, var(--bg-secondary), var(--bg-primary))',
+        background: 'transparent',
         borderBottom: '1px solid var(--border)'
       }}>
         {/* Ambient subtle glow for MSU */}

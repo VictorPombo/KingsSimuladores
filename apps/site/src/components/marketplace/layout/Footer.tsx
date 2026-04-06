@@ -4,7 +4,7 @@ import { Container } from '@kings/ui'
 export function Footer() {
   return (
     <footer style={{
-      background: 'var(--bg-secondary)',
+      background: 'transparent',
       borderTop: '1px solid var(--border)',
       padding: '4rem 0'
     }}>

@@ -37,7 +37,7 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
     .single()
 
   return (
-    <div style={{ background: '#06080F', minHeight: '100vh', paddingTop: '100px', color: '#fff' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', color: '#fff' }}>
       <Container>
         <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem', color: '#00e5ff' }}>Sua Garagem</h1>
         

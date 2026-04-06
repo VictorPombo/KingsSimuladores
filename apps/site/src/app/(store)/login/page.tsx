@@ -4,7 +4,7 @@ import { Container, Button } from '@kings/ui'
 
 export default function LoginPage() {
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: '#06080F', paddingTop: '100px' }}>
+    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
 
       <Container style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'center' }}>
         <div style={{ background: 'rgba(10, 14, 26, 0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '1rem', padding: '3rem', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
