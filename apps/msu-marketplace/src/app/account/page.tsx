@@ -9,7 +9,7 @@ export default async function AccountPage() {
   const supabase = createAdminClient()
   
   // Hardcoded seller ID for Wave 1 mockup (matches vender/route.ts)
-  const mockSellerId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+  const mockSellerId = 'ae8f8bc9-dc8f-470d-b6f1-839a51d679a9'
 
   const { data: meusAnunciosData } = await supabase
     .from('marketplace_listings')

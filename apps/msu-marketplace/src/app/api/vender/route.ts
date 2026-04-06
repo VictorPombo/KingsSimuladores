@@ -3,7 +3,7 @@ import { createAdminClient } from '@kings/db'
 import crypto from 'crypto'
 
 // Static mock seller ID — must match the profile seeded in Supabase
-const MOCK_SELLER_ID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+const MOCK_SELLER_ID = 'ae8f8bc9-dc8f-470d-b6f1-839a51d679a9'
 
 export async function POST(req: Request) {
   try {
