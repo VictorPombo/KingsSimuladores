@@ -273,7 +273,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 
     <div class="header-right">
       <div class="header-stat"><div class="header-stat-value">7</div><div class="header-stat-label">Fases</div></div>
-      <div class="header-stat"><div class="header-stat-value">50</div><div class="header-stat-label">Tasks</div></div>
+      <div class="header-stat"><div class="header-stat-value">51</div><div class="header-stat-label">Tasks</div></div>
       <div class="header-stat"><div class="header-stat-value">~12</div><div class="header-stat-label">Semanas restantes</div></div>
       <div class="header-stat"><div class="header-stat-value">Pro</div><div class="header-stat-label">Supabase</div></div>
     </div>
@@ -293,13 +293,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <div class="global-progress">
   <div class="global-progress-header">
     <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
-    <span class="global-progress-pct font-display">38%</span>
+    <span class="global-progress-pct font-display">39%</span>
   </div>
   <div class="progress-bar-track">
-    <div class="progress-bar-fill accent" style="width:38%"></div>
+      <div class="progress-fill" style="width:39%">39%</div>
   </div>
   <div class="progress-stats">
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 19 concluídas</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 20 concluídas</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 2 em progresso</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 29 pendentes</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--red)"></span> 0 bloqueadas</div>
@@ -337,8 +337,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="decision-icon">🖥️</div>
       <div>
         <div class="decision-label green">Painel Admin</div>
-        <div class="decision-value">admin.kingssimuladores.com.br</div>
-        <div class="decision-note">3º projeto na Vercel. Mesmo repositório, app separado em apps/admin.</div>
+        <div class="decision-value">kingssimuladores.com.br/admin</div>
+        <div class="decision-note">Rota protegida dentro do site unificado. Login separado com verificação de role=admin.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">🏗️</div>
+      <div>
+        <div class="decision-label green">Arquitetura — Site Unificado</div>
+        <div class="decision-value">1 site, 1 deploy, 1 domínio</div>
+        <div class="decision-note">3 apps consolidados em 1 único Next.js usando Route Groups: (store), (marketplace), (admin). Paleta compartilhada com accent diferente para seção MSU (/usado).</div>
       </div>
     </div>
     <div class="decision-card resolved">
@@ -384,9 +392,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="decision-card resolved">
       <div class="decision-icon">🌐</div>
       <div>
-        <div class="decision-label green">Domínios</div>
-        <div class="decision-value">3 projetos na Vercel</div>
-        <div class="decision-note">kingssimuladores.com.br / msu.kingssimuladores.com.br / admin.kingssimuladores.com.br</div>
+        <div class="decision-label green">Domínio</div>
+        <div class="decision-value">1 domínio — kingssimuladores.com.br</div>
+        <div class="decision-note">Site unificado: / (loja Kings), /usado (marketplace MSU), /admin (painel). 1 projeto na Vercel.</div>
       </div>
     </div>
   </div>
@@ -450,19 +458,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="env-row"><span class="env-key">RESEND_FROM_KINGS</span><span class="env-val"><span class="placeholder">contato@kingssimuladores.com.br</span></span></div>
     <div class="env-row"><span class="env-key">RESEND_FROM_MSU</span><span class="env-val"><span class="placeholder">nf@kingssimuladores.com.br</span></span></div>
 <br>
-    <div class="env-section-label">── URLs dos Sites</div>
-    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_KINGS</span><span class="env-val">https://kingssimuladores.com.br</span></div>
-    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_MSU</span><span class="env-val">https://msu.kingssimuladores.com.br</span></div>
-    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_ADMIN</span><span class="env-val">https://admin.kingssimuladores.com.br</span></div>
+    <div class="env-section-label">── URL do Site</div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SITE_URL</span><span class="env-val">https://kingssimuladores.com.br</span></div>
+    <div class="alert info" style="margin-top:8px">💡 Site unificado: <code>/</code> (loja), <code>/usado</code> (marketplace), <code>/admin</code> (painel). Não há mais subdomínios separados.</div>
   </div>
 <br>
   <div class="env-card">
     <div class="env-card-header">
       <div class="env-card-icon" style="background:rgba(139,92,246,.1);color:var(--purple)">▲</div>
-      <span class="env-card-title">Vercel — 3 Projetos</span>
-      <span class="env-card-badge" style="background:rgba(0,229,255,.1);color:var(--accent)">3 Projetos</span>
+      <span class="env-card-title">Vercel — 1 Projeto Unificado</span>
+      <span class="env-card-badge" style="background:rgba(6,214,160,.12);color:var(--green)">1 Deploy</span>
     </div>
-    <div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px">Cada push na branch <code style="color:var(--accent)">main</code> dispara deploy automático nos 3 projetos.</div>
+    <div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px">Cada push na branch <code style="color:var(--accent)">main</code> dispara deploy automático do site unificado.</div>
     <div class="deploy-flow">
       <div class="deploy-node active">git push origin main</div>
       <span class="deploy-arrow">→</span>
@@ -470,26 +477,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <span class="deploy-arrow">→</span>
       <div class="deploy-node">Next.js SSR/SSG</div>
       <span class="deploy-arrow">→</span>
-      <div class="deploy-node active">3 Sites Live</div>
+      <div class="deploy-node active">1 Site Live</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:16px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px">
       <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid var(--border)">
-        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 1</div>
-        <div style="font-size:.85rem;font-weight:600">kingssimuladores.com.br</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/kings-store</div>
-    </div>
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Loja Kings</div>
+        <div style="font-size:.85rem;font-weight:600">/ (raiz)</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Route Group: (store)</div>
+      </div>
       <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid var(--border)">
-        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 2</div>
-        <div style="font-size:.85rem;font-weight:600">msu.kingssimuladores.com.br</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/msu-marketplace</div>
-    </div>
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Marketplace MSU</div>
+        <div style="font-size:.85rem;font-weight:600">/usado</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Route Group: (marketplace)</div>
+      </div>
       <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid rgba(0,229,255,.2)">
-        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 3 — Novo</div>
-        <div style="font-size:.85rem;font-weight:600">admin.kingssimuladores.com.br</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/admin</div>
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Admin Panel</div>
+        <div style="font-size:.85rem;font-weight:600">/admin</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Route Group: (admin)</div>
+      </div>
     </div>
-  </div>
-    <div class="alert info" style="margin-top:12px">💡 <strong style="color:var(--accent)">Setup Vercel:</strong> Importar repo → em cada projeto, definir o <strong>Root Directory</strong> para o app correspondente. Adicionar as variáveis de ambiente em todos os 3 projetos.</div>
+    <div class="alert info" style="margin-top:12px">💡 <strong style="color:var(--accent)">Setup Vercel:</strong> Importar repo 1x → Root Directory: <code>apps/site</code>. Adicionar todas as env vars neste único projeto.</div>
   </div>
 <br>
   <div class="env-card">
@@ -678,16 +685,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gerar TypeScript types do banco (supabase gen types)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Supabase Auth (email + Google + Apple) + middleware Next.js</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Preencher .env.local com todas as variáveis (Placeholders criados)</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Deploy na Vercel — 3 projetos com Root Directory correto</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Adicionar env vars na Vercel nos 3 projetos</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Unificar 3 apps → 1 site (Route Groups) — apps/site</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Deploy na Vercel — 1 projeto unificado</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Adicionar env vars na Vercel</span><span class="task-priority critical">P0</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
         <div class="verify-item">▸ 11 tabelas visíveis no Supabase Table Editor</div>
         <div class="verify-item">▸ Trigger: registrar usuário → perfil criado automaticamente em profiles</div>
         <div class="verify-item">▸ RLS: usuário Kings não acessa dados MSU</div>
-        <div class="verify-item">▸ turbo dev roda os 3 apps localmente sem erro</div>
-        <div class="verify-item">▸ @kings/ui acessível nos 3 apps via import</div>
-        <div class="verify-item">▸ 3 domínios carregando no Vercel (kings, msu, admin)</div>
+        <div class="verify-item">▸ npm run dev roda o site unificado sem erro</div>
+        <div class="verify-item">▸ /, /usado, /admin carregam com layouts distintos</div>
+        <div class="verify-item">▸ 1 domínio carregando na Vercel (kingssimuladores.com.br)</div>
         <div class="verify-item">▸ supabase gen types gera database.types.ts sem erro</div>
       </div>
     </div></div>
@@ -980,8 +988,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 
 <footer class="footer">
   <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date"></span></p>
-  <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (3 projetos)</p>
-  <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Lançamento simultâneo · Supabase Pro · Admin em admin.kingssimuladores.com.br · NFe.io · Sem Olist por ora · Estoque interno</p>
+  <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (1 site unificado)</p>
+  <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Site unificado · Lançamento simultâneo · Supabase Pro · Admin em /admin · NFe.io · Sem Olist · Estoque interno</p>
 </footer>
 <br>
 <div style="max-width: 1400px; margin: 0 auto; padding: 20px 32px; background: rgba(255, 59, 92, 0.1); border: 1px solid var(--danger); border-radius: var(--radius-sm); margin-bottom: 24px;">
