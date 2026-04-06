@@ -40,8 +40,8 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Redirecionar para login se acessar rota protegida sem auth
-  const protectedPaths = ['/dashboard', '/account', '/orders', '/admin']
+  // Redirecionar rotas clientes protegidas comuns
+  const protectedPaths = ['/dashboard', '/account', '/orders']
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )
@@ -51,6 +51,37 @@ export async function updateSession(request: NextRequest) {
     redirectUrl.pathname = '/login'
     redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
+  }
+
+  // ─── ADMIN ROLE-BASED ACCESS CONTROL (RBAC) ───
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    // Permitir acesso livre à tela de login e página de unauthorized
+    if (
+      request.nextUrl.pathname.startsWith('/admin/login') ||
+      request.nextUrl.pathname.startsWith('/admin/unauthorized')
+    ) {
+      return supabaseResponse
+    }
+
+    if (!user) {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = '/admin/login'
+      redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    // Buscar profile para checar role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('auth_id', user.id)
+      .single()
+
+    if (!profile || profile.role !== 'admin') {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = '/admin/unauthorized'
+      return NextResponse.redirect(redirectUrl)
+    }
   }
 
   return supabaseResponse
