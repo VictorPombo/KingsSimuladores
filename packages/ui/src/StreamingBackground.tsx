@@ -54,16 +54,16 @@ const STREAMING_CSS = `
   /* ─── Glow no horizonte (cyan forte) ─── */
   .streaming-bg-glow-horizon {
     position: absolute;
-    bottom: 25%;
+    top: 15%;
     left: 50%;
     transform: translateX(-50%);
-    width: 160%;
-    height: 50%;
+    width: 200%;
+    height: 30%;
     background: radial-gradient(
-      ellipse 45% 40% at 50% 0%,
-      rgba(0, 229, 255, 0.12) 0%,
-      rgba(139, 92, 246, 0.05) 40%,
-      transparent 70%
+      ellipse 50% 50% at 50% 50%,
+      rgba(0, 229, 255, 0.15) 0%,
+      rgba(139, 92, 246, 0.08) 50%,
+      transparent 80%
     );
   }
 
@@ -86,19 +86,19 @@ const STREAMING_CSS = `
   /* ─── Linha do Horizonte ─── */
   .streaming-bg-horizon-line {
     position: absolute;
-    top: 50%;
+    top: 30%;
     left: 0;
     right: 0;
-    height: 1px;
+    height: 3px;
     background: linear-gradient(
       90deg,
-      transparent 2%,
-      rgba(0, 229, 255, 0.2) 20%,
-      rgba(0, 229, 255, 0.4) 50%,
-      rgba(0, 229, 255, 0.2) 80%,
-      transparent 98%
+      transparent 0%,
+      rgba(0, 229, 255, 0.4) 20%,
+      rgba(0, 229, 255, 0.8) 50%,
+      rgba(0, 229, 255, 0.4) 80%,
+      transparent 100%
     );
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.15), 0 0 40px rgba(0, 229, 255, 0.05);
+    /* Removido box-shadow super pesado */
   }
 
   /* ─── Grid do Chão ─── */
@@ -106,10 +106,9 @@ const STREAMING_CSS = `
     position: absolute;
     left: -50%;
     right: -50%;
-    top: 50%;
-    height: 100vh;
+    top: 30%;
+    height: 150vh;
     transform-origin: center top;
-    transform: perspective(350px) rotateX(60deg);
     background-image:
       linear-gradient(
         to right,
@@ -122,16 +121,10 @@ const STREAMING_CSS = `
         transparent 1px
       );
     background-size: 60px 60px;
-    animation: streamGridDown 2.5s linear infinite;
+    animation: streamGridDown 2s linear infinite;
     will-change: background-position;
-    -webkit-mask-image: 
-      linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.1) 75%, transparent 100%),
-      linear-gradient(to right, transparent 0%, rgba(0,0,0,1) 15%, rgba(0,0,0,1) 85%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-image: 
-      linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.1) 75%, transparent 100%),
-      linear-gradient(to right, transparent 0%, rgba(0,0,0,1) 15%, rgba(0,0,0,1) 85%, transparent 100%);
-    mask-composite: intersect;
+    /* Mask-image removido por causar extremas quedas de GPU e CPU */
+    transform: perspective(350px) rotateX(60deg) translateZ(0); /* Força GPU real */
   }
 
   /* ─── Grid do Teto ─── */
@@ -139,10 +132,9 @@ const STREAMING_CSS = `
     position: absolute;
     left: -50%;
     right: -50%;
-    bottom: 50%;
-    height: 80vh;
+    bottom: 70%;
+    height: 100vh;
     transform-origin: center bottom;
-    transform: perspective(350px) rotateX(-60deg);
     background-image:
       linear-gradient(
         to right,
@@ -155,27 +147,22 @@ const STREAMING_CSS = `
         transparent 1px
       );
     background-size: 60px 60px;
-    animation: streamGridUp 3.5s linear infinite;
+    animation: streamGridUp 3s linear infinite;
     will-change: background-position;
-    -webkit-mask-image: 
-      linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 80%),
-      linear-gradient(to right, transparent 0%, rgba(0,0,0,1) 20%, rgba(0,0,0,1) 80%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-image: 
-      linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 80%),
-      linear-gradient(to right, transparent 0%, rgba(0,0,0,1) 20%, rgba(0,0,0,1) 80%, transparent 100%);
-    mask-composite: intersect;
+    /* Mask-image removido por causar lentidão extrema */
+    transform: perspective(350px) rotateX(-60deg) translateZ(0); /* Força GPU real */
   }
 
   /* ─── Vignette ─── */
   .streaming-bg-vignette {
     position: absolute;
     inset: 0;
+    pointer-events: none;
     background: radial-gradient(
-      ellipse 65% 55% at 50% 50%,
-      transparent 20%,
-      rgba(6, 8, 15, 0.7) 80%,
-      #06080f 100%
+      ellipse 80% 80% at 50% 50%,
+      transparent 30%,
+      rgba(6, 8, 15, 0.4) 70%,
+      rgba(6, 8, 15, 0.8) 100%
     );
   }
 
