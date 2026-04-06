@@ -80,6 +80,21 @@
   --z-toast: 300;
 }
 
+/* ═══════════ MSU Theme Overrides ═══════════ */
+.theme-msu {
+  /* Accent: Flame Orange */
+  --accent: #ff6b35;
+  --accent-glow: rgba(255, 107, 53, 0.15);
+  --accent-dim: rgba(255, 107, 53, 0.08);
+
+  /* Gradients: Orange to Red */
+  --gradient-primary: linear-gradient(135deg, #ff6b35, #ff3b5c);
+  
+  /* Semantic adaptation */
+  --info: #ff6b35;
+  --success: #06d6a0; /* Green stays green but accent is orange */
+}
+
 /* ═══════════ Base Reset ═══════════ */
 *, *::before, *::after {
   box-sizing: border-box;
