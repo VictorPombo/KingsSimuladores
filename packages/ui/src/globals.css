@@ -61,7 +61,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px rgba(0, 232, 150, 0.25);
+  --shadow-glow: 0 0 20px rgba(0, 180, 245, 0.4);
 
   /* Typography */
   --font-display: 'Rajdhani', sans-serif;
@@ -173,4 +173,64 @@ h1, h2, h3, h4, h5, h6 {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* ═══════════ Responsive Hybrid Engine ═══════════ */
+.desktop-only { display: block; }
+.desktop-flex { display: flex; }
+.mobile-only { display: none !important; }
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .desktop-flex { display: none !important; }
+  .mobile-only { display: block !important; }
+  .mobile-only-flex { display: flex !important; }
+}
+
+.app-container {
+  min-height: 100vh;
+}
+@media (max-width: 768px) {
+  .app-container {
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+    padding-bottom: 90px;
+    background: var(--bg-primary);
+    border-left: 1px solid rgba(255,255,255,0.03);
+    border-right: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 0 40px rgba(0, 180, 245, 0.05);
+    overflow-x: hidden;
+  }
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Admin & MSU Layout */
+.admin-body { display: flex; min-height: 100vh; background: #030509; margin: 0; padding: 0; }
+.admin-main { flex: 1; padding: 2rem; position: relative; }
+.msu-main { flex: 1; }
+
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 0;
+    padding-bottom: 90px;
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+  .msu-main {
+    padding-bottom: 90px;
+  }
 }

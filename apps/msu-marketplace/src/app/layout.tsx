@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { BottomNav } from '../components/layout/BottomNav'
+import { Header } from '../components/layout/Header'
+import { Footer } from '../components/layout/Footer'
 
 export const metadata: Metadata = {
   title: 'Meu Simulador Usado',
-  description: 'Comunidade SIMRACING de Usados.',
+  description: 'Classificados simracing.',
 }
 
 export default function RootLayout({
@@ -17,23 +19,24 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
-      <body style={{ display: 'flex', justifyContent: 'center', background: '#030509', margin: 0, padding: 0 }}>
-        <main style={{
-          position: 'relative',
-          width: '100%',
-          maxWidth: '430px', 
-          minHeight: '100vh',
-          background: 'var(--bg-primary)',
-          boxShadow: '0 0 40px rgba(139, 92, 246, 0.05)',
-          borderLeft: '1px solid rgba(255,255,255,0.03)',
-          borderRight: '1px solid rgba(255,255,255,0.03)',
-          overflowX: 'hidden'
-        }}>
-          <div style={{ paddingBottom: '90px' }}>
-            {children}
-          </div>
-          <BottomNav />
+      <body style={{ background: '#030509', margin: 0, padding: 0 }}>
+        
+        <div className="desktop-only text-center">
+          <Header />
+        </div>
+
+        <main className="app-container msu-main">
+          {children}
         </main>
+
+        <div className="desktop-only">
+          <Footer />
+        </div>
+
+        <div className="mobile-only">
+          <BottomNav />
+        </div>
+
       </body>
     </html>
   )
