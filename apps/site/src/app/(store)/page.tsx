@@ -1,4 +1,4 @@
-import { Button, Card, Container, StreamingBackground } from '@kings/ui'
+import { Button, Card, Container } from '@kings/ui'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@kings/db'
 import { formatPrice } from '@kings/utils'
@@ -25,7 +25,7 @@ export default async function HomePage() {
       <header style={{ position: 'relative', width: '100%', minHeight: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'var(--bg-primary)' }}>
         
         {/* BACKGROUND REATIVO E SUTIL */}
-        <StreamingBackground />
+
         
         <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
           {/* Malha (Grid) bem sutil para textura tecnológica */}

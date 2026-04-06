@@ -1,214 +1,192 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Configuração Kings Simuladores
-// Quantidade: 101 | Velocidade: 5 | Comprimento: 39 | Mouse: 85
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const CONFIG = {
-  count:  101,
-  speed:  5,
-  length: 39,
-  force:  85,
-  colors: ['#00e5ff', '#8b5cf6', '#06d6a0', '#a78bfa', '#c8eeff'],
-  background: '#06080f',
-}
-
-interface Streak {
-  x: number
-  y: number
-  vx: number
-  vy: number
-  tilt: number
-  width: number
-  life: number
-  maxLife: number
-  color: string
-  alpha: number
-}
+/**
+ * StreamingBackground — Retro-wave 3D Grid
+ * 
+ * Efeito visual de grade perspectiva infinita (estilo Outrun/Synthwave).
+ * ✅ CSS Puro — sem Canvas, WebGL, ou libs externas.
+ * ✅ 60fps — anima apenas background-position (GPU-accelerated).
+ * ✅ position: fixed, z-index: -1 — não interfere na UI.
+ */
 
 export function StreamingBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const mouse     = useRef({ x: -9999, y: -9999 })
-  const streaks   = useRef<Streak[]>([])
-  const rafRef    = useRef<number>(0)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const DPR = window.devicePixelRatio || 1
-
-    // ── resize ──────────────────────────────
-    function resize() {
-      const W = canvas!.offsetWidth
-      const H = canvas!.offsetHeight
-      canvas!.width  = W * DPR
-      canvas!.height = H * DPR
-      ctx!.setTransform(DPR, 0, 0, DPR, 0, 0)
-    }
-
-    // ── fábrica de traço ────────────────────
-    function makeStreak(): Streak {
-      const W = canvas!.offsetWidth
-      const H = canvas!.offsetHeight
-      const color = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)]
-      const tilt  = (Math.random() - 0.5) * 0.22
-      return {
-        x:       Math.random() * W,
-        y:       H + Math.random() * H * 0.5,
-        vx:      tilt,
-        vy:      -(Math.random() * 0.8 + 0.5),
-        tilt,
-        width:   Math.random() * 1.1 + 0.3,
-        life:    0,
-        maxLife: Math.random() * 200 + 100,
-        color,
-        alpha:   0,
-      }
-    }
-
-    // ── inicializar traços ──────────────────
-    function init() {
-      const H = canvas!.offsetHeight
-      streaks.current = []
-      for (let i = 0; i < CONFIG.count; i++) {
-        const s = makeStreak()
-        s.y    = Math.random() * H          // distribuir pela tela no início
-        s.life = Math.random() * s.maxLife
-        streaks.current.push(s)
-      }
-    }
-
-    // ── loop de animação ────────────────────
-    function draw() {
-      const W   = canvas!.offsetWidth
-      const H   = canvas!.offsetHeight
-      const spd = CONFIG.speed / 4
-      const frc = CONFIG.force / 10
-      const LEN = CONFIG.length
-
-      ctx!.clearRect(0, 0, W, H)
-      ctx!.fillStyle = CONFIG.background
-      ctx!.fillRect(0, 0, W, H)
-
-      for (const s of streaks.current) {
-        s.life++
-
-        // fade in / fade out
-        const prog = s.life / s.maxLife
-        if (prog < 0.12)      s.alpha = prog / 0.12
-        else if (prog > 0.7)  s.alpha = 1 - (prog - 0.7) / 0.3
-        else                  s.alpha = 1
-        s.alpha = Math.max(0, Math.min(1, s.alpha))
-
-        // movimento
-        s.x += s.vx * spd
-        s.y += s.vy * spd
-
-        // repulsão do mouse
-        const dx   = s.x - mouse.current.x
-        const dy   = s.y - mouse.current.y
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < 110 && dist > 0) {
-          const str = (1 - dist / 110) * frc * 0.15
-          s.x += (dx / dist) * str
-          s.y += (dy / dist) * str * 0.5
-        }
-
-        // renascer ao sair da tela
-        if (s.life >= s.maxLife || s.y < -LEN * 2) {
-          Object.assign(s, makeStreak())
-          continue
-        }
-
-        // ── desenhar ───────────────────────
-        const len = LEN * (0.6 + s.alpha * 0.4)
-        const tx  = s.x + s.tilt * len   // base (transparente)
-        const ty  = s.y
-        const bx  = s.x - s.tilt * len   // ponta (branco)
-        const by  = s.y - len
-
-        ctx!.save()
-        ctx!.globalAlpha              = s.alpha
-        ctx!.globalCompositeOperation = 'screen'
-        ctx!.lineCap                  = 'round'
-
-        // brilho difuso simulado SEM 'filter: blur()' para 60fps cravado!
-        const glowG = ctx!.createLinearGradient(tx, ty, bx, by)
-        glowG.addColorStop(0,   s.color + '00')
-        glowG.addColorStop(0.5, s.color + '33')
-        glowG.addColorStop(1,   s.color + '00')
-        ctx!.strokeStyle = glowG
-        ctx!.lineWidth   = s.width * 6
-        ctx!.beginPath()
-        ctx!.moveTo(tx, ty)
-        ctx!.lineTo(bx, by)
-        ctx!.stroke()
-
-        // traço principal
-        const mainG = ctx!.createLinearGradient(tx, ty, bx, by)
-        mainG.addColorStop(0,   s.color + '00')
-        mainG.addColorStop(0.4, s.color + '88')
-        mainG.addColorStop(0.8, s.color + 'ff')
-        mainG.addColorStop(1,   '#ffffff')
-        ctx!.strokeStyle = mainG
-        ctx!.lineWidth   = s.width
-        ctx!.beginPath()
-        ctx!.moveTo(tx, ty)
-        ctx!.lineTo(bx, by)
-        ctx!.stroke()
-
-        ctx!.restore()
-      }
-
-      rafRef.current = requestAnimationFrame(draw)
-    }
-
-    // ── eventos ─────────────────────────────
-    function onMouseMove(e: MouseEvent) {
-      const rect      = canvas!.getBoundingClientRect()
-      mouse.current.x = e.clientX - rect.left
-      mouse.current.y = e.clientY - rect.top
-    }
-    function onMouseLeave() {
-      mouse.current = { x: -9999, y: -9999 }
-    }
-    function onResize() {
-      resize()
-      init()
-    }
-
-    canvas.addEventListener('mousemove', onMouseMove)
-    canvas.addEventListener('mouseleave', onMouseLeave)
-    window.addEventListener('resize', onResize)
-
-    resize()
-    init()
-    draw()
-
-    return () => {
-      cancelAnimationFrame(rafRef.current)
-      canvas.removeEventListener('mousemove', onMouseMove)
-      canvas.removeEventListener('mouseleave', onMouseLeave)
-      window.removeEventListener('resize', onResize)
-    }
-  }, [])
-
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top:      0,
-        left:     0,
-        width:    '100%',
-        height:   '100%',
-        display:  'block',
-        zIndex:   0,
-      }}
-    />
+    <>
+      <div
+        aria-hidden="true"
+        className="streaming-bg-root"
+      >
+        {/* ─── Ambient Glow: horizonte ─── */}
+        <div className="streaming-bg-glow-horizon" />
+
+        {/* ─── Ambient Glow: topo (roxo sutil) ─── */}
+        <div className="streaming-bg-glow-top" />
+
+        {/* ─── Linha do Horizonte ─── */}
+        <div className="streaming-bg-horizon-line" />
+
+        {/* ─── Grid do Chão (Perspectiva 3D) ─── */}
+        <div className="streaming-bg-floor" />
+
+        {/* ─── Grid do Teto (Perspectiva 3D invertida) ─── */}
+        <div className="streaming-bg-ceiling" />
+
+        {/* ─── Vignette nas bordas ─── */}
+        <div className="streaming-bg-vignette" />
+      </div>
+
+      <style dangerouslySetInnerHTML={{ __html: STREAMING_CSS }} />
+    </>
   )
 }
+
+const STREAMING_CSS = `
+  /* ─── Container ─── */
+  .streaming-bg-root {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: #06080f;
+    pointer-events: none;
+  }
+
+  /* ─── Glow no horizonte (cyan forte) ─── */
+  .streaming-bg-glow-horizon {
+    position: absolute;
+    bottom: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160%;
+    height: 50%;
+    background: radial-gradient(
+      ellipse 45% 40% at 50% 0%,
+      rgba(0, 229, 255, 0.12) 0%,
+      rgba(139, 92, 246, 0.05) 40%,
+      transparent 70%
+    );
+  }
+
+  /* ─── Glow topo (roxo) ─── */
+  .streaming-bg-glow-top {
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140%;
+    height: 45%;
+    background: radial-gradient(
+      ellipse 50% 50% at 50% 100%,
+      rgba(139, 92, 246, 0.06) 0%,
+      rgba(0, 229, 255, 0.03) 40%,
+      transparent 70%
+    );
+  }
+
+  /* ─── Linha do Horizonte ─── */
+  .streaming-bg-horizon-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 2%,
+      rgba(0, 229, 255, 0.2) 20%,
+      rgba(0, 229, 255, 0.4) 50%,
+      rgba(0, 229, 255, 0.2) 80%,
+      transparent 98%
+    );
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.15), 0 0 40px rgba(0, 229, 255, 0.05);
+  }
+
+  /* ─── Grid do Chão ─── */
+  .streaming-bg-floor {
+    position: absolute;
+    left: -50%;
+    right: -50%;
+    top: 50%;
+    height: 100vh;
+    transform-origin: center top;
+    transform: perspective(350px) rotateX(60deg);
+    background-image:
+      linear-gradient(
+        to right,
+        rgba(0, 229, 255, 0.18) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(0, 229, 255, 0.18) 1px,
+        transparent 1px
+      );
+    background-size: 60px 60px;
+    animation: streamGridDown 2.5s linear infinite;
+    will-change: background-position;
+    -webkit-mask-image: 
+      linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.1) 75%, transparent 100%),
+      linear-gradient(to right, transparent 0%, rgba(0,0,0,1) 15%, rgba(0,0,0,1) 85%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: 
+      linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.1) 75%, transparent 100%),
+      linear-gradient(to right, transparent 0%, rgba(0,0,0,1) 15%, rgba(0,0,0,1) 85%, transparent 100%);
+    mask-composite: intersect;
+  }
+
+  /* ─── Grid do Teto ─── */
+  .streaming-bg-ceiling {
+    position: absolute;
+    left: -50%;
+    right: -50%;
+    bottom: 50%;
+    height: 80vh;
+    transform-origin: center bottom;
+    transform: perspective(350px) rotateX(-60deg);
+    background-image:
+      linear-gradient(
+        to right,
+        rgba(139, 92, 246, 0.10) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(139, 92, 246, 0.10) 1px,
+        transparent 1px
+      );
+    background-size: 60px 60px;
+    animation: streamGridUp 3.5s linear infinite;
+    will-change: background-position;
+    -webkit-mask-image: 
+      linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 80%),
+      linear-gradient(to right, transparent 0%, rgba(0,0,0,1) 20%, rgba(0,0,0,1) 80%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: 
+      linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 80%),
+      linear-gradient(to right, transparent 0%, rgba(0,0,0,1) 20%, rgba(0,0,0,1) 80%, transparent 100%);
+    mask-composite: intersect;
+  }
+
+  /* ─── Vignette ─── */
+  .streaming-bg-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 65% 55% at 50% 50%,
+      transparent 20%,
+      rgba(6, 8, 15, 0.7) 80%,
+      #06080f 100%
+    );
+  }
+
+  /* ─── Keyframes (GPU: background-position only) ─── */
+  @keyframes streamGridDown {
+    0%   { background-position: 0 0; }
+    100% { background-position: 0 60px; }
+  }
+
+  @keyframes streamGridUp {
+    0%   { background-position: 0 0; }
+    100% { background-position: 0 -60px; }
+  }
+`

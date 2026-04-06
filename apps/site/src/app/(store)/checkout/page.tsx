@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Container } from '@kings/ui'
-import { StreamingBackground } from '@kings/ui'
+
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@kings/utils'
 import { calculateShipping } from '@kings/shipping'
@@ -95,7 +95,7 @@ export default function CheckoutPage() {
 
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: '#06080F', paddingTop: '100px' }}>
-      <StreamingBackground />
+
       
       <Container style={{ position: 'relative', zIndex: 1, paddingBottom: '100px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem', alignItems: 'start' }}>

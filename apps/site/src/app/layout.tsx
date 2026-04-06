@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   },
 }
 
+import { StreamingBackground } from '@kings/ui'
+
 export default function RootLayout({
   children,
 }: {
@@ -35,7 +37,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <StreamingBackground />
+        {children}
+      </body>
     </html>
   )
 }
