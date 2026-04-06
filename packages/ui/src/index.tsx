@@ -8,6 +8,7 @@ import React from 'react'
 
 export * from './ProductCard'
 export * from './StreamingBackground'
+export * from './Toast'
 
 /* ═══════════ Button ═══════════ */
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

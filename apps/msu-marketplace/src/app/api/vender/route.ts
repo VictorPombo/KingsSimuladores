@@ -1,16 +1,31 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@kings/db'
+import { createServerSupabaseClient } from '@kings/db/server'
 import crypto from 'crypto'
-
-// Static mock seller ID — must match the profile seeded in Supabase
-const MOCK_SELLER_ID = 'ae8f8bc9-dc8f-470d-b6f1-839a51d679a9'
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    const supabase = createAdminClient()
+    const supabase = await createServerSupabaseClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    const { error } = await (supabase.from('marketplace_listings') as any).insert({
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Verificar se o profile é realmente seller (ou admin)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('auth_id', user.id)
+      .single()
+
+    if (!profile || ((profile as any).role !== 'seller' && (profile as any).role !== 'admin')) {
+      return NextResponse.json({ error: 'Você precisa habilitar o modo Vendedor na sua conta primeiro.' }, { status: 403 })
+    }
+
+    const body = await req.json()
+
+    // O RLS policy "listings_insert" permitirá a inserção se seller_id = auth_id 
+    const { error } = await supabase.from('marketplace_listings').insert({
       id: crypto.randomUUID(),
       title: body.title,
       price: body.price,
@@ -18,9 +33,9 @@ export async function POST(req: Request) {
       images: [body.imageUrl],
       description: body.description,
       status: 'pending_review',
-      seller_id: MOCK_SELLER_ID,
+      seller_id: user.id, // ID real do Auth
       commission_rate: 0.1,
-    })
+    } as any)
 
     if (error) {
       console.error('Supabase insert error:', error)
