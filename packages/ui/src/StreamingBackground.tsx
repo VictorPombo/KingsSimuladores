@@ -9,12 +9,18 @@
  * ✅ position: fixed, z-index: -1 — não interfere na UI.
  */
 
+import { usePathname } from 'next/navigation'
+
 export function StreamingBackground() {
+  const pathname = usePathname()
+  const isMsu = pathname?.startsWith('/usado')
+
   return (
     <>
       <div
         aria-hidden="true"
         className="streaming-bg-root"
+        data-theme={isMsu ? 'msu' : 'kings'}
       >
         {/* ─── Ambient Glow: horizonte ─── */}
         <div className="streaming-bg-glow-horizon" />
@@ -41,6 +47,17 @@ export function StreamingBackground() {
 }
 
 const STREAMING_CSS = `
+  /* ─── Variables for Themes ─── */
+  .streaming-bg-root {
+    --sb-accent: 0, 229, 255;      /* Cyan */
+    --sb-secondary: 139, 92, 246;  /* Purple */
+  }
+
+  .streaming-bg-root[data-theme="msu"] {
+    --sb-accent: 255, 107, 53;     /* Orange */
+    --sb-secondary: 255, 59, 92;   /* Red */
+  }
+
   /* ─── Container ─── */
   .streaming-bg-root {
     position: fixed;
@@ -61,8 +78,8 @@ const STREAMING_CSS = `
     height: 30%;
     background: radial-gradient(
       ellipse 50% 50% at 50% 50%,
-      rgba(0, 229, 255, 0.15) 0%,
-      rgba(139, 92, 246, 0.08) 50%,
+      rgba(var(--sb-accent), 0.15) 0%,
+      rgba(var(--sb-secondary), 0.08) 50%,
       transparent 80%
     );
   }
@@ -77,8 +94,8 @@ const STREAMING_CSS = `
     height: 45%;
     background: radial-gradient(
       ellipse 50% 50% at 50% 100%,
-      rgba(139, 92, 246, 0.06) 0%,
-      rgba(0, 229, 255, 0.03) 40%,
+      rgba(var(--sb-secondary), 0.06) 0%,
+      rgba(var(--sb-accent), 0.03) 40%,
       transparent 70%
     );
   }
@@ -93,9 +110,9 @@ const STREAMING_CSS = `
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(0, 229, 255, 0.4) 20%,
-      rgba(0, 229, 255, 0.8) 50%,
-      rgba(0, 229, 255, 0.4) 80%,
+      rgba(var(--sb-accent), 0.4) 20%,
+      rgba(var(--sb-accent), 0.8) 50%,
+      rgba(var(--sb-accent), 0.4) 80%,
       transparent 100%
     );
     /* Removido box-shadow super pesado */
@@ -112,12 +129,12 @@ const STREAMING_CSS = `
     background-image:
       linear-gradient(
         to right,
-        rgba(0, 229, 255, 0.18) 1px,
+        rgba(var(--sb-accent), 0.18) 1px,
         transparent 1px
       ),
       linear-gradient(
         to bottom,
-        rgba(0, 229, 255, 0.18) 1px,
+        rgba(var(--sb-accent), 0.18) 1px,
         transparent 1px
       );
     background-size: 60px 60px;
@@ -138,12 +155,12 @@ const STREAMING_CSS = `
     background-image:
       linear-gradient(
         to right,
-        rgba(139, 92, 246, 0.10) 1px,
+        rgba(var(--sb-secondary), 0.10) 1px,
         transparent 1px
       ),
       linear-gradient(
         to bottom,
-        rgba(139, 92, 246, 0.10) 1px,
+        rgba(var(--sb-secondary), 0.10) 1px,
         transparent 1px
       );
     background-size: 60px 60px;
