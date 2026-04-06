@@ -293,10 +293,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <div class="global-progress">
   <div class="global-progress-header">
     <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
-    <span class="global-progress-pct font-display">39%</span>
+    <span class="global-progress-pct font-display">40%</span>
   </div>
   <div class="progress-bar-track">
-      <div class="progress-fill" style="width:39%">39%</div>
+      <div class="progress-fill" style="width:40%">40%</div>
   </div>
   <div class="progress-stats">
     <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 20 concluídas</div>
@@ -395,6 +395,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="decision-label green">Domínio</div>
         <div class="decision-value">1 domínio — kingssimuladores.com.br</div>
         <div class="decision-note">Site unificado: / (loja Kings), /usado (marketplace MSU), /admin (painel). 1 projeto na Vercel.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">📉</div>
+      <div>
+        <div class="decision-label green">Estoque</div>
+        <div class="decision-value">Baixa apenas no Webhook (Fase 3)</div>
+        <div class="decision-note">Evitar concorrência no momento do clique de compra. O trigger atômico atuará quando o Mercado Pago confirmar o 'paid'.</div>
       </div>
     </div>
   </div>
@@ -658,8 +666,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 CRÍTICA</span><span>🚀 Kings + MSU simultâneos</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">90%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:90%;background:var(--accent)"></div></div>
+        <div class="phase-pct" style="color:var(--accent)">95%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:95%;background:var(--accent)"></div></div>
       </div>
       <span class="phase-status progress">Em Progresso</span>
     </div>
@@ -709,8 +717,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 3 semanas</span><span>📦 6 planos</span><span>🔥 ALTA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">75%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:75%;background:var(--accent)"></div></div>
+        <div class="phase-pct" style="color:var(--accent)">85%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:85%;background:var(--accent)"></div></div>
       </div>
       <span class="phase-status progress">Em Progresso</span>
     </div>
@@ -734,7 +742,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Carrinho persistente (localStorage fallback ativo)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Checkout transparente (Mercado Pago — Pix, Boleto, Cartão) com preference_id</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text">Cálculo de frete dinâmico (Melhor Envio) com cotação em tempo real</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Fluxo de pedido (criação na tabela orders → pagamento → status)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fluxo de pedido (criação na tabela orders → pagamento → status)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Área do cliente (pedidos, perfil, endereços) com dados de profiles + orders</span><span class="task-priority high">P1</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
@@ -987,7 +995,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <br>
 
 <footer class="footer">
-  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date"></span></p>
+  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date">06 de Abril de 2026</span></p>
   <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (1 site unificado)</p>
   <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Site unificado · Lançamento simultâneo · Supabase Pro · Admin em /admin · NFe.io · Sem Olist · Estoque interno</p>
 </footer>

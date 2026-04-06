@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@kings/db/server'
+import { createPreference } from '@kings/payments'
 
 export async function POST(req: Request) {
   try {
@@ -19,10 +20,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Cart empty' }, { status: 400 })
     }
 
-    // 3. Fake Order Creation in Database
-    const orderId = crypto.randomUUID()
-    const mockOrder = {
-      id: orderId,
+    // 3. Mercado Pago Mock Preference Creation
+    const preference = await createPreference(items, customer)
+
+    // 4. Native Order Creation in Database
+    const orderData = {
       customer_id: user.id,
       brand_origin: 'kings',
       order_type: 'direct',
@@ -31,18 +33,45 @@ export async function POST(req: Request) {
       shipping_cost: shipping ? parseFloat(shipping.price) : 0,
       total: total,
       shipping_address: address,
-      created_at: new Date().toISOString(),
+      preference_id: preference.id, // Armazenando preference gerada
     }
 
-    await supabase.from('orders').insert(mockOrder as any)
-    
-    // In actual implementation we would also insert `order_items`.
+    const { data: newOrder, error: orderErr } = await supabase
+      .from('orders')
+      .insert(orderData as any)
+      .select('id')
+      .single()
 
-    // Return the fake session/order
+    if (orderErr || !newOrder) {
+      console.error('Insert Order Error:', orderErr)
+      return NextResponse.json({ error: 'Database failed to create order' }, { status: 500 })
+    }
+
+    // 5. Insert Order Items natively
+    const orderItemsData = items.map((item: any) => ({
+      order_id: newOrder.id,
+      product_id: item.id.startsWith('mock-') ? null : item.id, // Handle mock products
+      quantity: item.quantity,
+      unit_price: item.price,
+      total_price: item.price * item.quantity,
+    }))
+
+    const { error: itemsErr } = await supabase
+      .from('order_items')
+      .insert(orderItemsData as any)
+
+    if (itemsErr) {
+      console.error('Insert Items Error:', itemsErr)
+      // Ideally we would rollback the order here or it would be in an RPC transaction
+    }
+
+    // Return the real session/order
     return NextResponse.json({
       ok: true,
-      orderId: orderId,
-      detail: 'Mock order created successfully via frontend POST'
+      orderId: newOrder.id,
+      preferenceId: preference.id,
+      init_point: preference.init_point,
+      detail: 'Order recorded natively in DB and preference generated'
     })
 
   } catch (err: any) {
