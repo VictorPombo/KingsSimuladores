@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
 import { CouponInput } from './CouponInput'
+import { UpsellEngine } from '../upsell/UpsellEngine'
 
 export function CartDrawer() {
   const { items, isOpen, setIsOpen, updateQuantity, subtotal, discount, totalPrice } = useCart()
@@ -75,6 +76,9 @@ export function CartDrawer() {
               ))}
             </div>
           )}
+
+          {/* Motor de Recomendação Inteligente */}
+          {items.length > 0 && <UpsellEngine variant="compact" maxItems={2} />}
         </div>
 
         {items.length > 0 && (

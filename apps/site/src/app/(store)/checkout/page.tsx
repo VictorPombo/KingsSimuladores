@@ -7,6 +7,7 @@ import { Button, Container } from '@kings/ui'
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@kings/utils'
 import { createPreference } from '@kings/payments'
+import { UpsellEngine } from '@/components/store/upsell/UpsellEngine'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -235,6 +236,9 @@ export default function CheckoutPage() {
                 <span style={{ color: '#00e5ff' }}>{formatPrice(totalPrice + valorFrete)}</span>
               </div>
             </div>
+
+            {/* Motor de Recomendação Inteligente */}
+            <UpsellEngine variant="full" maxItems={3} />
           </div>
           
         </div>
