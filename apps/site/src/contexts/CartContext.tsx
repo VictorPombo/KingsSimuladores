@@ -11,6 +11,13 @@ export interface CartItem {
   quantity: number
 }
 
+export interface CouponState {
+  id: string
+  code: string
+  type: 'percent' | 'fixed' | 'shipping'
+  value: number
+}
+
 interface CartContextData {
   items: CartItem[]
   addItem: (item: CartItem) => void
@@ -19,6 +26,10 @@ interface CartContextData {
   clearCart: () => void
   totalItems: number
   totalPrice: number
+  subtotal: number
+  discount: number
+  coupon: CouponState | null
+  applyCoupon: (c: CouponState | null) => void
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
 }
@@ -28,6 +39,7 @@ const CartContext = createContext<CartContextData>({} as CartContextData)
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const [coupon, setCoupon] = useState<CouponState | null>(null)
   
   useEffect(() => {
     const saved = localStorage.getItem('@kings/cart')
@@ -68,12 +80,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const clearCart = () => setItems([])
 
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0)
-  const totalPrice = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+  const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+  
+  let discount = 0
+  if (coupon) {
+    if (coupon.type === 'percent') {
+      discount = subtotal * (coupon.value / 100)
+    } else if (coupon.type === 'fixed') {
+      discount = Math.min(coupon.value, subtotal)
+    }
+  }
+  
+  const totalPrice = subtotal - discount
+
+  const applyCoupon = (c: CouponState | null) => setCoupon(c)
 
   return (
     <CartContext.Provider value={{
       items, addItem, removeItem, updateQuantity, clearCart, 
-      totalItems, totalPrice, isOpen, setIsOpen
+      totalItems, subtotal, discount, totalPrice, coupon, applyCoupon, isOpen, setIsOpen
     }}>
       {children}
     </CartContext.Provider>

@@ -35,12 +35,20 @@ export async function POST(req: Request) {
           .from('orders')
           .update({ status: 'paid', payment_id: paymentId, payment_method: paymentData.payment_method_id })
           .eq('id', orderId)
-          .select('id, brand_origin, total, shipping_address, profiles(full_name, email, phone)')
+          .select('id, customer_id, brand_origin, total, shipping_address, coupon_id, profiles(full_name, email, phone)')
           .single()
 
         if (orderErr || !order) {
           console.error('[Webhook MP] Erro ao registrar pagamento na Order:', orderId)
           return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+        }
+
+        // 2.5 Incrementar count de uso do cupom se existir
+        if (order.coupon_id) {
+          const { data: couponToUpdate } = await supabase.from('coupons').select('usage_count').eq('id', order.coupon_id).single()
+          if (couponToUpdate) {
+            await supabase.from('coupons').update({ usage_count: (couponToUpdate.usage_count || 0) + 1 }).eq('id', order.coupon_id)
+          }
         }
 
         // 3. Buscar os itens do pedido para Controle de Estoque
@@ -72,6 +80,11 @@ export async function POST(req: Request) {
           }
         }
         
+        // 3.5 Limpar a tabela de Carrinho Ativo do cliente agora que foi Pago (Isso impede que o Robô de Cart Abandonado atue em falsos positivos)
+        if (order.customer_id) {
+          await supabase.from('cart').delete().eq('customer_id', order.customer_id)
+        }
+
         console.log(`[Webhook MP] Sucesso! Pedido ${orderId} aprovado e estoque atualizado.`)
         
         // 4. Emissão de Nota Fiscal NFe.io (Assíncrona para não prender o Webhook)

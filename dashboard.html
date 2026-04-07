@@ -285,6 +285,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <a href="#fases" style="color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">🚀 Fases do Projeto</a>
     <a href="#tech" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">🛠️ Tech Stack</a>
     <a href="#integracoes" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">🧩 Integrações</a>
+    <a href="#apis" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">⚡ Controle de APIs</a>
+    <a href="#financeiro" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">💸 Financeiro</a>
     <a href="#riscos" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">⚠️ Riscos</a>
   </nav>
 </header>
@@ -293,10 +295,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <div class="global-progress">
   <div class="global-progress-header">
     <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
-    <span class="global-progress-pct font-display">75%</span>
+    <span class="global-progress-pct font-display">85%</span>
   </div>
   <div class="progress-bar-track">
-      <div class="progress-bar-fill accent" style="width:75%"></div>
+      <div class="progress-bar-fill accent" style="width:85%"></div></div>
   </div>
   <div class="progress-stats">
     <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 38 concluídas</div>
@@ -433,9 +435,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="env-card-header">
       <div class="env-card-icon" style="background:rgba(139,92,246,.1);color:var(--purple)">🔑</div>
       <span class="env-card-title">Todas as Variáveis de Ambiente (.env.local completo)</span>
-      <span class="env-card-badge" style="background:rgba(255,209,102,.1);color:var(--yellow)">Preencher</span>
+      <span class="env-card-badge" style="background:rgba(255,59,92,.12);color:var(--red)">5 APIs Pendentes</span>
     </div>
     <div class="alert info">💡 Copie este bloco para o <code>.env.local</code> na raiz do projeto e preencha os valores marcados em amarelo. Os mesmos valores devem ser adicionados na Vercel em <strong>Settings → Environment Variables</strong> para os 3 projetos.</div>
+
+    <div class="alert danger" style="margin-top:8px;border-left:3px solid var(--red)">
+      🔴 <strong style="color:var(--red)">AÇÃO PENDENTE — Conectar Chaves Reais de Produção:</strong><br>
+      <span style="font-size:.82rem;line-height:1.8">
+        ⬜ <strong>Mercado Pago</strong> — <code>MP_ACCESS_TOKEN</code>, <code>MP_PUBLIC_KEY</code>, <code>MP_WEBHOOK_SECRET</code> → <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" style="color:var(--accent)">Painel MP</a><br>
+        ⬜ <strong>Melhor Envio</strong> — <code>MELHOR_ENVIO_TOKEN</code> → <a href="https://melhorenvio.com.br/painel/integracoes/tokens" target="_blank" style="color:var(--accent)">Painel ME</a><br>
+        ⬜ <strong>NFe.io</strong> — <code>NFEIO_API_KEY</code>, <code>NFEIO_COMPANY_ID_*</code> → <a href="https://nfe.io" target="_blank" style="color:var(--accent)">nfe.io/account</a><br>
+        ⬜ <strong>Z-API (WhatsApp)</strong> — <code>ZAPI_INSTANCE_ID</code>, <code>ZAPI_TOKEN</code>, <code>ZAPI_CLIENT_TOKEN</code> → <a href="https://z-api.io" target="_blank" style="color:var(--accent)">z-api.io</a><br>
+        ⬜ <strong>Resend (E-mail)</strong> — <code>RESEND_API_KEY</code> → <a href="https://resend.com/api-keys" target="_blank" style="color:var(--accent)">resend.com/api-keys</a><br>
+        <span style="color:var(--text-muted);font-size:.75rem">✅ Supabase — Já conectado | ✅ CRON_SECRET — Já configurado</span>
+      </span>
+    </div>
 <br>
     <div class="env-section-label">── Supabase (já configurado)</div>
     <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPABASE_URL</span><span class="env-val">https://mlrcaugthlkscusyxqrf.supabase.co</span></div>
@@ -468,6 +482,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <br>
     <div class="env-section-label">── URL do Site</div>
     <div class="env-row"><span class="env-key">NEXT_PUBLIC_SITE_URL</span><span class="env-val">https://kingssimuladores.com.br</span></div>
+<br>
+    <div class="env-section-label">── Vercel Cron Jobs (já configurado)</div>
+    <div class="env-row"><span class="env-key">CRON_SECRET</span><span class="env-val">Senha personalizada de proteção <span class="masked">(já adicionada no .env.local)</span></span></div>
     <div class="alert info" style="margin-top:8px">💡 Site unificado: <code>/</code> (loja), <code>/usado</code> (marketplace), <code>/admin</code> (painel). Não há mais subdomínios separados.</div>
   </div>
 <br>
@@ -866,18 +883,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 MÉDIA</span></div>
       </div>
       <div class="phase-progress">
-      <div class="phase-pct" style="color:var(--text-muted)">0%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+      <div class="phase-pct" style="color:var(--accent)">80%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:80%"></div></div>
       </div>
-      <span class="phase-status todo">Aguardando</span>
+      <span class="phase-status progress">Em Progresso</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="task-group"><div class="task-group-title">Tasks</div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Recuperação de carrinho abandonado — Z-API (1h) + Resend (24h)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Recuperação de carrinho abandonado — Z-API (1h) + Resend (24h)</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text">Upsell/Cross-sell inteligente no checkout ("comprou volante → sugere cockpit")</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Cupons avançados (tabela coupons — por marca, categoria, first-buy, frete grátis)</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">SEO avançado (schema markup JSON-LD, sitemap dinâmico, meta tags SSR Next.js)</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Integração Google Shopping / TikTok Shopping (feed de produtos)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cupons avançados (tabela coupons — por marca, categoria, first-buy, frete grátis)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">SEO avançado (schema markup JSON-LD, sitemap dinâmico, meta tags SSR Next.js)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Integração Google Shopping / TikTok Shopping (feed de produtos)</span><span class="task-priority medium">P2</span></div>
       </div>
     </div></div>
   </div>
@@ -958,7 +975,57 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
   </div>
 </div>
 
-<div class="section">
+<div class="section" id="financeiro">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(0,229,255,.12);color:var(--accent)">💸</div>
+    <span class="section-title">Custos Operacionais Mensais Estimados</span>
+  </div>
+  <div class="tech-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+    <div class="tech-item" style="border-left: 3px solid var(--purple)">
+      <div class="tech-name">Supabase Pro</div>
+      <div class="tech-role">R$ 140 / $25</div>
+    </div>
+    <div class="tech-item" style="border-left: 3px solid #FFF">
+      <div class="tech-name">Vercel Pro</div>
+      <div class="tech-role">R$ 115 / $20</div>
+    </div>
+    <div class="tech-item" style="border-left: 3px solid var(--green)">
+      <div class="tech-name">Z-API (WhatsApp)</div>
+      <div class="tech-role">R$ 139</div>
+    </div>
+    <div class="tech-item" style="border-left: 3px solid var(--orange)">
+      <div class="tech-name">Resend (E-mail)</div>
+      <div class="tech-role">Gratuito (até 3k unid.)</div>
+    </div>
+    <div class="tech-item" style="border-left: 3px solid var(--accent); background: rgba(0,229,255,0.05)">
+      <div class="tech-name" style="color: var(--accent)">TOTAL MENSAL ESTIMADO</div>
+      <div class="tech-role font-display" style="font-size:1.1rem;font-weight:700">~R$ 394,00 / Mês</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="apis">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(139,92,246,.12);color:var(--purple)">⚡</div>
+    <span class="section-title">Mapa de APIs & Webservices Internos</span>
+  </div>
+  <table class="risk-table">
+    <thead><tr><th>Endpoint da Plataforma</th><th>Status</th><th>Função Central</th><th>Integração Base</th></tr></thead>
+    <tbody>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/checkout</span></td><td><span class="int-status active">Construído</span></td><td>Processa pagamentos, calcula regras de split de frete/valor no cart.</td><td>Mercado Pago</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/webhooks/mercadopago</span></td><td><span class="int-status active">Construído</span></td><td>Confirma pagamentos, deduz estoque, limpa carrinho ativo, envia NFe e Notificações (Z-API/Resend).</td><td>Mercado Pago</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/cron/recover-carts</span></td><td><span class="int-status active">Construído</span></td><td>Cron Job faseado (1h WhatsApp / 24h Email) para funil de retenção de funil.</td><td>Vercel Cron</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/shipping</span></td><td><span class="int-status active">Construído</span></td><td>Estimativa de múltiplos fretes (PAC/Sedex/Jadlog/Azul) baseado em CEP e Dimensão.</td><td>Melhor Envio</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/vender</span></td><td><span class="int-status active">Construído</span></td><td>Motor de submissão + Moderador das listagens C2C do APP MSU (Meu Simulador Usado).</td><td>MSU SubApp</td></tr>
+      <!-- PENDENTES A PRODUZIR -->
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/google</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML dinâmico em tempo real de produtos estruturados pra Google Shopping.</td><td>Google Merchant Center</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/tiktok</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML variante de catálogo pra TikTok Shops com estoque síncrono.</td><td>TikTok For Business</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/shipping</span></td><td><span class="int-status decide">Pendente</span></td><td>(Fase 07) Receptor passivo que detecta Encomenda "Em Trânsito/Entregue" para Zap.</td><td>Melhor Envio / Z-API</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section" id="riscos">
   <div class="section-header">
     <div class="section-icon" style="background:rgba(255,59,92,.12);color:var(--red)">⚠️</div>
     <span class="section-title">Riscos e Mitigações</span>

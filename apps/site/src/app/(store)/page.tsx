@@ -3,6 +3,41 @@ import Link from 'next/link'
 import { createServerSupabaseClient } from '@kings/db'
 import { formatPrice } from '@kings/utils'
 
+const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
+
+// ── SEO: Schema JSON-LD para a Marca e o Site ──
+function HomeJsonLd() {
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Kings Simuladores',
+    url: BASE_URL,
+    logo: `${BASE_URL}/logo.png`,
+    description: 'A maior loja de simuladores de corrida do Brasil. Cockpits, volantes, pedais e acessórios premium.',
+    sameAs: [
+      'https://www.instagram.com/kingssimuladores',
+      'https://www.tiktok.com/@kingssimuladores',
+    ],
+  }
+  const siteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Kings Simuladores',
+    url: BASE_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${BASE_URL}/produtos?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  }
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }} />
+    </>
+  )
+}
+
 export default async function HomePage() {
   // Test Supabase connection
   let connectionStatus = 'Desconectado'
@@ -21,6 +56,9 @@ export default async function HomePage() {
 
   return (
     <div style={{ minHeight: 'calc(100vh - 80px)' }}>
+      {/* JSON-LD invisível para o Google */}
+      <HomeJsonLd />
+
       {/* Hero */}
       <header style={{ position: 'relative', width: '100%', minHeight: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         

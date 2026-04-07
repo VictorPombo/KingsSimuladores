@@ -4,9 +4,10 @@ import { useCart } from '@/contexts/CartContext'
 import { useRouter } from 'next/navigation'
 import { Button } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
+import { CouponInput } from './CouponInput'
 
 export function CartDrawer() {
-  const { items, isOpen, setIsOpen, updateQuantity, totalPrice } = useCart()
+  const { items, isOpen, setIsOpen, updateQuantity, subtotal, discount, totalPrice } = useCart()
   const router = useRouter()
 
   if (!isOpen) return null
@@ -78,9 +79,25 @@ export function CartDrawer() {
 
         {items.length > 0 && (
           <div style={{ padding: '24px', borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Subtotal:</span>
-              <span className="font-display" style={{ fontSize: '1.2rem', fontWeight: 800 }}>{formatPrice(totalPrice)}</span>
+            <CouponInput />
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '20px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                <span>Subtotal:</span>
+                <span className="font-display" style={{ fontWeight: 600 }}>{formatPrice(subtotal)}</span>
+              </div>
+              
+              {discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--green)' }}>
+                  <span>Desconto:</span>
+                  <span className="font-display" style={{ fontWeight: 600 }}>-{formatPrice(discount)}</span>
+                </div>
+              )}
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Total:</span>
+                <span className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent)' }}>{formatPrice(totalPrice)}</span>
+              </div>
             </div>
             <Button 
               size="lg" 
