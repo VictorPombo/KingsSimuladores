@@ -96,8 +96,13 @@ const MENU_ITEMS = [
     icon: Settings,
     subItems: [
       { label: 'Gerais', href: '/admin/config-gerais' },
+      { label: 'Dados da loja', href: '/admin/dados-loja' },
+      { label: 'Usuários', href: '/admin/usuarios' },
       { label: 'Formas de pagamento', href: '/admin/formas-pagamento' },
       { label: 'Formas de envio', href: '/admin/formas-envio' },
+      { label: 'Domínio próprio', href: '/admin/dominio' },
+      { label: 'Chave para API', href: '/admin/chave-api' },
+      { label: 'Gerenciador de arquivos', href: '/admin/gerenciador-arquivos' },
       { label: 'Aplicativos', href: '/admin/aplicativos' }
     ]
   }
