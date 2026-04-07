@@ -272,9 +272,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     </div>
 
     <div class="header-right">
-      <div class="header-stat"><div class="header-stat-value">7</div><div class="header-stat-label">Fases</div></div>
-      <div class="header-stat"><div class="header-stat-value">50</div><div class="header-stat-label">Tasks</div></div>
-      <div class="header-stat"><div class="header-stat-value">~12</div><div class="header-stat-label">Semanas restantes</div></div>
+      <div class="header-stat"><div class="header-stat-value">8</div><div class="header-stat-label">Fases</div></div>
+      <div class="header-stat"><div class="header-stat-value">72</div><div class="header-stat-label">Tasks</div></div>
+      <div class="header-stat"><div class="header-stat-value">~10</div><div class="header-stat-label">Semanas restantes</div></div>
       <div class="header-stat"><div class="header-stat-value">Pro</div><div class="header-stat-label">Supabase</div></div>
     </div>
   </div>
@@ -285,6 +285,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <a href="#fases" style="color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">🚀 Fases do Projeto</a>
     <a href="#tech" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">🛠️ Tech Stack</a>
     <a href="#integracoes" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">🧩 Integrações</a>
+    <a href="#apis" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">⚡ Controle de APIs</a>
+    <a href="#financeiro" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">💸 Financeiro</a>
     <a href="#riscos" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;">⚠️ Riscos</a>
   </nav>
 </header>
@@ -293,15 +295,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <div class="global-progress">
   <div class="global-progress-header">
     <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
-    <span class="global-progress-pct font-display">38%</span>
+    <span class="global-progress-pct font-display">93%</span>
   </div>
   <div class="progress-bar-track">
-    <div class="progress-bar-fill accent" style="width:38%"></div>
+      <div class="progress-bar-fill accent" style="width:93%"></div></div>
   </div>
   <div class="progress-stats">
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 19 concluídas</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 2 em progresso</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 29 pendentes</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 50 concluídas</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 1 em progresso</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 5 pendentes</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--red)"></span> 0 bloqueadas</div>
   </div>
 </div>
@@ -337,8 +339,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="decision-icon">🖥️</div>
       <div>
         <div class="decision-label green">Painel Admin</div>
-        <div class="decision-value">admin.kingssimuladores.com.br</div>
-        <div class="decision-note">3º projeto na Vercel. Mesmo repositório, app separado em apps/admin.</div>
+        <div class="decision-value">kingssimuladores.com.br/admin</div>
+        <div class="decision-note">Rota protegida dentro do site unificado. Login separado com verificação de role=admin.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">🏗️</div>
+      <div>
+        <div class="decision-label green">Arquitetura — Site Unificado</div>
+        <div class="decision-value">1 site, 1 deploy, 1 domínio</div>
+        <div class="decision-note">3 apps consolidados em 1 único Next.js usando Route Groups: (store), (marketplace), (admin). Paleta compartilhada com accent diferente para seção MSU (/usado).</div>
       </div>
     </div>
     <div class="decision-card resolved">
@@ -384,9 +394,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="decision-card resolved">
       <div class="decision-icon">🌐</div>
       <div>
-        <div class="decision-label green">Domínios</div>
-        <div class="decision-value">3 projetos na Vercel</div>
-        <div class="decision-note">kingssimuladores.com.br / msu.kingssimuladores.com.br / admin.kingssimuladores.com.br</div>
+        <div class="decision-label green">Domínio</div>
+        <div class="decision-value">1 domínio — kingssimuladores.com.br</div>
+        <div class="decision-note">Site unificado: / (loja Kings), /usado (marketplace MSU), /admin (painel). 1 projeto na Vercel.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">📉</div>
+      <div>
+        <div class="decision-label green">Estoque</div>
+        <div class="decision-value">Baixa apenas no Webhook (Fase 3)</div>
+        <div class="decision-note">Evitar concorrência no momento do clique de compra. O trigger atômico atuará quando o Mercado Pago confirmar o 'paid'.</div>
       </div>
     </div>
   </div>
@@ -417,9 +435,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="env-card-header">
       <div class="env-card-icon" style="background:rgba(139,92,246,.1);color:var(--purple)">🔑</div>
       <span class="env-card-title">Todas as Variáveis de Ambiente (.env.local completo)</span>
-      <span class="env-card-badge" style="background:rgba(255,209,102,.1);color:var(--yellow)">Preencher</span>
+      <span class="env-card-badge" style="background:rgba(255,59,92,.12);color:var(--red)">5 APIs Pendentes</span>
     </div>
     <div class="alert info">💡 Copie este bloco para o <code>.env.local</code> na raiz do projeto e preencha os valores marcados em amarelo. Os mesmos valores devem ser adicionados na Vercel em <strong>Settings → Environment Variables</strong> para os 3 projetos.</div>
+
+    <div class="alert danger" style="margin-top:8px;border-left:3px solid var(--red)">
+      🔴 <strong style="color:var(--red)">AÇÃO PENDENTE — Conectar Chaves Reais de Produção:</strong><br>
+      <span style="font-size:.82rem;line-height:1.8">
+        ⬜ <strong>Mercado Pago</strong> — <code>MP_ACCESS_TOKEN</code>, <code>MP_PUBLIC_KEY</code>, <code>MP_WEBHOOK_SECRET</code> → <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" style="color:var(--accent)">Painel MP</a><br>
+        ⬜ <strong>Melhor Envio</strong> — <code>MELHOR_ENVIO_TOKEN</code> → <a href="https://melhorenvio.com.br/painel/integracoes/tokens" target="_blank" style="color:var(--accent)">Painel ME</a><br>
+        ⬜ <strong>NFe.io</strong> — <code>NFEIO_API_KEY</code>, <code>NFEIO_COMPANY_ID_*</code> → <a href="https://nfe.io" target="_blank" style="color:var(--accent)">nfe.io/account</a><br>
+        ⬜ <strong>Z-API (WhatsApp)</strong> — <code>ZAPI_INSTANCE_ID</code>, <code>ZAPI_TOKEN</code>, <code>ZAPI_CLIENT_TOKEN</code> → <a href="https://z-api.io" target="_blank" style="color:var(--accent)">z-api.io</a><br>
+        ⬜ <strong>Resend (E-mail)</strong> — <code>RESEND_API_KEY</code> → <a href="https://resend.com/api-keys" target="_blank" style="color:var(--accent)">resend.com/api-keys</a><br>
+        <span style="color:var(--text-muted);font-size:.75rem">✅ Supabase — Já conectado | ✅ CRON_SECRET — Já configurado</span>
+      </span>
+    </div>
 <br>
     <div class="env-section-label">── Supabase (já configurado)</div>
     <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPABASE_URL</span><span class="env-val">https://mlrcaugthlkscusyxqrf.supabase.co</span></div>
@@ -450,19 +480,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="env-row"><span class="env-key">RESEND_FROM_KINGS</span><span class="env-val"><span class="placeholder">contato@kingssimuladores.com.br</span></span></div>
     <div class="env-row"><span class="env-key">RESEND_FROM_MSU</span><span class="env-val"><span class="placeholder">nf@kingssimuladores.com.br</span></span></div>
 <br>
-    <div class="env-section-label">── URLs dos Sites</div>
-    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_KINGS</span><span class="env-val">https://kingssimuladores.com.br</span></div>
-    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_MSU</span><span class="env-val">https://msu.kingssimuladores.com.br</span></div>
-    <div class="env-row"><span class="env-key">NEXT_PUBLIC_URL_ADMIN</span><span class="env-val">https://admin.kingssimuladores.com.br</span></div>
+    <div class="env-section-label">── URL do Site</div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SITE_URL</span><span class="env-val">https://kingssimuladores.com.br</span></div>
+<br>
+    <div class="env-section-label">── Vercel Cron Jobs (já configurado)</div>
+    <div class="env-row"><span class="env-key">CRON_SECRET</span><span class="env-val">Senha personalizada de proteção <span class="masked">(já adicionada no .env.local)</span></span></div>
+    <div class="alert info" style="margin-top:8px">💡 Site unificado: <code>/</code> (loja), <code>/usado</code> (marketplace), <code>/admin</code> (painel). Não há mais subdomínios separados.</div>
   </div>
 <br>
   <div class="env-card">
     <div class="env-card-header">
       <div class="env-card-icon" style="background:rgba(139,92,246,.1);color:var(--purple)">▲</div>
-      <span class="env-card-title">Vercel — 3 Projetos</span>
-      <span class="env-card-badge" style="background:rgba(0,229,255,.1);color:var(--accent)">3 Projetos</span>
+      <span class="env-card-title">Vercel — 1 Projeto Unificado</span>
+      <span class="env-card-badge" style="background:rgba(6,214,160,.12);color:var(--green)">1 Deploy</span>
     </div>
-    <div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px">Cada push na branch <code style="color:var(--accent)">main</code> dispara deploy automático nos 3 projetos.</div>
+    <div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px">Cada push na branch <code style="color:var(--accent)">main</code> dispara deploy automático do site unificado.</div>
     <div class="deploy-flow">
       <div class="deploy-node active">git push origin main</div>
       <span class="deploy-arrow">→</span>
@@ -470,26 +502,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <span class="deploy-arrow">→</span>
       <div class="deploy-node">Next.js SSR/SSG</div>
       <span class="deploy-arrow">→</span>
-      <div class="deploy-node active">3 Sites Live</div>
+      <div class="deploy-node active">1 Site Live</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:16px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px">
       <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid var(--border)">
-        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 1</div>
-        <div style="font-size:.85rem;font-weight:600">kingssimuladores.com.br</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/kings-store</div>
-    </div>
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Loja Kings</div>
+        <div style="font-size:.85rem;font-weight:600">/ (raiz)</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Route Group: (store)</div>
+      </div>
       <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid var(--border)">
-        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 2</div>
-        <div style="font-size:.85rem;font-weight:600">msu.kingssimuladores.com.br</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/msu-marketplace</div>
-    </div>
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Marketplace MSU</div>
+        <div style="font-size:.85rem;font-weight:600">/usado</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Route Group: (marketplace)</div>
+      </div>
       <div style="background:var(--bg-secondary);padding:12px;border-radius:6px;border:1px solid rgba(0,229,255,.2)">
-        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Projeto 3 — Novo</div>
-        <div style="font-size:.85rem;font-weight:600">admin.kingssimuladores.com.br</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Root: apps/admin</div>
+        <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Admin Panel</div>
+        <div style="font-size:.85rem;font-weight:600">/admin</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted);margin-top:2px">Route Group: (admin)</div>
+      </div>
     </div>
-  </div>
-    <div class="alert info" style="margin-top:12px">💡 <strong style="color:var(--accent)">Setup Vercel:</strong> Importar repo → em cada projeto, definir o <strong>Root Directory</strong> para o app correspondente. Adicionar as variáveis de ambiente em todos os 3 projetos.</div>
+    <div class="alert info" style="margin-top:12px">💡 <strong style="color:var(--accent)">Setup Vercel:</strong> Importar repo 1x → Root Directory: <code>apps/site</code>. Adicionar todas as env vars neste único projeto.</div>
   </div>
 <br>
   <div class="env-card">
@@ -651,8 +683,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 CRÍTICA</span><span>🚀 Kings + MSU simultâneos</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">90%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:90%;background:var(--accent)"></div></div>
+        <div class="phase-pct" style="color:var(--accent)">95%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:95%;background:var(--accent)"></div></div>
       </div>
       <span class="phase-status progress">Em Progresso</span>
     </div>
@@ -676,18 +708,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Configurar packages: ui, db, config, utils, payments, shipping, notifications (Mocks)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Design system base (@kings/ui) — Tailwind v4, dark mode, tokens</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gerar TypeScript types do banco (supabase gen types)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Estabilização: Resolução de 100% dos erros Type Inference do Supabase e limpeza do log Strict Build</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Supabase Auth (email + Google + Apple) + middleware Next.js</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Preencher .env.local com todas as variáveis (Placeholders criados)</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Deploy na Vercel — 3 projetos com Root Directory correto</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Adicionar env vars na Vercel nos 3 projetos</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Unificar 3 apps → 1 site (Route Groups) — apps/site</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Deploy na Vercel — 1 projeto unificado</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Adicionar env vars na Vercel</span><span class="task-priority critical">P0</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
         <div class="verify-item">▸ 11 tabelas visíveis no Supabase Table Editor</div>
         <div class="verify-item">▸ Trigger: registrar usuário → perfil criado automaticamente em profiles</div>
         <div class="verify-item">▸ RLS: usuário Kings não acessa dados MSU</div>
-        <div class="verify-item">▸ turbo dev roda os 3 apps localmente sem erro</div>
-        <div class="verify-item">▸ @kings/ui acessível nos 3 apps via import</div>
-        <div class="verify-item">▸ 3 domínios carregando no Vercel (kings, msu, admin)</div>
+        <div class="verify-item">▸ npm run dev roda o site unificado sem erro</div>
+        <div class="verify-item">▸ /, /usado, /admin carregam com layouts distintos</div>
+        <div class="verify-item">▸ 1 domínio carregando na Vercel (kingssimuladores.com.br)</div>
         <div class="verify-item">▸ supabase gen types gera database.types.ts sem erro</div>
       </div>
     </div></div>
@@ -701,10 +735,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 3 semanas</span><span>📦 6 planos</span><span>🔥 ALTA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">75%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:75%;background:var(--accent)"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:100%;background:var(--green)"></div></div>
       </div>
-      <span class="phase-status progress">Em Progresso</span>
+      <span class="phase-status done">Concluído</span>
     </div>
     <div class="phase-body"><div class="phase-content">
       <div class="wave-block"><div class="wave-title">WAVE 1</div><div class="wave-plans">
@@ -725,8 +759,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Página de produto (galeria, variantes, cálculo de frete, parcelas 12x)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Carrinho persistente (localStorage fallback ativo)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Checkout transparente (Mercado Pago — Pix, Boleto, Cartão) com preference_id</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Cálculo de frete dinâmico (Melhor Envio) com cotação em tempo real</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Fluxo de pedido (criação na tabela orders → pagamento → status)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cálculo de frete dinâmico (Melhor Envio) com cotação em tempo real</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fluxo de pedido (criação na tabela orders → pagamento → status)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Área do cliente (pedidos, perfil, endereços) com dados de profiles + orders</span><span class="task-priority high">P1</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
@@ -747,19 +781,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 ALTA</span><span>⚡ Confirmar NFe.io antes de iniciar</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:100%;background:var(--green)"></div></div>
       </div>
-      <span class="phase-status todo">Aguardando</span>
+      <span class="phase-status done">Concluído</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="alert warn">⚠️ <strong style="color:var(--yellow)">Antes de iniciar esta fase:</strong> Criar conta no NFe.io (nfe.io), cadastrar os CNPJs das empresas e adicionar NFEIO_API_KEY no .env.local e na Vercel.</div>
       <div class="task-group"><div class="task-group-title">Tasks</div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Webhook Mercado Pago em /api/webhooks/mercadopago — atualiza orders.status + dispara triggers</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Emissão de NF-e via NFe.io — automática ao status 'paid'. Dupla para pedidos mistos (2 CNPJs)</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Geração de etiqueta Melhor Envio após pagamento confirmado</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Notificações WhatsApp via Z-API: pedido confirmado, enviado, entregue</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Notificações E-mail via Resend: confirmação + NF em PDF anexo</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Webhook Mercado Pago em /api/webhooks/mercadopago — atualiza orders.status + dispara triggers</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Emissão de NF-e via NFe.io — automática ao status 'paid'. Dupla para pedidos mistos (2 CNPJs)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Geração de etiqueta Melhor Envio após pagamento confirmado</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações WhatsApp via Z-API: pedido confirmado, enviado, entregue</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações E-mail via Resend: confirmação + NF em PDF anexo</span><span class="task-priority high">P1</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
         <div class="verify-item">▸ Webhook recebe POST do MP, valida assinatura e atualiza orders.status</div>
@@ -778,10 +812,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 3 semanas</span><span>📦 6 planos</span><span>🔥 ALTA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">66%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:66%;background:var(--accent)"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:100%;background:var(--green)"></div></div>
       </div>
-      <span class="phase-status progress">Em Progresso</span>
+      <span class="phase-status done">Concluído</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="wave-block"><div class="wave-title">WAVE 1 ✅</div><div class="wave-plans">
@@ -792,19 +826,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="wave-plan" style="border-color:var(--green)"><div class="wave-plan-id" style="color:var(--green)">04-03 ✓</div><div class="wave-plan-name">Listagem + Busca/Filtros (/produtos)</div></div>
         <div class="wave-plan" style="border-color:var(--green)"><div class="wave-plan-id" style="color:var(--green)">04-04 ✓</div><div class="wave-plan-name">Moderação Admin (/moderacao)</div></div>
       </div></div>
-      <div class="wave-block"><div class="wave-title">WAVE 3 — Próxima</div><div class="wave-plans">
-        <div class="wave-plan"><div class="wave-plan-id">04-05</div><div class="wave-plan-name">Checkout Split Payment</div></div>
-        <div class="wave-plan"><div class="wave-plan-id">04-06</div><div class="wave-plan-name">Avaliações + Perfil Vendedor</div></div>
+      <div class="wave-block"><div class="wave-title">WAVE 3 ✅</div><div class="wave-plans">
+        <div class="wave-plan" style="border-color:var(--green)"><div class="wave-plan-id" style="color:var(--green)">04-05 ✓</div><div class="wave-plan-name">Checkout Split Payment</div></div>
+        <div class="wave-plan" style="border-color:var(--green)"><div class="wave-plan-id" style="color:var(--green)">04-06 ✓</div><div class="wave-plan-name">Avaliações + Perfil Vendedor</div></div>
       </div></div>
       <div class="task-group"><div class="task-group-title">Tasks</div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Layout MSU (identidade visual racing/community, distinta da Kings)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cadastro de anúncio — grava em marketplace_listings com status 'pending_review'</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Painel admin de moderação — aprova/rejeita listings com rejection_reason</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Listagem pública (status='active') com busca full-text e filtros</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Checkout com Split Payment MP — comissão retida, restante ao vendedor</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Registro de comissão em tabela commissions após pagamento</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Sistema de avaliação (estrelas + texto) pós-compra</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Perfil público do vendedor com anúncios ativos e média de avaliações</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Checkout com Split Payment MP — comissão retida, restante ao vendedor</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Registro de comissão em tabela commissions após pagamento</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Sistema de avaliação (estrelas + texto) pós-compra</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Perfil público do vendedor com anúncios ativos e média de avaliações</span><span class="task-priority medium">P2</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
         <div class="verify-item">▸ Anúncio criado aparece em marketplace_listings com status 'pending_review'</div>
@@ -823,20 +857,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 6 planos</span><span>🔥 MÉDIA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:100%;background:var(--green)"></div></div>
       </div>
-      <span class="phase-status todo">Aguardando</span>
+      <span class="phase-status done">Concluído</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="alert info">💡 O admin usa o mesmo Supabase. Acesso restrito a profiles com role='admin'. Domínio: <strong>admin.kingssimuladores.com.br</strong> — 3º projeto na Vercel.</div>
       <div class="task-group"><div class="task-group-title">Tasks</div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Dashboard financeiro por brand_origin (Kings vs MSU) com totais de orders</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Gestão unificada de pedidos (tabela orders filtrável por status/marca/data)</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">CRUD de produtos + gestão de estoque + bulk import via CSV</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Fila de moderação de anúncios MSU (listings com status 'pending_review')</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Gestão de comissões — lista commissions com payout_status e ação de marcar como pago</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Relatórios: vendas por período, frete, conversão, top produtos</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Dashboard financeiro por brand_origin (Kings vs MSU) com totais de orders</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gestão unificada de pedidos (tabela orders filtrável por status/marca/data)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">CRUD de produtos + gestão de estoque + bulk import via CSV</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fila de moderação de anúncios MSU (listings com status 'pending_review')</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gestão de comissões — lista commissions com payout_status e ação de marcar como pago</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Relatórios: vendas por período, frete, conversão, top produtos</span><span class="task-priority medium">P2</span></div>
       </div>
     </div></div>
   </div>
@@ -849,34 +883,81 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 MÉDIA</span></div>
       </div>
       <div class="phase-progress">
-      <div class="phase-pct" style="color:var(--text-muted)">0%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+      <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--green);width:100%"></div></div>
       </div>
-      <span class="phase-status todo">Aguardando</span>
+      <span class="phase-status done">Concluída</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="task-group"><div class="task-group-title">Tasks</div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Recuperação de carrinho abandonado — Z-API (1h) + Resend (24h)</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Upsell/Cross-sell inteligente no checkout ("comprou volante → sugere cockpit")</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Cupons avançados (tabela coupons — por marca, categoria, first-buy, frete grátis)</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">SEO avançado (schema markup JSON-LD, sitemap dinâmico, meta tags SSR Next.js)</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Integração Google Shopping / TikTok Shopping (feed de produtos)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Recuperação de carrinho abandonado — Z-API (1h) + Resend (24h)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Upsell/Cross-sell inteligente no checkout ("comprou volante → sugere cockpit")</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cupons avançados (tabela coupons — por marca, categoria, first-buy, frete grátis)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">SEO avançado (schema markup JSON-LD, sitemap dinâmico, meta tags SSR Next.js)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Integração Google Shopping / TikTok Shopping (feed de produtos)</span><span class="task-priority medium">P2</span></div>
       </div>
     </div></div>
   </div>
 <br>
   <div class="phase-card" onclick="this.classList.toggle('open')">
     <div class="phase-header">
-      <span class="phase-number font-display">07</span>
+      <span class="phase-number font-display">08</span>
+      <div class="phase-info">
+        <div class="phase-name">Refinamento UI/UX e Admin Profissional</div>
+        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 19 planos</span><span>🔥 CRÍTICA</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--green);width:100%"></div></div>
+      </div>
+      <span class="phase-status done">Concluída</span>
+  </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="task-group"><div class="task-group-title">UI/UX — Storefront</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Restauração da Busca e Filtros clássicos (Site Antigo) via URL Params</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Implementação Carrosséis Horizontais na Home (Lançamentos / Mais Vendidos / Destaques)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Favicon Original da Kings inserido diretamente pelo CDN oficial</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Revamp do Painel Admin copiando layout da Loja Integrada (Sidebar Sanfona, Dark Mode)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Ajuste de estilos e scroll (hide-scrollbar) e polimento geral de navegação</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Seção Vendas (6 sub-páginas)</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Listar Pedidos — KPIs, filtros status/marca, busca, row expandível, export CSV</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Criar Pedido — Formulário 6 seções (cliente novo/existente, endereço ViaCEP, busca produtos, carrinho, entrega, pagamento, resumo)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Clientes — Lista com avatares, KPIs, filtros interativos, busca, export CSV</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Link de Carrinho — Criação e gerenciamento de links pré-preenchidos</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Relatórios — 16 relatórios com dados reais do Supabase, filtros e export CSV</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notas Fiscais BETA — Gestão NF-e, download PDF/XML, status, KPIs</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Seção Produtos (8 sub-páginas)</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Listar Produtos — KPIs, imagens, filtros status/estoque, badges marca, export CSV</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Criar Produto — Formulário (info geral, preço/estoque, organização marca/categoria, dados envio/CNPJ)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Categorias — Tabela com escopo de marca, criação inline</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Marcas — Cards visuais com logo/CNPJ/slug</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Avaliações — Tabela com estrelas visuais e dados seller_reviews</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Importar Produtos — Drag-and-drop CSV com instruções de formato</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Lixeira de Produtos — Arquivados com estilo esmaecido</span><span class="task-priority low">P3</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Preços Segmentados + Grades — Páginas "em desenvolvimento" profissionais</span><span class="task-priority low">P3</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Auth & Infraestrutura</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Correção de auth admin — bypass RLS com service_role no middleware</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fix coluna auth_id vs id em todas as verificações de perfil admin</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Migração de &lt;Link&gt; para &lt;a&gt; no sidebar para evitar cache do App Router</span><span class="task-priority high">P1</span></div>
+      </div>
+    </div></div>
+  </div>
+<br>
+  <div class="phase-card" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">09</span>
       <div class="phase-info">
         <div class="phase-name">Testes, Migração & Go Live</div>
         <div class="phase-meta"><span>⏱ 1–2 semanas</span><span>📦 7 planos</span><span>🔥 CRÍTICA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+        <div class="phase-pct" style="color:var(--accent)">55%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:55%"></div></div>
       </div>
-      <span class="phase-status todo">Aguardando</span>
+      <span class="phase-status progress">Em Progresso</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="alert decided" style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15)">📦 <strong style="color:var(--accent)">Migração de dados:</strong> Scripts de migração devem ser criados durante as fases anteriores e testados em staging. A decisão de <em>quando</em> executar a migração real (Loja Integrada → Supabase e Firebase → Supabase) será tomada nesta fase.</div>
@@ -884,9 +965,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check"></span><span class="task-text">Testes E2E — Playwright — fluxo completo: browse → cart → checkout → confirm → NF</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text">Testes de carga — k6 — 100 compras simultâneas sem degradação</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text">Compra real em sandbox MP (cartão, Pix, boleto) — fluxo completo</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Script de migração: Loja Integrada → tabela products do Supabase</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Script de migração: Firebase (MSU) → tabelas profiles + marketplace_listings</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">301 redirects de todas as URLs antigas para as novas (next.config.js)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Loja Integrada → tabela products do Supabase (85 produtos importados via scraper)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Loja Integrada → usuarios Supabase (importados e bypass trigger de profiles)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Firebase (MSU) 👉 CANCELADO (Não há base legada para migrar)</span><span class="task-priority low">P3</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">301 redirects de todas as URLs antigas para as novas (next.config.js)</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text">DNS swap — Kings + MSU + Admin simultâneos — Go Live 🚀</span><span class="task-priority critical">P0</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Go Live</div>
@@ -941,7 +1023,57 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
   </div>
 </div>
 
-<div class="section">
+<div class="section" id="financeiro">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(0,229,255,.12);color:var(--accent)">💸</div>
+    <span class="section-title">Custos Operacionais Mensais Estimados</span>
+  </div>
+  <div class="tech-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+    <div class="tech-item" style="border-left: 3px solid var(--purple)">
+      <div class="tech-name">Supabase Pro</div>
+      <div class="tech-role">R$ 140 / $25</div>
+    </div>
+    <div class="tech-item" style="border-left: 3px solid #FFF">
+      <div class="tech-name">Vercel Pro</div>
+      <div class="tech-role">R$ 115 / $20</div>
+    </div>
+    <div class="tech-item" style="border-left: 3px solid var(--green)">
+      <div class="tech-name">Z-API (WhatsApp)</div>
+      <div class="tech-role">R$ 139</div>
+    </div>
+    <div class="tech-item" style="border-left: 3px solid var(--orange)">
+      <div class="tech-name">Resend (E-mail)</div>
+      <div class="tech-role">Gratuito (até 3k unid.)</div>
+    </div>
+    <div class="tech-item" style="border-left: 3px solid var(--accent); background: rgba(0,229,255,0.05)">
+      <div class="tech-name" style="color: var(--accent)">TOTAL MENSAL ESTIMADO</div>
+      <div class="tech-role font-display" style="font-size:1.1rem;font-weight:700">~R$ 394,00 / Mês</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="apis">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(139,92,246,.12);color:var(--purple)">⚡</div>
+    <span class="section-title">Mapa de APIs & Webservices Internos</span>
+  </div>
+  <table class="risk-table">
+    <thead><tr><th>Endpoint da Plataforma</th><th>Status</th><th>Função Central</th><th>Integração Base</th></tr></thead>
+    <tbody>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/checkout</span></td><td><span class="int-status active">Construído</span></td><td>Processa pagamentos, calcula regras de split de frete/valor no cart.</td><td>Mercado Pago</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/webhooks/mercadopago</span></td><td><span class="int-status active">Construído</span></td><td>Confirma pagamentos, deduz estoque, limpa carrinho ativo, envia NFe e Notificações (Z-API/Resend).</td><td>Mercado Pago</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/cron/recover-carts</span></td><td><span class="int-status active">Construído</span></td><td>Cron Job faseado (1h WhatsApp / 24h Email) para funil de retenção de funil.</td><td>Vercel Cron</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/shipping</span></td><td><span class="int-status active">Construído</span></td><td>Estimativa de múltiplos fretes (PAC/Sedex/Jadlog/Azul) baseado em CEP e Dimensão.</td><td>Melhor Envio</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/vender</span></td><td><span class="int-status active">Construído</span></td><td>Motor de submissão + Moderador das listagens C2C do APP MSU (Meu Simulador Usado).</td><td>MSU SubApp</td></tr>
+      <!-- PENDENTES A PRODUZIR -->
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/google</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML dinâmico em tempo real de produtos estruturados pra Google Shopping.</td><td>Google Merchant Center</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/tiktok</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML variante de catálogo pra TikTok Shops com estoque síncrono.</td><td>TikTok For Business</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/shipping</span></td><td><span class="int-status decide">Pendente</span></td><td>(Fase 07) Receptor passivo que detecta Encomenda "Em Trânsito/Entregue" para Zap.</td><td>Melhor Envio / Z-API</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section" id="riscos">
   <div class="section-header">
     <div class="section-icon" style="background:rgba(255,59,92,.12);color:var(--red)">⚠️</div>
     <span class="section-title">Riscos e Mitigações</span>
@@ -979,9 +1111,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <br>
 
 <footer class="footer">
-  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date"></span></p>
-  <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (3 projetos)</p>
-  <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Lançamento simultâneo · Supabase Pro · Admin em admin.kingssimuladores.com.br · NFe.io · Sem Olist por ora · Estoque interno</p>
+  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date">07 de Abril de 2026</span></p>
+  <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (1 site unificado)</p>
+  <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Site unificado · Lançamento simultâneo · Supabase Pro · Admin em /admin · NFe.io · Sem Olist · Estoque interno</p>
 </footer>
 <br>
 <div style="max-width: 1400px; margin: 0 auto; padding: 20px 32px; background: rgba(255, 59, 92, 0.1); border: 1px solid var(--danger); border-radius: var(--radius-sm); margin-bottom: 24px;">

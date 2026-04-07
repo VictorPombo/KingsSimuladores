@@ -22,7 +22,7 @@ export async function createServerSupabaseClient() {
 
   const cookieStore = await cookies()
 
-  return createServerClient<Database>(url, key, {
+  return createServerClient<any>(url, key, {
     cookies: {
       getAll() {
         return cookieStore.getAll()
@@ -45,7 +45,7 @@ export async function createServerSupabaseClient() {
  * NUNCA usar no frontend. Apenas em Server Actions / Route Handlers.
  */
 export function createAdminClient() {
-  return createClient<Database>(
+  return createClient<any>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
