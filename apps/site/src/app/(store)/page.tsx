@@ -115,17 +115,15 @@ export default async function HomePage() {
               
               return (
                 <Link key={product.id} href={`/produtos/${product.slug}`} style={{ textDecoration: 'none' }}>
-                  <div style={{
+                  <div className="hover:border-[currentColor] hover:-translate-y-1" style={{
+                    color: 'var(--accent)',
                     background: 'var(--bg-card)',
                     border: '1px solid var(--border)',
                     borderRadius: '12px',
                     overflow: 'hidden',
                     transition: 'border-color 0.2s, transform 0.2s',
                     cursor: 'pointer',
-                  }}
-                    onMouseOver={(e: any) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
-                    onMouseOut={(e: any) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                  >
+                  }}>
                     {/* Imagem */}
                     <div style={{ background: '#fff', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '220px' }}>
                       <img src={imgUrl} alt={product.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />

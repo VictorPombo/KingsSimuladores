@@ -1,20 +1,64 @@
-'use client'
+import { Container, Badge } from '@kings/ui'
+import { createServerSupabaseClient } from '@kings/db'
+import { formatPrice } from '@kings/utils'
+import Link from 'next/link'
+import { Suspense } from 'react'
 
-import { Container, ProductCard, Badge } from '@kings/ui'
-import { useCart } from '@/contexts/CartContext'
+import { CatalogFilters } from './CatalogFilters'
 
-// Mock de dados para mostrar no catálogo
-const MOCK_PRODUCTS = [
-  { id: '1', title: 'Cockpit P1 PRO Extreme', price: 4599.90, imageUrl: 'https://placehold.co/400x400/131928/e8ecf4?text=Cockpit+P1', brand: 'XTREME RACING', isNew: true, discount: 5 },
-  { id: '2', title: 'Volante Fanatec DD Pro', price: 7999.00, imageUrl: 'https://placehold.co/400x400/131928/e8ecf4?text=Fanatec+DD', brand: 'FANATEC', installments: 10 },
-  { id: '3', title: 'Pedais Load Cell V3', price: 3499.00, imageUrl: 'https://placehold.co/400x400/131928/e8ecf4?text=Pedais+V3', brand: 'FANATEC' },
-  { id: '4', title: 'Base Moza R9 Direct Drive', price: 5499.00, imageUrl: 'https://placehold.co/400x400/131928/e8ecf4?text=Moza+R9', brand: 'MOZA RACING', isNew: true },
-  { id: '5', title: 'Câmbio H-Shifter TH8A', price: 1899.90, imageUrl: 'https://placehold.co/400x400/131928/e8ecf4?text=TH8A', brand: 'THRUSTMASTER', discount: 10 },
-  { id: '6', title: 'Cockpit SXT V2', price: 2199.00, imageUrl: 'https://placehold.co/400x400/131928/e8ecf4?text=Cockpit+SXT', brand: 'XTREME RACING' },
-]
+export const revalidate = 0 // Muda provisoriamente para 0 (dinâmico) para filtros funcionarem localmente e em prod sem atraso
 
-export default function ProductsPage() {
-  const { addItem, setIsOpen } = useCart()
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
+  let products: any[] = []
+  
+  const category = typeof searchParams.category === 'string' ? searchParams.category : null
+  const brand = typeof searchParams.brand === 'string' ? searchParams.brand : null
+  
+  try {
+    const supabase = await createServerSupabaseClient()
+    let query = supabase
+      .from('products')
+      .select('id, title, slug, price, price_compare, images, attributes, stock')
+      .eq('status', 'active')
+      
+    if (category) {
+      const map: Record<string, string> = {
+        cockpits: 'cockpit',
+        volantes: 'volante', // vai pegar volante, fanatec dd
+        pedais: 'pedal', // pedal, pedais
+        acessorios: 'acessorio'
+      }
+      const term = map[category] || category
+      
+      // Ajuste para plural/singular basico
+      if (term === 'pedal') {
+        query = query.or('title.ilike.%pedal%,title.ilike.%pedais%')
+      } else if (term === 'volante') {
+        query = query.or('title.ilike.%volante%,title.ilike.%base%')
+      } else {
+        query = query.ilike('title', `%${term}%`)
+      }
+    }
+    
+    if (brand) {
+      const map: Record<string, string> = {
+        xtreme: 'xtreme',
+        fanatec: 'fanatec',
+        moza: 'moza'
+      }
+      const term = map[brand] || brand
+      query = query.ilike('attributes->>brand', `%${term}%`)
+    }
+
+    const { data } = await query.order('created_at', { ascending: false })
+    products = data || []
+  } catch (err) {
+    console.error("Erro buscando produtos:", err)
+  }
 
   return (
     <div style={{ padding: '40px 0', minHeight: 'calc(100vh - 80px)' }}>
@@ -22,61 +66,81 @@ export default function ProductsPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
           <div>
             <h1 className="font-display" style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>CATÁLOGO</h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>Mostrando {MOCK_PRODUCTS.length} produtos encontrados</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>Mostrando {products.length} produtos encontrados</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Badge variant="warning">MOCK DATA</Badge>
+            <Badge variant="success">LIVE DATA</Badge>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(250px, 1fr) 3fr', gap: '32px' }}>
           {/* Sidebar */}
           <aside style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-              <h3 className="font-display" style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>Filtros</h3>
-              
-              <div style={{ marginBottom: '24px' }}>
-                <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Categorias</h4>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <li><label style={{ display: 'flex', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}><input type="checkbox" /> Cockpits</label></li>
-                  <li><label style={{ display: 'flex', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}><input type="checkbox" /> Volantes</label></li>
-                  <li><label style={{ display: 'flex', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}><input type="checkbox" /> Pedais</label></li>
-                  <li><label style={{ display: 'flex', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}><input type="checkbox" /> Acessórios</label></li>
-                </ul>
-              </div>
-
-              <div style={{ marginBottom: '24px' }}>
-                <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Marcas</h4>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <li><label style={{ display: 'flex', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}><input type="checkbox" /> Xtreme Racing</label></li>
-                  <li><label style={{ display: 'flex', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}><input type="checkbox" /> Fanatec</label></li>
-                  <li><label style={{ display: 'flex', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}><input type="checkbox" /> Moza Racing</label></li>
-                </ul>
-              </div>
-            </div>
+            <Suspense fallback={<div style={{ padding: '24px', background: 'var(--bg-card)', borderRadius: 'var(--radius)' }}>Carregando filtros...</div>}>
+              <CatalogFilters />
+            </Suspense>
           </aside>
 
           {/* Product Grid */}
           <main>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '24px' }}>
-              {MOCK_PRODUCTS.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  {...product} 
-                  onClick={() => {
-                    addItem({
-                      id: product.id,
-                      title: product.title,
-                      price: (product.discount ?? 0) > 0 ? product.price * (1 - (product.discount ?? 0) / 100) : product.price,
-                      imageUrl: product.imageUrl,
-                      brand: product.brand,
-                      quantity: 1
-                    })
-                    setIsOpen(true)
-                  }}
-                />
-              ))}
-            </div>
+            {products.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                Nenhum produto encontrado.
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '24px' }}>
+                {products.map(product => {
+                  const hasDiscount = product.price_compare && product.price_compare > product.price
+                  const imgUrl = product.images?.[0] || 'https://placehold.co/400x400/131928/e8ecf4?text=Kings'
+                  const brandName = product.attributes?.brand || 'Kings Simuladores'
+                  
+                  return (
+                    <Link key={product.id} href={`/produtos/${product.slug}`} style={{ textDecoration: 'none' }}>
+                      <div className="hover:border-[currentColor] hover:-translate-y-1" style={{
+                        color: 'var(--accent)', /* Usado para o currentColor do border no hover se o tailwind permitir fallbacks, ou deixamos estático */
+                        background: 'var(--bg-card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        transition: 'border-color 0.2s, transform 0.2s',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: '100%'
+                      }}>
+                        {/* Imagem */}
+                        <div style={{ background: '#fff', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '220px', flexShrink: 0 }}>
+                          <img src={imgUrl} alt={product.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                        </div>
+                        
+                        {/* Info */}
+                        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                          <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                            {brandName}
+                          </div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 'auto', minHeight: '38px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {product.title}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '12px' }}>
+                            {hasDiscount && (
+                              <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                                {formatPrice(product.price_compare)}
+                              </span>
+                            )}
+                            <span className="font-display" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--success)' }}>
+                              {formatPrice(product.price)}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                            12x de {formatPrice(product.price / 12)} sem juros
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
           </main>
         </div>
       </Container>
