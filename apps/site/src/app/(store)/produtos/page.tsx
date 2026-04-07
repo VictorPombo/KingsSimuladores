@@ -17,6 +17,7 @@ export default async function ProductsPage({
   
   const category = typeof searchParams.category === 'string' ? searchParams.category : null
   const brand = typeof searchParams.brand === 'string' ? searchParams.brand : null
+  const q = typeof searchParams.q === 'string' ? searchParams.q : null
   
   try {
     const supabase = await createServerSupabaseClient()
@@ -25,22 +26,34 @@ export default async function ProductsPage({
       .select('id, title, slug, price, price_compare, images, attributes, stock')
       .eq('status', 'active')
       
+    if (q) {
+      // Busca ampla pelo termo da barra de pesquisa
+      query = query.ilike('title', `%${q}%`)
+    }
+
     if (category) {
-      const map: Record<string, string> = {
-        cockpits: 'cockpit',
-        volantes: 'volante', // vai pegar volante, fanatec dd
-        pedais: 'pedal', // pedal, pedais
-        acessorios: 'acessorio'
-      }
-      const term = map[category] || category
+      const term = category.toLowerCase()
       
-      // Ajuste para plural/singular basico
-      if (term === 'pedal') {
+      if (term === 'pedal' || term === 'pedais') {
         query = query.or('title.ilike.%pedal%,title.ilike.%pedais%')
-      } else if (term === 'volante') {
-        query = query.or('title.ilike.%volante%,title.ilike.%base%')
+      } else if (term === 'volante' || term === 'volantes') {
+        query = query.or('title.ilike.%volante%,title.ilike.%arco%')
+      } else if (term === 'base') {
+        query = query.or('title.ilike.%base%,title.ilike.%motor%')
+      } else if (term === 'kit' || term === 'kit-completo') {
+        query = query.or('title.ilike.%kit%,title.ilike.%bundle%')
+      } else if (term === 'cockpit' || term === 'cockpits') {
+        query = query.ilike('title', '%cockpit%')
+      } else if (term === 'pc' || term === 'computador') {
+        query = query.or('title.ilike.%pc%,title.ilike.%windows%,title.ilike.%computador%')
+      } else if (term === 'playstation') {
+        query = query.or('title.ilike.%playstation%,title.ilike.%ps4%,title.ilike.%ps5%')
+      } else if (term === 'xbox') {
+        query = query.ilike('title', '%xbox%')
       } else {
-        query = query.ilike('title', `%${term}%`)
+        // Fallback genérico para remover "s" do final e tentar pegar a raiz da palavra
+        const rootTerm = term.endsWith('s') ? term.slice(0, -1) : term
+        query = query.ilike('title', `%${rootTerm}%`)
       }
     }
     

@@ -12,7 +12,7 @@ export default async function ComissoesAdminPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/admin/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('role').eq('auth_id', user.id).single()
   if (!profile || profile.role !== 'admin') {
     redirect('/admin/unauthorized')
   }

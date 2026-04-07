@@ -272,9 +272,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     </div>
 
     <div class="header-right">
-      <div class="header-stat"><div class="header-stat-value">7</div><div class="header-stat-label">Fases</div></div>
-      <div class="header-stat"><div class="header-stat-value">52</div><div class="header-stat-label">Tasks</div></div>
-      <div class="header-stat"><div class="header-stat-value">~12</div><div class="header-stat-label">Semanas restantes</div></div>
+      <div class="header-stat"><div class="header-stat-value">8</div><div class="header-stat-label">Fases</div></div>
+      <div class="header-stat"><div class="header-stat-value">72</div><div class="header-stat-label">Tasks</div></div>
+      <div class="header-stat"><div class="header-stat-value">~10</div><div class="header-stat-label">Semanas restantes</div></div>
       <div class="header-stat"><div class="header-stat-value">Pro</div><div class="header-stat-label">Supabase</div></div>
     </div>
   </div>
@@ -295,15 +295,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <div class="global-progress">
   <div class="global-progress-header">
     <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
-    <span class="global-progress-pct font-display">88%</span>
+    <span class="global-progress-pct font-display">93%</span>
   </div>
   <div class="progress-bar-track">
-      <div class="progress-bar-fill accent" style="width:88%"></div></div>
+      <div class="progress-bar-fill accent" style="width:93%"></div></div>
   </div>
   <div class="progress-stats">
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 38 concluídas</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 2 em progresso</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 12 pendentes</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 50 concluídas</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 1 em progresso</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 5 pendentes</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--red)"></span> 0 bloqueadas</div>
   </div>
 </div>
@@ -901,14 +901,61 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <br>
   <div class="phase-card" onclick="this.classList.toggle('open')">
     <div class="phase-header">
-      <span class="phase-number font-display">07</span>
+      <span class="phase-number font-display">08</span>
+      <div class="phase-info">
+        <div class="phase-name">Refinamento UI/UX e Admin Profissional</div>
+        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 19 planos</span><span>🔥 CRÍTICA</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--green);width:100%"></div></div>
+      </div>
+      <span class="phase-status done">Concluída</span>
+  </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="task-group"><div class="task-group-title">UI/UX — Storefront</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Restauração da Busca e Filtros clássicos (Site Antigo) via URL Params</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Implementação Carrosséis Horizontais na Home (Lançamentos / Mais Vendidos / Destaques)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Favicon Original da Kings inserido diretamente pelo CDN oficial</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Revamp do Painel Admin copiando layout da Loja Integrada (Sidebar Sanfona, Dark Mode)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Ajuste de estilos e scroll (hide-scrollbar) e polimento geral de navegação</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Seção Vendas (6 sub-páginas)</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Listar Pedidos — KPIs, filtros status/marca, busca, row expandível, export CSV</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Criar Pedido — Formulário 6 seções (cliente novo/existente, endereço ViaCEP, busca produtos, carrinho, entrega, pagamento, resumo)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Clientes — Lista com avatares, KPIs, filtros interativos, busca, export CSV</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Link de Carrinho — Criação e gerenciamento de links pré-preenchidos</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Relatórios — 16 relatórios com dados reais do Supabase, filtros e export CSV</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notas Fiscais BETA — Gestão NF-e, download PDF/XML, status, KPIs</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Seção Produtos (8 sub-páginas)</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Listar Produtos — KPIs, imagens, filtros status/estoque, badges marca, export CSV</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Criar Produto — Formulário (info geral, preço/estoque, organização marca/categoria, dados envio/CNPJ)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Categorias — Tabela com escopo de marca, criação inline</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Marcas — Cards visuais com logo/CNPJ/slug</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Avaliações — Tabela com estrelas visuais e dados seller_reviews</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Importar Produtos — Drag-and-drop CSV com instruções de formato</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Lixeira de Produtos — Arquivados com estilo esmaecido</span><span class="task-priority low">P3</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Preços Segmentados + Grades — Páginas "em desenvolvimento" profissionais</span><span class="task-priority low">P3</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Auth & Infraestrutura</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Correção de auth admin — bypass RLS com service_role no middleware</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fix coluna auth_id vs id em todas as verificações de perfil admin</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Migração de &lt;Link&gt; para &lt;a&gt; no sidebar para evitar cache do App Router</span><span class="task-priority high">P1</span></div>
+      </div>
+    </div></div>
+  </div>
+<br>
+  <div class="phase-card" onclick="this.classList.toggle('open')">
+    <div class="phase-header">
+      <span class="phase-number font-display">09</span>
       <div class="phase-info">
         <div class="phase-name">Testes, Migração & Go Live</div>
         <div class="phase-meta"><span>⏱ 1–2 semanas</span><span>📦 7 planos</span><span>🔥 CRÍTICA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">45%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:45%"></div></div>
+        <div class="phase-pct" style="color:var(--accent)">55%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:55%"></div></div>
       </div>
       <span class="phase-status progress">Em Progresso</span>
   </div>
@@ -1064,7 +1111,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <br>
 
 <footer class="footer">
-  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date">06 de Abril de 2026</span></p>
+  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date">07 de Abril de 2026</span></p>
   <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (1 site unificado)</p>
   <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Site unificado · Lançamento simultâneo · Supabase Pro · Admin em /admin · NFe.io · Sem Olist · Estoque interno</p>
 </footer>

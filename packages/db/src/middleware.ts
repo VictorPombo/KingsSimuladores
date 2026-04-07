@@ -33,6 +33,11 @@ export async function updateSession(request: NextRequest) {
         )
       },
     },
+    global: {
+      fetch: (url: any, options: any) => {
+        return fetch(url, { ...options, cache: 'no-store' } as any)
+      }
+    }
   })
 
   // Refresh session — important for Server Components
@@ -70,8 +75,14 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
-    // Buscar profile para checar role
-    const { data: profile } = await supabase
+    // Usar SERVICE_ROLE para garantir a busca ignorando qualquer bug de RLS ou JWT no Edge
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    const serviceClient = createServerClient<any>(url, serviceKey, {
+      cookies: { getAll() { return [] }, setAll() {} },
+      global: { fetch: (url: any, options: any) => fetch(url, { ...options, cache: 'no-store'} as any) }
+    })
+
+    const { data: profile, error: profileError } = await serviceClient
       .from('profiles')
       .select('*')
       .eq('auth_id', user.id)
@@ -80,6 +91,9 @@ export async function updateSession(request: NextRequest) {
     if (!profile || profile.role !== 'admin') {
       const redirectUrl = request.nextUrl.clone()
       redirectUrl.pathname = '/admin/unauthorized'
+      if (profileError) {
+        redirectUrl.searchParams.set('err', profileError.message)
+      }
       return NextResponse.redirect(redirectUrl)
     }
   }

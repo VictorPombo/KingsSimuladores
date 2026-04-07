@@ -13,9 +13,11 @@ export function Footer() {
       <Container>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px', marginBottom: '32px' }}>
           <div>
-            <h3 className="font-display" style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '1.2rem', fontWeight: 800 }}>
-              KINGS SIMULADORES
-            </h3>
+            <img 
+              src="https://cdn.awsli.com.br/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png" 
+              alt="Kings Simuladores" 
+              style={{ height: '65px', display: 'block', objectFit: 'contain', marginBottom: '16px' }}
+            />
             <p style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>
               A melhor e maior loja de simuladores de corrida do Brasil. Tudo para o seu cockpit.
             </p>

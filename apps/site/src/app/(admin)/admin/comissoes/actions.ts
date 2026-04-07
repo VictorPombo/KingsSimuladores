@@ -10,7 +10,7 @@ export async function markCommissionPaid(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/admin/login')
   
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('role').eq('auth_id', user.id).single()
   if (!profile || profile.role !== 'admin') {
     return
   }

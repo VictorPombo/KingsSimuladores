@@ -2,6 +2,7 @@ import { updateSession } from '@kings/db'
 import { type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Force rebuild of middleware in dev
   return await updateSession(request)
 }
 

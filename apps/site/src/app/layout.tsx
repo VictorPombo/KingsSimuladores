@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     siteName: 'Kings Simuladores',
     type: 'website',
   },
+  icons: {
+    icon: 'https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png',
+    shortcut: 'https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png',
+    apple: 'https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png',
+  },
 }
 
 import { StreamingBackground } from '@kings/ui'
