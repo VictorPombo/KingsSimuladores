@@ -273,7 +273,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 
     <div class="header-right">
       <div class="header-stat"><div class="header-stat-value">7</div><div class="header-stat-label">Fases</div></div>
-      <div class="header-stat"><div class="header-stat-value">51</div><div class="header-stat-label">Tasks</div></div>
+      <div class="header-stat"><div class="header-stat-value">52</div><div class="header-stat-label">Tasks</div></div>
       <div class="header-stat"><div class="header-stat-value">~12</div><div class="header-stat-label">Semanas restantes</div></div>
       <div class="header-stat"><div class="header-stat-value">Pro</div><div class="header-stat-label">Supabase</div></div>
     </div>
@@ -293,15 +293,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <div class="global-progress">
   <div class="global-progress-header">
     <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
-    <span class="global-progress-pct font-display">40%</span>
+    <span class="global-progress-pct font-display">75%</span>
   </div>
   <div class="progress-bar-track">
-      <div class="progress-fill" style="width:40%">40%</div>
+      <div class="progress-bar-fill accent" style="width:75%"></div>
   </div>
   <div class="progress-stats">
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 20 concluídas</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 38 concluídas</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 2 em progresso</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 29 pendentes</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 12 pendentes</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--red)"></span> 0 bloqueadas</div>
   </div>
 </div>
@@ -691,6 +691,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Configurar packages: ui, db, config, utils, payments, shipping, notifications (Mocks)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Design system base (@kings/ui) — Tailwind v4, dark mode, tokens</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gerar TypeScript types do banco (supabase gen types)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Estabilização: Resolução de 100% dos erros Type Inference do Supabase e limpeza do log Strict Build</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Supabase Auth (email + Google + Apple) + middleware Next.js</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Preencher .env.local com todas as variáveis (Placeholders criados)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Unificar 3 apps → 1 site (Route Groups) — apps/site</span><span class="task-priority critical">P0</span></div>
@@ -717,10 +718,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 3 semanas</span><span>📦 6 planos</span><span>🔥 ALTA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">85%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:85%;background:var(--accent)"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:100%;background:var(--green)"></div></div>
       </div>
-      <span class="phase-status progress">Em Progresso</span>
+      <span class="phase-status done">Concluído</span>
     </div>
     <div class="phase-body"><div class="phase-content">
       <div class="wave-block"><div class="wave-title">WAVE 1</div><div class="wave-plans">
@@ -741,7 +742,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Página de produto (galeria, variantes, cálculo de frete, parcelas 12x)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Carrinho persistente (localStorage fallback ativo)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Checkout transparente (Mercado Pago — Pix, Boleto, Cartão) com preference_id</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Cálculo de frete dinâmico (Melhor Envio) com cotação em tempo real</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cálculo de frete dinâmico (Melhor Envio) com cotação em tempo real</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fluxo de pedido (criação na tabela orders → pagamento → status)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Área do cliente (pedidos, perfil, endereços) com dados de profiles + orders</span><span class="task-priority high">P1</span></div>
       </div>
@@ -763,19 +764,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 ALTA</span><span>⚡ Confirmar NFe.io antes de iniciar</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:100%;background:var(--green)"></div></div>
       </div>
-      <span class="phase-status todo">Aguardando</span>
+      <span class="phase-status done">Concluído</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="alert warn">⚠️ <strong style="color:var(--yellow)">Antes de iniciar esta fase:</strong> Criar conta no NFe.io (nfe.io), cadastrar os CNPJs das empresas e adicionar NFEIO_API_KEY no .env.local e na Vercel.</div>
       <div class="task-group"><div class="task-group-title">Tasks</div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Webhook Mercado Pago em /api/webhooks/mercadopago — atualiza orders.status + dispara triggers</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Emissão de NF-e via NFe.io — automática ao status 'paid'. Dupla para pedidos mistos (2 CNPJs)</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Geração de etiqueta Melhor Envio após pagamento confirmado</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Notificações WhatsApp via Z-API: pedido confirmado, enviado, entregue</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Notificações E-mail via Resend: confirmação + NF em PDF anexo</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Webhook Mercado Pago em /api/webhooks/mercadopago — atualiza orders.status + dispara triggers</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Emissão de NF-e via NFe.io — automática ao status 'paid'. Dupla para pedidos mistos (2 CNPJs)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Geração de etiqueta Melhor Envio após pagamento confirmado</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações WhatsApp via Z-API: pedido confirmado, enviado, entregue</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações E-mail via Resend: confirmação + NF em PDF anexo</span><span class="task-priority high">P1</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
         <div class="verify-item">▸ Webhook recebe POST do MP, valida assinatura e atualiza orders.status</div>
@@ -794,10 +795,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 3 semanas</span><span>📦 6 planos</span><span>🔥 ALTA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">66%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:66%;background:var(--accent)"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:100%;background:var(--green)"></div></div>
       </div>
-      <span class="phase-status progress">Em Progresso</span>
+      <span class="phase-status done">Concluído</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="wave-block"><div class="wave-title">WAVE 1 ✅</div><div class="wave-plans">
@@ -808,19 +809,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="wave-plan" style="border-color:var(--green)"><div class="wave-plan-id" style="color:var(--green)">04-03 ✓</div><div class="wave-plan-name">Listagem + Busca/Filtros (/produtos)</div></div>
         <div class="wave-plan" style="border-color:var(--green)"><div class="wave-plan-id" style="color:var(--green)">04-04 ✓</div><div class="wave-plan-name">Moderação Admin (/moderacao)</div></div>
       </div></div>
-      <div class="wave-block"><div class="wave-title">WAVE 3 — Próxima</div><div class="wave-plans">
-        <div class="wave-plan"><div class="wave-plan-id">04-05</div><div class="wave-plan-name">Checkout Split Payment</div></div>
-        <div class="wave-plan"><div class="wave-plan-id">04-06</div><div class="wave-plan-name">Avaliações + Perfil Vendedor</div></div>
+      <div class="wave-block"><div class="wave-title">WAVE 3 ✅</div><div class="wave-plans">
+        <div class="wave-plan" style="border-color:var(--green)"><div class="wave-plan-id" style="color:var(--green)">04-05 ✓</div><div class="wave-plan-name">Checkout Split Payment</div></div>
+        <div class="wave-plan" style="border-color:var(--green)"><div class="wave-plan-id" style="color:var(--green)">04-06 ✓</div><div class="wave-plan-name">Avaliações + Perfil Vendedor</div></div>
       </div></div>
       <div class="task-group"><div class="task-group-title">Tasks</div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Layout MSU (identidade visual racing/community, distinta da Kings)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cadastro de anúncio — grava em marketplace_listings com status 'pending_review'</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Painel admin de moderação — aprova/rejeita listings com rejection_reason</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Listagem pública (status='active') com busca full-text e filtros</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Checkout com Split Payment MP — comissão retida, restante ao vendedor</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Registro de comissão em tabela commissions após pagamento</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Sistema de avaliação (estrelas + texto) pós-compra</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Perfil público do vendedor com anúncios ativos e média de avaliações</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Checkout com Split Payment MP — comissão retida, restante ao vendedor</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Registro de comissão em tabela commissions após pagamento</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Sistema de avaliação (estrelas + texto) pós-compra</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Perfil público do vendedor com anúncios ativos e média de avaliações</span><span class="task-priority medium">P2</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
         <div class="verify-item">▸ Anúncio criado aparece em marketplace_listings com status 'pending_review'</div>
@@ -839,20 +840,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 6 planos</span><span>🔥 MÉDIA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--text-muted)">0%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:100%;background:var(--green)"></div></div>
       </div>
-      <span class="phase-status todo">Aguardando</span>
+      <span class="phase-status done">Concluído</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="alert info">💡 O admin usa o mesmo Supabase. Acesso restrito a profiles com role='admin'. Domínio: <strong>admin.kingssimuladores.com.br</strong> — 3º projeto na Vercel.</div>
       <div class="task-group"><div class="task-group-title">Tasks</div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Dashboard financeiro por brand_origin (Kings vs MSU) com totais de orders</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Gestão unificada de pedidos (tabela orders filtrável por status/marca/data)</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">CRUD de produtos + gestão de estoque + bulk import via CSV</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Fila de moderação de anúncios MSU (listings com status 'pending_review')</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Gestão de comissões — lista commissions com payout_status e ação de marcar como pago</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Relatórios: vendas por período, frete, conversão, top produtos</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Dashboard financeiro por brand_origin (Kings vs MSU) com totais de orders</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gestão unificada de pedidos (tabela orders filtrável por status/marca/data)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">CRUD de produtos + gestão de estoque + bulk import via CSV</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fila de moderação de anúncios MSU (listings com status 'pending_review')</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gestão de comissões — lista commissions com payout_status e ação de marcar como pago</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Relatórios: vendas por período, frete, conversão, top produtos</span><span class="task-priority medium">P2</span></div>
       </div>
     </div></div>
   </div>

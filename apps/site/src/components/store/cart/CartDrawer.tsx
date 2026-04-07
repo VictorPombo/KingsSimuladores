@@ -1,12 +1,13 @@
 'use client'
 
-import React from 'react'
 import { useCart } from '@/contexts/CartContext'
+import { useRouter } from 'next/navigation'
 import { Button } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
 
 export function CartDrawer() {
-  const { items, isOpen, setIsOpen, removeItem, updateQuantity, totalPrice } = useCart()
+  const { items, isOpen, setIsOpen, updateQuantity, totalPrice } = useCart()
+  const router = useRouter()
 
   if (!isOpen) return null
 
@@ -81,7 +82,16 @@ export function CartDrawer() {
               <span style={{ color: 'var(--text-secondary)' }}>Subtotal:</span>
               <span className="font-display" style={{ fontSize: '1.2rem', fontWeight: 800 }}>{formatPrice(totalPrice)}</span>
             </div>
-            <Button size="lg" style={{ width: '100%' }}>Finalizar Compra</Button>
+            <Button 
+              size="lg" 
+              style={{ width: '100%' }}
+              onClick={() => {
+                setIsOpen(false)
+                router.push('/checkout')
+              }}
+            >
+              Finalizar Compra
+            </Button>
             <Button variant="ghost" size="sm" style={{ width: '100%', marginTop: '8px' }} onClick={() => setIsOpen(false)}>
               Continuar Comprando
             </Button>

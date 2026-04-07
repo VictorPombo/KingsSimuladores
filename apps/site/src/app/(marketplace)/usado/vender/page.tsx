@@ -44,7 +44,7 @@ export default function VenderPage() {
 
   if (success) {
     return (
-      <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '120px' }}>
+      <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '120px' }}>
         <Container style={{ textAlign: 'center' }}>
           <div style={{ background: 'var(--bg-card)', padding: '3rem', borderRadius: '1rem', border: '1px solid var(--border)', maxWidth: '500px', margin: '0 auto' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏁</div>
@@ -63,7 +63,7 @@ export default function VenderPage() {
   }
 
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
       <Container>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <h1 style={{ fontSize: '2rem', color: '#fff', fontWeight: 800, marginBottom: '0.5rem' }}>Desapegue e faça um Upgrade.</h1>

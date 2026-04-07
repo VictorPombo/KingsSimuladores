@@ -1,5 +1,6 @@
 import { Container, Badge, Button } from '@kings/ui'
 import { AddToCartButton } from '@/components/store/cart/AddToCartButton'
+import { ShippingSimulator } from '@/components/store/shipping/ShippingSimulator'
 import { formatPrice } from '@kings/utils'
 
 // Simulando um fetch de banco baseado no ID da URL
@@ -54,17 +55,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               </div>
             </div>
 
-            <div style={{ marginBottom: '32px' }}>
-              {/* Simulador de Frete (Mock de UI) */}
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input 
-                  type="text" 
-                  placeholder="Seu CEP" 
-                  style={{ flex: 1, padding: '12px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', outline: 'none' }}
-                />
-                <Button variant="secondary">Calcular Frete</Button>
-              </div>
-            </div>
+            <ShippingSimulator dimensions={[{ weight: 25, width: 60, height: 60, length: 60 }]} />
 
             <AddToCartButton 
               product={{

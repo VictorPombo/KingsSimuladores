@@ -18,7 +18,7 @@ export async function updateSession(request: NextRequest) {
 
   let supabaseResponse = NextResponse.next({ request })
 
-  const supabase = createServerClient<Database>(url, key, {
+  const supabase = createServerClient<any>(url, key, {
     cookies: {
       getAll() {
         return request.cookies.getAll()
@@ -73,7 +73,7 @@ export async function updateSession(request: NextRequest) {
     // Buscar profile para checar role
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('*')
       .eq('auth_id', user.id)
       .single()
 

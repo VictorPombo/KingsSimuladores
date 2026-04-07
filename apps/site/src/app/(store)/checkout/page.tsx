@@ -6,7 +6,6 @@ import { Button, Container } from '@kings/ui'
 
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@kings/utils'
-import { calculateShipping } from '@kings/shipping'
 import { createPreference } from '@kings/payments'
 
 export default function CheckoutPage() {
@@ -52,10 +51,28 @@ export default function CheckoutPage() {
     const fakeDimensions = [
       { weight: 25, width: 60, height: 60, length: 60 }
     ]
-    const simulados = await calculateShipping('01001000', cep, fakeDimensions)
-    setFretes(simulados)
-    setSelectedFrete(simulados[0]) // Select PAC by default
-    setStep(2)
+    
+    try {
+      const res = await fetch('/api/shipping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toPostalCode: cep,
+          dimensions: fakeDimensions
+        })
+      })
+      const data = await res.json()
+      
+      if (data.options && data.options.length > 0) {
+        setFretes(data.options)
+        setSelectedFrete(data.options[0]) // Select first option by default
+        setStep(2)
+      } else {
+        alert('Não foi possível calcular fretes para este CEP.')
+      }
+    } catch (err) {
+      alert('Erro ao se comunicar com servidor de fretes.')
+    }
   }
 
   const handlePagamentoMock = async () => {

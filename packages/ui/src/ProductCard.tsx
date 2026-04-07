@@ -12,6 +12,7 @@ export interface ProductCardProps {
   discount?: number
   isNew?: boolean
   installments?: number
+  onClick?: () => void
 }
 
 export function ProductCard({
@@ -23,6 +24,7 @@ export function ProductCard({
   discount = 0,
   isNew = false,
   installments = 12,
+  onClick
 }: ProductCardProps) {
   const finalPrice = discount > 0 ? price * (1 - discount / 100) : price
   const installmentValue = finalPrice / installments
@@ -36,6 +38,7 @@ export function ProductCard({
 
   return (
     <Card 
+      onClick={onClick}
       hover 
       style={{ 
         padding: 0, 

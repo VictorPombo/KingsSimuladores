@@ -155,12 +155,12 @@ export function Input({ label, error, style, id, ...props }: InputProps) {
 }
 
 /* ═══════════ Badge ═══════════ */
-export interface BadgeProps {
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode
   variant?: 'info' | 'success' | 'warning' | 'danger'
 }
 
-export function Badge({ children, variant = 'info' }: BadgeProps) {
+export function Badge({ children, variant = 'info', style, className, ...props }: BadgeProps) {
   const colors: Record<string, { bg: string; fg: string }> = {
     info: { bg: 'var(--accent-dim)', fg: 'var(--accent)' },
     success: { bg: 'rgba(6,214,160,.12)', fg: 'var(--success)' },
@@ -183,6 +183,7 @@ export function Badge({ children, variant = 'info' }: BadgeProps) {
         background: colors[variant].bg,
         color: colors[variant].fg,
       }}
+      {...props}
     >
       {children}
     </span>

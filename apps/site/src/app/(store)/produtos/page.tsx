@@ -1,4 +1,7 @@
+'use client'
+
 import { Container, ProductCard, Badge } from '@kings/ui'
+import { useCart } from '@/contexts/CartContext'
 
 // Mock de dados para mostrar no catálogo
 const MOCK_PRODUCTS = [
@@ -11,6 +14,8 @@ const MOCK_PRODUCTS = [
 ]
 
 export default function ProductsPage() {
+  const { addItem, setIsOpen } = useCart()
+
   return (
     <div style={{ padding: '40px 0', minHeight: 'calc(100vh - 80px)' }}>
       <Container>
@@ -55,7 +60,21 @@ export default function ProductsPage() {
           <main>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '24px' }}>
               {MOCK_PRODUCTS.map((product) => (
-                <ProductCard key={product.id} {...product} />
+                <ProductCard 
+                  key={product.id} 
+                  {...product} 
+                  onClick={() => {
+                    addItem({
+                      id: product.id,
+                      title: product.title,
+                      price: (product.discount ?? 0) > 0 ? product.price * (1 - (product.discount ?? 0) / 100) : product.price,
+                      imageUrl: product.imageUrl,
+                      brand: product.brand,
+                      quantity: 1
+                    })
+                    setIsOpen(true)
+                  }}
+                />
               ))}
             </div>
           </main>
