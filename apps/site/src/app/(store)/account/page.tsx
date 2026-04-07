@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { Container } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AccountPage({ searchParams }: { searchParams: { order?: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
