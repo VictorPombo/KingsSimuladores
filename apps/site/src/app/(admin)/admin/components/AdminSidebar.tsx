@@ -10,9 +10,7 @@ import {
   Package, 
   Megaphone,
   Share2,
-  Puzzle,
   DollarSign,
-  Palette,
   Settings,
   ChevronDown,
   ChevronRight,
@@ -67,29 +65,22 @@ const MENU_ITEMS = [
     label: 'Marketing',
     icon: Megaphone,
     subItems: [
-      { label: 'Promoções', href: 'javascript:;' },
-      { label: 'Brinde', href: 'javascript:;' },
+      { label: 'Promoções', href: '/admin/promocoes' },
+      { label: 'Brinde', href: '/admin/brindes' },
       { label: 'Cupons de desconto', href: '/admin/cupons' },
-      { label: 'Automações', href: 'javascript:;' },
-      { label: 'Compre junto', href: 'javascript:;' },
-      { label: 'Frete grátis', href: 'javascript:;' },
-      { label: 'Newsletter', href: 'javascript:;' },
-      { label: 'Avise-me', href: 'javascript:;' }
+      { label: 'Automações', href: '/admin/automacoes' },
+      { label: 'Compre junto', href: '/admin/compre-junto' },
+      { label: 'Frete grátis', href: '/admin/frete-gratis' },
+      { label: 'Newsletter', href: '/admin/newsletter' },
+      { label: 'Avise-me', href: '/admin/avise-me' }
     ]
   },
   {
     label: 'Canais de vendas',
     icon: Share2,
     subItems: [
-      { label: 'Google Shopping', href: 'javascript:;' },
-      { label: 'Mercado Livre', href: 'javascript:;' }
-    ]
-  },
-  {
-    label: 'Soluções',
-    icon: Puzzle,
-    subItems: [
-      { label: 'Aplicativos', href: 'javascript:;' }
+      { label: 'Google Shopping', href: '/admin/google-shopping' },
+      { label: 'Mercado Livre', href: '/admin/mercado-livre' }
     ]
   },
   {
@@ -97,24 +88,17 @@ const MENU_ITEMS = [
     icon: DollarSign,
     subItems: [
       { label: 'Comissões (Split)', href: '/admin/comissoes' },
-      { label: 'Faturas', href: 'javascript:;' }
-    ]
-  },
-  {
-    label: 'Personalize sua loja',
-    icon: Palette,
-    subItems: [
-      { label: 'Temas', href: 'javascript:;' },
-      { label: 'Editor visual', href: 'javascript:;' }
+      { label: 'Faturas', href: '/admin/faturas' }
     ]
   },
   {
     label: 'Configurações',
     icon: Settings,
     subItems: [
-      { label: 'Gerais', href: 'javascript:;' },
-      { label: 'Formas de pagamento', href: 'javascript:;' },
-      { label: 'Formas de envio', href: 'javascript:;' }
+      { label: 'Gerais', href: '/admin/config-gerais' },
+      { label: 'Formas de pagamento', href: '/admin/formas-pagamento' },
+      { label: 'Formas de envio', href: '/admin/formas-envio' },
+      { label: 'Aplicativos', href: '/admin/aplicativos' }
     ]
   }
 ]
