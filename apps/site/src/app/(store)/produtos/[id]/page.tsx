@@ -1,117 +1,118 @@
-import { Container, Badge, Button } from '@kings/ui'
+import { Container, Badge } from '@kings/ui'
 import { AddToCartButton } from '@/components/store/cart/AddToCartButton'
 import { ShippingSimulator } from '@/components/store/shipping/ShippingSimulator'
 import { formatPrice } from '@kings/utils'
+import { createServerSupabaseClient } from '@kings/db'
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 
-// Simulando um fetch de banco baseado no ID da URL
-const MOCK_PRODUCTS: Record<string, any> = {
-  '1': { id: '1', title: 'Cockpit P1 PRO Extreme', price: 4599.90, imageUrl: 'https://placehold.co/800x800/131928/e8ecf4?text=Cockpit+P1', brand: 'XTREME RACING', isNew: true, discount: 5, description: 'Cockpit robusto de alumínio estrutural para direct drives pesados. Ajustes milimétricos em banco, volante e pedais.', stock: 12 },
-  '2': { id: '2', title: 'Volante Fanatec DD Pro', price: 7999.00, imageUrl: 'https://placehold.co/800x800/131928/e8ecf4?text=Fanatec+DD', brand: 'FANATEC', description: 'Base Direct Drive 8Nm com licença oficial PlayStation e Gran Turismo. Inclui volante compatível.', stock: 5 },
+// ── Buscar produto do Supabase ──
+async function getProduct(slug: string) {
+  const supabase = await createServerSupabaseClient()
+  const { data } = await supabase
+    .from('products')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'active')
+    .single()
+  return data
 }
 
-// ── SEO: Gera meta tags dinâmicas por produto ──
+// ── SEO: Meta tags dinâmicas ──
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const product = MOCK_PRODUCTS[params.id] || MOCK_PRODUCTS['1']
-  const finalPrice = product.discount > 0 ? product.price * (1 - product.discount / 100) : product.price
+  const product = await getProduct(params.id)
+  if (!product) return { title: 'Produto não encontrado | Kings Simuladores' }
+
+  const price = product.price_compare && product.price_compare > product.price
+    ? product.price : product.price
 
   return {
     title: `${product.title} | Kings Simuladores`,
-    description: `${product.title} por ${formatPrice(finalPrice)} em até 12x sem juros. ${product.description}`,
+    description: `${product.title} por ${formatPrice(price)} em até 12x sem juros. ${(product.description || '').slice(0, 150)}`,
     openGraph: {
       title: product.title,
-      description: product.description,
-      url: `${BASE_URL}/produtos/${product.id}`,
+      description: product.description || product.title,
+      url: `${BASE_URL}/produtos/${product.slug}`,
       siteName: 'Kings Simuladores',
-      images: [{ url: product.imageUrl, width: 800, height: 800, alt: product.title }],
+      images: product.images?.[0] ? [{ url: product.images[0], width: 800, height: 800, alt: product.title }] : [],
       type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: product.title,
-      description: product.description,
-      images: [product.imageUrl],
     },
   }
 }
 
-// ── SEO: Gera Schema JSON-LD Product para Google Rich Results ──
-function ProductJsonLd({ product, finalPrice }: { product: any; finalPrice: number }) {
+// ── SEO: Schema JSON-LD Product ──
+function ProductJsonLd({ product }: { product: any }) {
+  const brandName = product.attributes?.brand || 'Kings Simuladores'
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.title,
     description: product.description,
-    image: product.imageUrl,
-    brand: {
-      '@type': 'Brand',
-      name: product.brand,
-    },
+    image: product.images?.[0] || '',
+    brand: { '@type': 'Brand', name: brandName },
+    sku: product.sku,
     offers: {
       '@type': 'Offer',
-      url: `${BASE_URL}/produtos/${product.id}`,
+      url: `${BASE_URL}/produtos/${product.slug}`,
       priceCurrency: 'BRL',
-      price: finalPrice.toFixed(2),
-      availability: (product.stock ?? 1) > 0
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
-      seller: {
-        '@type': 'Organization',
-        name: 'Kings Simuladores',
-      },
-      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      price: Number(product.price).toFixed(2),
+      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: 'Kings Simuladores' },
     },
-    sku: product.id,
-    category: 'Simuladores de Corrida',
   }
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  )
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 }
 
-export default function ProductPage({ params }: { params: { id: string } }) {
-  const product = MOCK_PRODUCTS[params.id] || MOCK_PRODUCTS['1']
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  const product = await getProduct(params.id)
+  if (!product) notFound()
 
-  const finalPrice = product.discount > 0 ? product.price * (1 - product.discount / 100) : product.price
+  const hasDiscount = product.price_compare && product.price_compare > product.price
+  const originalPrice = hasDiscount ? product.price_compare : product.price
+  const finalPrice = product.price
+  const discountPct = hasDiscount ? Math.round((1 - finalPrice / originalPrice) * 100) : 0
   const installmentValue = finalPrice / 12
+  const brandName = product.attributes?.brand || 'Kings Simuladores'
+  const imageUrl = product.images?.[0] || 'https://placehold.co/800x800/131928/e8ecf4?text=Kings'
 
   return (
     <div style={{ padding: '60px 0', minHeight: 'calc(100vh - 80px)' }}>
-      {/* JSON-LD invisível para o Google */}
-      <ProductJsonLd product={product} finalPrice={finalPrice} />
-
+      <ProductJsonLd product={product} />
       <Container>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1fr) minmax(300px, 500px)', gap: '60px', alignItems: 'start' }}>
           
-          {/* Photos */}
+          {/* Foto */}
           <div style={{ background: '#fff', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-            <img src={product.imageUrl} alt={product.title} style={{ width: '100%', aspectRatio: '1', objectFit: 'contain' }} />
+            <img src={imageUrl} alt={product.title} style={{ width: '100%', aspectRatio: '1', objectFit: 'contain' }} />
           </div>
 
-          {/* Details */}
+          {/* Detalhes */}
           <div>
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                <Badge variant="info">{product.brand}</Badge>
-                {product.isNew && <Badge variant="success">Lançamento</Badge>}
+                <Badge variant="info">{brandName}</Badge>
+                {product.stock <= 0 && <Badge variant="warning">Esgotado</Badge>}
+                {discountPct > 0 && <Badge variant="success">-{discountPct}%</Badge>}
               </div>
               <h1 className="font-display" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.1 }}>
                 {product.title}
               </h1>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6 }}>
-                {product.description}
-              </p>
+              {product.description && (
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6 }}>
+                  {product.description.slice(0, 300)}{product.description.length > 300 ? '...' : ''}
+                </p>
+              )}
             </div>
 
             <div style={{ padding: '24px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '24px' }}>
               <div style={{ marginBottom: '8px' }}>
-                {product.discount > 0 && <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '1rem' }}>{formatPrice(product.price)}</span>}
+                {hasDiscount && (
+                  <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '1rem' }}>
+                    {formatPrice(originalPrice)}
+                  </span>
+                )}
                 <div className="font-display" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--success)' }}>
                   {formatPrice(finalPrice)}
                 </div>
@@ -131,12 +132,11 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 id: product.id,
                 title: product.title,
                 price: finalPrice,
-                imageUrl: product.imageUrl,
-                brand: product.brand
+                imageUrl,
+                brand: brandName,
               }} 
             />
           </div>
-
         </div>
       </Container>
     </div>
