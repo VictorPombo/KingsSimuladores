@@ -217,13 +217,13 @@ export default async function HomePage() {
           </div>
 
           {/* Título Principal */}
-          <h1 className="font-display" style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '24px', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          <h1 className="font-display" style={{ fontSize: 'clamp(2.2rem, 8vw, 4.5rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '24px', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
             A experiência de pilotar <br/>
             <span style={{ color: 'var(--success)' }}>
               começa aqui.
             </span>
           </h1>
-          <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '700px', lineHeight: 1.6, margin: '0 auto 40px' }}>
+          <p style={{ fontSize: 'clamp(1rem, 3vw, 1.15rem)', color: 'var(--text-secondary)', maxWidth: '700px', lineHeight: 1.6, margin: '0 auto 40px' }}>
             Cockpits, volantes, pedais e ecossistemas absolutos das melhores marcas.
             Entrega para todo o Brasil com parcelamento real em até 12x.
           </p>
