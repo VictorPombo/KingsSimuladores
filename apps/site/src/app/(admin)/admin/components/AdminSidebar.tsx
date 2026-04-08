@@ -19,102 +19,116 @@ import {
   Store
 } from 'lucide-react'
 
-// Estrutura exata decodificada da Loja Integrada
-const MENU_ITEMS = [
+// Estrutura separada por ecossistema
+const MENU_SECTIONS = [
   {
-    label: 'Início',
-    icon: Home,
-    href: '/admin'
-  },
-  {
-    label: 'Visão de Negócio',
-    icon: PieChart,
-    subItems: [
-      { label: 'Diário de Bordo', href: '/admin/diario-de-bordo' },
-      { label: 'Relatórios', href: '/admin/relatorios' }
+    title: 'LOJA KINGS',
+    color: '#25d366',
+    items: [
+      { label: 'Início', icon: Home, href: '/admin' },
+      {
+        label: 'Vendas',
+        icon: ShoppingCart,
+        subItems: [
+          { label: 'Listar pedidos', href: '/admin/pedidos' },
+          { label: 'Criar pedido', href: '/admin/criar-pedido' },
+          { label: 'Link de carrinho', href: '/admin/link-carrinho' },
+          { label: 'Clientes', href: '/admin/clientes' },
+          { label: 'Relatórios', href: '/admin/relatorios' },
+          { label: 'Notas fiscais BETA', href: '/admin/notas-fiscais' }
+        ]
+      },
+      {
+        label: 'Produtos',
+        icon: Package,
+        subItems: [
+          { label: 'Listar produtos', href: '/admin/produtos' },
+          { label: 'Criar produto', href: '/admin/criar-produto' },
+          { label: 'Avaliações', href: '/admin/avaliacoes' },
+          { label: 'Importar', href: '/admin/importar-produtos' },
+          { label: 'Preços segmentados', href: '/admin/precos-segmentados' },
+          { label: 'Categorias', href: '/admin/categorias' },
+          { label: 'Marcas', href: '/admin/marcas' },
+          { label: 'Grades', href: '/admin/grades' },
+          { label: 'Lixeira de produtos', href: '/admin/lixeira-produtos' }
+        ]
+      },
+      {
+        label: 'Marketing',
+        icon: Megaphone,
+        subItems: [
+          { label: 'Promoções', href: '/admin/promocoes' },
+          { label: 'Brinde', href: '/admin/brindes' },
+          { label: 'Cupons de desconto', href: '/admin/cupons' },
+          { label: 'Automações', href: '/admin/automacoes' },
+          { label: 'Compre junto', href: '/admin/compre-junto' },
+          { label: 'Frete grátis', href: '/admin/frete-gratis' },
+          { label: 'Newsletter', href: '/admin/newsletter' },
+          { label: 'Avise-me', href: '/admin/avise-me' }
+        ]
+      }
     ]
   },
   {
-    label: 'Vendas',
-    icon: ShoppingCart,
-    subItems: [
-      { label: 'Listar pedidos', href: '/admin/pedidos' },
-      { label: 'Criar pedido', href: '/admin/criar-pedido' },
-      { label: 'Link de carrinho', href: '/admin/link-carrinho' },
-      { label: 'Clientes', href: '/admin/clientes' },
-      { label: 'Relatórios', href: '/admin/relatorios' },
-      { label: 'Notas fiscais BETA', href: '/admin/notas-fiscais' }
+    title: 'MARKETPLACE MSU',
+    color: '#06b6d4',
+    items: [
+      {
+        label: 'Marketplace MSU',
+        icon: Store,
+        subItems: [
+          { label: 'Dashboard MSU', href: '/admin?tab=msu' },
+          { label: 'Anúncios', href: '/admin/msu-anuncios' },
+          { label: 'Moderação', href: '/admin/moderacao' },
+          { label: 'Vendedores', href: '/admin/msu-vendedores' },
+          { label: 'Comissões', href: '/admin/msu-comissoes' }
+        ]
+      }
     ]
   },
   {
-    label: 'Produtos',
-    icon: Package,
-    subItems: [
-      { label: 'Listar produtos', href: '/admin/produtos' },
-      { label: 'Criar produto', href: '/admin/criar-produto' },
-      { label: 'Avaliações', href: '/admin/avaliacoes' },
-      { label: 'Importar', href: '/admin/importar-produtos' },
-      { label: 'Preços segmentados', href: '/admin/precos-segmentados' },
-      { label: 'Categorias', href: '/admin/categorias' },
-      { label: 'Marcas', href: '/admin/marcas' },
-      { label: 'Grades', href: '/admin/grades' },
-      { label: 'Lixeira de produtos', href: '/admin/lixeira-produtos' }
-    ]
-  },
-  {
-    label: 'Marketplace MSU',
-    icon: Store,
-    subItems: [
-      { label: 'Dashboard MSU', href: '/admin/msu' },
-      { label: 'Anúncios', href: '/admin/msu-anuncios' },
-      { label: 'Moderação', href: '/admin/moderacao' },
-      { label: 'Vendedores', href: '/admin/msu-vendedores' },
-      { label: 'Comissões', href: '/admin/msu-comissoes' }
-    ]
-  },
-  {
-    label: 'Marketing',
-    icon: Megaphone,
-    subItems: [
-      { label: 'Promoções', href: '/admin/promocoes' },
-      { label: 'Brinde', href: '/admin/brindes' },
-      { label: 'Cupons de desconto', href: '/admin/cupons' },
-      { label: 'Automações', href: '/admin/automacoes' },
-      { label: 'Compre junto', href: '/admin/compre-junto' },
-      { label: 'Frete grátis', href: '/admin/frete-gratis' },
-      { label: 'Newsletter', href: '/admin/newsletter' },
-      { label: 'Avise-me', href: '/admin/avise-me' }
-    ]
-  },
-  {
-    label: 'Canais de vendas',
-    icon: Share2,
-    subItems: [
-      { label: 'Google Shopping', href: '/admin/google-shopping' },
-      { label: 'Mercado Livre', href: '/admin/mercado-livre' }
-    ]
-  },
-  {
-    label: 'Financeiro',
-    icon: DollarSign,
-    subItems: [
-      { label: 'Comissões (Split)', href: '/admin/comissoes' },
-      { label: 'Faturas', href: '/admin/faturas' }
-    ]
-  },
-  {
-    label: 'Configurações',
-    icon: Settings,
-    subItems: [
-      { label: 'Gerais', href: '/admin/config-gerais' },
-      { label: 'Dados da loja', href: '/admin/dados-loja' },
-      { label: 'Usuários', href: '/admin/usuarios' },
-      { label: 'Formas de pagamento', href: '/admin/formas-pagamento' },
-      { label: 'Formas de envio', href: '/admin/formas-envio' },
-      { label: 'Domínio próprio', href: '/admin/dominio' },
-      { label: 'Chave para API', href: '/admin/chave-api' },
-      { label: 'Gerenciador de arquivos', href: '/admin/gerenciador-arquivos' },
-      { label: 'Aplicativos', href: '/admin/aplicativos' }
+    title: 'SISTEMA',
+    color: '#94a3b8',
+    items: [
+      {
+        label: 'Visão de Negócio',
+        icon: PieChart,
+        subItems: [
+          { label: 'Diário de Bordo', href: '/admin/diario-de-bordo' },
+          { label: 'Relatórios', href: '/admin/relatorios' }
+        ]
+      },
+      {
+        label: 'Canais de vendas',
+        icon: Share2,
+        subItems: [
+          { label: 'Google Shopping', href: '/admin/google-shopping' },
+          { label: 'Mercado Livre', href: '/admin/mercado-livre' }
+        ]
+      },
+      {
+        label: 'Financeiro',
+        icon: DollarSign,
+        subItems: [
+          { label: 'Comissões (Split)', href: '/admin/comissoes' },
+          { label: 'Faturas', href: '/admin/faturas' }
+        ]
+      },
+      {
+        label: 'Configurações',
+        icon: Settings,
+        subItems: [
+          { label: 'Gerais', href: '/admin/config-gerais' },
+          { label: 'Dados da loja', href: '/admin/dados-loja' },
+          { label: 'Usuários', href: '/admin/usuarios' },
+          { label: 'Formas de pagamento', href: '/admin/formas-pagamento' },
+          { label: 'Formas de envio', href: '/admin/formas-envio' },
+          { label: 'Domínio próprio', href: '/admin/dominio' },
+          { label: 'Chave para API', href: '/admin/chave-api' },
+          { label: 'Gerenciador de arquivos', href: '/admin/gerenciador-arquivos' },
+          { label: 'Aplicativos', href: '/admin/aplicativos' }
+        ]
+      }
     ]
   }
 ]
@@ -125,13 +139,18 @@ export function AdminSidebar() {
 
   // Expandir automaticamente os menus que contém a rota atual
   useEffect(() => {
-    MENU_ITEMS.forEach(item => {
-      if (item.subItems) {
-        const isActive = item.subItems.some(sub => sub.href === pathname && sub.href !== 'javascript:;')
-        if (isActive) {
-          setOpenMenus(prev => ({ ...prev, [item.label]: true }))
+    MENU_SECTIONS.forEach(section => {
+      section.items.forEach(item => {
+        if (item.subItems) {
+          const isActive = item.subItems.some(sub => {
+            const pathWithoutQuery = sub.href.split('?')[0]
+            return pathWithoutQuery === pathname && sub.href !== 'javascript:;'
+          })
+          if (isActive) {
+            setOpenMenus(prev => ({ ...prev, [item.label]: true }))
+          }
         }
-      }
+      })
     })
   }, [pathname])
 
@@ -184,50 +203,65 @@ export function AdminSidebar() {
         `}} />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {MENU_ITEMS.map((item, idx) => {
-            const hasSub = !!item.subItems
-            const isOpen = openMenus[item.label]
-            const Icon = item.icon
-            
-            // Check if exact root active
-            const isRootActive = isMenuPathActive(item.href || '')
+          {MENU_SECTIONS.map((section, sIdx) => (
+            <div key={sIdx} style={{ marginBottom: '16px' }}>
+              <div style={{ 
+                padding: '8px 24px', 
+                fontSize: '0.65rem', 
+                fontWeight: 800, 
+                color: section.color || '#64748b', 
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                borderTop: sIdx > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                paddingTop: sIdx > 0 ? '16px' : '8px',
+                marginTop: sIdx > 0 ? '8px' : '0'
+              }}>
+                {section.title}
+              </div>
+              
+              {section.items.map((item, idx) => {
+                const hasSub = !!item.subItems
+                const isOpen = openMenus[item.label]
+                const Icon = item.icon
+                
+                const isRootActive = isMenuPathActive(item.href || '')
 
-            return (
-              <div key={idx} style={{ padding: '0 12px' }}>
-                {hasSub ? (
-                  <button
-                    onClick={() => toggleMenu(item.label)}
-                    className="sidebar-item-hover"
-                    style={{
-                      width: '100%',
-                      background: 'transparent',
-                      border: 'none',
-                      color: isOpen ? '#fff' : '#cbd5e1',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      fontWeight: isOpen ? 600 : 500,
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <Icon size={18} strokeWidth={isOpen ? 2.5 : 2} style={{ color: isOpen ? '#fff' : '#94a3b8' }} />
-                      <span style={{ fontSize: '0.9rem' }}>{item.label}</span>
-                    </div>
-                    {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                  </button>
-                ) : (
-                  <a href={item.href!} style={{ textDecoration: 'none' }}>
-                    <div 
-                      className="sidebar-item-hover"
-                      style={{
-                        color: isRootActive ? '#22d3ee' : '#cbd5e1', // Cyan indicator for active Root
-                        padding: '12px',
-                        borderRadius: '8px',
-                        display: 'flex',
+                return (
+                  <div key={idx} style={{ padding: '0 12px', marginBottom: '4px' }}>
+                    {hasSub ? (
+                      <button
+                        onClick={() => toggleMenu(item.label)}
+                        className="sidebar-item-hover"
+                        style={{
+                          width: '100%',
+                          background: 'transparent',
+                          border: 'none',
+                          color: isOpen ? '#fff' : '#cbd5e1',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          fontWeight: isOpen ? 600 : 500,
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <Icon size={18} strokeWidth={isOpen ? 2.5 : 2} style={{ color: isOpen ? section.color : '#94a3b8' }} />
+                          <span style={{ fontSize: '0.9rem' }}>{item.label}</span>
+                        </div>
+                        {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                      </button>
+                    ) : (
+                      <a href={item.href!} style={{ textDecoration: 'none' }}>
+                        <div 
+                          className="sidebar-item-hover"
+                          style={{
+                            color: isRootActive ? section.color : '#cbd5e1',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            display: 'flex',
                         alignItems: 'center',
                         gap: '12px',
                         fontWeight: isRootActive ? 600 : 500,
@@ -306,6 +340,8 @@ export function AdminSidebar() {
               </div>
             )
           })}
+            </div>
+          ))}
         </div>
       </nav>
 

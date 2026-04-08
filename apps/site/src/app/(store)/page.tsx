@@ -2,6 +2,7 @@ import { Button, Container } from '@kings/ui'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@kings/db'
 import { formatPrice } from '@kings/utils'
+import { ListingCard } from '@/components/marketplace/ListingCard'
 
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 
@@ -43,6 +44,7 @@ export default async function HomePage() {
   let lancamentos: any[] = []
   let maisVendidos: any[] = []
   let destaques: any[] = []
+  let msuListings: any[] = []
 
   try {
     const supabase = await createServerSupabaseClient()
@@ -76,6 +78,16 @@ export default async function HomePage() {
       .limit(6)
       
     destaques = dataDest && dataDest.length > 0 ? dataDest : lancamentos // fallback de segurança
+    
+    // 4. Oportunidades P2P (Meu Simulador Usado - Cross-Selling)
+    const { data: dataMsu } = await supabase
+      .from('marketplace_listings')
+      .select('id, title, price, condition, images, seller_id, profiles(full_name)')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(6)
+      
+    msuListings = dataMsu || []
   } catch (err) {
     console.error(err)
   }
@@ -251,6 +263,36 @@ export default async function HomePage() {
       <section id="vitrines" style={{ padding: '80px 0', overflow: 'hidden' }}>
         <Container>
           <ProductCarousel title="LANÇAMENTOS" prods={lancamentos} />
+          
+          {msuListings.length > 0 && (
+            <div style={{ marginBottom: '80px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', gap: '24px' }}>
+                <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to right, transparent, rgba(6, 182, 212, 0.4))' }} />
+                <h2 className="font-display" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '4px', textTransform: 'uppercase', color: '#06b6d4', textShadow: '0 0 10px rgba(6, 182, 212, 0.2)' }}>
+                  OPORTUNIDADES MSU
+                </h2>
+                <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to left, transparent, rgba(6, 182, 212, 0.4))' }} />
+              </div>
+              <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Equipamentos premium da comunidade com a Segurança Kings.</p>
+              
+              <div className="hide-scroll" style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px', scrollSnapType: 'x mandatory' }}>
+                {msuListings.map(listing => (
+                  <div key={listing.id} style={{ minWidth: 'min(300px, 80vw)', scrollSnapAlign: 'start', flexShrink: 0 }}>
+                    <ListingCard 
+                      id={listing.id}
+                      title={listing.title}
+                      price={listing.price}
+                      condition={listing.condition}
+                      imageUrl={listing.images[0]}
+                      location="Brasil"
+                      sellerName={listing.profiles?.full_name || 'Piloto Vendedor'}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
           <ProductCarousel title="DESTAQUES" prods={destaques} />
         </Container>

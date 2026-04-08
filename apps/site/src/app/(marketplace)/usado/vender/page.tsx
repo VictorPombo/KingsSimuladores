@@ -122,12 +122,20 @@ export default function VenderPage() {
 
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        .vender-title { font-size: 2.5rem; }
+        .vender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) {
+          .vender-title { font-size: 2rem !important; }
+          .vender-grid { grid-template-columns: 1fr !important; }
+        }
+      `}} />
       <Container>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#06b6d4', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.85rem' }}>
             VENDA SEU SETUP
           </div>
-          <h1 style={{ fontSize: '2.5rem', color: '#fff', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.5px' }}>Anunciar Equipamento.</h1>
+          <h1 className="vender-title" style={{ fontWeight: 900, color: '#fff', marginBottom: '0.5rem', letterSpacing: '-0.5px' }}>Anunciar Equipamento.</h1>
           <p style={{ color: '#a1a1aa', marginBottom: '2rem', fontSize: '1.1rem' }}>
             Desapegue do seu hardware antigo gratuitamente. A comissão só é retida em caso de venda bem-sucedida, garantindo ambiente anticarote pros dois lados.
           </p>
@@ -181,7 +189,7 @@ export default function VenderPage() {
               <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} type="text" placeholder="Ex: Fanatec CSL DD 8Nm + Pedais" style={inputStyle} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="vender-grid">
               <div>
                 <label style={labelStyle}>Preço (R$) *</label>
                 <input required value={form.price} onChange={e => setForm({...form, price: e.target.value})} type="number" placeholder="Digite apenas números" style={inputStyle} />

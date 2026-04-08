@@ -66,8 +66,18 @@ export default async function ListingDetailPage({ params }: Props) {
 
   return (
     <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        .msu-detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 3rem; align-items: start; }
+        .msu-price-box { position: sticky; top: 100px; }
+        .msu-shield { flex-direction: row; }
+        @media (max-width: 992px) {
+          .msu-detail-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+          .msu-price-box { position: relative !important; top: 0 !important; }
+          .msu-shield { flex-direction: column !important; text-align: center; }
+        }
+      `}} />
       <Container>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 400px', gap: '3rem', alignItems: 'start' }}>
+        <div className="msu-detail-grid">
           
           {/* Esquerda: Fotos e Descrição */}
           <div>
@@ -80,7 +90,7 @@ export default async function ListingDetailPage({ params }: Props) {
               {listing.description}
             </div>
             
-            <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(0,229,255,0.05)', borderRadius: '1rem', border: '1px solid rgba(0,229,255,0.2)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div className="msu-shield" style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(0,229,255,0.05)', borderRadius: '1rem', border: '1px solid rgba(0,229,255,0.2)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                <ShieldCheck size={32} color="var(--accent)" />
                <div>
                  <h4 style={{ color: 'var(--accent)', fontWeight: 700, margin: '0 0 0.25rem 0' }}>Segurança Kings: Pague pela plataforma</h4>
@@ -90,7 +100,7 @@ export default async function ListingDetailPage({ params }: Props) {
           </div>
 
           {/* Direita: Price Box */}
-          <div style={{ position: 'sticky', top: '100px' }}>
+          <div className="msu-price-box">
             <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--border)' }}>
               <div style={{ textTransform: 'uppercase', color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.5rem' }}>{listing.condition}</div>
               <h1 style={{ fontSize: '2rem', color: '#fff', fontWeight: 800, margin: '0 0 1rem 0', lineHeight: 1.2 }}>{listing.title}</h1>
