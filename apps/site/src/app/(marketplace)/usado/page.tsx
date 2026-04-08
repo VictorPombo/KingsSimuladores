@@ -1,48 +1,25 @@
 import React from 'react'
 import { Container, Button } from '@kings/ui'
 import { ListingCard } from '@/components/marketplace/ListingCard'
+import { createServerSupabaseClient } from '@kings/db/server'
 
-// Mock Data temporarily for Wave 1
-const mockListings = [
-  {
-    id: 'l1',
-    title: 'Volante Logitech G29 Force Feedback Semi-Novo',
-    price: 1100,
-    imageUrl: 'https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=800&auto=format&fit=crop',
-    condition: 'Semi-Novo',
-    location: 'São Paulo, SP',
-    sellerName: 'Marcos R.'
-  },
-  {
-    id: 'l2',
-    title: 'Cockpit Xtreme Racing V3 Branco + Suporte de Telas',
-    price: 1850,
-    imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop',
-    condition: 'Usado',
-    location: 'Curitiba, PR',
-    sellerName: 'Piloto_1990'
-  },
-  {
-    id: 'l3',
-    title: 'Fanatec CSL DD 8Nm - Apenas Base (Na Caixa)',
-    price: 3600,
-    imageUrl: 'https://images.unsplash.com/photo-1593118247619-e2d6f056869e?q=80&w=800&auto=format&fit=crop',
-    condition: 'Novo (Caixa Aberta)',
-    location: 'Rio de Janeiro, RJ',
-    sellerName: 'SimRacingRJ'
-  },
-  {
-    id: 'l4',
-    title: 'Pedal CSL Elite LC',
-    price: 900,
-    imageUrl: 'https://images.unsplash.com/photo-1538688423619-a81d3f23454b?q=80&w=800&auto=format&fit=crop',
-    condition: 'Usado',
-    location: 'Belo Horizonte, MG',
-    sellerName: 'Vitor S.'
-  }
-]
+export const dynamic = 'force-dynamic'
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createServerSupabaseClient()
+  
+  const { data: listings } = await supabase
+    .from('marketplace_listings')
+    .select(`
+      *,
+      profiles (
+        full_name
+      )
+    `)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(8)
+
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '80px' }}>
       
@@ -68,18 +45,19 @@ export default function Home() {
             Compre e venda cockpits, volantes e acessórios diretamente com pilotos de todo o Brasil. Intermediação segura pela KingsHub.
           </p>
 
-          <div style={{ 
+          <form action="/usado/produtos" style={{ 
             display: 'flex', maxWidth: '600px', margin: '0 auto', 
             background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '0.5rem',
             padding: '0.5rem', overflow: 'hidden', backdropFilter: 'blur(10px)'
           }}>
             <input 
-              type="text" 
+              type="text"
+              name="q" 
               placeholder="Ex: Volante Fanatec, Pedal Load Cell..." 
               style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', padding: '0.5rem 1rem', outline: 'none' }}
             />
-            <Button style={{ background: 'var(--accent)', color: '#000' }}>Procurar</Button>
-          </div>
+            <Button type="submit" style={{ background: 'var(--accent)', color: '#000' }}>Procurar</Button>
+          </form>
         </Container>
       </section>
 
@@ -95,9 +73,24 @@ export default function Home() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-            {mockListings.map(listing => (
-              <ListingCard key={listing.id} {...listing} />
+            {listings?.map(listing => (
+              <ListingCard 
+                key={listing.id}
+                id={listing.id}
+                title={listing.title}
+                price={listing.price}
+                condition={listing.condition}
+                imageUrl={listing.images[0]}
+                location="Brasil"
+                sellerName={(listing as any).profiles?.full_name || 'Piloto Oculto'}
+              />
             ))}
+            
+            {listings?.length === 0 && (
+              <div style={{ color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 0' }}>
+                Nenhum anúncio disponível no momento. Seja o primeiro a anunciar!
+              </div>
+            )}
           </div>
 
         </Container>
