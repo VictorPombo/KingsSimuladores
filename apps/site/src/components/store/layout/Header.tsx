@@ -74,34 +74,32 @@ export function Header() {
             background: 'rgba(6, 8, 15, 0.98)',
             backdropFilter: 'blur(20px)',
             borderBottom: '1px solid var(--border)',
-            padding: '12px 16px',
+            paddingTop: '12px',
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px' }}>
               <a href="/" style={{ flexShrink: 0 }}>
                 <img 
                   src="https://cdn.awsli.com.br/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png" 
                   alt="Kings Simuladores" 
-                  style={{ height: '40px', display: 'block', objectFit: 'contain' }}
+                  style={{ height: '36px', display: 'block', objectFit: 'contain' }}
                 />
               </a>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <CartIcon />
-                <Button variant="secondary" size="sm" style={{ padding: '0 12px', fontSize: '0.75rem' }}>Entrar</Button>
+                <Button variant="secondary" size="sm" style={{ padding: '0 12px', fontSize: '0.75rem', borderRadius: '16px' }}>
+                  User
+                </Button>
               </div>
             </div>
 
-            <div style={{ width: '100%' }}>
+            <div style={{ padding: '0 16px' }}>
               <SearchBar />
             </div>
 
-            <nav style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '4px' }}>
-              <a href="/produtos" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600, whiteSpace: 'nowrap' }}>Produtos</a>
-              <a href="/categorias" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600, whiteSpace: 'nowrap' }}>Categorias</a>
-            </nav>
+            <MobileCategoryNav />
           </div>
-          <MobileCategoryNav />
         </header>
       </div>
     </>

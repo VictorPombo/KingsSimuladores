@@ -167,38 +167,55 @@ export function CategoryNav() {
 
 export function MobileCategoryNav() {
   return (
-    <nav 
-      style={{ 
-        background: 'rgba(6, 8, 15, 0.6)', 
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid var(--border)',
-        position: 'relative',
-        zIndex: 90,
-        width: '100%'
-      }}
-    >
-      <div className="hide-scroll" style={{ 
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 16px',
-        paddingBottom: '8px',
-        gap: '24px',
-        overflowX: 'auto',
-        scrollSnapType: 'x mandatory'
-      }}>
+    <nav style={{ width: '100%' }}>
+      <div 
+        className="hide-scroll" 
+        style={{ 
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 16px 16px 16px',
+          gap: '12px',
+          overflowX: 'auto',
+          scrollSnapType: 'x mandatory'
+        }}
+      >
+        {/* Chip persistente para "Todos os Produtos" */}
+        <Link 
+          href="/produtos"
+          style={{
+            display: 'block',
+            padding: '6px 16px',
+            background: 'var(--success)',
+            color: '#000',
+            borderRadius: '24px',
+            fontWeight: 700,
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            whiteSpace: 'nowrap',
+            scrollSnapAlign: 'start',
+            flexShrink: 0,
+            boxShadow: '0 4px 10px rgba(0, 229, 255, 0.4)'
+          }}
+        >
+          + Produtos
+        </Link>
         {MENU_ITEMS.map((item, idx) => (
           <Link 
             key={idx} 
             href={item.href}
             style={{
               display: 'block',
-              padding: '12px 4px',
-              color: 'var(--text-secondary)',
+              padding: '6px 14px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '20px',
+              color: 'var(--text-primary)',
               textDecoration: 'none',
-              fontWeight: 600,
-              fontSize: '0.8rem',
+              fontWeight: 500,
+              fontSize: '0.75rem',
               textTransform: 'uppercase',
-              letterSpacing: '1px',
+              letterSpacing: '0.5px',
               whiteSpace: 'nowrap',
               scrollSnapAlign: 'start',
               flexShrink: 0
