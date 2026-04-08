@@ -206,17 +206,18 @@ export function MobileCategoryNav() {
             alignItems: 'center',
             gap: '4px',
             padding: '5px 12px',
-            background: 'rgba(6, 182, 212, 0.1)',
-            border: '1px solid rgba(6, 182, 212, 0.3)',
+            background: 'linear-gradient(to right, #FF6B35, #FF3B5C)',
+            border: 'none',
             borderRadius: '16px',
-            color: '#06b6d4',
+            color: '#fff',
             textDecoration: 'none',
             fontWeight: 800,
             fontSize: '11px',
             textTransform: 'uppercase',
             whiteSpace: 'nowrap',
             scrollSnapAlign: 'start',
-            flexShrink: 0
+            flexShrink: 0,
+            boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)'
           }}
         >
           ♻️ MSU

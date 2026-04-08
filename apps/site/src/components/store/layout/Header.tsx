@@ -43,7 +43,7 @@ export function Header() {
             </div>
 
             <nav style={{ display: 'flex', gap: '24px', alignItems: 'center', flexShrink: 0 }}>
-              <a href="/usado" style={{ fontSize: '0.85rem', color: '#06b6d4', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(6, 182, 212, 0.1)', borderRadius: '6px', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
+              <a href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #FF6B35, #FF3B5C)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)' }}>
                 <span>♻️</span> Loja de Usados (MSU)
               </a>
               <a href="/produtos" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
