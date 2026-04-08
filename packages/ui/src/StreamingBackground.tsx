@@ -49,8 +49,8 @@ export function StreamingBackground() {
 const STREAMING_CSS = `
   /* ─── Variables for Themes ─── */
   .streaming-bg-root {
-    --sb-accent: 0, 229, 255;      /* Cyan */
-    --sb-secondary: 139, 92, 246;  /* Purple */
+    --sb-accent: 0, 232, 150;      /* Green Kings */
+    --sb-secondary: 0, 180, 245;  /* Blue Kings */
   }
 
   .streaming-bg-root[data-theme="msu"] {

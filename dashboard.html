@@ -1046,10 +1046,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="alert decided" style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15)">📦 <strong style="color:var(--accent)">Migração de dados:</strong> Scripts de migração devem ser criados durante as fases anteriores e testados em staging. A decisão de <em>quando</em> executar a migração real (Loja Integrada → Supabase e Firebase → Supabase) será tomada nesta fase.</div>
+      <div class="alert warn" style="background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.15);margin-top:12px;">🤖 <strong style="color:#00ff88">Comandos de QA Prontos para Execução:</strong><br/>
+      Para rodar os testes criados: <br/>
+      <strong>1. Teste de Stress (K6):</strong> <code>k6 run scripts/k6-loadtest.js</code> (100 usuários).<br/>
+      <strong>2. Teste E2E (Playwright):</strong> <code>cd apps/site && npx playwright install</code>, e depois <code>npx playwright test</code>.<br/>
+      <span style="font-size:12px;opacity:0.8">Rode após finalizar os detalhes do front-end e injetar as chaves reais de API no .env!</span></div>
       <div class="task-group"><div class="task-group-title">Tasks</div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Testes E2E — Playwright — fluxo completo: browse → cart → checkout → confirm → NF</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Testes de carga — k6 — 100 compras simultâneas sem degradação</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Compra real em sandbox MP (cartão, Pix, boleto) — fluxo completo</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Testes E2E — Playwright — fluxo completo (Setup Configurado -> Necessita Chaves para finalização)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Testes de carga — k6 — 100 compras simultâneas (Script k6-loadtest.js Criado)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Compra real em sandbox MP (cartão, Pix, boleto) — AGUARDANDO API_KEY</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Loja Integrada → tabela products do Supabase (85 produtos importados via scraper)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Loja Integrada → usuarios Supabase (importados e bypass trigger de profiles)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Firebase (MSU) 👉 CANCELADO (Não há base legada para migrar)</span><span class="task-priority low">P3</span></div>
