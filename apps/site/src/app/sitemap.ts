@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next'
 import { createAdminClient } from '@kings/db/server'
 
+export const dynamic = 'force-dynamic'
+
 // URL base do site — será trocada pelo domínio real quando o DNS for apontado
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 

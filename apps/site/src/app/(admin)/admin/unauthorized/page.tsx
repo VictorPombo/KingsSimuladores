@@ -1,6 +1,8 @@
 import { Card, Container } from '@kings/ui'
 import { createServerSupabaseClient } from '@kings/db'
 
+export const dynamic = 'force-dynamic'
+
 export default async function UnauthorizedPage() {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()

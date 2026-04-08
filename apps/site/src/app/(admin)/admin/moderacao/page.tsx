@@ -1,5 +1,7 @@
 import React from 'react'
 import { createServerSupabaseClient } from '@kings/db'
+
+export const dynamic = 'force-dynamic'
 import { Card, Button, Badge } from '@kings/ui'
 import { revalidatePath } from 'next/cache'
 

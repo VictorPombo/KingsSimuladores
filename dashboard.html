@@ -272,8 +272,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     </div>
 
     <div class="header-right">
-      <div class="header-stat"><div class="header-stat-value">8</div><div class="header-stat-label">Fases</div></div>
-      <div class="header-stat"><div class="header-stat-value">72</div><div class="header-stat-label">Tasks</div></div>
+      <div class="header-stat"><div class="header-stat-value">9</div><div class="header-stat-label">Fases</div></div>
+      <div class="header-stat"><div class="header-stat-value">96</div><div class="header-stat-label">Tasks</div></div>
       <div class="header-stat"><div class="header-stat-value">~10</div><div class="header-stat-label">Semanas restantes</div></div>
       <div class="header-stat"><div class="header-stat-value">Pro</div><div class="header-stat-label">Supabase</div></div>
     </div>
@@ -295,15 +295,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <div class="global-progress">
   <div class="global-progress-header">
     <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
-    <span class="global-progress-pct font-display">93%</span>
+    <span class="global-progress-pct font-display">90%</span>
   </div>
   <div class="progress-bar-track">
-      <div class="progress-bar-fill accent" style="width:93%"></div></div>
+      <div class="progress-bar-fill accent" style="width:90%"></div></div>
   </div>
   <div class="progress-stats">
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 50 concluídas</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 1 em progresso</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 5 pendentes</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 67 concluídas</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 2 em progresso</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 27 pendentes</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--red)"></span> 0 bloqueadas</div>
   </div>
 </div>
@@ -904,7 +904,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <span class="phase-number font-display">08</span>
       <div class="phase-info">
         <div class="phase-name">Refinamento UI/UX e Admin Profissional</div>
-        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 19 planos</span><span>🔥 CRÍTICA</span></div>
+        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 40 planos</span><span>🔥 CRÍTICA</span></div>
       </div>
       <div class="phase-progress">
         <div class="phase-pct" style="color:var(--green)">100%</div>
@@ -942,6 +942,69 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Correção de auth admin — bypass RLS com service_role no middleware</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fix coluna auth_id vs id em todas as verificações de perfil admin</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Migração de &lt;Link&gt; para &lt;a&gt; no sidebar para evitar cache do App Router</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Seção Marketing (8 sub-páginas)</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Promoções — KPIs, formulário de criação, tabela de campanhas</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Brindes — Configuração de produtos brinde com regras automáticas</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cupons de desconto — Gestão de cupons existente</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Automações — 3 fluxos pré-configurados (WhatsApp 1h / Email 24h / Pós-compra 7d), toggle ativa/pausada</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Compre Junto — Cross-sell visual (Volante → Cockpit -10%)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Frete Grátis — Regras por valor mínimo e por CEP</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Newsletter — KPIs, lista inscritos, enviar campanha, export</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Avise-me — Notificações de retorno de estoque via Resend</span><span class="task-priority low">P3</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Canais de Vendas (2 sub-páginas)</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Google Shopping — KPIs, URL feed XML, detalhes Merchant Center</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Mercado Livre — Página "em breve" com link API docs</span><span class="task-priority low">P3</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Financeiro (2 sub-páginas)</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Comissões (Split) — Gestão de repasses marketplace</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Faturas — Histórico de recebimentos com dados reais do Supabase</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Configurações (9 sub-páginas)</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gerais — Dados loja, domínio/SEO, segurança (SSL/RLS)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Dados da Loja — Razão social, CNPJ, IE, endereço, contato</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Usuários — Lista real do Supabase com badges admin/cliente</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Formas de Pagamento — MP, Pix, Boleto, Cartão com taxas</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Formas de Envio — PAC, SEDEX, Jadlog, Azul, Retirada</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Domínio Próprio — Status DNS, SSL, registros A/CNAME</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Chave para API — Visualização segura, cópia, variáveis de ambiente</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gerenciador de Arquivos — Drag-and-drop, buckets Supabase Storage</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Aplicativos — 8 integrações com status (MP, Melhor Envio, Z-API, Resend, NFe.io, Google, TikTok, GA)</span><span class="task-priority medium">P2</span></div>
+      </div>
+      </div>
+    </div></div>
+  </div>
+<br>
+  <div class="phase-card open">
+    <div class="phase-header">
+      <span class="phase-number font-display">08B</span>
+      <div class="phase-info">
+        <div class="phase-name">Marketplace: Meu Simulador Usado (MSU)</div>
+        <div class="phase-meta"><span>⏱ 1 semana</span><span>📦 11 planos</span><span>🔥 CRÍTICA</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--accent)">18%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:18%"></div></div>
+      </div>
+      <span class="phase-status progress">Em Progresso</span>
+  </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="alert decided" style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15)">📦 <strong style="color:var(--accent)">Estratégia MSU:</strong> Tudo no mesmo repositório e mesmo projeto Supabase. Tabelas segregadas. Auth compartilhada (Kings & MSU). O Admin herdará uma seção dedicada para gestão.</div>
+      <div class="task-group"><div class="task-group-title">Storefront (UI/UX Profissionalização)</div>
+        <div class="task"><span class="task-check progress"></span><span class="task-text">Home (/usado) — Trocar mocks da vitrine por dados reais <code>marketplace_listings</code> apontando para loja real</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Explorar (/usado/produtos) — Implementar filtros funcionais da base com Supabase active filters</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Detalhe do Produto (/usado/produto/[id]) — Criar página detalhada com carrossel dinâmico e checkout placeholder</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Vender (/usado/vender) — Formulário funcional enviando status 'pending_review' fake session</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Vender (+Foto) — Implementar upload real para bucket <code>marketplace-listings</code> do Supabase Storage Auth</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check progress"></span><span class="task-text">Minha Garagem (/usado/account) — Histórico de meus classificados, avaliações client-side, central</span><span class="task-priority high">P1</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">Admin — Seção MSU Market</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Sidebar & Layout — Criar grupo "Meu Simulador Usado" auto-nav no side AdminSidebar</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Dashboard MSU (/admin/msu) — Cards de KPIs (Ativos, Pendentes, Vendidos)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Moderação (/admin/moderacao) — Funcional (Aprovar/Rejeitar). Mover logic para o grupo MSU centralizado</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Cofre/Comissões (/admin/msu-comissoes) — Visualização gráfica de rendimentos transacionais</span><span class="task-priority low">P3</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Fix API Core /api/vender — Usar Auth User ID em vez do Mock central Seller ID de fallback.</span><span class="task-priority critical">P0</span></div>
       </div>
     </div></div>
   </div>
