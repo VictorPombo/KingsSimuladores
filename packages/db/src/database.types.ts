@@ -294,7 +294,6 @@ export type Database = {
           id: string
           order_id: string
           product_id: string | null
-          listing_id: string | null
           quantity: number
           unit_price: number
           total_price: number
@@ -303,7 +302,6 @@ export type Database = {
           id?: string
           order_id: string
           product_id?: string | null
-          listing_id?: string | null
           quantity?: number
           unit_price: number
           total_price: number
@@ -312,7 +310,6 @@ export type Database = {
           id?: string
           order_id?: string
           product_id?: string | null
-          listing_id?: string | null
           quantity?: number
           unit_price?: number
           total_price?: number
@@ -359,10 +356,63 @@ export type Database = {
           created_at?: string
         }
       }
+      marketplace_orders: {
+        Row: {
+          id: string
+          buyer_id: string
+          seller_id: string
+          listing_id: string
+          total_price: number
+          commission_rate: number
+          kings_fee: number
+          seller_net: number
+          status: string | null
+          mp_preference_id: string | null
+          mp_payment_id: string | null
+          shipping_address: Json | null
+          tracking_code: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          buyer_id: string
+          seller_id: string
+          listing_id: string
+          total_price: number
+          commission_rate?: number
+          kings_fee: number
+          seller_net: number
+          status?: string | null
+          mp_preference_id?: string | null
+          mp_payment_id?: string | null
+          shipping_address?: Json | null
+          tracking_code?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          buyer_id?: string
+          seller_id?: string
+          listing_id?: string
+          total_price?: number
+          commission_rate?: number
+          kings_fee?: number
+          seller_net?: number
+          status?: string | null
+          mp_preference_id?: string | null
+          mp_payment_id?: string | null
+          shipping_address?: Json | null
+          tracking_code?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       commissions: {
         Row: {
           id: string
-          order_id: string
+          marketplace_order_id: string | null
           seller_id: string
           sale_amount: number
           commission_rate: number
@@ -374,7 +424,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          order_id: string
+          marketplace_order_id?: string | null
           seller_id: string
           sale_amount: number
           commission_rate: number
@@ -386,7 +436,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          order_id?: string
+          marketplace_order_id?: string | null
           seller_id?: string
           sale_amount?: number
           commission_rate?: number
