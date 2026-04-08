@@ -239,7 +239,7 @@ export default async function HomePage() {
       </header>
 
       {/* BANNER MOZA ACTIVE PEDAL */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: '40px auto 0', padding: '0 16px' }}>
+      <section style={{ width: '100%', maxWidth: '1200px', margin: 'clamp(20px, 4vw, 40px) auto 0', padding: '0 16px' }}>
         <div style={{ 
           width: '100%', 
           borderRadius: '16px', 
@@ -260,7 +260,7 @@ export default async function HomePage() {
       </section>
 
       {/* SECTION TRIPLA DE PRODUTOS */}
-      <section id="vitrines" style={{ padding: '80px 0', overflow: 'hidden' }}>
+      <section id="vitrines" style={{ padding: 'clamp(32px, 8vw, 80px) 0', overflow: 'hidden' }}>
         <Container>
           <ProductCarousel title="LANÇAMENTOS" prods={lancamentos} />
           

@@ -27,7 +27,7 @@ export function SearchBar() {
         width: '100%',
         maxWidth: '500px',
         height: '48px',
-        margin: '0 24px',
+        margin: '0 auto',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
       }}
     >
