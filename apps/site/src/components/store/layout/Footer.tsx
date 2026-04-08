@@ -33,13 +33,25 @@ export function Footer() {
           <div>
             <h4 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Atendimento</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li style={{ fontSize: '0.85rem' }}>WhatsApp: (11) 99999-9999</li>
-              <li style={{ fontSize: '0.85rem' }}>contato@kingssimuladores.com.br</li>
+              <li style={{ fontSize: '0.85rem' }}>
+                <a href="https://wa.me/5511959018725" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>WhatsApp: (11) 95901-8725</a>
+              </li>
+              <li style={{ fontSize: '0.85rem' }}>
+                <a href="mailto:contato@kingssimuladores.com.br" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>contato@kingssimuladores.com.br</a>
+              </li>
+              <li style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>KINGS SIMULADORES - CNPJ: 29.688.089/0001-02</li>
             </ul>
           </div>
         </div>
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '24px', textAlign: 'center', fontSize: '0.78rem' }}>
-          Kings Simuladores © {new Date().getFullYear()} — Todos os direitos reservados.
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-[var(--border)] text-[0.78rem]">
+          <div>
+            Kings Simuladores © {new Date().getFullYear()} — Todos os direitos reservados.
+          </div>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <a href="https://instagram.com/kingssimuladores" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '1.2rem', textDecoration: 'none' }}>Instagram</a>
+            <a href="https://facebook.com/kingssimuladores" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '1.2rem', textDecoration: 'none' }}>Facebook</a>
+            <a href="https://www.youtube.com/@kingssimuladores" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '1.2rem', textDecoration: 'none' }}>YouTube</a>
+          </div>
         </div>
       </Container>
     </footer>

@@ -200,8 +200,8 @@ export default async function HomePage() {
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 16px', maxWidth: '896px', margin: '0 auto' }}>
           
           {/* Badge superior */}
-          <div style={{ marginBottom: '32px', padding: '8px 16px', borderRadius: '9999px', border: '1px solid rgba(16, 185, 129, 0.2)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(4px)' }}>
-            <span style={{ fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, color: 'var(--success)' }}>🏎️ MAIOR HUB DO BRASIL</span>
+          <div style={{ marginBottom: '24px', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(16, 185, 129, 0.2)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(4px)' }}>
+            <span style={{ fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, color: 'var(--success)' }}>O REI DOS SIMULADORES!</span>
           </div>
 
           {/* Título Principal */}
@@ -211,7 +211,7 @@ export default async function HomePage() {
               começa aqui.
             </span>
           </h1>
-          <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '600px', lineHeight: 1.6, margin: '0 auto 40px' }}>
+          <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '700px', lineHeight: 1.6, margin: '0 auto 40px' }}>
             Cockpits, volantes, pedais e ecossistemas absolutos das melhores marcas.
             Entrega para todo o Brasil com parcelamento real em até 12x.
           </p>
@@ -225,6 +225,27 @@ export default async function HomePage() {
           </div>
         </div>
       </header>
+
+      {/* BANNER MOZA ACTIVE PEDAL */}
+      <section style={{ width: '100%', maxWidth: '1200px', margin: '40px auto 0', padding: '0 16px' }}>
+        <div style={{ 
+          width: '100%', 
+          borderRadius: '16px', 
+          overflow: 'hidden', 
+          border: '1px solid rgba(16, 185, 129, 0.2)',
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.5)',
+          background: '#0a0a0a'
+        }}>
+          {/* Banner Único: YouTube com Link */}
+          <a href="https://www.youtube.com/@kingssimuladores" target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '100%' }}>
+            <img 
+              src="https://cdn.awsli.com.br/1920x1920/1940/1940182/banner/dkp-2-eapfpa40uj.png" 
+              alt="Canal Kings Simuladores no YouTube" 
+              style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} 
+            />
+          </a>
+        </div>
+      </section>
 
       {/* SECTION TRIPLA DE PRODUTOS */}
       <section id="vitrines" style={{ padding: '80px 0', overflow: 'hidden' }}>
