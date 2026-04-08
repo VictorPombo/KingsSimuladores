@@ -43,7 +43,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-[var(--border)] text-[0.78rem]">
+        <div style={{ display: 'flex', flexWrap: 'wrap-reverse', alignItems: 'center', justifyContent: 'space-between', gap: '24px', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)', fontSize: '0.78rem' }}>
           <div>
             Kings Simuladores © {new Date().getFullYear()} — Todos os direitos reservados.
           </div>
