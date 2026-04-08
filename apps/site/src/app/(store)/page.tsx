@@ -260,43 +260,45 @@ export default async function HomePage() {
       </section>
 
       {/* SECTION TRIPLA DE PRODUTOS */}
-      <section id="vitrines" style={{ padding: 'clamp(32px, 8vw, 80px) 0', overflow: 'hidden' }}>
-        <Container>
-          <ProductCarousel title="LANÇAMENTOS" prods={lancamentos} />
-          
-          {msuListings.length > 0 && (
-            <div style={{ marginBottom: '80px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', gap: '24px' }}>
-                <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to right, transparent, rgba(6, 182, 212, 0.4))' }} />
-                <h2 className="font-display" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '4px', textTransform: 'uppercase', color: '#06b6d4', textShadow: '0 0 10px rgba(6, 182, 212, 0.2)' }}>
-                  OPORTUNIDADES MSU
-                </h2>
-                <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to left, transparent, rgba(6, 182, 212, 0.4))' }} />
+      {(lancamentos?.length > 0 || msuListings?.length > 0 || maisVendidos?.length > 0 || destaques?.length > 0) && (
+        <section id="vitrines" style={{ padding: 'clamp(32px, 8vw, 80px) 0', overflow: 'hidden' }}>
+          <Container>
+            <ProductCarousel title="LANÇAMENTOS" prods={lancamentos} />
+            
+            {msuListings.length > 0 && (
+              <div style={{ marginBottom: '80px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', gap: '24px' }}>
+                  <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to right, transparent, rgba(6, 182, 212, 0.4))' }} />
+                  <h2 className="font-display" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '4px', textTransform: 'uppercase', color: '#06b6d4', textShadow: '0 0 10px rgba(6, 182, 212, 0.2)' }}>
+                    OPORTUNIDADES MSU
+                  </h2>
+                  <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to left, transparent, rgba(6, 182, 212, 0.4))' }} />
+                </div>
+                <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Equipamentos premium da comunidade com a Segurança Kings.</p>
+                
+                <div className="hide-scroll" style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px', scrollSnapType: 'x mandatory' }}>
+                  {msuListings.map(listing => (
+                    <div key={listing.id} style={{ minWidth: 'min(300px, 80vw)', scrollSnapAlign: 'start', flexShrink: 0 }}>
+                      <ListingCard 
+                        id={listing.id}
+                        title={listing.title}
+                        price={listing.price}
+                        condition={listing.condition}
+                        imageUrl={listing.images[0]}
+                        location="Brasil"
+                        sellerName={listing.profiles?.full_name || 'Piloto Vendedor'}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-              <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Equipamentos premium da comunidade com a Segurança Kings.</p>
-              
-              <div className="hide-scroll" style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px', scrollSnapType: 'x mandatory' }}>
-                {msuListings.map(listing => (
-                  <div key={listing.id} style={{ minWidth: 'min(300px, 80vw)', scrollSnapAlign: 'start', flexShrink: 0 }}>
-                    <ListingCard 
-                      id={listing.id}
-                      title={listing.title}
-                      price={listing.price}
-                      condition={listing.condition}
-                      imageUrl={listing.images[0]}
-                      location="Brasil"
-                      sellerName={listing.profiles?.full_name || 'Piloto Vendedor'}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            )}
 
-          <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
-          <ProductCarousel title="DESTAQUES" prods={destaques} />
-        </Container>
-      </section>
+            <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
+            <ProductCarousel title="DESTAQUES" prods={destaques} />
+          </Container>
+        </section>
+      )}
     </div>
   )
 }

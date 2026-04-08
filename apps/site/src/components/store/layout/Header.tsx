@@ -86,7 +86,7 @@ export function Header() {
                 <img 
                   src="https://cdn.awsli.com.br/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png" 
                   alt="Kings Simuladores" 
-                  style={{ height: '36px', display: 'block', objectFit: 'contain' }}
+                  style={{ height: '48px', display: 'block', objectFit: 'contain' }}
                 />
               </a>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
