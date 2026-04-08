@@ -66,7 +66,6 @@ export function CategoryNav() {
 
   return (
     <nav 
-      className="hidden md:block"
       style={{ 
         background: 'rgba(6, 8, 15, 0.6)', 
         backdropFilter: 'blur(10px)',
@@ -169,13 +168,13 @@ export function CategoryNav() {
 export function MobileCategoryNav() {
   return (
     <nav 
-      className="block md:hidden w-full hide-scroll"
       style={{ 
         background: 'rgba(6, 8, 15, 0.6)', 
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid var(--border)',
         position: 'relative',
-        zIndex: 90
+        zIndex: 90,
+        width: '100%'
       }}
     >
       <div className="hide-scroll" style={{ 

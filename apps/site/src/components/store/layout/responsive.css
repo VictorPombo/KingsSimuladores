@@ -1,0 +1,15 @@
+.desktop-header-kings {
+  display: block;
+}
+.mobile-header-kings {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-header-kings {
+    display: none !important;
+  }
+  .mobile-header-kings {
+    display: block !important;
+  }
+}
