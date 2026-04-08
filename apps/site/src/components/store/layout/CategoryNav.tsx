@@ -200,6 +200,29 @@ export function MobileCategoryNav() {
         >
           + Produtos
         </Link>
+        <Link 
+          href="/usado"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '6px 14px',
+            background: 'rgba(6, 182, 212, 0.1)',
+            border: '1px solid rgba(6, 182, 212, 0.3)',
+            borderRadius: '20px',
+            color: '#06b6d4',
+            textDecoration: 'none',
+            fontWeight: 800,
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            whiteSpace: 'nowrap',
+            scrollSnapAlign: 'start',
+            flexShrink: 0
+          }}
+        >
+          ♻️ MSU
+        </Link>
         {MENU_ITEMS.map((item, idx) => (
           <Link 
             key={idx} 

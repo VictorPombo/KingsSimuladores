@@ -3,10 +3,43 @@ import { Container, Button } from '@kings/ui'
 import { createServerSupabaseClient } from '@kings/db/server'
 import { formatPrice } from '@kings/utils'
 import { notFound } from 'next/navigation'
+import { MessageCircle, ShieldCheck } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ListingDetailPage({ params }: { params: { id: string } }) {
+type Props = {
+  params: { id: string }
+}
+
+export async function generateMetadata({ params }: Props) {
+  const supabase = await createServerSupabaseClient()
+  
+  const { data: listing } = await supabase
+    .from('marketplace_listings')
+    .select('title, price, images, description')
+    .eq('id', params.id)
+    .single()
+
+  if (!listing) {
+    return { title: 'Produto não encontrado | MSU' }
+  }
+
+  const formatBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(listing.price)
+
+  return {
+    title: `${listing.title} - ${formatBRL} | Meu Simulador Usado`,
+    description: listing.description.substring(0, 150) + '...',
+    openGraph: {
+      title: `${listing.title} por apenas ${formatBRL}`,
+      description: 'Confira este equipamento no Maior Marketplace de Sim Racing do Brasil.',
+      images: [listing.images[0]],
+      siteName: 'Meu Simulador Usado',
+      type: 'website',
+    },
+  }
+}
+
+export default async function ListingDetailPage({ params }: Props) {
   const supabase = await createServerSupabaseClient()
   
   const { data: listing } = await supabase
@@ -23,10 +56,18 @@ export default async function ListingDetailPage({ params }: { params: { id: stri
 
   if (!listing) return notFound()
 
+  const sellerName = (listing as any).profiles?.full_name || 'Piloto Vendedor'
+  
+  // Mensagem pré-formatada para Zap do vendedor (MVP Negociação)
+  const itemName = encodeURIComponent(listing.title)
+  const itemPrice = encodeURIComponent(formatPrice(listing.price))
+  const zapMessage = `Olá ${sellerName}, vi seu anúncio no MSU (Meu Simulador Usado):\n\n*${itemName}* por ${itemPrice}\n\nAinda está disponível? Aceita proposta?`
+  const whatsappUrl = `https://wa.me/?text=${zapMessage}` // Adicionaremos o fone real se houver dps. Para o MVP redireciona p/ WhatsApp intent.
+
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '100px' }}>
+    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
       <Container>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '3rem', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 400px', gap: '3rem', alignItems: 'start' }}>
           
           {/* Esquerda: Fotos e Descrição */}
           <div>
@@ -37,6 +78,14 @@ export default async function ListingDetailPage({ params }: { params: { id: stri
             <h2 style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 800, marginBottom: '1rem' }}>Descrição do Anúncio</h2>
             <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
               {listing.description}
+            </div>
+            
+            <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(0,229,255,0.05)', borderRadius: '1rem', border: '1px solid rgba(0,229,255,0.2)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+               <ShieldCheck size={32} color="var(--accent)" />
+               <div>
+                 <h4 style={{ color: 'var(--accent)', fontWeight: 700, margin: '0 0 0.25rem 0' }}>Segurança Kings: Pague pela plataforma</h4>
+                 <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Seu dinheiro fica protegido até você receber e aprovar o produto. Nunca transfira dinheiro diretamente pela negociação no WhatsApp sem usar a plataforma Oficial.</p>
+               </div>
             </div>
           </div>
 
@@ -49,17 +98,25 @@ export default async function ListingDetailPage({ params }: { params: { id: stri
                 {formatPrice(listing.price)}
               </div>
 
-              <Button style={{ width: '100%', background: 'var(--accent)', color: '#000', padding: '1rem', fontSize: '1.1rem', marginBottom: '1rem' }}>
-                Comprar com Garantia Kings
-              </Button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+                <Button style={{ width: '100%', background: 'var(--accent)', color: '#000', padding: '1.25rem', fontSize: '1.1rem', fontWeight: 800 }}>
+                  Comprar Agora
+                </Button>
+                
+                <a href={whatsappUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                  <Button variant="secondary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '1.25rem', fontSize: '1.1rem', fontWeight: 600, border: '1px solid #25D366', color: '#25D366' }}>
+                    <MessageCircle size={20} /> Fazer Oferta
+                  </Button>
+                </a>
+              </div>
 
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '0.5rem', marginTop: '1rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '0.5rem' }}>
                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Vendedor</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ width: '40px', height: '40px', background: 'var(--bg-secondary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>👤</div>
                   <div>
-                    <div style={{ color: '#fff', fontWeight: 600 }}>{(listing as any).profiles?.full_name || 'Piloto'}</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Membro confiável</div>
+                    <div style={{ color: '#fff', fontWeight: 600 }}>{sellerName}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Membro confiável (C2C)</div>
                   </div>
                 </div>
               </div>
