@@ -192,17 +192,17 @@ export default async function HomePage() {
       {/* Hero */}
       <header style={{ position: 'relative', width: '100%', padding: 'clamp(32px, 10vw, 120px) 0 clamp(16px, 5vw, 60px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         
-        {/* GLOW DE FUNDO MAIS AGRESSIVO DA KINGS */}
+        {/* GLOW DE FUNDO MAIS AGRESSIVO E BI-COLOR DA KINGS */}
         <div style={{
           position: 'absolute',
           top: '30%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '80vw',
-          height: '80vw',
-          maxWidth: '800px',
-          maxHeight: '800px',
-          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)', // Verde Kings no topo
+          width: '90vw',
+          height: '50vw',
+          maxWidth: '900px',
+          maxHeight: '600px',
+          background: 'radial-gradient(ellipse, rgba(0, 229, 255, 0.12) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%)', // Ciano fundindo com Verde 
           filter: 'blur(80px)',
           zIndex: 0,
           pointerEvents: 'none',

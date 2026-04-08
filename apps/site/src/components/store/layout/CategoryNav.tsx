@@ -220,7 +220,7 @@ export function MobileCategoryNav() {
             boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)'
           }}
         >
-          ♻️ MSU
+          MSU
         </Link>
         {MENU_ITEMS.map((item, idx) => (
           <Link 
