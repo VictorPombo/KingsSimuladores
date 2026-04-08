@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { Container, Button } from '@kings/ui'
-import { createBrowserSupabaseClient } from '@kings/db/client'
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function MsuLogin() {
   const [email, setEmail] = useState('')
@@ -10,8 +10,10 @@ export default function MsuLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    const supabase = createBrowserSupabaseClient()
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       alert(error.message)
