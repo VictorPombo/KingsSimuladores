@@ -984,8 +984,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 1 semana</span><span>📦 11 planos</span><span>🔥 CRÍTICA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">72%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:72%"></div></div>
+        <div class="phase-pct" style="color:var(--accent)">50%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:50%"></div></div>
       </div>
       <span class="phase-status progress">Em Progresso</span>
   </div>
@@ -996,9 +996,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Login MSU (/usado/login) — Criada página protegendo garagem c/ Supabase SSR</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Explorar (/usado/produtos) — Implementar filtros funcionais da base com Supabase active filters</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Detalhe do Produto (/usado/produto/[id]) — Criar página detalhada com design original fluido</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">A rota /usado/produto/[id] deve usar generateMetadata() do Next.js para gerar Open Graph tags ricas (título, preço, imagem), otimizando o compartilhamento no WhatsApp.</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Vender (/usado/vender) — Formulário funcional enviando status 'pending_review' fake session</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Vender (+Foto) — Implementar upload real para bucket <code>marketplace-listings</code> do Supabase Storage Auth</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Vender (+Foto) — Integrar compressão Client-Side (ex: browser-image-compression) para converter para WebP e limitar a 1080p antes do envio ao Supabase Storage.</span><span class="task-priority medium">P2</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Minha Garagem (/usado/account) — Histórico de meus classificados atrelados ao usuário logado</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">MVP de Negociação: Criar botão 'Fazer Oferta' que redireciona o comprador para o WhatsApp do vendedor com mensagem pré-formatada, operando ao lado do botão 'Comprar Agora' (Split Payment).</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Inserir selo visual de segurança C2C na página do anúncio ('Segurança Kings: Pague pela plataforma...').</span><span class="task-priority medium">P2</span></div>
+      </div>
+      <div class="task-group"><div class="task-group-title">UX / Integração Kings ↔ MSU (Cross-Selling) & Arquitetura</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Revisão de RLS e Segregação: Garantir que a tabela profiles seja compartilhada (SSO), mas products (Kings) e marketplace_listings (MSU) estejam 100% isoladas via Row Level Security.</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Criar tabela marketplace_orders isolada de orders (da Kings), conectando-a à tabela commissions para gerenciar repasses do Split Payment sem misturar faturamento.</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Implementar Toggle/Link destacado na Navbar principal para navegação cruzada (Loja Kings | Usados MSU).</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Adicionar carrossel na Home da Kings com fallback de cross-sell: 'Veja os últimos usados adicionados no MSU'.</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Fallback de Estoque Esgotado: Se um produto novo da Kings ficar sem estoque, exibir botão de busca por aquele modelo no MSU.</span><span class="task-priority medium">P2</span></div>
       </div>
       <div class="task-group"><div class="task-group-title">Admin — Seção MSU Market</div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Sidebar & Layout — Criar grupo "Meu Simulador Usado" auto-nav no side AdminSidebar completado com todos os links</span><span class="task-priority critical">P0</span></div>
