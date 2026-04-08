@@ -162,3 +162,47 @@ export function CategoryNav() {
     </nav>
   )
 }
+
+export function MobileCategoryNav() {
+  return (
+    <nav style={{ 
+      background: 'rgba(6, 8, 15, 0.6)', 
+      backdropFilter: 'blur(10px)',
+      borderBottom: '1px solid var(--border)',
+      position: 'relative',
+      zIndex: 90
+    }}>
+      <div className="hide-scroll" style={{ 
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 16px',
+        paddingBottom: '8px',
+        gap: '24px',
+        overflowX: 'auto',
+        scrollSnapType: 'x mandatory'
+      }}>
+        {MENU_ITEMS.map((item, idx) => (
+          <Link 
+            key={idx} 
+            href={item.href}
+            style={{
+              display: 'block',
+              padding: '12px 4px',
+              color: 'var(--text-secondary)',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              whiteSpace: 'nowrap',
+              scrollSnapAlign: 'start',
+              flexShrink: 0
+            }}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </div>
+    </nav>
+  )
+}
