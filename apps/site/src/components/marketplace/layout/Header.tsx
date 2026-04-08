@@ -35,6 +35,10 @@ export function Header() {
           <Link href="/usado/produtos" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s' }}>
             Explorar Anúncios
           </Link>
+          <div style={{ width: '1px', height: '16px', background: 'var(--border)' }}></div>
+          <Link href="/usado/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600, transition: 'color 0.2s' }}>
+            Entrar
+          </Link>
           <Link href="/usado/account" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s' }}>
             Minha Garagem
           </Link>
