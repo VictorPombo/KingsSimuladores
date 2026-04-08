@@ -48,7 +48,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body style={{ backgroundColor: '#06080f', color: '#fff', margin: 0 }}>
+      <body>
         <StreamingBackground />
         {children}
       </body>
