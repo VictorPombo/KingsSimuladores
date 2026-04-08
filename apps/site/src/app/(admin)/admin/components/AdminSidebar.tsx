@@ -15,7 +15,8 @@ import {
   ChevronDown,
   ChevronRight,
   ExternalLink,
-  ChevronLeft
+  ChevronLeft,
+  Store
 } from 'lucide-react'
 
 // Estrutura exata decodificada da Loja Integrada
@@ -50,7 +51,6 @@ const MENU_ITEMS = [
     icon: Package,
     subItems: [
       { label: 'Listar produtos', href: '/admin/produtos' },
-      { label: 'Moderação MSU', href: '/admin/moderacao' },
       { label: 'Criar produto', href: '/admin/criar-produto' },
       { label: 'Avaliações', href: '/admin/avaliacoes' },
       { label: 'Importar', href: '/admin/importar-produtos' },
@@ -59,6 +59,17 @@ const MENU_ITEMS = [
       { label: 'Marcas', href: '/admin/marcas' },
       { label: 'Grades', href: '/admin/grades' },
       { label: 'Lixeira de produtos', href: '/admin/lixeira-produtos' }
+    ]
+  },
+  {
+    label: 'Marketplace MSU',
+    icon: Store,
+    subItems: [
+      { label: 'Dashboard MSU', href: '/admin/msu' },
+      { label: 'Anúncios', href: '/admin/msu-anuncios' },
+      { label: 'Moderação', href: '/admin/moderacao' },
+      { label: 'Vendedores', href: '/admin/msu-vendedores' },
+      { label: 'Comissões', href: '/admin/msu-comissoes' }
     ]
   },
   {

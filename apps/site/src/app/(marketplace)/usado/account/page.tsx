@@ -1,20 +1,23 @@
 // @ts-nocheck
 import React from 'react'
 import { Container } from '@kings/ui'
-import { createAdminClient } from '@kings/db'
+import { createServerSupabaseClient } from '@kings/db'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AccountPage() {
-  const supabase = createAdminClient()
-  
-  // Hardcoded seller ID for Wave 1 mockup (matches vender/route.ts)
-  const mockSellerId = 'ae8f8bc9-dc8f-470d-b6f1-839a51d679a9'
+  const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect('/usado/login')
+  }
 
   const { data: meusAnunciosData } = await supabase
     .from('marketplace_listings')
     .select('*')
-    .eq('seller_id', mockSellerId)
+    .eq('seller_id', user.id)
     .order('created_at', { ascending: false })
 
   const meusAnuncios = meusAnunciosData as any[]

@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@kings/db'
+import { createServerSupabaseClient } from '@kings/db'
 import crypto from 'crypto'
-
-// Static mock seller ID — must match the profile seeded in Supabase
-const MOCK_SELLER_ID = 'ae8f8bc9-dc8f-470d-b6f1-839a51d679a9'
 
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const supabase = createAdminClient()
+    // Precisamos do client com auth para identificar o usuário, mas vamos usar service_role ou auth client
+    const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
+    }
 
-    const { error } = await (supabase.from('marketplace_listings') as any).insert({
+    const { error } = await supabase.from('marketplace_listings').insert({
       id: crypto.randomUUID(),
       title: body.title,
       price: body.price,
@@ -18,7 +21,7 @@ export async function POST(req: Request) {
       images: [body.imageUrl],
       description: body.description,
       status: 'pending_review',
-      seller_id: MOCK_SELLER_ID,
+      seller_id: user.id,
       commission_rate: 0.1,
     })
 
