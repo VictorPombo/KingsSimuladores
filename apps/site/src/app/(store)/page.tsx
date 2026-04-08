@@ -212,18 +212,18 @@ export default async function HomePage() {
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 16px', maxWidth: '896px', margin: '0 auto' }}>
           
           {/* Badge superior */}
-          <div style={{ marginBottom: '24px', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(16, 185, 129, 0.2)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(4px)' }}>
+          <div style={{ marginBottom: 'clamp(12px, 3vw, 24px)', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(16, 185, 129, 0.2)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(4px)' }}>
             <span style={{ fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, color: 'var(--success)' }}>O REI DOS SIMULADORES!</span>
           </div>
 
           {/* Título Principal */}
-          <h1 className="font-display" style={{ fontSize: 'clamp(2.2rem, 8vw, 4.5rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '24px', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          <h1 className="font-display" style={{ fontSize: 'clamp(2.2rem, 8vw, 4.5rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'clamp(12px, 3vw, 24px)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
             A experiência de pilotar <br/>
             <span style={{ color: 'var(--success)' }}>
               começa aqui.
             </span>
           </h1>
-          <p style={{ fontSize: 'clamp(1rem, 3vw, 1.15rem)', color: 'var(--text-secondary)', maxWidth: '700px', lineHeight: 1.6, margin: '0 auto 40px' }}>
+          <p style={{ fontSize: 'clamp(1rem, 3vw, 1.15rem)', color: 'var(--text-secondary)', maxWidth: '700px', lineHeight: 1.6, margin: '0 auto clamp(24px, 6vw, 40px)' }}>
             Cockpits, volantes, pedais e ecossistemas absolutos das melhores marcas.
             Entrega para todo o Brasil com parcelamento real em até 12x.
           </p>
