@@ -65,13 +65,16 @@ export function CategoryNav() {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
 
   return (
-    <nav style={{ 
-      background: 'rgba(6, 8, 15, 0.6)', 
-      backdropFilter: 'blur(10px)',
-      borderBottom: '1px solid var(--border)',
-      position: 'relative',
-      zIndex: 90
-    }}>
+    <nav 
+      className="hidden md:block"
+      style={{ 
+        background: 'rgba(6, 8, 15, 0.6)', 
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid var(--border)',
+        position: 'relative',
+        zIndex: 90
+      }}
+    >
       <div style={{ 
         maxWidth: '1400px', 
         margin: '0 auto', 
@@ -165,13 +168,16 @@ export function CategoryNav() {
 
 export function MobileCategoryNav() {
   return (
-    <nav style={{ 
-      background: 'rgba(6, 8, 15, 0.6)', 
-      backdropFilter: 'blur(10px)',
-      borderBottom: '1px solid var(--border)',
-      position: 'relative',
-      zIndex: 90
-    }}>
+    <nav 
+      className="block md:hidden w-full hide-scroll"
+      style={{ 
+        background: 'rgba(6, 8, 15, 0.6)', 
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid var(--border)',
+        position: 'relative',
+        zIndex: 90
+      }}
+    >
       <div className="hide-scroll" style={{ 
         display: 'flex',
         alignItems: 'center',
