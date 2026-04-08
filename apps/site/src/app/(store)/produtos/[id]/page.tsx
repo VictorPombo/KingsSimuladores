@@ -136,6 +136,13 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 brand: brandName,
               }} 
             />
+            {product.stock <= 0 && (
+              <a href={`/usado/produtos?q=${encodeURIComponent(product.title)}`} style={{ display: 'block', marginTop: '16px', textDecoration: 'none' }}>
+                <div style={{ background: 'rgba(6, 182, 212, 0.1)', border: '1px solid #06b6d4', color: '#06b6d4', padding: '16px', borderRadius: 'var(--radius)', textAlign: 'center', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <span>🔍</span> Buscar versão usada no MSU
+                </div>
+              </a>
+            )}
           </div>
         </div>
       </Container>
