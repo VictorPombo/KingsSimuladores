@@ -130,6 +130,8 @@ export type Database = {
           images: string[]
           weight_kg: number | null
           dimensions_cm: Json | null
+          ncm: string | null
+          ean: string | null
           created_at: string
           updated_at: string
         }
@@ -150,6 +152,8 @@ export type Database = {
           images?: string[]
           weight_kg?: number | null
           dimensions_cm?: Json | null
+          ncm?: string | null
+          ean?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -170,6 +174,8 @@ export type Database = {
           images?: string[]
           weight_kg?: number | null
           dimensions_cm?: Json | null
+          ncm?: string | null
+          ean?: string | null
           created_at?: string
           updated_at?: string
         }

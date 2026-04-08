@@ -19,6 +19,7 @@ export async function createProduct(formData: {
   title: string; slug: string; description: string; price: number; priceCompare: number | null
   stock: number; sku: string; brandId: string; categoryId: string; status: string
   weightKg: number | null; width: number | null; height: number | null; length: number | null
+  ncm: string; ean: string
   cnpjEmitente: string
 }) {
   const supabase = await createServerSupabaseClient()
@@ -38,6 +39,8 @@ export async function createProduct(formData: {
     status: formData.status,
     weight_kg: formData.weightKg,
     dimensions_cm: { width: formData.width, height: formData.height, length: formData.length },
+    ncm: formData.ncm,
+    ean: formData.ean,
     cnpj_emitente: formData.cnpjEmitente,
   })
 

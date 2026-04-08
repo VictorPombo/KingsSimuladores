@@ -375,12 +375,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="decision-note">Melhor API, SDK em Node.js, suporte a multi-CNPJ. Confirmar antes da Fase 3.</div>
       </div>
     </div>
-    <div class="decision-card decided">
+    <div class="decision-card resolved">
       <div class="decision-icon">📦</div>
       <div>
-        <div class="decision-label accent">ERP — Não utilizar Olist</div>
-        <div class="decision-value">Estoque gerenciado internamente</div>
-        <div class="decision-note">Gestão de estoque direta no Supabase via painel admin. Sem integração ERP externa por ora.</div>
+        <div class="decision-label green">Omnichannel & ERP (Olist/Bling)</div>
+        <div class="decision-value">Integração via Hub Homologado</div>
+        <div class="decision-note">A KingsHub centraliza o cadastro e aciona a API do Olist. O Olist assume a burocracia e distribui os anúncios em massa (Shopee, ML, Amazon). O fluxo de volta usa um webhook do Olist para dar baixa no estoque da KingsHub.</div>
+      </div>
+    </div>
+    <div class="decision-card resolved">
+      <div class="decision-icon">🛡️</div>
+      <div>
+        <div class="decision-label green">Validação de Produtos</div>
+        <div class="decision-value">Regra Rígida de Cadastro</div>
+        <div class="decision-note">O formulário de produto na KingsHub exige preenchimento obrigatório e travado de NCM, EAN, Peso e Dimensões. O sistema impede o salvamento se faltar algum dado, evitando erros de rejeição nas APIs dos marketplaces.</div>
       </div>
     </div>
     <div class="decision-card decided">
@@ -908,10 +916,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 40 planos</span><span>🔥 CRÍTICA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--green)">100%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--green);width:100%"></div></div>
+        <div class="phase-pct" style="color:var(--accent)">90%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:90%"></div></div>
       </div>
-      <span class="phase-status done">Concluída</span>
+      <span class="phase-status progress">Em Progresso</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="task-group"><div class="task-group-title">UI/UX — Storefront</div>
@@ -930,6 +938,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notas Fiscais BETA — Gestão NF-e, download PDF/XML, status, KPIs</span><span class="task-priority high">P1</span></div>
       </div>
       <div class="task-group"><div class="task-group-title">Admin — Seção Produtos (8 sub-páginas)</div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Validação Rígida de Cadastro: Refatorar formulário de 'Criar Produto' exigindo preenchimento de NCM, EAN, Peso e Dimensões obrigatoriamente para compatibilidade Omnichannel.</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Integração Olist (Omnichannel): Desenvolver serviço que compila os dados do produto salvo e envia (POST) para a API do Olist espelhar nos marketplaces.</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Listar Produtos — KPIs, imagens, filtros status/estoque, badges marca, export CSV</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Criar Produto — Formulário (info geral, preço/estoque, organização marca/categoria, dados envio/CNPJ)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Categorias — Tabela com escopo de marca, criação inline</span><span class="task-priority high">P1</span></div>
@@ -1081,9 +1091,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="int-status decide">⚡ Confirmar conta</div>
     </div>
     <div class="int-card">
-      <div class="int-icon">📊</div><div class="int-name">ERP / Estoque</div>
-      <div class="int-desc">Gerenciado internamente via tabela products no Supabase + painel admin. Sem integração externa por ora. Olist pode ser adicionado futuramente se necessário.</div>
-      <div class="int-status skip">— Interno</div>
+      <div class="int-icon">📊</div><div class="int-name">ERP / Hub Omnichannel</div>
+      <div class="int-desc">Integração ativa com o ecossistema Olist (antigo Tiny). Espelhamento automático do catálogo master da KingsHub para marketplaces (Shopee, ML) e sync bidirecional de estoque e notas fiscais.</div>
+      <div class="int-status active">✓ Definido</div>
     </div>
     <div class="int-card">
       <div class="int-icon">📱</div><div class="int-name">Z-API (WhatsApp)</div>
@@ -1144,6 +1154,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/google</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML dinâmico em tempo real de produtos estruturados pra Google Shopping.</td><td>Google Merchant Center</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/tiktok</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML variante de catálogo pra TikTok Shops com estoque síncrono.</td><td>TikTok For Business</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/shipping</span></td><td><span class="int-status decide">Pendente</span></td><td>(Fase 07) Receptor passivo que detecta Encomenda "Em Trânsito/Entregue" para Zap.</td><td>Melhor Envio / Z-API</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/erp/sync</span></td><td><span class="int-status decide">Pendente</span></td><td>Recebe o payload do produto recém-cadastrado na KingsHub (com NCM, EAN, dimensões) e injeta no ERP Olist.</td><td>Olist API</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/erp</span></td><td><span class="int-status decide">Pendente</span></td><td>Webhook passivo que escuta o Olist. Ocorre venda na Shopee/ML -> dá baixa no estoque central do Supabase.</td><td>Olist API</td></tr>
     </tbody>
   </table>
 </div>

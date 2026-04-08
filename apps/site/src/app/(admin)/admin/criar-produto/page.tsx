@@ -33,6 +33,8 @@ export default function CriarProdutoPage() {
   const [width, setWidth] = useState<number | null>(null)
   const [height, setHeight] = useState<number | null>(null)
   const [length, setLength] = useState<number | null>(null)
+  const [ncm, setNcm] = useState('')
+  const [ean, setEan] = useState('')
   const [cnpjEmitente, setCnpjEmitente] = useState('')
 
   useEffect(() => {
@@ -46,11 +48,17 @@ export default function CriarProdutoPage() {
 
   async function handleSubmit() {
     setError(''); setSuccess('')
-    if (!title || !price || !brandId) { setError('Título, preço e marca são obrigatórios.'); return }
+    
+    // Regra Rígida Omnichannel
+    if (!title || !price || !brandId || !ncm || !ean || !weightKg || !width || !height || !length || !cnpjEmitente) { 
+      setError('Todos os campos fiscais, de envio (dimensões) e básicos são OBRIGATÓRIOS para a integração ao Olist/Hub.')
+      return 
+    }
+    
     startTransition(async () => {
       try {
-        await createProduct({ title, slug, description, price, priceCompare, stock, sku, brandId, categoryId, status, weightKg, width, height, length, cnpjEmitente })
-        setSuccess('Produto criado com sucesso!')
+        await createProduct({ title, slug, description, price, priceCompare, stock, sku, brandId, categoryId, status, weightKg, width, height, length, ncm, ean, cnpjEmitente })
+        setSuccess('Produto criado e pronto para o Hub Omnichannel!')
         setTimeout(() => router.push('/admin/produtos'), 1500)
       } catch (e: any) { setError(e.message) }
     })
@@ -146,18 +154,19 @@ export default function CriarProdutoPage() {
         </div>
       </div>
 
-      {/* Envio */}
+      {/* Envio e Fiscal (Rigid Validation) */}
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}><Settings size={20} color="#22d3ee" /> Dados de envio</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-          <div><label style={labelStyle}>Peso (kg)</label><input type="number" step="0.001" value={weightKg ?? ''} onChange={e => setWeightKg(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
-          <div><label style={labelStyle}>Largura (cm)</label><input type="number" value={width ?? ''} onChange={e => setWidth(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
-          <div><label style={labelStyle}>Altura (cm)</label><input type="number" value={height ?? ''} onChange={e => setHeight(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
-          <div><label style={labelStyle}>Comprimento (cm)</label><input type="number" value={length ?? ''} onChange={e => setLength(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+        <div style={{...sectionTitleStyle, color: '#f43f5e'}}><Settings size={20} /> Fiscal & Omnichannel (Obrigatórios)</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+          <div><label style={labelStyle}>NCM *</label><input type="text" placeholder="Ex: 9504.50.00" value={ncm} onChange={e => setNcm(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+          <div><label style={labelStyle}>EAN (Cód. Barras) *</label><input type="text" placeholder="Sem EAN = digite 'SEM GTIN'" value={ean} onChange={e => setEan(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+          <div><label style={labelStyle}>CNPJ Emitente *</label><input type="text" placeholder="00.000.000/0000-00" value={cnpjEmitente} onChange={e => setCnpjEmitente(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
         </div>
-        <div style={{ maxWidth: '400px' }}>
-          <label style={labelStyle}>CNPJ Emitente *</label>
-          <input type="text" placeholder="00.000.000/0000-00" value={cnpjEmitente} onChange={e => setCnpjEmitente(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+          <div><label style={labelStyle}>Peso (kg) *</label><input type="number" step="0.001" placeholder="Ex: 5.5" value={weightKg ?? ''} onChange={e => setWeightKg(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+          <div><label style={labelStyle}>Largura (cm) *</label><input type="number" placeholder="Ex: 30" value={width ?? ''} onChange={e => setWidth(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+          <div><label style={labelStyle}>Altura (cm) *</label><input type="number" placeholder="Ex: 20" value={height ?? ''} onChange={e => setHeight(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+          <div><label style={labelStyle}>Comprim. (cm) *</label><input type="number" placeholder="Ex: 40" value={length ?? ''} onChange={e => setLength(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
         </div>
       </div>
 
