@@ -233,35 +233,44 @@ export default async function HomePage() {
               QUAL É SEU NÍVEL?
             </h3>
             
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <style dangerouslySetInnerHTML={{__html: `
+              .kings-btn-pump {
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, filter 0.3s ease;
+              }
+              .kings-btn-pump:hover {
+                transform: scale(1.08) translateY(-2px) !important;
+                filter: brightness(1.2);
+              }
+            `}} />
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link href="/niveis/iniciante" style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(8px)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} className="hover:scale-105 hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
                   INICIANTE
                 </div>
               </Link>
               <Link href="/niveis/semiprofissional" style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(8px)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} className="hover:scale-105 hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
                   SEMIPROFISSIONAL
                 </div>
               </Link>
               <Link href="/niveis/premium" style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(8px)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} className="hover:scale-105 hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
                   PREMIUM
                 </div>
               </Link>
               <Link href="/niveis/profissional" style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(8px)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} className="hover:scale-105 hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
                   PROFISSIONAL
                 </div>
               </Link>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '-16px' }}>
             <Link href="/produtos" style={{ textDecoration: 'none' }}>
-              <Button size="lg" style={{ background: 'var(--success)', color: '#000', border: 'none', padding: '14px 32px', fontSize: '1rem', fontWeight: 800 }}>
+              <button style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border)', padding: '14px 32px', fontSize: '0.9rem', fontWeight: 700, borderRadius: '12px', cursor: 'pointer' }} className="kings-btn-pump hover:border-white hover:text-white">
                 VER CATÁLOGO COMPLETO
-              </Button>
+              </button>
             </Link>
           </div>
         </div>

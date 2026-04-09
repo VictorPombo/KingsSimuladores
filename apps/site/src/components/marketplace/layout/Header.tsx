@@ -32,7 +32,11 @@ export function Header() {
         </Link>
         
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <Link href="/usado/produtos" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s' }}>
+          <Link href="/" style={{ fontSize: '0.8rem', color: '#00e5ff', textTransform: 'uppercase', fontWeight: 800, padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(0, 229, 255, 0.1)', borderRadius: '8px', border: '1px solid rgba(0, 229, 255, 0.3)', transition: 'all 0.3s' }} className="hover:scale-105 hover:bg-[#00e5ff] hover:text-black hover:shadow-[0_0_15px_rgba(0,229,255,0.4)]">
+            ← Voltar à Kings
+          </Link>
+          
+          <Link href="/usado/produtos" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'all 0.3s' }} className="hover:text-white hover:scale-105">
             Explorar Anúncios
           </Link>
           <div style={{ width: '1px', height: '16px', background: 'var(--border)' }}></div>

@@ -42,24 +42,44 @@ export function Header() {
               <SearchBar />
             </div>
 
+            <style dangerouslySetInnerHTML={{__html: `
+              .kings-nav-hover {
+                display: inline-block;
+                transition: transform 0.3s ease, color 0.3s ease;
+              }
+              .kings-nav-hover:hover {
+                transform: scale(1.1) translateY(-1px);
+                color: #fff !important;
+              }
+              .kings-btn-hover {
+                transition: transform 0.3s ease;
+              }
+              .kings-btn-hover:hover {
+                transform: scale(1.08) translateY(-1px);
+              }
+            `}} />
             <nav style={{ display: 'flex', gap: '24px', alignItems: 'center', flexShrink: 0 }}>
-              <a href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #FF6B35, #FF3B5C)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)' }}>
+              <a href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #FF6B35, #FF3B5C)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)' }} className="kings-btn-hover">
                 Loja de Usados (MSU)
               </a>
-              <a href="/produtos" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              <a href="/produtos" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }} className="kings-nav-hover">
                 Produtos
               </a>
-              <a href="/categorias" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              <a href="/categorias" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }} className="kings-nav-hover">
                 Categorias
               </a>
-              <a href="/quem-somos" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                Quem somos?
+              <a href="/" style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }} className="kings-nav-hover">
+                Início
               </a>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
-              <CartIcon />
-              <Button variant="secondary" size="sm">
-                Entrar
-              </Button>
+              <div className="kings-btn-hover cursor-pointer">
+                <CartIcon />
+              </div>
+              <div className="kings-btn-hover">
+                <Button variant="secondary" size="sm">
+                  Entrar
+                </Button>
+              </div>
             </nav>
           </Container>
           
