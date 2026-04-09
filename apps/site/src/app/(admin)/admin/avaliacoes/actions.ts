@@ -3,13 +3,24 @@
 import { createAdminClient } from '@kings/db'
 import { revalidatePath } from 'next/cache'
 
-export async function hideReview(id: string) {
+const HIDDEN_PREFIX = '[HIDDEN]'
+
+export async function toggleReviewVisibility(id: string, currentComment: string | null) {
   const supabase = createAdminClient()
 
-  // Limpa o comentário mas mantém a nota (oculta o texto ofensivo)
+  let newComment: string | null = currentComment
+
+  if (currentComment?.startsWith(HIDDEN_PREFIX)) {
+    // Desocultar: remover o prefixo
+    newComment = currentComment.slice(HIDDEN_PREFIX.length)
+  } else {
+    // Ocultar: adicionar o prefixo
+    newComment = HIDDEN_PREFIX + (currentComment || '')
+  }
+
   const { error } = await supabase
     .from('seller_reviews')
-    .update({ comment: '[Comentário ocultado pelo administrador]' })
+    .update({ comment: newComment })
     .eq('id', id)
 
   if (error) {
@@ -17,7 +28,7 @@ export async function hideReview(id: string) {
   }
 
   revalidatePath('/admin/avaliacoes')
-  return { success: true }
+  return { success: true, newComment }
 }
 
 export async function deleteReview(id: string) {
