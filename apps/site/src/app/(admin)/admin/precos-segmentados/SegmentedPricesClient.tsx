@@ -142,46 +142,56 @@ export function SegmentedPricesClient({
           padding: 24px; display: flex; flex-direction: column; overflow: hidden;
         }
         
-        .product-list { display: flex; flex-direction: column; gap: 8px; }
-        .product-row { 
-          display: grid;
-          grid-template-columns: minmax(120px, 3fr) 1fr 1.5fr 1fr;
-          align-items: center; justify-content: space-between; 
-          padding: 12px; background: #24252b; border: 1px solid #3f424d80; border-radius: 8px;
-          transition: border 0.2s; gap: 16px;
+        .product-list { display: flex; flex-direction: column; gap: 12px; }
+        .product-card { 
+          display: flex; flex-direction: column; gap: 12px;
+          padding: 16px; background: #24252b; border: 1px solid #3f424d80; border-radius: 10px;
+          transition: border 0.2s, background 0.2s;
         }
-        .product-row:hover { border-color: #3f424d; background: #292a31; }
+        .product-card:hover { border-color: #8b5cf680; background: #282930; }
         
-        .prod-info { display: flex; align-items: center; gap: 12px; overflow: hidden; }
-        .prod-img { width: 44px; height: 44px; border-radius: 6px; background: #18191d; border: 1px solid #3f424d; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        .card-header { display: flex; align-items: center; gap: 16px; }
+        .prod-img { width: 48px; height: 48px; border-radius: 8px; background: #18191d; border: 1px solid #3f424d; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
         .prod-img img { width: 100%; height: 100%; object-fit: cover; }
-        .prod-details { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
-        .prod-title { color: #f8fafc; font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-        .prod-sku { color: #64748b; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .prod-details { display: flex; flex-direction: column; }
+        .prod-title { color: #f8fafc; font-size: 1rem; font-weight: 600; line-height: 1.3; }
+        .prod-sku { color: #64748b; font-size: 0.8rem; margin-top: 2px; }
         
-        .prod-price-orig { color: #94a3b8; font-size: 0.85rem; white-space: nowrap; }
+        .card-controls { 
+          display: grid; 
+          grid-template-columns: 1fr 1.5fr 1fr; 
+          align-items: center; gap: 16px; 
+          background: #1c1d22; padding: 12px 16px; border-radius: 8px; border: 1px solid #3f424d50;
+        }
+        
+        .control-block { display: flex; flex-direction: column; gap: 4px; }
+        .control-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600; }
+        
+        .prod-price-orig { color: #94a3b8; font-size: 0.95rem; font-weight: 500; }
         
         .prod-rule select { 
-          width: 100%; background: #1f2025; color: #f8fafc; padding: 8px; border-radius: 6px; 
-          font-size: 0.8rem; outline: none; cursor: pointer; border: 1px solid #3f424d;
+          width: 100%; background: #24252b; color: #f8fafc; padding: 10px 12px; border-radius: 8px; 
+          font-size: 0.9rem; outline: none; cursor: pointer; border: 1px solid #3f424d;
+          transition: border-color 0.2s;
         }
+        .prod-rule select:focus { border-color: #8b5cf6; }
         
-        .prod-final { display: flex; justify-content: flex-end; align-items: center; }
+        .prod-final { display: flex; justify-content: flex-end; align-items: center; font-size: 1.1rem; }
+        
+        .fixed-price-input-wrapper { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: flex-end; }
+        .fixed-input-box { display: flex; align-items: center; background: #1c1d22; border: 1px solid #10b981; border-radius: 6px; padding: 6px 10px; width: 120px; }
+        .fixed-input-box span { color: #10b981; font-size: 0.85rem; margin-right: 6px; font-weight: 600; }
+        .fixed-input-box input { width: 100%; background: transparent; border: none; color: #10b981; outline: none; font-size: 1rem; font-weight: 700; }
         
         @media (max-width: 1150px) {
-          .segmented-container { grid-template-columns: 1fr; } /* Coloca Grupos em cima e Tabela embaixo na vertical */
+          .segmented-container { grid-template-columns: 1fr; } 
           .sidebar { max-width: 100%; }
         }
         
-        @media (max-width: 768px) {
-          .product-row { 
-            grid-template-columns: 1fr; 
-            align-items: flex-start; gap: 10px; 
-            padding: 16px;
-          }
-          .prod-price-orig { font-size: 0.85rem; display: flex; gap: 8px; }
-          .prod-price-orig::before { content: "Original:"; color: #64748b; }
-          .prod-final { width: 100%; justify-content: flex-start; margin-top: 4px; padding-top: 12px; border-top: 1px dashed #3f424d80; }
+        @media (max-width: 650px) {
+          .card-controls { grid-template-columns: 1fr; gap: 12px; }
+          .prod-final { justify-content: flex-start; }
+          .fixed-price-input-wrapper { justify-content: flex-start; }
         }
       `}} />
 
@@ -281,7 +291,7 @@ export function SegmentedPricesClient({
               />
             </div>
 
-            {/* Nova Lista de Produtos Responsiva */}
+            {/* Nova Lista de Produtos Elevada */}
             <div className="product-list">
               {filteredProducts.map(p => {
                 const override = overrides.find(o => o.product_id === p.id && o.group_id === activeGroup.id)
@@ -300,10 +310,10 @@ export function SegmentedPricesClient({
                 else if (currentRule === 'fixed' && !isManualEditing && override?.price) finalPrice = override.price
 
                 return (
-                  <div key={p.id} className="product-row">
+                  <div key={p.id} className="product-card">
                     
-                    {/* Imagem + Titulo */}
-                    <div className="prod-info">
+                    {/* Linha 1: Info do Produto (Sem cortes) */}
+                    <div className="card-header">
                       <div className="prod-img">
                         {p.images && p.images[0] ? (
                           <img src={p.images[0]} alt={p.title} />
@@ -312,58 +322,63 @@ export function SegmentedPricesClient({
                         )}
                       </div>
                       <div className="prod-details">
-                        <div className="prod-title" title={p.title}>{p.title}</div>
+                        <div className="prod-title">{p.title}</div>
                         <div className="prod-sku">SKU: {p.sku || 'N/A'}</div>
                       </div>
                     </div>
 
-                    {/* Preço Original */}
-                    <div className="prod-price-orig">
-                      {fmt(p.price)}
-                    </div>
-                    
-                    {/* Regra Select */}
-                    <div className="prod-rule">
-                      <select 
-                        disabled={isPending}
-                        value={currentRule}
-                        onChange={(e) => handleProductRuleChange(p.id, e.target.value as any)}
-                        style={{ borderColor: currentRule === 'normal' ? '#3f424d' : currentRule === 'base_discount' ? '#8b5cf6' : '#10b981' }}
-                      >
-                        <option value="normal">Normal (Sem desc.)</option>
-                        <option value="base_discount">- {activeGroup.discount_percent}% (Base)</option>
-                        <option value="fixed">Fixo Específico</option>
-                      </select>
-                    </div>
+                    {/* Linha 2: Controles (Três Blocos) */}
+                    <div className="card-controls">
+                      {/* Bloco 1: Preço Original */}
+                      <div className="control-block">
+                        <span className="control-label">Preço Original</span>
+                        <div className="prod-price-orig">{fmt(p.price)}</div>
+                      </div>
+                      
+                      {/* Bloco 2: Regra Status */}
+                      <div className="control-block prod-rule">
+                        <span className="control-label">Regra Aplicada</span>
+                        <select 
+                          disabled={isPending}
+                          value={currentRule}
+                          onChange={(e) => handleProductRuleChange(p.id, e.target.value as any)}
+                          style={{ borderColor: currentRule === 'normal' ? '#3f424d' : currentRule === 'base_discount' ? '#8b5cf6' : '#10b981' }}
+                        >
+                          <option value="normal">Sem desconto (Inativo)</option>
+                          <option value="base_discount">Desconto Base (-{activeGroup.discount_percent}%)</option>
+                          <option value="fixed">Preço Fixo Específico</option>
+                        </select>
+                      </div>
 
-                    {/* Preço Final Display ou Input */}
-                    <div className="prod-final">
-                      {currentRule === 'fixed' ? (
-                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', background: '#1f2025', border: '1px solid #10b981', borderRadius: '6px', padding: '4px 8px', maxWidth: '100px' }}>
-                            <span style={{ color: '#10b981', fontSize: '0.8rem', marginRight: '4px' }}>R$</span>
-                            <input 
-                              type="number" 
-                              placeholder="0.00"
-                              value={localPrices[p.id] ?? (override?.price || '')}
-                              onChange={e => setLocalPrices({ ...localPrices, [p.id]: e.target.value })}
-                              style={{ width: '100%', background: 'transparent', border: 'none', color: '#10b981', outline: 'none', fontSize: '0.9rem', fontWeight: 'bold' }}
-                            />
+                      {/* Bloco 3: Preço Final */}
+                      <div className="control-block prod-final">
+                        <span className="control-label" style={{ textAlign: 'right', display: 'block', width: '100%', marginBottom: '4px' }}>Preço Final</span>
+                        {currentRule === 'fixed' ? (
+                          <div className="fixed-price-input-wrapper">
+                            <div className="fixed-input-box">
+                              <span>R$</span>
+                              <input 
+                                type="number" 
+                                placeholder="0.00"
+                                value={localPrices[p.id] ?? (override?.price || '')}
+                                onChange={e => setLocalPrices({ ...localPrices, [p.id]: e.target.value })}
+                              />
+                            </div>
+                            {isManualEditing && (
+                              <button onClick={() => handleFixedPriceSave(p.id)} disabled={isPending}
+                                style={{ padding: '8px', background: '#10b98120', border: '1px solid #10b981', borderRadius: '6px', color: '#10b981', cursor: 'pointer', display: 'flex' }}>
+                                <Save size={16} />
+                              </button>
+                            )}
                           </div>
-                          {isManualEditing && (
-                            <button onClick={() => handleFixedPriceSave(p.id)} disabled={isPending}
-                              style={{ padding: '6px', background: '#10b98120', border: '1px solid #10b981', borderRadius: '6px', color: '#10b981', cursor: 'pointer', display: 'flex' }}>
-                              <Save size={14} />
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        <span style={{ fontSize: '0.9rem', fontWeight: currentRule === 'base_discount' ? 600 : 400, color: currentRule === 'base_discount' ? '#8b5cf6' : '#94a3b8' }}>
-                          {fmt(finalPrice)}
-                        </span>
-                      )}
-                    </div>
+                        ) : (
+                          <span style={{ fontWeight: currentRule === 'base_discount' ? 700 : 500, color: currentRule === 'base_discount' ? '#8b5cf6' : '#94a3b8' }}>
+                            {fmt(finalPrice)}
+                          </span>
+                        )}
+                      </div>
 
+                    </div>
                   </div>
                 )
               })}
