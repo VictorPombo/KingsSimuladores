@@ -16,7 +16,11 @@ import {
   ChevronRight,
   ExternalLink,
   ChevronLeft,
-  Store
+  Store,
+  LayoutDashboard,
+  Tag,
+  ShieldCheck,
+  Users
 } from 'lucide-react'
 
 // Estrutura separada por ecossistema
@@ -73,17 +77,11 @@ const MENU_SECTIONS = [
     title: 'MARKETPLACE MSU',
     color: '#06b6d4',
     items: [
-      {
-        label: 'Marketplace MSU',
-        icon: Store,
-        subItems: [
-          { label: 'Dashboard MSU', href: '/admin?tab=msu' },
-          { label: 'Anúncios', href: '/admin/msu-anuncios' },
-          { label: 'Moderação', href: '/admin/moderacao' },
-          { label: 'Vendedores', href: '/admin/msu-vendedores' },
-          { label: 'Comissões', href: '/admin/msu-comissoes' }
-        ]
-      }
+      { label: 'Dashboard MSU', icon: LayoutDashboard, href: '/admin?tab=msu' },
+      { label: 'Anúncios', icon: Tag, href: '/admin/msu-anuncios' },
+      { label: 'Moderação', icon: ShieldCheck, href: '/admin/moderacao' },
+      { label: 'Vendedores', icon: Users, href: '/admin/msu-vendedores' },
+      { label: 'Comissões MSU', icon: DollarSign, href: '/admin/msu-comissoes' }
     ]
   },
   {
@@ -269,7 +267,7 @@ export function AdminSidebar() {
                             fontWeight: isRootActive ? 600 : 500,
                             background: isRootActive ? `${section.color}15` : 'transparent',
                             transition: 'all 0.2s',
-                            borderLeft: isRootActive ? \`3px solid \${section.color}\` : '3px solid transparent'
+                            borderLeft: isRootActive ? `3px solid ${section.color}` : '3px solid transparent'
                           }}
                         >
                           <Icon size={18} strokeWidth={isRootActive ? 2.5 : 2} style={{ color: isRootActive ? section.color : '#94a3b8' }} />
