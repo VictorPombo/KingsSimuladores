@@ -29,7 +29,7 @@ export async function applySegmentedPrices(products: Record<string, any>[]) {
     // 3. Get customer group configuration
     const { data: group } = await supabase
       .from('customer_groups')
-      .select('discount_percent, apply_to_all_products')
+      .select('name, discount_percent, apply_to_all_products')
       .eq('id', profile.customer_group_id)
       .single()
 
