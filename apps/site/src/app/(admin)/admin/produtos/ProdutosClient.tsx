@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Search, Plus, Package, Eye, Edit2, Trash2, Download, Image, AlertCircle } from 'lucide-react'
+import React, { useState, useTransition } from 'react'
+import { Search, Plus, Package, Eye, Edit2, Trash2, Download, Image, AlertCircle, Power, MoreVertical, Archive } from 'lucide-react'
+import { toggleProductStatus, deleteProduct } from './actions'
 
 type Product = {
   id: string; title: string; slug: string; sku: string | null; price: number; price_compare: number | null
@@ -19,6 +20,19 @@ export function ProdutosClient({ products }: { products: Product[] }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [stockFilter, setStockFilter] = useState('all')
+  const [isPending, startTransition] = useTransition()
+  
+  const handleToggleStatus = (id: string, current: string) => {
+    if(confirm(current === 'active' ? 'Desativar este produto?' : 'Ativar este produto?')) {
+      startTransition(() => { toggleProductStatus(id, current) })
+    }
+  }
+
+  const handleDelete = (id: string) => {
+    if(confirm('Tem certeza que deseja arquivar/remover este produto? Ele não aparecerá mais na loja.')) {
+      startTransition(() => { deleteProduct(id) })
+    }
+  }
 
   const filtered = products.filter(p => {
     const matchSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,8 +121,8 @@ export function ProdutosClient({ products }: { products: Product[] }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
             <thead>
               <tr>
-                {['', 'Produto', 'SKU', 'Marca', 'Preço', 'Estoque', 'Status', 'Criado'].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#1f2025', whiteSpace: 'nowrap' }}>{h}</th>
+                {['', 'Produto', 'SKU', 'Marca', 'Preço', 'Estoque', 'Status', 'Criado', ''].map((h, i) => (
+                  <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#1f2025', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -164,6 +178,19 @@ export function ProdutosClient({ products }: { products: Product[] }) {
                     </td>
                     <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       {new Date(p.created_at).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', opacity: isPending ? 0.5 : 1 }}>
+                        <button title="Editar" onClick={() => alert('Edição completa será construída em breve na rota de Criar Produto!')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}>
+                          <Edit2 size={16} />
+                        </button>
+                        <button title={p.status === 'active' ? 'Desativar' : 'Ativar'} onClick={() => handleToggleStatus(p.id, p.status)} style={{ background: 'transparent', border: 'none', color: p.status === 'active' ? '#ef4444' : '#10b981', cursor: 'pointer', padding: '4px' }}>
+                          <Power size={16} />
+                        </button>
+                        <button title="Arquivar / Mover para Lixeira" onClick={() => handleDelete(p.id)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}>
+                          <Archive size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
