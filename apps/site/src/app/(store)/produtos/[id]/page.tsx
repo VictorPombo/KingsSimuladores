@@ -5,6 +5,7 @@ import { formatPrice } from '@kings/utils'
 import { createServerSupabaseClient } from '@kings/db'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { applySegmentedPrices } from '@/lib/pricing'
 
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 
@@ -66,8 +67,12 @@ function ProductJsonLd({ product }: { product: any }) {
 }
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await getProduct(params.id)
+  let product = await getProduct(params.id)
   if (!product) notFound()
+
+  // Injetar lógicas de preços baseados no grupo
+  const [segmentedProduct] = await applySegmentedPrices([product])
+  product = segmentedProduct || product
 
   const hasDiscount = product.price_compare && product.price_compare > product.price
   const originalPrice = hasDiscount ? product.price_compare : product.price

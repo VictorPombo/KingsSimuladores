@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@kings/db'
 import { formatPrice } from '@kings/utils'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { applySegmentedPrices } from '@/lib/pricing'
 
 import { CatalogFilters } from './CatalogFilters'
 
@@ -68,7 +69,10 @@ export default async function ProductsPage({
     }
 
     const { data } = await query.order('created_at', { ascending: false })
-    products = data || []
+    
+    // Injeta a lógica de preços segmentados antes de mandar para a view
+    products = await applySegmentedPrices(data || [])
+    
   } catch (err) {
     console.error("Erro buscando produtos:", err)
   }
