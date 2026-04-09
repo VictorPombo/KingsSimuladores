@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useTransition } from 'react'
 import { Plus, Folder, Loader2, Save, X, Settings2, ShieldAlert } from 'lucide-react'
+import { createCategoryAction } from './actions'
 
 type Category = { id: string; name: string; slug: string; brand_scope: string | null; sort_order: number; parent_id: string | null }
 
@@ -13,20 +14,23 @@ const inputStyle: React.CSSProperties = {
 
 export function CategoriasClient({ categories }: { categories: Category[] }) {
   const [showForm, setShowForm] = useState(false)
-  const [isPending, setIsPending] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [brandScope, setBrandScope] = useState<string>('')
 
   const handleSave = () => {
-    setIsPending(true)
-    // Server action wireup would go here. For now we simulate save config.
-    setTimeout(() => {
-      setIsPending(false)
-      setShowForm(false)
-      setName('')
-      setSlug('')
-    }, 800)
+    startTransition(async () => {
+      const res = await createCategoryAction({ name, slug, brand_scope: brandScope || null })
+      if (res.success) {
+        setShowForm(false)
+        setName('')
+        setSlug('')
+        setBrandScope('')
+      } else {
+        alert('Erro ao salvar: ' + res.error)
+      }
+    })
   }
 
   return (
