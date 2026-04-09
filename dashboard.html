@@ -370,9 +370,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="decision-card decided">
       <div class="decision-icon">🧾</div>
       <div>
-        <div class="decision-label accent">NF-e — A Decidir</div>
-        <div class="decision-value">NFe.io recomendado</div>
-        <div class="decision-note">Melhor API, SDK em Node.js, suporte a multi-CNPJ. Confirmar antes da Fase 3.</div>
+        <div class="decision-label green">NF-e — Centralizada</div>
+        <div class="decision-value">100% via Olist</div>
+        <div class="decision-note">As emissões de notas fiscais de venda serão engatilhadas de forma passiva direto para o ERP Olist para centralizar tudo lá nativamente.</div>
       </div>
     </div>
     <div class="decision-card resolved">
@@ -452,7 +452,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <span style="font-size:.82rem;line-height:1.8">
         ⬜ <strong>Mercado Pago</strong> — <code>MP_ACCESS_TOKEN</code>, <code>MP_PUBLIC_KEY</code>, <code>MP_WEBHOOK_SECRET</code> → <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" style="color:var(--accent)">Painel MP</a><br>
         ⬜ <strong>Melhor Envio</strong> — <code>MELHOR_ENVIO_TOKEN</code> → <a href="https://melhorenvio.com.br/painel/integracoes/tokens" target="_blank" style="color:var(--accent)">Painel ME</a><br>
-        ⬜ <strong>NFe.io</strong> — <code>NFEIO_API_KEY</code>, <code>NFEIO_COMPANY_ID_*</code> → <a href="https://nfe.io" target="_blank" style="color:var(--accent)">nfe.io/account</a><br>
+        ⬜ <strong>Olist ERP</strong> — <code>OLIST_API_KEY</code> → Emissão de Notas Centralizada<br>
         ⬜ <strong>Z-API (WhatsApp)</strong> — <code>ZAPI_INSTANCE_ID</code>, <code>ZAPI_TOKEN</code>, <code>ZAPI_CLIENT_TOKEN</code> → <a href="https://z-api.io" target="_blank" style="color:var(--accent)">z-api.io</a><br>
         ⬜ <strong>Resend (E-mail)</strong> — <code>RESEND_API_KEY</code> → <a href="https://resend.com/api-keys" target="_blank" style="color:var(--accent)">resend.com/api-keys</a><br>
         <span style="color:var(--text-muted);font-size:.75rem">✅ Supabase — Já conectado | ✅ CRON_SECRET — Já configurado</span>
@@ -473,10 +473,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="env-row"><span class="env-key">MELHOR_ENVIO_TOKEN</span><span class="env-val"><span class="placeholder">Bearer token da conta Melhor Envio</span></span></div>
     <div class="env-row"><span class="env-key">MELHOR_ENVIO_SANDBOX</span><span class="env-val">true <span class="masked">(mudar para false em produção)</span></span></div>
 <br>
-    <div class="env-section-label">── NF-e (NFe.io — recomendado)</div>
-    <div class="env-row"><span class="env-key">NFEIO_API_KEY</span><span class="env-val"><span class="placeholder">Chave da API NFe.io (nfe.io/account)</span></span></div>
-    <div class="env-row"><span class="env-key">NFEIO_COMPANY_ID_KINGS</span><span class="env-val"><span class="placeholder">ID da empresa Kings no NFe.io</span></span></div>
-    <div class="env-row"><span class="env-key">NFEIO_COMPANY_ID_MSU</span><span class="env-val"><span class="placeholder">ID da empresa MSU no NFe.io (se CNPJ diferente)</span></span></div>
+    <div class="env-section-label">── Olist (ERP & Hub)</div>
+    <div class="env-row"><span class="env-key">OLIST_API_KEY</span><span class="env-val"><span class="placeholder">Chave da API Olist (para NF-e)</span></span></div>
 <br>
     <div class="env-section-label">── Z-API (WhatsApp)</div>
     <div class="env-row"><span class="env-key">ZAPI_INSTANCE_ID</span><span class="env-val"><span class="placeholder">ID da instância Z-API</span></span></div>
@@ -669,7 +667,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="tech-item"><div class="tech-name">Turborepo</div><div class="tech-role">Monorepo (3 apps)</div></div>
     <div class="tech-item"><div class="tech-name">Mercado Pago</div><div class="tech-role">Pagamentos + Split</div></div>
     <div class="tech-item"><div class="tech-name">Vercel</div><div class="tech-role">3 projetos em deploy</div></div>
-    <div class="tech-item"><div class="tech-name">NFe.io</div><div class="tech-role">NF-e automática</div></div>
+    <div class="tech-item"><div class="tech-name">Olist</div><div class="tech-role">Hub / ERP / NF-e</div></div>
     <div class="tech-item"><div class="tech-name">Melhor Envio</div><div class="tech-role">Frete + Etiqueta</div></div>
     <div class="tech-item"><div class="tech-name">Z-API</div><div class="tech-role">WhatsApp</div></div>
     <div class="tech-item"><div class="tech-name">Resend</div><div class="tech-role">E-mail transacional</div></div>
@@ -786,7 +784,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <span class="phase-number font-display">03</span>
       <div class="phase-info">
         <div class="phase-name">Integrações Críticas</div>
-        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 ALTA</span><span>⚡ Confirmar NFe.io antes de iniciar</span></div>
+        <div class="phase-meta"><span>⏱ 2 semanas</span><span>📦 5 planos</span><span>🔥 ALTA</span><span>⚡ Automação webhook Olist</span></div>
       </div>
       <div class="phase-progress">
         <div class="phase-pct" style="color:var(--green)">100%</div>
@@ -795,10 +793,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <span class="phase-status done">Concluído</span>
   </div>
     <div class="phase-body"><div class="phase-content">
-      <div class="alert warn">⚠️ <strong style="color:var(--yellow)">Antes de iniciar esta fase:</strong> Criar conta no NFe.io (nfe.io), cadastrar os CNPJs das empresas e adicionar NFEIO_API_KEY no .env.local e na Vercel.</div>
+      <div class="alert warn">⚠️ <strong style="color:var(--yellow)">Antes de iniciar esta fase:</strong> Validar webhook Olist para comunicação unidirecional e emissão de notas.</div>
       <div class="task-group"><div class="task-group-title">Tasks</div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Webhook Mercado Pago em /api/webhooks/mercadopago — atualiza orders.status + dispara triggers</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Emissão de NF-e via NFe.io — automática ao status 'paid'. Dupla para pedidos mistos (2 CNPJs)</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Emissão de NF-e via Olist ERP — Webhook de faturamento enviado ao status 'paid'.</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Geração de etiqueta Melhor Envio após pagamento confirmado</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações WhatsApp via Z-API: pedido confirmado, enviado, entregue</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações E-mail via Resend: confirmação + NF em PDF anexo</span><span class="task-priority high">P1</span></div>
@@ -981,7 +979,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Domínio Próprio — Status DNS, SSL, registros A/CNAME</span><span class="task-priority medium">P2</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Chave para API — Visualização segura, cópia, variáveis de ambiente</span><span class="task-priority medium">P2</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gerenciador de Arquivos — Drag-and-drop, buckets Supabase Storage</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Aplicativos — 8 integrações com status (MP, Melhor Envio, Z-API, Resend, NFe.io, Google, TikTok, GA)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Aplicativos — 8 integrações com status (MP, Melhor Envio, Z-API, Resend, Olist, Google, TikTok, GA)</span><span class="task-priority medium">P2</span></div>
       </div>
       </div>
     </div></div>
@@ -1090,11 +1088,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="int-desc">Cotação em tempo real na página de produto. Geração de etiqueta após pagamento. Rastreio via webhook.</div>
       <div class="int-status active">✓ Definido</div>
     </div>
-    <div class="int-card">
-      <div class="int-icon">🧾</div><div class="int-name">NFe.io</div>
-      <div class="int-desc">Emissão automática por CNPJ. NF dupla para pedidos com 2 CNPJs. PDF enviado por e-mail ao comprador.<br><span style="font-size:10px;color:var(--mu)">Razão Social: SABRINA PRADO ALBERTONI LTDA — ME (Simples Nacional)</span></div>
-      <div class="int-status decide">⚡ Confirmar conta</div>
-    </div>
+
     <div class="int-card">
       <div class="int-icon">📊</div><div class="int-name">ERP / Hub Omnichannel</div>
       <div class="int-desc">Integração ativa com o ecossistema Olist (antigo Tiny). Espelhamento automático do catálogo master da KingsHub para marketplaces (Shopee, ML) e sync bidirecional de estoque e notas fiscais.</div>
@@ -1151,7 +1145,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <thead><tr><th>Endpoint da Plataforma</th><th>Status</th><th>Função Central</th><th>Integração Base</th></tr></thead>
     <tbody>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/checkout</span></td><td><span class="int-status active">Construído</span></td><td>Processa pagamentos, calcula regras de split de frete/valor no cart.</td><td>Mercado Pago</td></tr>
-      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/webhooks/mercadopago</span></td><td><span class="int-status active">Construído</span></td><td>Confirma pagamentos, deduz estoque, limpa carrinho ativo, envia NFe e Notificações (Z-API/Resend).</td><td>Mercado Pago</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/webhooks/mercadopago</span></td><td><span class="int-status active">Construído</span></td><td>Confirma pagamentos, deduz estoque, limpa carrinho, dispara ERP Olist e Notificações.</td><td>Mercado Pago</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/cron/recover-carts</span></td><td><span class="int-status active">Construído</span></td><td>Cron Job faseado (1h WhatsApp / 24h Email) para funil de retenção de funil.</td><td>Vercel Cron</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/shipping</span></td><td><span class="int-status active">Construído</span></td><td>Estimativa de múltiplos fretes (PAC/Sedex/Jadlog/Azul) baseado em CEP e Dimensão.</td><td>Melhor Envio</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/vender</span></td><td><span class="int-status active">Construído</span></td><td>Motor de submissão + Moderador das listagens C2C do APP MSU (Meu Simulador Usado).</td><td>MSU SubApp</td></tr>
@@ -1178,7 +1172,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <tr><td>Webhook MP duplicado</td><td><span class="risk-level high">Alta</span></td><td><span class="risk-level medium">Médio</span></td><td>Idempotency key: checar payment_id em orders antes de processar</td></tr>
       <tr><td>SEO perder ranking na migração</td><td><span class="risk-level high">Alta</span></td><td><span class="risk-level high">Alto</span></td><td>301 redirects completos. Schema markup JSON-LD. Sitemap dinâmico</td></tr>
       <tr><td>Migração de dados corrompida</td><td><span class="risk-level medium">Média</span></td><td><span class="risk-level high">Alto</span></td><td>Scripts testados em staging. Backup completo antes da execução. Rollback plan</td></tr>
-      <tr><td>NFe.io não configurado no prazo</td><td><span class="risk-level medium">Média</span></td><td><span class="risk-level high">Alto</span></td><td>Criar conta NFe.io antes de iniciar Fase 3. Emissão manual como fallback temporário</td></tr>
+      <tr><td>Integração Olist com atraso</td><td><span class="risk-level medium">Média</span></td><td><span class="risk-level high">Alto</span></td><td>Emissão manual direto no painel do Olist como fallback</td></tr>
     </tbody>
   </table>
 </div>
@@ -1205,7 +1199,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <footer class="footer">
   <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date">07 de Abril de 2026</span></p>
   <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (1 site unificado)</p>
-  <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Site unificado · Lançamento simultâneo · Supabase Pro · Admin em /admin · NFe.io · Sem Olist · Estoque interno</p>
+  <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Site unificado · Lançamento simultâneo · Supabase Pro · Admin em /admin · NFs via Olist · Estoque interno</p>
 </footer>
 <br>
 <div style="max-width: 1400px; margin: 0 auto; padding: 20px 32px; background: rgba(255, 59, 92, 0.1); border: 1px solid var(--danger); border-radius: var(--radius-sm); margin-bottom: 24px;">
