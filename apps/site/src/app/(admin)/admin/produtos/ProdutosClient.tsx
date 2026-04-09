@@ -20,6 +20,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [stockFilter, setStockFilter] = useState('all')
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   
   const handleToggleStatus = (id: string, current: string) => {
@@ -28,10 +29,8 @@ export function ProdutosClient({ products }: { products: Product[] }) {
     }
   }
 
-  const handleDelete = (id: string) => {
-    if(confirm('Tem certeza que deseja arquivar/remover este produto? Ele não aparecerá mais na loja.')) {
-      startTransition(() => { deleteProduct(id) })
-    }
+  const handleDeleteClick = (id: string) => {
+    setDeleteConfirmId(id)
   }
 
   const filtered = products.filter(p => {
@@ -121,9 +120,10 @@ export function ProdutosClient({ products }: { products: Product[] }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
             <thead>
               <tr>
-                {['', 'Produto', 'SKU', 'Marca', 'Preço', 'Estoque', 'Status', 'Criado', ''].map((h, i) => (
+                {['', 'Produto', 'SKU', 'Marca', 'Preço', 'Estoque', 'Status', 'Criado'].map((h, i) => (
                   <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#1f2025', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
+                <th style={{ position: 'sticky', right: 0, padding: '12px 16px', textAlign: 'right', background: '#1f2025', boxShadow: '-4px 0 10px rgba(0,0,0,0.1)' }}>AÇÕES</th>
               </tr>
             </thead>
             <tbody>
@@ -179,7 +179,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
                     <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       {new Date(p.created_at).toLocaleDateString('pt-BR')}
                     </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                    <td style={{ position: 'sticky', right: 0, padding: '12px 16px', textAlign: 'right', background: '#1e1e1e', boxShadow: '-4px 0 10px rgba(0,0,0,0.2)' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', opacity: isPending ? 0.5 : 1 }}>
                         <button title="Editar" onClick={() => alert('Edição completa será construída em breve na rota de Criar Produto!')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}>
                           <Edit2 size={16} />
@@ -187,7 +187,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
                         <button title={p.status === 'active' ? 'Desativar' : 'Ativar'} onClick={() => handleToggleStatus(p.id, p.status)} style={{ background: 'transparent', border: 'none', color: p.status === 'active' ? '#ef4444' : '#10b981', cursor: 'pointer', padding: '4px' }}>
                           <Power size={16} />
                         </button>
-                        <button title="Arquivar / Mover para Lixeira" onClick={() => handleDelete(p.id)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}>
+                        <button title="Arquivar / Mover para Lixeira" onClick={() => handleDeleteClick(p.id)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}>
                           <Archive size={16} />
                         </button>
                       </div>
@@ -199,6 +199,40 @@ export function ProdutosClient({ products }: { products: Product[] }) {
           </table>
         </div>
       </div>
+
+      {/* Modal Card Fix para Deleção */}
+      {deleteConfirmId && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#1f2025', padding: '24px', borderRadius: '12px', width: '400px', border: '1px solid #3f424d', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
+            <AlertCircle color="#ef4444" size={32} style={{ marginBottom: '16px' }} />
+            <h3 style={{ margin: '0 0 8px 0', color: '#fff', fontSize: '1.2rem' }}>Deseja remover este produto?</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '24px', lineHeight: '1.5' }}>
+              Esta ação enviará o produto para a lixeira (arquivado) e ele não aparecerá mais no catálogo KINGS ou MSU. Tem certeza absoluta?
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setDeleteConfirmId(null)} 
+                style={{ background: 'transparent', color: '#fff', border: '1px solid #3f424d', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={() => {
+                  startTransition(() => { deleteProduct(deleteConfirmId); setDeleteConfirmId(null) })
+                }} 
+                style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, transition: 'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#dc2626'}
+                onMouseLeave={e => e.currentTarget.style.background = '#ef4444'}
+              >
+                {isPending ? 'Removendo...' : 'Sim, Remover'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
