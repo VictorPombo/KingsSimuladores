@@ -199,6 +199,7 @@ export function AdminSidebar() {
           .hide-scroll::-webkit-scrollbar { display: none; }
           .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
           .sidebar-item-hover:hover { background: rgba(255,255,255,0.05); }
+          .sidebar-item-hover:focus, button:focus { outline: none !important; }
           .sidebar-sub-hover:hover { background: rgba(255,255,255,0.08); color: #fff; }
         `}} />
 
@@ -236,6 +237,7 @@ export function AdminSidebar() {
                           width: '100%',
                           background: 'transparent',
                           border: 'none',
+                          outline: 'none',
                           color: isOpen ? '#fff' : '#cbd5e1',
                           padding: '12px',
                           borderRadius: '8px',
@@ -262,15 +264,15 @@ export function AdminSidebar() {
                             padding: '12px',
                             borderRadius: '8px',
                             display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        fontWeight: isRootActive ? 600 : 500,
-                        background: isRootActive ? 'rgba(34, 211, 238, 0.1)' : 'transparent',
-                        transition: 'all 0.2s',
-                        borderLeft: isRootActive ? '3px solid #22d3ee' : '3px solid transparent'
-                      }}
-                    >
-                      <Icon size={18} strokeWidth={isRootActive ? 2.5 : 2} style={{ color: isRootActive ? '#22d3ee' : '#94a3b8' }} />
+                            alignItems: 'center',
+                            gap: '12px',
+                            fontWeight: isRootActive ? 600 : 500,
+                            background: isRootActive ? `${section.color}15` : 'transparent',
+                            transition: 'all 0.2s',
+                            borderLeft: isRootActive ? \`3px solid \${section.color}\` : '3px solid transparent'
+                          }}
+                        >
+                          <Icon size={18} strokeWidth={isRootActive ? 2.5 : 2} style={{ color: isRootActive ? section.color : '#94a3b8' }} />
                       <span style={{ fontSize: '0.9rem' }}>{item.label}</span>
                     </div>
                   </a>
@@ -327,7 +329,7 @@ export function AdminSidebar() {
                               >
                                 {sub.label}
                                 {isActive && (
-                                  <span style={{ float: 'right', width: '4px', height: '4px', background: '#25d366', borderRadius: '50%', marginTop: '6px' }} />
+                                  <span style={{ float: 'right', width: '4px', height: '4px', background: section.color, borderRadius: '50%', marginTop: '6px' }} />
                                 )}
                               </div>
                             </a>
