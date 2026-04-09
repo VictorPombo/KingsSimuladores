@@ -103,7 +103,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
     const sc = STATUS_MAP[p.status] || { label: p.status, color: '#94a3b8' }
     return (
       <div style={{ display: 'flex', gap: '8px', opacity: isPending ? 0.5 : 1 }}>
-        <button title="Editar" onClick={() => alert('Edição completa será construída em breve!')}
+        <button title="Editar" onClick={() => window.location.href = `/admin/produtos/${p.id}`}
           style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#94a3b8', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
           <Edit2 size={14} />
         </button>
