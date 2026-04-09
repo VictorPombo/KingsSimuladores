@@ -257,7 +257,7 @@ export default function ImportarProdutosPage() {
                   <span style={{ color: '#10b981' }}>•</span>
                   <span style={{ color: '#94a3b8', fontFamily: 'monospace' }}>{h}</span>
                   <span style={{ color: '#4a4d57' }}>
-                    {h === 'titulo' ? '(obrigatório)' : h === 'slug' ? '(obrigatório)' : h === 'preco' ? '(obrigatório)' : '(opcional)'}
+                    {h === 'titulo' ? '(obrigatório)' : h === 'slug' ? '(obrigatório)' : h === 'preco' ? '(obrigatório)' : h === 'sku' ? '(obrigatório)' : h === 'marca' ? '(obrigatório)' : '(opcional)'}
                   </span>
                 </div>
               ))}

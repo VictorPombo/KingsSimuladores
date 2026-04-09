@@ -31,8 +31,8 @@ export async function importProducts(rows: CsvRow[]) {
       continue
     }
 
-    if (!r.titulo || !r.slug || !r.preco) {
-      results.push({ row: i + 1, title: r.titulo || '(vazio)', status: 'error', msg: 'Título, slug ou preço ausente' })
+    if (!r.titulo || !r.slug || !r.preco || !r.sku) {
+      results.push({ row: i + 1, title: r.titulo || '(vazio)', status: 'error', msg: 'Título, slug, preço ou SKU ausente' })
       continue
     }
 
