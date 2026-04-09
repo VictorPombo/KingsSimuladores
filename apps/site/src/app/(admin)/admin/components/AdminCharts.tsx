@@ -62,7 +62,7 @@ export function RevenueChart({ isMsu }: { isMsu: boolean }) {
           <Tooltip 
             contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
             itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
-            formatter={(value: number) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value), 'Faturamento']}
+            formatter={(value: any) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0), 'Faturamento']}
           />
           <Area 
             type="monotone" 
