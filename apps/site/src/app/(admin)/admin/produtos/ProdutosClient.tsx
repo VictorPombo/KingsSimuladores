@@ -25,7 +25,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 900)
+    const check = () => setIsMobile(window.innerWidth < 1200)
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
@@ -190,10 +190,10 @@ export function ProdutosClient({ products }: { products: Product[] }) {
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            {['', 'Produto', 'SKU', 'Marca', 'Preço', 'Estoque', 'Status', 'Criado', 'Ações'].map((h, i) => (
+            {['', 'Produto', 'Marca', 'Preço', 'Estoque', 'Status', 'Ações'].map((h, i) => (
               <th key={i} style={{
-                padding: '12px 16px', textAlign: i === 8 ? 'right' : 'left',
-                fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b',
+                padding: '10px 12px', textAlign: i === 6 ? 'right' : 'left',
+                fontSize: '0.68rem', fontWeight: 'bold', color: '#64748b',
                 textTransform: 'uppercase', letterSpacing: '0.5px', background: '#1f2025',
                 whiteSpace: 'nowrap',
               }}>{h}</th>
@@ -202,41 +202,40 @@ export function ProdutosClient({ products }: { products: Product[] }) {
         </thead>
         <tbody>
           {filtered.length === 0 ? (
-            <tr><td colSpan={9} style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
+            <tr><td colSpan={7} style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
               <Package size={28} style={{ margin: '0 auto 8px', display: 'block', opacity: 0.4 }} />
               Nenhum produto encontrado.
             </td></tr>
           ) : filtered.map(p => {
-            const sc = STATUS_MAP[p.status] || { label: p.status, color: '#94a3b8' }
             return (
               <tr key={p.id} style={{ borderBottom: '1px solid #3f424d', transition: 'background 0.15s' }}
                 onMouseEnter={(e: any) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                 onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}>
-                <td style={{ padding: '12px 16px', width: '56px' }}>
-                  {renderProductImage(p)}
+                <td style={{ padding: '10px 12px', width: '48px' }}>
+                  {renderProductImage(p, 36)}
                 </td>
-                <td style={{ padding: '12px 16px', maxWidth: '220px' }}>
-                  <div style={{ color: '#e2e8f0', fontSize: '0.85rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
-                  <div style={{ color: '#64748b', fontSize: '0.7rem', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.slug}</div>
+                <td style={{ padding: '10px 12px' }}>
+                  <div style={{ color: '#e2e8f0', fontSize: '0.83rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{p.title}</div>
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '2px' }}>
+                    {p.sku && <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#64748b' }}>{p.sku}</span>}
+                    <span style={{ color: '#4a4d57', fontSize: '0.65rem' }}>•</span>
+                    <span style={{ fontSize: '0.65rem', color: '#4a4d57' }}>{new Date(p.created_at).toLocaleDateString('pt-BR')}</span>
+                  </div>
                 </td>
-                <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontSize: '0.8rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>{p.sku || '-'}</td>
-                <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
                   {renderBrandBadge(p.brand_name)}
                 </td>
-                <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
-                  <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#e2e8f0', fontWeight: 600 }}>R$ {p.price.toFixed(2)}</div>
-                  {p.price_compare && <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#64748b', textDecoration: 'line-through' }}>R$ {p.price_compare.toFixed(2)}</div>}
+                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.83rem', color: '#e2e8f0', fontWeight: 600 }}>R$ {p.price.toFixed(2)}</div>
+                  {p.price_compare && <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#64748b', textDecoration: 'line-through' }}>R$ {p.price_compare.toFixed(2)}</div>}
                 </td>
-                <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
                   {renderStockBadge(p.stock)}
                 </td>
-                <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
                   {renderStatusBadge(p.status)}
                 </td>
-                <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
-                  {new Date(p.created_at).toLocaleDateString('pt-BR')}
-                </td>
-                <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                <td style={{ padding: '10px 12px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                   {renderActions(p)}
                 </td>
               </tr>
