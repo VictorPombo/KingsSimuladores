@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useState, useTransition } from 'react'
-import { Plus, Edit2, Trash2, Tag, Percent, X, Search, Save, Package, Globe, MousePointerClick } from 'lucide-react'
+import { Plus, Edit2, Trash2, Tag, Percent, X, Search, Save, Package, Globe, MousePointerClick, Image as ImageIcon } from 'lucide-react'
 import { createCustomerGroup, updateCustomerGroup, deleteCustomerGroup, setSegmentedProductRule } from './actions'
 
 type Group = { id: string; name: string; discount_percent: number; apply_to_all_products: boolean }
-type Product = { id: string; title: string; sku: string; price: number }
+type Product = { id: string; title: string; sku: string; price: number; images?: string[] }
 type PriceOverride = { id: string; product_id: string; group_id: string; price: number | null; status: 'active' | 'ignored' }
 
 export function SegmentedPricesClient({ 
@@ -65,14 +65,12 @@ export function SegmentedPricesClient({
 
   const handleProductRuleChange = (productId: string, newRule: 'normal' | 'base_discount' | 'fixed') => {
     if (!activeGroup) return
-    // If selecting fixed, we don't save immediately, we wait for user to type and hit save icon
     if (newRule === 'fixed') {
       const existing = overrides.find(o => o.product_id === productId && o.group_id === activeGroup.id)
       setLocalPrices({ ...localPrices, [productId]: existing?.price ? String(existing.price) : '' })
       return
     }
 
-    // Save Normal or Base Discount
     startTransition(async () => {
       const res = await setSegmentedProductRule(productId, activeGroup.id, newRule, null, activeGroup.apply_to_all_products)
       if (res.success) {
@@ -130,9 +128,49 @@ export function SegmentedPricesClient({
   const fmt = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
 
   return (
-    <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+    <div className="segmented-container">
+      <style dangerouslySetInnerHTML={{__html: `
+        .segmented-container { display: flex; gap: 24px; flex-wrap: wrap; }
+        .sidebar { flex: 1 1 300px; max-width: 400px; }
+        .main-content { flex: 3 1 500px; background: #2c2e36; border-radius: 12px; border: 1px solid #3f424d; padding: 24px; display: flex; flex-direction: column; }
+        
+        .product-list { display: flex; flex-direction: column; gap: 8px; }
+        .product-row { 
+          display: flex; align-items: center; justify-content: space-between; 
+          padding: 12px; background: #24252b; border: 1px solid #3f424d80; border-radius: 8px;
+          transition: border 0.2s; gap: 12px;
+        }
+        .product-row:hover { border-color: #3f424d; background: #292a31; }
+        
+        .prod-info { display: flex; align-items: center; gap: 12px; flex: 2; min-width: 150px; overflow: hidden; }
+        .prod-img { width: 44px; height: 44px; border-radius: 6px; background: #18191d; border: 1px solid #3f424d; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        .prod-img img { width: 100%; height: 100%; object-fit: cover; }
+        .prod-details { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+        .prod-title { color: #f8fafc; font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .prod-sku { color: #64748b; font-size: 0.75rem; }
+        
+        .prod-price-orig { flex: 0.8; color: #94a3b8; font-size: 0.85rem; }
+        
+        .prod-rule { flex: 1.2; min-width: 140px; }
+        .prod-rule select { 
+          width: 100%; background: #1f2025; color: #f8fafc; padding: 8px 10px; border-radius: 6px; 
+          font-size: 0.8rem; outline: none; cursor: pointer; border: 1px solid #3f424d;
+        }
+        
+        .prod-final { flex: 1; display: flex; justify-content: flex-end; align-items: center; min-width: 110px; }
+        
+        @media (max-width: 900px) {
+          .product-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+          .prod-info { width: 100%; }
+          .prod-price-orig { width: 100%; font-size: 0.8rem; display: flex; gap: 8px; }
+          .prod-price-orig::before { content: "Original:"; color: #64748b; }
+          .prod-rule { width: 100%; }
+          .prod-final { width: 100%; justify-content: flex-start; margin-top: 4px; padding-top: 10px; border-top: 1px dashed #3f424d80; }
+        }
+      `}} />
+
       {/* Sidebar: Grupos */}
-      <div style={{ flex: '1 1 300px', maxWidth: '400px' }}>
+      <div className="sidebar">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <UsersIcon /> Grupos
@@ -176,37 +214,36 @@ export function SegmentedPricesClient({
       </div>
 
       {/* Main Content: Tabela de Preços */}
-      <div style={{ flex: '3 1 500px', background: '#2c2e36', borderRadius: '12px', border: '1px solid #3f424d', padding: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div className="main-content">
         {!activeGroup ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
             <Tag size={48} style={{ marginBottom: '24px', opacity: 0.5 }} />
             <h3 style={{ fontSize: '1.2rem', color: '#fff', marginBottom: '12px' }}>Como funcionam as Tabelas de Preço?</h3>
             <div style={{ maxWidth: '500px', fontSize: '0.9rem', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <p>O recurso de Preços Segmentados permite criar regras comerciais personalizadas para diferentes tipos de clientes. Você trabalha nas seguintes opções:</p>
+              <p>Crie regras dinâmicas para grupos:</p>
               
               <div style={{ background: '#1e293b', borderLeft: '3px solid #64748b', padding: '16px', borderRadius: '0 8px 8px 0' }}>
                 <strong style={{ color: '#fff', display: 'block', marginBottom: '4px' }}>1. Preço Normal (Inativo)</strong>
-                O desconto do grupo é ignorado e o produto mantém o seu preço original. Útil se você tem produtos com margem apertada.
+                O desconto do grupo é ignorado e o produto mantém preço original.
               </div>
 
               <div style={{ background: '#1e293b', borderLeft: '3px solid #8b5cf6', padding: '16px', borderRadius: '0 8px 8px 0' }}>
                 <strong style={{ color: '#fff', display: 'block', marginBottom: '4px' }}>2. Desconto Base</strong>
-                O sistema usa a porcentagem do grupo como desconto. Ex: Se o grupo tem 20%, o produto fica 20% mais barato automaticamente.
+                O produto recebe a porcentagem da capa do grupo de forma automática.
               </div>
               
               <div style={{ background: '#1e293b', borderLeft: '3px solid #10b981', padding: '16px', borderRadius: '0 8px 8px 0' }}>
                 <strong style={{ color: '#fff', display: 'block', marginBottom: '4px' }}>3. Preço Fixo</strong>
-                Você define um valor exato gravado na pedra para aquele produto e grupo, sobrepondo qualquer outra regra.
+                Você digita um valor gravado na pedra apenas para este grupo e produto.
               </div>
-
             </div>
           </div>
         ) : (
           <>
-            <div style={{ marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #3f424d', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #3f424d', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontSize: '1.4rem', color: '#fff', margin: '0 0 8px 0' }}>Tabela: {activeGroup.name}</h2>
-                <div style={{ display: 'flex', gap: '16px' }}>
+                <h2 style={{ fontSize: '1.4rem', color: '#fff', margin: '0 0 8px 0' }}>Gerenciar: {activeGroup.name}</h2>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                   <span style={{ color: '#10b981', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Percent size={14} /> {activeGroup.discount_percent}% de desconto
                   </span>
@@ -218,7 +255,7 @@ export function SegmentedPricesClient({
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', background: '#1f2025', borderRadius: '8px', padding: '10px 16px', marginBottom: '16px', border: '1px solid #3f424d' }}>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#1f2025', borderRadius: '8px', padding: '10px 16px', marginBottom: '20px', border: '1px solid #3f424d' }}>
               <Search size={18} color="#64748b" />
               <input 
                 type="text" 
@@ -228,107 +265,102 @@ export function SegmentedPricesClient({
               />
             </div>
 
-            <div style={{ overflowX: 'auto', flex: 1 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid #3f424d', textAlign: 'left', color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '12px', fontWeight: 600 }}>Produto</th>
-                    <th style={{ padding: '12px', fontWeight: 600 }}>Preço Original</th>
-                    <th style={{ padding: '12px', fontWeight: 600 }}>Regra Aplicada</th>
-                    <th style={{ padding: '12px', fontWeight: 600 }}>Preço Final</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map(p => {
-                    const override = overrides.find(o => o.product_id === p.id && o.group_id === activeGroup.id)
-                    const isManualEditing = localPrices[p.id] !== undefined
+            {/* Nova Lista de Produtos Responsiva */}
+            <div className="product-list">
+              {filteredProducts.map(p => {
+                const override = overrides.find(o => o.product_id === p.id && o.group_id === activeGroup.id)
+                const isManualEditing = localPrices[p.id] !== undefined
+                
+                let currentRule: 'normal' | 'base_discount' | 'fixed' = activeGroup.apply_to_all_products ? 'base_discount' : 'normal'
+                if (override) {
+                  if (override.status === 'ignored') currentRule = 'normal'
+                  else if (override.price !== null) currentRule = 'fixed'
+                  else currentRule = 'base_discount'
+                }
+                if (isManualEditing) currentRule = 'fixed'
+
+                let finalPrice = p.price
+                if (currentRule === 'base_discount') finalPrice = p.price * (1 - (activeGroup.discount_percent / 100))
+                else if (currentRule === 'fixed' && !isManualEditing && override?.price) finalPrice = override.price
+
+                return (
+                  <div key={p.id} className="product-row">
                     
-                    // Determine current active rule
-                    let currentRule: 'normal' | 'base_discount' | 'fixed' = activeGroup.apply_to_all_products ? 'base_discount' : 'normal'
-                    if (override) {
-                      if (override.status === 'ignored') currentRule = 'normal'
-                      else if (override.price !== null) currentRule = 'fixed'
-                      else currentRule = 'base_discount'
-                    }
+                    {/* Imagem + Titulo */}
+                    <div className="prod-info">
+                      <div className="prod-img">
+                        {p.images && p.images[0] ? (
+                          <img src={p.images[0]} alt={p.title} />
+                        ) : (
+                          <ImageIcon size={20} color="#3f424d" />
+                        )}
+                      </div>
+                      <div className="prod-details">
+                        <div className="prod-title" title={p.title}>{p.title}</div>
+                        <div className="prod-sku">SKU: {p.sku || 'N/A'}</div>
+                      </div>
+                    </div>
 
-                    if (isManualEditing) currentRule = 'fixed' // Force visual to fixed if typing
+                    {/* Preço Original */}
+                    <div className="prod-price-orig">
+                      {fmt(p.price)}
+                    </div>
+                    
+                    {/* Regra Select */}
+                    <div className="prod-rule">
+                      <select 
+                        disabled={isPending}
+                        value={currentRule}
+                        onChange={(e) => handleProductRuleChange(p.id, e.target.value as any)}
+                        style={{ borderColor: currentRule === 'normal' ? '#3f424d' : currentRule === 'base_discount' ? '#8b5cf6' : '#10b981' }}
+                      >
+                        <option value="normal">Normal (Sem desc.)</option>
+                        <option value="base_discount">- {activeGroup.discount_percent}% (Base)</option>
+                        <option value="fixed">Fixo Específico</option>
+                      </select>
+                    </div>
 
-                    // Calculate visual final price
-                    let finalPrice = p.price
-                    if (currentRule === 'base_discount') finalPrice = p.price * (1 - (activeGroup.discount_percent / 100))
-                    else if (currentRule === 'fixed' && !isManualEditing && override?.price) finalPrice = override.price
-
-                    return (
-                      <tr key={p.id} style={{ borderBottom: '1px solid #3f424d20' }}>
-                        <td style={{ padding: '12px' }}>
-                          <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Package size={16} color="#8b5cf6" /> {p.title}
+                    {/* Preço Final Display ou Input */}
+                    <div className="prod-final">
+                      {currentRule === 'fixed' ? (
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', background: '#1f2025', border: '1px solid #10b981', borderRadius: '6px', padding: '4px 8px', maxWidth: '100px' }}>
+                            <span style={{ color: '#10b981', fontSize: '0.8rem', marginRight: '4px' }}>R$</span>
+                            <input 
+                              type="number" 
+                              placeholder="0.00"
+                              value={localPrices[p.id] ?? (override?.price || '')}
+                              onChange={e => setLocalPrices({ ...localPrices, [p.id]: e.target.value })}
+                              style={{ width: '100%', background: 'transparent', border: 'none', color: '#10b981', outline: 'none', fontSize: '0.9rem', fontWeight: 'bold' }}
+                            />
                           </div>
-                          <div style={{ color: '#64748b', fontSize: '0.75rem', marginTop: '2px', paddingLeft: '24px' }}>SKU: {p.sku || 'N/A'}</div>
-                        </td>
-                        <td style={{ padding: '12px', color: '#94a3b8', fontSize: '0.9rem' }}>
-                          {fmt(p.price)}
-                        </td>
-                        
-                        <td style={{ padding: '12px' }}>
-                          <select 
-                            disabled={isPending}
-                            value={currentRule}
-                            onChange={(e) => handleProductRuleChange(p.id, e.target.value as any)}
-                            style={{ 
-                              background: '#1f2025', 
-                              border: `1px solid ${currentRule === 'normal' ? '#3f424d' : currentRule === 'base_discount' ? '#8b5cf6' : '#10b981'}`, 
-                              color: '#fff', padding: '6px 10px', borderRadius: '6px', fontSize: '0.85rem', outline: 'none', cursor: 'pointer' 
-                            }}
-                          >
-                            <option value="normal">Normal (Sem desc.)</option>
-                            <option value="base_discount">Desconto Base (-{activeGroup.discount_percent}%)</option>
-                            <option value="fixed">Preço Fixo Customizado</option>
-                          </select>
-                        </td>
+                          {isManualEditing && (
+                            <button onClick={() => handleFixedPriceSave(p.id)} disabled={isPending}
+                              style={{ padding: '6px', background: '#10b98120', border: '1px solid #10b981', borderRadius: '6px', color: '#10b981', cursor: 'pointer', display: 'flex' }}>
+                              <Save size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.9rem', fontWeight: currentRule === 'base_discount' ? 600 : 400, color: currentRule === 'base_discount' ? '#8b5cf6' : '#94a3b8' }}>
+                          {fmt(finalPrice)}
+                        </span>
+                      )}
+                    </div>
 
-                        <td style={{ padding: '12px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '130px' }}>
-                            {currentRule === 'fixed' ? (
-                              <>
-                                <div style={{ display: 'flex', alignItems: 'center', background: '#1f2025', border: '1px solid #10b981', borderRadius: '6px', padding: '4px 8px' }}>
-                                  <span style={{ color: '#10b981', fontSize: '0.85rem', marginRight: '4px' }}>R$</span>
-                                  <input 
-                                    type="number" 
-                                    placeholder="0.00"
-                                    value={localPrices[p.id] ?? (override?.price || '')}
-                                    onChange={e => setLocalPrices({ ...localPrices, [p.id]: e.target.value })}
-                                    style={{ width: '70px', background: 'transparent', border: 'none', color: '#10b981', outline: 'none', fontSize: '0.9rem', fontWeight: 'bold' }}
-                                  />
-                                </div>
-                                {isManualEditing && (
-                                  <button onClick={() => handleFixedPriceSave(p.id)} disabled={isPending}
-                                    style={{ padding: '6px', background: '#10b98120', border: '1px solid #10b981', borderRadius: '6px', color: '#10b981', cursor: 'pointer', display: 'flex' }}>
-                                    <Save size={14} />
-                                  </button>
-                                )}
-                              </>
-                            ) : (
-                              <span style={{ fontSize: '0.9rem', fontWeight: currentRule === 'base_discount' ? 600 : 400, color: currentRule === 'base_discount' ? '#8b5cf6' : '#94a3b8' }}>
-                                {fmt(finalPrice)}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+                  </div>
+                )
+              })}
             </div>
+
           </>
         )}
       </div>
 
-      {/* Modal Grupo */}
+      {/* Modal Grupo (Mantido igual) */}
       {modalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div style={{ background: '#1e1e1e', borderRadius: '12px', width: '450px', border: '1px solid #3f424d', overflow: 'hidden' }}>
+          <div style={{ background: '#1e1e1e', borderRadius: '12px', width: '450px', maxWidth: '90%', border: '1px solid #3f424d', overflow: 'hidden' }}>
             <div style={{ padding: '16px 24px', borderBottom: '1px solid #3f424d', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0, color: '#fff', fontSize: '1.1rem' }}>{editingGroup?.id ? 'Editar Grupo' : 'Novo Grupo'}</h3>
               <button onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={18} /></button>

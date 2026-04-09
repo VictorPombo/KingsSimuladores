@@ -15,7 +15,7 @@ export default async function PrecosSegmentadosPage() {
   // Buscar produtos ativos (para listar na tabela de preços)
   const { data: products } = await supabase
     .from('products')
-    .select('id, title, sku, price')
+    .select('id, title, sku, price, images')
     .eq('status', 'active')
     .order('title', { ascending: true })
 
