@@ -8,7 +8,10 @@ export async function applySegmentedPrices(products: any[]) {
     
     // 1. Check logged in user
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return products
+    if (!user) {
+      console.log('SegmentedPrices: No user logged in.')
+      return products
+    }
 
     // 2. Get user profile to check customer_group_id
     const { data: profile } = await supabase
@@ -17,7 +20,10 @@ export async function applySegmentedPrices(products: any[]) {
       .eq('id', user.id)
       .single()
 
-    if (!profile?.customer_group_id) return products
+    if (!profile?.customer_group_id) {
+      console.log('SegmentedPrices: User', user.id, 'has no customer_group_id.')
+      return products
+    }
 
     // 3. Get customer group configuration
     const { data: group } = await supabase
@@ -40,6 +46,8 @@ export async function applySegmentedPrices(products: any[]) {
     if (overrides) {
       overrides.forEach(o => overrideMap[o.product_id] = o)
     }
+
+    console.log('SegmentedPrices: Processing for Group', group.name || profile.customer_group_id, '| Overrides found:', overrides?.length)
 
     // 5. Compute prices
     return products.map(p => {
