@@ -17,27 +17,33 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
 
-    const { data, error: err } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+      const { data, error: err } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (err) {
-      setError(err.message)
+      if (err) {
+        setError(err.message)
+        setLoading(false)
+        return
+      }
+
+      if (data.session) {
+        // Usar href nativo para forçar reload e garantir que edge cookies sejam lidos pelo server
+        const searchParams = new URLSearchParams(window.location.search)
+        const redirect = searchParams.get('redirect') || '/admin/diario-de-bordo'
+        window.location.href = redirect
+      }
+    } catch (err: any) {
+      console.error(err)
+      setError('Erro crítico: ' + (err.message || 'Falha na conexão com o banco.'))
       setLoading(false)
-      return
-    }
-
-    if (data.session) {
-      // Force refresh cookies
-      router.refresh()
-      // Redireciona pro dashboard
-      router.push('/admin/diario-de-bordo')
     }
   }
 
