@@ -35,7 +35,7 @@ export async function applySegmentedPrices(products: any[]) {
     if (!group) return products
 
     // 4. Get specific overrides for this group
-    const productIds = products.map(p => p.id)
+    const productIds = products.map((p: any) => p.id)
     const { data: overrides } = await supabase
       .from('segmented_prices')
       .select('product_id, price, status')
@@ -50,7 +50,7 @@ export async function applySegmentedPrices(products: any[]) {
     console.log('SegmentedPrices: Processing for Group', group.name || profile.customer_group_id, '| Overrides found:', overrides?.length)
 
     // 5. Compute prices
-    return products.map(p => {
+    return products.map((p: any) => {
       const pCopy = { ...p }
       const override = overrideMap[p.id]
       const discountMultiplier = 1 - (Number(group.discount_percent) / 100)
