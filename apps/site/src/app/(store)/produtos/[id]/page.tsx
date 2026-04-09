@@ -7,6 +7,9 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { applySegmentedPrices } from '@/lib/pricing'
 
+export const revalidate = 0 // Força dinâmico para a checagem de B2B
+export const dynamic = 'force-dynamic'
+
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 
 // ── Buscar produto do Supabase ──

@@ -341,7 +341,7 @@ export function SegmentedPricesClient({
                         <select 
                           disabled={isPending}
                           value={currentRule}
-                          onChange={(e) => handleProductRuleChange(p.id, e.target.value as any)}
+                          onChange={(e) => handleProductRuleChange(p.id, e.target.value as 'active' | 'ignored' | 'inactive')}
                           style={{ borderColor: currentRule === 'normal' ? '#3f424d' : currentRule === 'base_discount' ? '#8b5cf6' : '#10b981' }}
                         >
                           <option value="normal">Sem desconto (Inativo)</option>

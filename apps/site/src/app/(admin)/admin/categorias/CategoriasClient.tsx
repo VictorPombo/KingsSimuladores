@@ -142,8 +142,8 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
               background: '#24252b', padding: '16px 20px', borderRadius: '12px', border: '1px solid #3f424d80',
               transition: 'transform 0.2s, border-color 0.2s', cursor: 'default'
             }}
-            onMouseEnter={(e: any) => e.currentTarget.style.borderColor = '#8b5cf680'}
-            onMouseLeave={(e: any) => e.currentTarget.style.borderColor = '#3f424d80'}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf680'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3f424d80'}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ width: '36px', height: '36px', background: '#1c1d22', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #3f424d50' }}>

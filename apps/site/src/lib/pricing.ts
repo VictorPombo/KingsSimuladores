@@ -45,7 +45,7 @@ export async function applySegmentedPrices(products: Record<string, any>[]) {
 
     const overrideMap = {} as Record<string, { price: number | null, status: string }>
     if (overrides) {
-      overrides.forEach(o => overrideMap[o.product_id] = o)
+      overrides.forEach((o: { product_id: string, price: number | null, status: string }) => overrideMap[o.product_id] = o)
     }
 
     console.log('SegmentedPrices: Processing for Group', group.name || profile.customer_group_id, '| Overrides found:', overrides?.length)
