@@ -52,6 +52,9 @@ export function Header() {
               <a href="/categorias" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
                 Categorias
               </a>
+              <a href="/quem-somos" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Quem somos?
+              </a>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
               <CartIcon />
               <Button variant="secondary" size="sm">

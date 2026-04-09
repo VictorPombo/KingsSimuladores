@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createServerSupabaseClient } from '@kings/db'
 import { formatPrice } from '@kings/utils'
 import { ListingCard } from '@/components/marketplace/ListingCard'
+import { DalesteSticker } from '@/components/store/home/DalesteSticker'
 
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 
@@ -186,11 +187,14 @@ export default async function HomePage() {
 
   return (
     <div style={{ minHeight: 'calc(100vh - 80px)' }}>
+      {/* FIGURINHA DALESTE (FIXED E COM FADE SCROLL) */}
+      <DalesteSticker />
+
       {/* JSON-LD invisível para o Google */}
       <HomeJsonLd />
 
       {/* Hero */}
-      <header style={{ position: 'relative', width: '100%', padding: 'clamp(32px, 10vw, 120px) 0 clamp(16px, 5vw, 60px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <header style={{ position: 'relative', width: '100%', padding: 'clamp(48px, 8vw, 110px) 0 clamp(24px, 4vw, 50px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         
         {/* GLOW DE FUNDO MAIS AGRESSIVO E BI-COLOR DA KINGS */}
         <div style={{
@@ -211,27 +215,52 @@ export default async function HomePage() {
         {/* CONTEÚDO PRINCIPAL */}
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 16px', maxWidth: '896px', margin: '0 auto' }}>
           
-          {/* Badge superior */}
-          <div style={{ marginBottom: 'clamp(12px, 3vw, 24px)', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(16, 185, 129, 0.2)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(4px)' }}>
-            <span style={{ fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, color: 'var(--success)' }}>O REI DOS SIMULADORES!</span>
-          </div>
-
           {/* Título Principal */}
-          <h1 className="font-display" style={{ fontSize: 'clamp(2.2rem, 8vw, 4.5rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'clamp(12px, 3vw, 24px)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          <h1 className="font-display" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.2rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'clamp(8px, 2vw, 20px)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
             A experiência de pilotar <br/>
             <span style={{ color: 'var(--success)' }}>
               começa aqui.
             </span>
           </h1>
-          <p style={{ fontSize: 'clamp(1rem, 3vw, 1.15rem)', color: 'var(--text-secondary)', maxWidth: '700px', lineHeight: 1.6, margin: '0 auto clamp(24px, 6vw, 40px)' }}>
+          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'var(--text-secondary)', maxWidth: '800px', lineHeight: 1.5, margin: '0 auto clamp(24px, 4vw, 40px)' }}>
             Cockpits, volantes, pedais e ecossistemas absolutos das melhores marcas.
             Entrega para todo o Brasil com parcelamento real em até 12x.
           </p>
 
+          {/* Secao Niveis */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginBottom: '40px' }}>
+            <h3 style={{ fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-primary)', marginBottom: '20px', fontWeight: 800, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              QUAL É SEU NÍVEL?
+            </h3>
+            
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Link href="/niveis/iniciante" style={{ textDecoration: 'none' }}>
+                <div style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(8px)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} className="hover:scale-105 hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                  INICIANTE
+                </div>
+              </Link>
+              <Link href="/niveis/semiprofissional" style={{ textDecoration: 'none' }}>
+                <div style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(8px)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} className="hover:scale-105 hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                  SEMIPROFISSIONAL
+                </div>
+              </Link>
+              <Link href="/niveis/premium" style={{ textDecoration: 'none' }}>
+                <div style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(8px)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} className="hover:scale-105 hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                  PREMIUM
+                </div>
+              </Link>
+              <Link href="/niveis/profissional" style={{ textDecoration: 'none' }}>
+                <div style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'rgba(12, 16, 24, 0.8)', backdropFilter: 'blur(8px)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} className="hover:scale-105 hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                  PROFISSIONAL
+                </div>
+              </Link>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <Link href="/produtos" style={{ textDecoration: 'none' }}>
-              <Button size="lg" style={{ background: 'var(--success)', color: '#000', border: 'none' }}>
-                VER CATÁLOGO
+              <Button size="lg" style={{ background: 'var(--success)', color: '#000', border: 'none', padding: '14px 32px', fontSize: '1rem', fontWeight: 800 }}>
+                VER CATÁLOGO COMPLETO
               </Button>
             </Link>
           </div>

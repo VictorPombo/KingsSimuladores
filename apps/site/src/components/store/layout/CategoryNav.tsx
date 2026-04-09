@@ -4,16 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 const MENU_ITEMS = [
-  {
-    label: "QUAL TEU NIVEL?",
-    href: "/produtos",
-    subItems: [
-      { label: "INICIANTE – HOBBIE O INÍCIO.", href: "/niveis/iniciante" },
-      { label: "PREMIUM – AQUI VOCÊ FAZ A DIFERENÇA!", href: "/niveis/premium" },
-      { label: "PROFISSIONAIS – TODO MILÉSSIMO CONTA!", href: "/niveis/profissional" },
-      { label: "SEMIPROFISSIONAIS – 3X NA SEMANA, FOCO!!!", href: "/niveis/semiprofissional" }
-    ]
-  },
+
   {
     label: "THERMALTAKE",
     href: "/marcas/thermaltake"
@@ -58,6 +49,10 @@ const MENU_ITEMS = [
   {
     label: "CONSULTORIA",
     href: "/consultoria"
+  },
+  {
+    label: "QUEM SOMOS?",
+    href: "/quem-somos"
   }
 ]
 
