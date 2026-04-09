@@ -134,9 +134,24 @@ export function SegmentedPricesClient({
       {/* Main Content: Tabela de Preços */}
       <div style={{ flex: '3 1 500px', background: '#2c2e36', borderRadius: '12px', border: '1px solid #3f424d', padding: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {!activeGroup ? (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', opacity: 0.6 }}>
-            <Tag size={48} style={{ marginBottom: '16px' }} />
-            <p>Selecione ou crie um grupo à esquerda para configurar preços específicos.</p>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+            <Tag size={48} style={{ marginBottom: '24px', opacity: 0.5 }} />
+            <h3 style={{ fontSize: '1.2rem', color: '#fff', marginBottom: '12px' }}>Como funcionam as Tabelas de Preço?</h3>
+            <div style={{ maxWidth: '500px', fontSize: '0.9rem', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <p>O recurso de Preços Segmentados permite criar regras comerciais personalizadas para diferentes tipos de clientes. Você trabalha em duas camadas:</p>
+              
+              <div style={{ background: '#1e293b', borderLeft: '3px solid #8b5cf6', padding: '16px', borderRadius: '0 8px 8px 0' }}>
+                <strong style={{ color: '#fff', display: 'block', marginBottom: '4px' }}>1. Desconto Base (Automático)</strong>
+                Configure uma porcentagem padrão no grupo (ex: 20%). Todos os produtos do site ficarão 20% mais baratos automaticamente para clientes desse grupo.
+              </div>
+              
+              <div style={{ background: '#1e293b', borderLeft: '3px solid #10b981', padding: '16px', borderRadius: '0 8px 8px 0' }}>
+                <strong style={{ color: '#fff', display: 'block', marginBottom: '4px' }}>2. Preço Fixo (Manual)</strong>
+                Selecione um grupo e defina um valor exato para um produto específico (ex: R$ 800,00). Esse valor fixo <strong>sobressai</strong> a porcentagem base, travando o preço apenas para esse grupo.
+              </div>
+
+              <p style={{ textAlign: 'center', marginTop: '8px', color: '#94a3b8' }}>Selecione um grupo à esquerda para começar.</p>
+            </div>
           </div>
         ) : (
           <>
