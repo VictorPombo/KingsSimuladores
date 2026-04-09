@@ -123,7 +123,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
                 {['', 'Produto', 'SKU', 'Marca', 'Preço', 'Estoque', 'Status', 'Criado'].map((h, i) => (
                   <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#1f2025', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
-                <th style={{ position: 'sticky', right: 0, padding: '12px 16px', textAlign: 'right', background: '#1f2025', boxShadow: '-4px 0 10px rgba(0,0,0,0.1)' }}>AÇÕES</th>
+                <th style={{ position: 'sticky', right: 0, zIndex: 10, padding: '12px 16px', textAlign: 'right', fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#1f2025', boxShadow: '-4px 0 10px rgba(0,0,0,0.2)' }}>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -179,16 +179,16 @@ export function ProdutosClient({ products }: { products: Product[] }) {
                     <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       {new Date(p.created_at).toLocaleDateString('pt-BR')}
                     </td>
-                    <td style={{ position: 'sticky', right: 0, padding: '12px 16px', textAlign: 'right', background: '#1e1e1e', boxShadow: '-4px 0 10px rgba(0,0,0,0.2)' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', opacity: isPending ? 0.5 : 1 }}>
-                        <button title="Editar" onClick={() => alert('Edição completa será construída em breve na rota de Criar Produto!')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}>
-                          <Edit2 size={16} />
+                    <td style={{ position: 'sticky', right: 0, zIndex: 5, padding: '12px 16px', textAlign: 'right', background: '#1e1e1e', boxShadow: '-4px 0 10px rgba(0,0,0,0.2)', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', opacity: isPending ? 0.5 : 1 }}>
+                        <button title="Editar" onClick={() => alert('Edição completa será construída em breve na rota de Criar Produto!')} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#94a3b8', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Edit2 size={15} />
                         </button>
-                        <button title={p.status === 'active' ? 'Desativar' : 'Ativar'} onClick={() => handleToggleStatus(p.id, p.status)} style={{ background: 'transparent', border: 'none', color: p.status === 'active' ? '#ef4444' : '#10b981', cursor: 'pointer', padding: '4px' }}>
-                          <Power size={16} />
+                        <button title={p.status === 'active' ? 'Desativar' : 'Ativar'} onClick={() => handleToggleStatus(p.id, p.status)} style={{ background: p.status === 'active' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', border: `1px solid ${p.status === 'active' ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'}`, borderRadius: '6px', color: p.status === 'active' ? '#ef4444' : '#10b981', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+                          <Power size={15} />
                         </button>
-                        <button title="Arquivar / Mover para Lixeira" onClick={() => handleDeleteClick(p.id)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}>
-                          <Archive size={16} />
+                        <button title="Lixeira (Arquivar / Remover)" onClick={() => handleDeleteClick(p.id)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#64748b', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>
