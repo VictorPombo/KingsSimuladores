@@ -4,11 +4,11 @@ import { createAdminClient } from '@kings/db'
 import { revalidatePath } from 'next/cache'
 
 // Grupos
-export async function createCustomerGroup(name: string, discount_percent: number) {
+export async function createCustomerGroup(name: string, discount_percent: number, apply_to_all_products: boolean) {
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('customer_groups')
-    .insert({ name, discount_percent })
+    .insert({ name, discount_percent, apply_to_all_products })
     .select()
     .single()
 
@@ -17,11 +17,11 @@ export async function createCustomerGroup(name: string, discount_percent: number
   return { success: true, data }
 }
 
-export async function updateCustomerGroup(id: string, name: string, discount_percent: number) {
+export async function updateCustomerGroup(id: string, name: string, discount_percent: number, apply_to_all_products: boolean) {
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('customer_groups')
-    .update({ name, discount_percent })
+    .update({ name, discount_percent, apply_to_all_products })
     .eq('id', id)
     .select()
     .single()
@@ -43,12 +43,31 @@ export async function deleteCustomerGroup(id: string) {
   return { success: true }
 }
 
-// Preços Específicos
-export async function setSegmentedPrice(product_id: string, group_id: string, price: number | null) {
+// Preços / Regras Específicas
+export async function setSegmentedProductRule(
+  product_id: string,
+  group_id: string,
+  rule: 'normal' | 'base_discount' | 'fixed',
+  price: number | null,
+  group_apply_to_all: boolean
+) {
   const supabase = createAdminClient()
 
-  if (price === null) {
-    // Remover override
+  let shouldDeleteRow = false;
+  let rowStatus = 'active';
+  let rowPrice = null;
+
+  if (group_apply_to_all) {
+    if (rule === 'base_discount') shouldDeleteRow = true; // inheriting default behavior
+    else if (rule === 'normal') { rowStatus = 'ignored'; rowPrice = null; }
+    else if (rule === 'fixed') { rowStatus = 'active'; rowPrice = price; }
+  } else {
+    if (rule === 'normal') shouldDeleteRow = true; // inheriting default behavior
+    else if (rule === 'base_discount') { rowStatus = 'active'; rowPrice = null; }
+    else if (rule === 'fixed') { rowStatus = 'active'; rowPrice = price; }
+  }
+
+  if (shouldDeleteRow) {
     const { error } = await supabase
       .from('segmented_prices')
       .delete()
@@ -56,10 +75,7 @@ export async function setSegmentedPrice(product_id: string, group_id: string, pr
       .eq('group_id', group_id)
     if (error) return { success: false, error: error.message }
   } else {
-    // Upsert novo preço usando supabase match
-    // O Supabase postgREST suporta on-conflict se a tabela tiver constraint unique explícita configurada, 
-    // mas se o pk for diferente, as vezes precisa de onConflict explícito.
-    // Pra garantir, tentamos um update primeiro, ou um select then insert/update.
+    // Upsert
     const { data: existing } = await supabase
       .from('segmented_prices')
       .select('id')
@@ -70,13 +86,13 @@ export async function setSegmentedPrice(product_id: string, group_id: string, pr
     if (existing) {
       const { error } = await supabase
         .from('segmented_prices')
-        .update({ price })
+        .update({ status: rowStatus, price: rowPrice })
         .eq('id', existing.id)
       if (error) return { success: false, error: error.message }
     } else {
       const { error } = await supabase
         .from('segmented_prices')
-        .insert({ product_id, group_id, price })
+        .insert({ product_id, group_id, status: rowStatus, price: rowPrice })
       if (error) return { success: false, error: error.message }
     }
   }

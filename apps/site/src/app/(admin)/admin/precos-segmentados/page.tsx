@@ -22,7 +22,7 @@ export default async function PrecosSegmentadosPage() {
   // Buscar overrides já salvos
   const { data: overrides } = await supabase
     .from('segmented_prices')
-    .select('id, product_id, group_id, price')
+    .select('id, product_id, group_id, price, status')
 
   return (
     <div style={{ padding: '2rem', minHeight: '100vh', color: '#fff', background: '#1e1e1e' }}>
