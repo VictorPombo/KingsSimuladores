@@ -44,7 +44,7 @@ export function MsuClient({ initialListings }: { initialListings: Listing[] }) {
               )}
             </div>
             <div>
-              <h3 style={{ margin: '0 0 0.25rem 0', color: listing.status === 'inactive' ? '#64748b' : '#fff', fontSize: '1rem' }}>
+              <h3 style={{ margin: '0 0 0.25rem 0', color: (listing.status === 'pending_review' || listing.status === 'rejected') ? '#64748b' : '#fff', fontSize: '1rem' }}>
                 {listing.title}
               </h3>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -56,7 +56,8 @@ export function MsuClient({ initialListings }: { initialListings: Listing[] }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <Badge variant={
               listing.status === 'active' ? 'success' : 
-              listing.status === 'pending_review' ? 'warning' : 'info'
+              listing.status === 'pending_review' ? 'warning' : 
+              listing.status === 'rejected' ? 'danger' : 'info'
             }>
               {listing.status}
             </Badge>
