@@ -58,12 +58,12 @@ const MENU_SECTIONS = [
         ]
       },
       {
-        label: 'Marketing',
+        label: 'Ofertas & Engajamento',
         icon: Megaphone,
         subItems: [
-          { label: 'Promoções', href: '/admin/promocoes' },
-          { label: 'Brinde', href: '/admin/brindes' },
+          { label: 'Descontos Automáticos', href: '/admin/promocoes' },
           { label: 'Cupons de desconto', href: '/admin/cupons' },
+          { label: 'Brinde no Carrinho', href: '/admin/brindes' },
           { label: 'Automações', href: '/admin/automacoes' },
           { label: 'Compre junto', href: '/admin/compre-junto' },
           { label: 'Frete grátis', href: '/admin/frete-gratis' },

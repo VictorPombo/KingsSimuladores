@@ -19,15 +19,15 @@ export default function PromocoesPage() {
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>Promoções</h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Gerencie campanhas promocionais da loja</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>Descontos Automáticos</h1>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Regras de desconto aplicadas automaticamente no carrinho</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} style={{
           display: 'flex', alignItems: 'center', gap: '6px',
           background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', borderRadius: '8px',
           padding: '10px 20px', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
           boxShadow: '0 2px 8px rgba(245,158,11,0.3)'
-        }}><Plus size={16} /> Nova Promoção</button>
+        }}><Plus size={16} /> Nova Regra</button>
       </div>
 
       {/* KPIs */}
@@ -49,9 +49,9 @@ export default function PromocoesPage() {
 
       {showForm && (
         <div style={{ background: '#2c2e36', borderRadius: '8px', border: '1px solid #3f424d', padding: '24px', marginBottom: '20px' }}>
-          <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><Zap size={18} color="#f59e0b" /> Criar nova promoção</h3>
+          <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><Zap size={18} color="#f59e0b" /> Criar regra de desconto</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-            <div><label style={{ display: 'block', color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }}>Nome da promoção *</label><input type="text" placeholder="Ex: Black Friday 2026" style={inputStyle} /></div>
+            <div><label style={{ display: 'block', color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }}>Nome da regra *</label><input type="text" placeholder="Ex: Black Friday 2026" style={inputStyle} /></div>
             <div><label style={{ display: 'block', color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }}>Tipo *</label>
               <select style={{ ...inputStyle, cursor: 'pointer' }}><option value="percentage">Desconto %</option><option value="fixed">Desconto fixo (R$)</option><option value="buy_x_get_y">Leve X Pague Y</option></select>
             </div>
@@ -68,7 +68,7 @@ export default function PromocoesPage() {
       <div style={{ background: '#2c2e36', borderRadius: '8px', border: '1px solid #3f424d', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead><tr>
-            {['Promoção', 'Tipo', 'Desconto', 'Período', 'Usos', 'Status'].map(h => (
+            {['Regra', 'Tipo', 'Desconto', 'Período', 'Usos', 'Status'].map(h => (
               <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', background: '#1f2025' }}>{h}</th>
             ))}
           </tr></thead>
@@ -76,8 +76,8 @@ export default function PromocoesPage() {
             {promos.length === 0 ? (
               <tr><td colSpan={6} style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
                 <Percent size={28} style={{ margin: '0 auto 8px', display: 'block', opacity: 0.3 }} />
-                <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: 500 }}>Nenhuma promoção criada ainda</p>
-                <p style={{ margin: 0, fontSize: '0.8rem' }}>Crie promoções para impulsionar suas vendas.</p>
+                <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: 500 }}>Nenhuma regra ativa ainda</p>
+                <p style={{ margin: 0, fontSize: '0.8rem' }}>Crie descontos automáticos para o carrinho.</p>
               </td></tr>
             ) : null}
           </tbody>
