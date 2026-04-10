@@ -30,10 +30,10 @@ export function DalesteSticker() {
         setOpacity(1)
       }
     }
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
-    
+
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -41,7 +41,8 @@ export function DalesteSticker() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .sticker-pump {
           transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
         }
@@ -55,12 +56,12 @@ export function DalesteSticker() {
       {/* VERSÃO DESKTOP (FIXA NO CANTO ESQUERDO) */}
       <div className="desktop-only" style={{ position: 'fixed', bottom: 0, left: 0, zIndex: 9999, opacity: opacity, pointerEvents: opacity > 0.5 ? 'auto' : 'none' }}>
         <Link href="/quem-somos" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-end', width: '320px', cursor: 'pointer' }} className="sticker-pump group">
-          
-          <div style={{ 
-            marginBottom: '-30px', 
+
+          <div style={{
+            marginBottom: '-30px',
             marginLeft: '20px',
-            textAlign: 'center', 
-            background: 'rgba(6, 8, 15, 0.9)', 
+            textAlign: 'center',
+            background: 'rgba(6, 8, 15, 0.9)',
             backdropFilter: 'blur(16px)',
             padding: '12px 16px',
             borderRadius: '12px',
@@ -75,65 +76,37 @@ export function DalesteSticker() {
             <p style={{ margin: '8px 0 0', fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--success)', fontWeight: 700, lineHeight: 1.3 }}>Clica aqui para conhecer minha história!</p>
           </div>
 
-          <img 
-            src="/daleste.png" 
-            alt="Fernando Albertoni - Desktop" 
-            style={{ 
-              width: '130%', 
+          <img
+            src="/daleste.png"
+            alt="Fernando Albertoni - Desktop"
+            style={{
+              width: '130%',
               height: 'auto',
-              objectFit: 'contain', 
-              objectPosition: 'left bottom', 
+              objectFit: 'contain',
+              objectPosition: 'left bottom',
               filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.8))',
               zIndex: 2,
               position: 'relative',
               pointerEvents: 'none',
-              transform: 'translate(-85px, 15px)' 
-            }} 
+              transform: 'translate(-85px, 15px)'
+            }}
           />
         </Link>
       </div>
 
-      {/* VERSÃO MOBILE (LAYOUT DE SUPER-SOBREPOSIÇÃO) */}
-      <div className="mobile-only w-full max-w-[896px] mx-auto px-4" style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '90px 16px 90px', zIndex: 10 }}>
-        {/* Aumentei agressivamente os paddings superior e inferior (90px) para acomodar a foto gigante simetricamente e garantir a mesma distância de cima e de baixo! */}
-        
-        <Link href="/quem-somos" style={{ textDecoration: 'none', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: '100%', maxWidth: '380px', minHeight: '100px', cursor: 'pointer' }} className="sticker-pump group">
-          
-          <img 
-            src="/daleste.png" 
-            alt="Fernando Albertoni - Mobile" 
-            style={{ 
-              position: 'absolute',
-              left: '-40px', /* Bem colado/sangrando para a esquerda para caber a foto larga */
-              top: '50%',
-              transform: 'translateY(-50%)', /* Alinhamento central absoluto em relação à caixinha */
-              width: '290px', /* Tamanho extremamente GIGANTE para a nova foto abraçando o volante */
-              height: 'auto',
-              objectFit: 'contain', 
-              filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.8))',
-              zIndex: 2,
-              pointerEvents: 'none'
-            }} 
-          />
-
-          <div style={{ 
-            textAlign: 'left', 
-            background: 'rgba(6, 8, 15, 0.9)', 
-            backdropFilter: 'blur(16px)',
-            padding: '8px 14px', /* CAIXA ACHATADA: Reduzi o enchimento superior e inferior */
-            borderRadius: '10px',
-            border: '1px solid rgba(0, 229, 255, 0.3)',
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.8)',
-            zIndex: 3,
-            position: 'relative',
-            width: '170px' /* Mais fina/estreita na horizontal também */
-          }}>
-            <p style={{ margin: 0, fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.2 }}>Sou Fernando Albertoni</p>
-            <p style={{ margin: '2px 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Famoso Daleste</p>
-            <p style={{ margin: '6px 0 0', fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--success)', fontWeight: 700, lineHeight: 1.2 }}>Ver minha história!</p>
-          </div>
-          
-        </Link>
+      {/* VERSÃO MOBILE (BANNER ESTÁTICO - SEM AÇÃO AO CLICAR) */}
+      <div className="mobile-only w-full mx-auto" style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '0 16px', margin: '-50px 0 -50px', zIndex: 10 }}>
+        <img
+          src="/banner-fernando.png"
+          alt="Sou Fernando Albertoni, conhecido como Daleste"
+          style={{
+            width: '100%',
+            height: 'auto',
+            objectFit: 'contain',
+            borderRadius: '16px',
+            pointerEvents: 'none'
+          }}
+        />
       </div>
     </>
   )
