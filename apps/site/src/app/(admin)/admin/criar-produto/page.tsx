@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState, useEffect, useTransition } from 'react'
+import React, { useState, useEffect, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Package, DollarSign, Archive, Settings, Loader2, CheckCircle, AlertTriangle, Grid3X3, Trash2 } from 'lucide-react'
+import { ArrowLeft, Package, DollarSign, Archive, Settings, Loader2, CheckCircle, AlertTriangle, Grid3X3, Trash2, UploadCloud, X, ImageIcon, Image as LucideImage } from 'lucide-react'
 import { getBrands, getCategories, createProduct, getVariationGrids } from './actions'
+import imageCompression from 'browser-image-compression'
+import { createClient } from '@supabase/supabase-js'
 
 const inputStyle: React.CSSProperties = { width: '100%', background: '#1f2025', border: '1px solid #3f424d', borderRadius: '6px', padding: '10px 14px', color: '#fff', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }
 const labelStyle: React.CSSProperties = { display: 'block', color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }
@@ -23,6 +25,27 @@ export default function CriarProdutoPage() {
   const [hasVariations, setHasVariations] = useState(false)
   const [selectedGridId, setSelectedGridId] = useState('')
   const [variationsData, setVariationsData] = useState<{ opt: string; sku: string; price: string; stock: number }[]>([])
+
+  // Fotos
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files)
+      setImageFiles(prev => [...prev, ...filesArray])
+      
+      filesArray.forEach(file => {
+        setImagePreviews(prev => [...prev, URL.createObjectURL(file)])
+      })
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index))
+    setImagePreviews(prev => prev.filter((_, i) => i !== index))
+  }
 
   // Form
   const [title, setTitle] = useState('')
@@ -64,6 +87,32 @@ export default function CriarProdutoPage() {
     
     startTransition(async () => {
       try {
+        const uploadedUrls: string[] = []
+        
+        // 1. Processar e Enviar Imagens se existirem
+        if (imageFiles.length > 0) {
+          const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          )
+          
+          for (let i = 0; i < imageFiles.length; i++) {
+            const file = imageFiles[i]
+            const options = { maxSizeMB: 1, maxWidthOrHeight: 1080, useWebWorker: true, fileType: 'image/webp' as any }
+            const compressedFile = await imageCompression(file, options)
+            const fileName = `catalog/${Date.now()}-${Math.random().toString(36).substring(7)}.webp`
+            
+            const { error: uploadErr } = await supabase.storage.from('produtos').upload(fileName, compressedFile, { cacheControl: '3600' })
+            if (uploadErr) {
+               console.warn("Erro ao fazer upload da img, avisar admin para criar o bucket 'produtos'.", uploadErr)
+               throw new Error("Erro de Upload: Verifique se o bucket 'produtos' existe e está público no Supabase.")
+            }
+            
+            const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(fileName)
+            uploadedUrls.push(publicUrl)
+          }
+        }
+
         const payloadVars = hasVariations && selectedGridId 
           ? variationsData.map(v => {
               const grid = variationGrids.find(g => g.id === selectedGridId)
@@ -79,6 +128,7 @@ export default function CriarProdutoPage() {
         await createProduct({ 
           title, slug, description, price, priceCompare, stock: hasVariations ? 0 : stock, 
           sku, brandId, categoryId, status, weightKg, width, height, length, ncm, ean, cnpjEmitente,
+          images: uploadedUrls,
           variations: payloadVars
         })
         setSuccess('Produto criado e pronto para o Hub Omnichannel!')
@@ -120,6 +170,49 @@ export default function CriarProdutoPage() {
         <div>
           <label style={labelStyle}>Descrição</label>
           <textarea placeholder="Descreva o produto..." value={description} onChange={e => setDescription(e.target.value)} style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} onFocus={focusHandler} onBlur={blurHandler} />
+        </div>
+      </div>
+
+      {/* GALERIA */}
+      <div style={sectionStyle}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 style={{ ...sectionTitleStyle, margin: 0 }}><LucideImage size={20} color="#3b82f6" /> Galeria de Fotos</h2>
+        </div>
+        
+        <div>
+          <input 
+            type="file" 
+            accept="image/*" 
+            multiple
+            ref={fileInputRef} 
+            onChange={handleImageChange} 
+            style={{ display: 'none' }} 
+          />
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px' }}>
+            {imagePreviews.map((preview, idx) => (
+              <div key={idx} style={{ position: 'relative', aspectRatio: '1/1', borderRadius: '12px', border: '1px solid #3f424d', overflow: 'hidden', background: '#1c1d22' }}>
+                <img src={preview} alt={`Preview ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <button type="button" onClick={() => removeImage(idx)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+            
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              style={{ 
+                border: '2px dashed rgba(59, 130, 246, 0.4)', background: 'rgba(59, 130, 246, 0.05)', 
+                borderRadius: '12px', aspectRatio: '1/1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+                cursor: 'pointer', transition: 'all 0.2s ease', padding: '16px', textAlign: 'center'
+              }}
+              onMouseOver={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'}
+              onMouseOut={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.05)'}
+            >
+              <UploadCloud size={28} color="#3b82f6" style={{ marginBottom: '12px' }} />
+              <div style={{ color: '#fff', fontWeight: 600, fontSize: '0.85rem' }}>Adicionar fotos</div>
+            </div>
+          </div>
         </div>
       </div>
 
