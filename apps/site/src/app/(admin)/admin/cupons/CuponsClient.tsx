@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from 'react'
 import { Ticket, Plus, Trash2, Power, PowerOff, Copy, CheckCircle, Tag, Truck, DollarSign, Clock, Users, Zap } from 'lucide-react'
+import { toggleCouponStatus, deleteCoupon, createCoupon } from './actions'
 
 type Coupon = {
   id: string; code: string; type: 'percent' | 'fixed' | 'shipping'
@@ -116,7 +117,7 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
           <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 700, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Zap size={18} color="#f59e0b" /> Criar novo cupom
           </h3>
-          <form action="/admin/cupons" method="POST">
+          <form action={async (formData: FormData) => { startTransition(async () => { await createCoupon(formData); setShowForm(false) }) }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div>
                 <label style={labelStyle}>Código do Cupom *</label>
@@ -275,24 +276,24 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
 
                     {/* Status */}
                     <td style={{ padding: '16px 20px' }}>
-                      <form action={async () => { 'use server'; const { toggleCouponStatus } = await import('./actions'); await toggleCouponStatus(coupon.id, coupon.is_active) }}>
-                        <button type="submit" style={{ 
-                          display: 'flex', alignItems: 'center', gap: '6px',
-                          background: coupon.is_active ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)',
-                          border: `1px solid ${coupon.is_active ? 'rgba(16, 185, 129, 0.3)' : 'rgba(100, 116, 139, 0.3)'}`,
-                          color: coupon.is_active ? '#10b981' : '#64748b',
-                          padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
-                          transition: 'all 0.2s'
-                        }}>
-                          {coupon.is_active ? <><Power size={12} /> Ativo</> : <><PowerOff size={12} /> Inativo</>}
-                        </button>
-                      </form>
+                      <button onClick={() => startTransition(() => toggleCouponStatus(coupon.id, coupon.is_active))} disabled={isPending} style={{ 
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        background: coupon.is_active ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+                        border: `1px solid ${coupon.is_active ? 'rgba(16, 185, 129, 0.3)' : 'rgba(100, 116, 139, 0.3)'}`,
+                        color: coupon.is_active ? '#10b981' : '#64748b',
+                        padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
+                        transition: 'all 0.2s'
+                      }}>
+                        {coupon.is_active ? <><Power size={12} /> Ativo</> : <><PowerOff size={12} /> Inativo</>}
+                      </button>
                     </td>
 
                     {/* Ações */}
                     <td style={{ padding: '16px 20px' }}>
-                      <form action={async () => { 'use server'; const { deleteCoupon } = await import('./actions'); await deleteCoupon(coupon.id) }}>
-                        <button type="submit" title="Excluir permanentemente" style={{ 
+                      <button 
+                        onClick={() => { if (confirm('Excluir este cupom permanentemente?')) startTransition(() => deleteCoupon(coupon.id)) }}
+                        disabled={isPending}
+                        title="Excluir permanentemente" style={{ 
                           background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)',
                           color: '#ef4444', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -300,10 +301,9 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
                         }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)' }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)' }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </form>
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </td>
                   </tr>
                 )
