@@ -86,7 +86,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         @media (max-width: 768px) {
           .admin-grid-2-1 { grid-template-columns: 1fr; gap: 16px; }
           .admin-kpi-grid { grid-template-columns: 1fr; }
-          .admin-header-flex { flexDirection: column; alignItems: flex-start; gap: 8px; }
+          .admin-header-flex { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
       `}} />
 

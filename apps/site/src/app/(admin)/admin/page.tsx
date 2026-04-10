@@ -97,21 +97,23 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
           padding: '16px 0',
         }}
       >
-        <Container style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h1
-            className="gradient-text"
-            style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 800 }}
-          >
-            KINGS HUB — ADMIN
-          </h1>
-          <Badge variant="warning">Apenas Administradores</Badge>
+        <Container>
+          <div className="admin-header-flex">
+            <h1
+              className="gradient-text"
+              style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 800, margin: 0 }}
+            >
+              KINGS HUB — ADMIN
+            </h1>
+            <Badge variant="warning">Apenas Administradores</Badge>
+          </div>
         </Container>
       </header>
 
       <section style={{ padding: '40px 0' }}>
         <Container style={{ maxWidth: '1400px' }}>
           {/* TAB SEGMENTATION */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '32px', flexWrap: 'wrap' }}>
             <Link href="/admin?tab=kings" style={{ textDecoration: 'none' }}>
               <div style={{ 
                 padding: '10px 20px', 
