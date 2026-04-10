@@ -187,8 +187,7 @@ export default async function HomePage() {
 
   return (
     <div style={{ minHeight: 'calc(100vh - 80px)' }}>
-      {/* FIGURINHA DALESTE (FIXED E COM FADE SCROLL) */}
-      <DalesteSticker />
+      {/* FIGURINHA DALESTE (REMOVIDA DAQUI, FOI PARA BAIXO DO HERO NO MOBILE) */}
 
       {/* JSON-LD invisível para o Google */}
       <HomeJsonLd />
@@ -285,6 +284,9 @@ export default async function HomePage() {
           </div>
         </div>
       </header>
+
+      {/* FIGURINHA DALESTE (FICA AQUI NO MOBILE!) */}
+      <DalesteSticker />
 
       {/* BANNER MOZA ACTIVE PEDAL */}
       <section style={{ width: '100%', maxWidth: '1200px', margin: 'clamp(20px, 4vw, 40px) auto 0', padding: '0 16px' }}>
