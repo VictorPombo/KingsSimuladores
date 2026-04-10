@@ -14,6 +14,18 @@ export default function NewsletterPage() {
         <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', borderRadius: '8px', padding: '10px 20px', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 2px 8px rgba(59,130,246,0.3)' }}><Send size={16} /> Enviar Campanha</button>
       </div>
 
+      {/* Explainer */}
+      <div style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: '12px', border: '1px solid #3f424d', padding: '28px 32px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: '#3b82f620', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Mail size={28} color="#3b82f6" /></div>
+        <div>
+          <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, margin: '0 0 6px' }}>Como funciona?</h3>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
+            A Newsletter captura e-mails dos visitantes da loja e permite enviar <strong style={{ color: '#cbd5e1' }}>campanhas em massa</strong> com novidades, lançamentos e promoções. <br/>
+            <span style={{ color: '#64748b' }}>Exemplo: Chegou um cockpit novo → você dispara um e-mail para todos os inscritos: "Novidade na pista! Cockpit GTR Pro já disponível com 15% OFF no lançamento".</span>
+          </p>
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         {[
           { label: 'Inscritos', value: '0', color: '#3b82f6', icon: Users },

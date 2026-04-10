@@ -28,6 +28,18 @@ export default function AutomacoesPage() {
         <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', borderRadius: '8px', padding: '10px 20px', color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,185,129,0.3)' }}><Plus size={16} /> Nova Automação</button>
       </div>
 
+      {/* Explainer */}
+      <div style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: '12px', border: '1px solid #3f424d', padding: '28px 32px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: '#10b98120', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Zap size={28} color="#10b981" /></div>
+        <div>
+          <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, margin: '0 0 6px' }}>Como funciona?</h3>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
+            Automações são <strong style={{ color: '#cbd5e1' }}>mensagens disparadas sozinhas</strong> quando algo acontece na loja: um cliente abandona o carrinho, finaliza uma compra, ou um produto volta ao estoque. <br/>
+            <span style={{ color: '#64748b' }}>Exemplo: O cliente adicionou um cockpit ao carrinho mas não finalizou → após 1h recebe um WhatsApp: "Ei, seu setup está esperando! Finalize agora com 5% OFF".</span>
+          </p>
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gap: '12px' }}>
         {automations.map(auto => (
           <div key={auto.id} style={{ background: '#2c2e36', borderRadius: '8px', border: '1px solid #3f424d', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'border-color 0.2s' }}>

@@ -30,6 +30,18 @@ export default function PromocoesPage() {
         }}><Plus size={16} /> Nova Regra</button>
       </div>
 
+      {/* Explainer */}
+      <div style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: '12px', border: '1px solid #3f424d', padding: '28px 32px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: '#f59e0b20', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Zap size={28} color="#f59e0b" /></div>
+        <div>
+          <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, margin: '0 0 6px' }}>Como funciona?</h3>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
+            Diferente dos <strong style={{ color: '#cbd5e1' }}>Cupons</strong> (onde o cliente precisa digitar um código), os Descontos Automáticos são aplicados <strong style={{ color: '#cbd5e1' }}>sozinhos no carrinho</strong> quando as condições são atendidas. <br/>
+            <span style={{ color: '#64748b' }}>Exemplo: "10% OFF em compras acima de R$ 2.000" — o desconto aparece automaticamente no checkout sem o cliente precisar fazer nada.</span>
+          </p>
+        </div>
+      </div>
+
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         {[

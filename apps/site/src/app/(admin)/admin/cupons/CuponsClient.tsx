@@ -80,6 +80,18 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
         </button>
       </div>
 
+      {/* Explainer */}
+      <div style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: '12px', border: '1px solid #3f424d', padding: '28px 32px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: '#f59e0b20', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Ticket size={28} color="#f59e0b" /></div>
+        <div>
+          <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, margin: '0 0 6px' }}>Como funciona?</h3>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
+            Cupons são <strong style={{ color: '#cbd5e1' }}>códigos secretos</strong> que o cliente digita na hora de pagar para ganhar desconto. Você controla a validade, o limite de usos e o tipo de abatimento. <br/>
+            <span style={{ color: '#64748b' }}>Exemplo: Crie o cupom <code style={{ color: '#22d3ee', background: '#22d3ee10', padding: '2px 6px', borderRadius: '4px' }}>BEMVINDO10</code> com 10% OFF para novos clientes. Envie por WhatsApp ou redes sociais.</span>
+          </p>
+        </div>
+      </div>
+
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         {[
