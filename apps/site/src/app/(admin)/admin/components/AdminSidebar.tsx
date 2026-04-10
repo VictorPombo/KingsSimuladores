@@ -179,16 +179,17 @@ export function AdminSidebar() {
         flexDirection: 'column',
         gap: '4px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '24px', height: '24px', background: '#25d366', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {/* Pseudo Logo */}
-            <span style={{ fontSize: '12px', fontWeight: 900, color: '#fff' }}>K</span>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img 
+            src="https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png" 
+            alt="Kings Simuladores" 
+            style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'contain' }}
+          />
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.5px' }}>
             Kings<span style={{ color: '#aaa', fontWeight: 400 }}>Hub</span>
           </h2>
         </div>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#06b6d4', letterSpacing: '1px', marginLeft: '32px' }}>EXPANSÃO</span>
+        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#06b6d4', letterSpacing: '1.5px', marginLeft: '42px' }}>EXPANSÃO</span>
       </div>
 
       {/* Menu Principal com scroller nativo */}
