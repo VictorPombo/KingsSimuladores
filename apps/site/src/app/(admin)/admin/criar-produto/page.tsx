@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Package, DollarSign, Archive, Settings, Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
-import { getBrands, getCategories, createProduct } from './actions'
+import { ArrowLeft, Package, DollarSign, Archive, Settings, Loader2, CheckCircle, AlertTriangle, Grid3X3, Trash2 } from 'lucide-react'
+import { getBrands, getCategories, createProduct, getVariationGrids } from './actions'
 
 const inputStyle: React.CSSProperties = { width: '100%', background: '#1f2025', border: '1px solid #3f424d', borderRadius: '6px', padding: '10px 14px', color: '#fff', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }
 const labelStyle: React.CSSProperties = { display: 'block', color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }
@@ -15,8 +15,14 @@ export default function CriarProdutoPage() {
   const [isPending, startTransition] = useTransition()
   const [brands, setBrands] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
+  const [variationGrids, setVariationGrids] = useState<any[]>([])
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  // Variáveis da Grade
+  const [hasVariations, setHasVariations] = useState(false)
+  const [selectedGridId, setSelectedGridId] = useState('')
+  const [variationsData, setVariationsData] = useState<{ opt: string; sku: string; price: string; stock: number }[]>([])
 
   // Form
   const [title, setTitle] = useState('')
@@ -40,6 +46,7 @@ export default function CriarProdutoPage() {
   useEffect(() => {
     getBrands().then(setBrands)
     getCategories().then(setCategories)
+    getVariationGrids().then(setVariationGrids)
   }, [])
 
   useEffect(() => {
@@ -57,7 +64,23 @@ export default function CriarProdutoPage() {
     
     startTransition(async () => {
       try {
-        await createProduct({ title, slug, description, price, priceCompare, stock, sku, brandId, categoryId, status, weightKg, width, height, length, ncm, ean, cnpjEmitente })
+        const payloadVars = hasVariations && selectedGridId 
+          ? variationsData.map(v => {
+              const grid = variationGrids.find(g => g.id === selectedGridId)
+              return {
+                sku: v.sku,
+                stock: v.stock,
+                price: v.price ? Number(v.price) : null,
+                attributes: { [grid?.name || 'Opção']: v.opt }
+              }
+            })
+          : []
+          
+        await createProduct({ 
+          title, slug, description, price, priceCompare, stock: hasVariations ? 0 : stock, 
+          sku, brandId, categoryId, status, weightKg, width, height, length, ncm, ean, cnpjEmitente,
+          variations: payloadVars
+        })
         setSuccess('Produto criado e pronto para o Hub Omnichannel!')
         setTimeout(() => router.push('/admin/produtos'), 1500)
       } catch (e: any) { setError(e.message) }
@@ -86,8 +109,8 @@ export default function CriarProdutoPage() {
             <input type="text" placeholder="Ex: Cockpit Simulador Pro Racing" value={title} onChange={e => setTitle(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} />
           </div>
           <div>
-            <label style={labelStyle}>SKU</label>
-            <input type="text" placeholder="KNG-001" value={sku} onChange={e => setSku(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} />
+            <label style={labelStyle}>SKU do Produto Base</label>
+            <input type="text" placeholder="Ex: KNG-001" value={sku} onChange={e => setSku(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} />
           </div>
         </div>
         <div style={{ marginBottom: '16px' }}>
@@ -119,10 +142,84 @@ export default function CriarProdutoPage() {
             </div>
           </div>
           <div>
-            <label style={labelStyle}>Estoque *</label>
-            <input type="number" min={0} value={stock} onChange={e => setStock(Number(e.target.value))} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} />
+            <label style={labelStyle}>{hasVariations ? 'Estoque (Ignorado c/ Variação)' : 'Estoque Base *'}</label>
+            <input type="number" min={0} value={stock} onChange={e => setStock(Number(e.target.value))} disabled={hasVariations} style={{...inputStyle, opacity: hasVariations ? 0.5 : 1}} onFocus={focusHandler} onBlur={blurHandler} />
           </div>
         </div>
+      </div>
+
+      {/* VARIAÇÕES */}
+      <div style={{ ...sectionStyle, borderColor: hasVariations ? '#22d3ee' : '#3f424d' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: hasVariations ? '24px' : '0' }}>
+          <h2 style={{ ...sectionTitleStyle, margin: 0, color: hasVariations ? '#22d3ee' : '#fff' }}><Grid3X3 size={20} color={hasVariations ? "#22d3ee" : "#64748b"} /> Variações de Estoque</h2>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: hasVariations ? '#22d3ee' : '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>
+            Habilitar
+            <input type="checkbox" checked={hasVariations} onChange={e => setHasVariations(e.target.checked)} style={{ accentColor: '#22d3ee', width: '16px', height: '16px' }} />
+          </label>
+        </div>
+
+        {hasVariations && (
+          <div style={{ padding: '20px', background: '#1f2025', borderRadius: '8px', border: '1px solid #3f424d' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={labelStyle}>Selecione a Matriz (Grade) *</label>
+              <select value={selectedGridId} onChange={e => {
+                setSelectedGridId(e.target.value)
+                const grid = variationGrids.find(g => g.id === e.target.value)
+                if (grid && grid.options) {
+                  setVariationsData(grid.options.map((opt: string) => ({ opt, sku: '', price: '', stock: 0 })))
+                } else {
+                  setVariationsData([])
+                }
+              }} style={{ ...inputStyle, cursor: 'pointer' }}>
+                <option value="">Escolha uma grade predefinida...</option>
+                {variationGrids.map(g => <option key={g.id} value={g.id}>{g.name} ({g.options?.length} opções)</option>)}
+              </select>
+            </div>
+
+            {selectedGridId && variationsData.length > 0 && (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', padding: '10px', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Opção</th>
+                      <th style={{ textAlign: 'left', padding: '10px', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>SKU Específico</th>
+                      <th style={{ textAlign: 'left', padding: '10px', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Estoque *</th>
+                      <th style={{ textAlign: 'left', padding: '10px', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Preço Diferenciado (Opcional)</th>
+                      <th style={{ textAlign: 'center', padding: '10px', width: '40px' }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {variationsData.map((v, i) => (
+                      <tr key={i} style={{ borderTop: '1px solid #3f424d' }}>
+                        <td style={{ padding: '10px', fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>{v.opt}</td>
+                        <td style={{ padding: '10px' }}>
+                          <input type="text" value={v.sku} onChange={(e) => {
+                            const nd = [...variationsData]; nd[i].sku = e.target.value; setVariationsData(nd);
+                          }} placeholder="Automático se vazio" style={{ ...inputStyle, padding: '8px 12px', fontSize: '0.8rem' }} />
+                        </td>
+                        <td style={{ padding: '10px' }}>
+                          <input type="number" min={0} value={v.stock} onChange={(e) => {
+                            const nd = [...variationsData]; nd[i].stock = Number(e.target.value); setVariationsData(nd);
+                          }} style={{ ...inputStyle, padding: '8px 12px', fontSize: '0.8rem' }} />
+                        </td>
+                        <td style={{ padding: '10px' }}>
+                          <input type="number" step="0.01" value={v.price} onChange={(e) => {
+                            const nd = [...variationsData]; nd[i].price = e.target.value; setVariationsData(nd);
+                          }} placeholder="R$ Padrão" style={{ ...inputStyle, padding: '8px 12px', fontSize: '0.8rem' }} />
+                        </td>
+                        <td style={{ padding: '10px', textAlign: 'center' }}>
+                          <button type="button" onClick={() => setVariationsData(variationsData.filter((_, idx) => idx !== i))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Organização */}
