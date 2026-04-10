@@ -288,7 +288,7 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
 
                     {/* Status */}
                     <td style={{ padding: '16px 20px' }}>
-                      <button onClick={() => startTransition(() => toggleCouponStatus(coupon.id, coupon.is_active))} disabled={isPending} style={{ 
+                      <button onClick={() => startTransition(() => { toggleCouponStatus(coupon.id, coupon.is_active); })} disabled={isPending} style={{ 
                         display: 'flex', alignItems: 'center', gap: '6px',
                         background: coupon.is_active ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)',
                         border: `1px solid ${coupon.is_active ? 'rgba(16, 185, 129, 0.3)' : 'rgba(100, 116, 139, 0.3)'}`,
@@ -303,7 +303,7 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
                     {/* Ações */}
                     <td style={{ padding: '16px 20px' }}>
                       <button 
-                        onClick={() => { if (confirm('Excluir este cupom permanentemente?')) startTransition(() => deleteCoupon(coupon.id)) }}
+                        onClick={() => { if (confirm('Excluir este cupom permanentemente?')) startTransition(() => { deleteCoupon(coupon.id); }); }}
                         disabled={isPending}
                         title="Excluir permanentemente" style={{ 
                           background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)',
