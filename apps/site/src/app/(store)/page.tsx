@@ -241,25 +241,32 @@ export default async function HomePage() {
                 transform: scale(1.08) translateY(-2px) !important;
                 filter: brightness(1.2);
               }
+              @media (min-width: 768px) {
+                .hero-btn-grid {
+                  display: grid !important;
+                  grid-template-columns: 1fr auto 1fr !important;
+                  gap: 16px;
+                  align-items: center;
+                }
+                .btn-left { justify-self: end; }
+                .btn-center { justify-self: center; }
+                .btn-right { justify-self: start; }
+              }
             `}} />
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Link href="/niveis/iniciante" style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+            <div className="hero-btn-grid flex flex-col gap-4 w-full max-w-[800px] px-4 md:px-0">
+              <Link href="/niveis/iniciante" style={{ textDecoration: 'none' }} className="btn-left w-max mx-auto md:mx-0">
+                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
                   INICIANTE
                 </div>
               </Link>
-              <Link href="/niveis/semiprofissional" style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+              <Link href="/niveis/semiprofissional" style={{ textDecoration: 'none' }} className="btn-center w-max mx-auto md:mx-0">
+                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
                   SEMIPROFISSIONAL
                 </div>
               </Link>
-              <Link href="/niveis/premium" style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
-                  PREMIUM
-                </div>
-              </Link>
-              <Link href="/niveis/profissional" style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+
+              <Link href="/niveis/profissional" style={{ textDecoration: 'none' }} className="btn-right w-max mx-auto md:mx-0">
+                <div style={{ padding: '12px 28px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
                   PROFISSIONAL
                 </div>
               </Link>

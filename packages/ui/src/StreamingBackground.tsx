@@ -185,12 +185,12 @@ const STREAMING_CSS = `
 
   /* ─── Keyframes (GPU: background-position only) ─── */
   @keyframes streamGridDown {
-    0%   { background-position: 0 0; }
-    100% { background-position: 0 60px; }
+    0%   { background-position: center 0; }
+    100% { background-position: center 60px; }
   }
 
   @keyframes streamGridUp {
-    0%   { background-position: 0 0; }
-    100% { background-position: 0 -60px; }
+    0%   { background-position: center 0; }
+    100% { background-position: center -60px; }
   }
 `

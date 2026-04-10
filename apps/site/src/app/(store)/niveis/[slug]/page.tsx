@@ -18,11 +18,6 @@ const NIVEIS_DATA: Record<string, { title: string, desc: string, color: string }
     desc: "Esta categoria representa um passo acima para pilotos virtuais que já possuem alguma experiência e buscam um equipamento com maior realismo, precisão e imersão. Os produtos aqui oferecem um melhor feedback de força em wheelbases (9 a 12NM), pedaleiras mais avançadas e componentes de maior durabilidade.",
     color: "#10b981" // Verde/Kings
   },
-  premium: {
-    title: "PREMIUM - AQUI VOCÊ FAZ A DIFERENÇA!",
-    desc: "Neste nível a imersão e o detalhamento técnico são primordiais. Focada em pilotos hiper competitivos que buscam extrair o máximo do carro. É indicado o uso de Direct Drives com mais de 15NM e displays nativos que exigem conhecimento extra de telemetria.",
-    color: "#a855f7" // Purple
-  },
   profissional: {
     title: "PROFISSIONAIS - TODO MILÉSIMO CONTA!",
     desc: "O ápice da simulação. Aqui o foco é extrair cada pentelhésimo de segundo da pista. Equipamentos de categoria mundial, pedais ativos, cockpits de movimento reais (Motion) e simuladores em níveis de fidelidade usados livremente por pilotos de F1, GT3 e Porsche Cup para treinar na vida real.",
@@ -52,10 +47,8 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
       query = query.or('title.ilike.%R3%,title.ilike.%R5%,title.ilike.%T128%,title.ilike.%G6%,title.ilike.%GR300%,title.ilike.%KS%')
     } else if (params.slug === 'semiprofissional') {
       query = query.or('title.ilike.%R9%,title.ilike.%R12%,title.ilike.%GR500%,title.ilike.%T818%,title.ilike.%MOZA%')
-    } else if (params.slug === 'premium') {
-      query = query.or('title.ilike.%R16%,title.ilike.%R21%,title.ilike.%FSR%,title.ilike.%Porsche%')
     } else if (params.slug === 'profissional') {
-      query = query.or('title.ilike.%Motion%,title.ilike.%Active%,title.ilike.%GM5%,title.ilike.%Lamborghini%,title.ilike.%Active Pedal%')
+      query = query.or('title.ilike.%Motion%,title.ilike.%Active%,title.ilike.%GM5%,title.ilike.%Lamborghini%,title.ilike.%Active Pedal%,title.ilike.%R16%,title.ilike.%R21%,title.ilike.%FSR%,title.ilike.%Porsche%')
     }
 
     const result = await query.order('created_at', { ascending: false })
