@@ -1,9 +1,9 @@
 import React from 'react'
 import { createServerSupabaseClient } from '@kings/db'
+import { revalidatePath } from 'next/cache'
+import { ShieldCheck, CheckCircle, XCircle, Clock, AlertTriangle, Image as ImageIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
-import { Card, Button, Badge } from '@kings/ui'
-import { revalidatePath } from 'next/cache'
 
 export default async function ModeracaoPage() {
   const supabase = await createServerSupabaseClient()
@@ -14,9 +14,8 @@ export default async function ModeracaoPage() {
     .eq('status', 'pending_review')
     .order('created_at', { ascending: false })
   
-  const pendentes = pendentesData as any[]
+  const pendentes = (pendentesData || []) as any[]
 
-  // Server Action para aprovar
   async function approveListing(formData: FormData) {
     'use server'
     const id = formData.get('id') as string
@@ -25,75 +24,128 @@ export default async function ModeracaoPage() {
     revalidatePath('/admin/moderacao')
   }
 
-  // Server Action para rejeitar
   async function rejectListing(formData: FormData) {
     'use server'
     const id = formData.get('id') as string
     const reason = formData.get('reason') as string
     const s = await createServerSupabaseClient()
-    await s.from('marketplace_listings').update({ 
-      status: 'rejected', 
-      rejection_reason: reason 
-    }).eq('id', id)
+    await s.from('marketplace_listings').update({ status: 'rejected', rejection_reason: reason }).eq('id', id)
     revalidatePath('/admin/moderacao')
   }
 
   return (
-    <div>
-      <h1 className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>Fila de Moderação (MSU)</h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Aprove ou rejeite classificados submetidos por pilotos do Marketplace.</p>
+    <div style={{ padding: '2rem', minHeight: '100vh', color: '#fff', background: '#1e1e1e' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-      {error && <div style={{ color: 'var(--danger)' }}>Erro: {error.message}</div>}
+        {/* Header */}
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <ShieldCheck size={24} color="#06b6d4" /> Fila de Moderação
+          </h1>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Aprove ou rejeite classificados submetidos por pilotos</p>
+        </div>
 
-      {pendentes?.length === 0 && (
-        <Card style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-          🎉 Tudo limpo! Não há anúncios pendentes para revisão.
-        </Card>
-      )}
+        {/* Explainer */}
+        <div style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: '12px', border: '1px solid #3f424d', padding: '28px 32px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: '#06b6d420', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><ShieldCheck size={28} color="#06b6d4" /></div>
+          <div>
+            <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, margin: '0 0 6px' }}>Como funciona?</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
+              Quando um piloto submete um equipamento para venda, ele entra nesta fila com status <strong style={{ color: '#f59e0b' }}>Pendente</strong>. Você analisa a foto, descrição e preço, e decide aprovar ou rejeitar. <br/>
+              <span style={{ color: '#64748b' }}>Anúncios aprovados aparecem imediatamente na vitrine pública do MSU. Rejeitados recebem o motivo e o vendedor é notificado.</span>
+            </p>
+          </div>
+        </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {pendentes?.map((item) => (
-          <Card key={item.id} style={{ padding: '1.5rem', display: 'flex', gap: '1.5rem' }}>
-            {item.images && item.images.length > 0 ? (
-              <img src={item.images[0]} alt="thumb" style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '0.5rem' }} />
-            ) : (
-              <div style={{ width: '150px', height: '150px', background: 'var(--bg-secondary)', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Sem Foto</div>
-            )}
-            
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <h3 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: '#fff' }}>{item.title}</h3>
-                <Badge variant="warning">Pendente</Badge>
+        {/* KPI */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ background: '#2c2e36', borderRadius: '12px', padding: '20px 28px', border: '1px solid #3f424d', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f59e0b15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Clock size={20} color="#f59e0b" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Na Fila</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: pendentes.length > 0 ? '#f59e0b' : '#10b981', marginTop: '2px' }}>{pendentes.length}</div>
+            </div>
+          </div>
+          {pendentes.length === 0 && (
+            <div style={{ color: '#10b981', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CheckCircle size={18} /> Tudo limpo! Não há anúncios pendentes.
+            </div>
+          )}
+        </div>
+
+        {error && <div style={{ color: '#ef4444', background: '#ef444415', border: '1px solid #ef444430', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '0.85rem' }}>Erro: {error.message}</div>}
+
+        {/* Cards de Revisão */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {pendentes.map((item) => (
+            <div key={item.id} style={{ background: '#2c2e36', borderRadius: '12px', border: '1px solid #f59e0b30', padding: '24px', display: 'flex', gap: '24px' }}>
+              
+              {/* Imagem */}
+              <div style={{ width: '160px', height: '160px', borderRadius: '12px', overflow: 'hidden', background: '#1f2025', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {item.images && item.images.length > 0 ? (
+                  <img src={item.images[0]} alt="thumb" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#3f424d' }}>
+                    <ImageIcon size={32} />
+                    <span style={{ fontSize: '0.7rem' }}>Sem Foto</span>
+                  </div>
+                )}
               </div>
               
-              <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                <span style={{ color: 'var(--success)', fontWeight: 600 }}>R$ {item.price}</span>
-                <span>•</span>
-                <span>{item.condition}</span>
-                <span>•</span>
-                <span style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>Vendedor: {item.seller_id.split('-')[0]}</span>
-              </div>
-              <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', margin: '0 0 1.5rem 0', lineHeight: 1.5 }}>{item.description}</p>
-              
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <form action={approveListing}>
-                  <input type="hidden" name="id" value={item.id} />
-                  <Button type="submit">
-                    ✅ Aprovar Classificado
-                  </Button>
-                </form>
+              {/* Info */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: 0 }}>{item.title}</h3>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#f59e0b', background: '#f59e0b15', border: '1px solid #f59e0b30', padding: '4px 12px', borderRadius: '20px', textTransform: 'uppercase', flexShrink: 0 }}>Pendente</span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '16px', color: '#94a3b8', fontSize: '0.85rem', marginBottom: '12px', flexWrap: 'wrap' }}>
+                    <span style={{ color: '#10b981', fontWeight: 700, fontSize: '1.1rem' }}>R$ {Number(item.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span style={{ color: '#3f424d' }}>•</span>
+                    <span>{item.condition || '—'}</span>
+                    <span style={{ color: '#3f424d' }}>•</span>
+                    <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#64748b' }}>Vendedor: {item.seller_id?.split('-')[0] || '—'}</span>
+                  </div>
+                  
+                  <p style={{ color: '#cbd5e1', fontSize: '0.9rem', margin: 0, lineHeight: 1.6, maxHeight: '4.8em', overflow: 'hidden' }}>{item.description || 'Sem descrição fornecida.'}</p>
+                </div>
+                
+                {/* Ações */}
+                <div style={{ display: 'flex', gap: '12px', marginTop: '16px', flexWrap: 'wrap' }}>
+                  <form action={approveListing}>
+                    <input type="hidden" name="id" value={item.id} />
+                    <button type="submit" style={{
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                      background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', borderRadius: '10px',
+                      padding: '10px 24px', color: '#fff', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(16,185,129,0.3)', transition: 'transform 0.2s'
+                    }}>
+                      <CheckCircle size={16} /> Aprovar
+                    </button>
+                  </form>
 
-                <form action={rejectListing} style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input type="hidden" name="id" value={item.id} />
-                  <input type="text" name="reason" placeholder="Motivo da recusa..." required style={{ border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: '#fff', padding: '0.4rem 0.75rem', borderRadius: '0.5rem', outline: 'none' }} />
-                  <Button type="submit" variant="ghost" style={{ color: 'var(--danger)' }}>
-                    ❌ Rejeitar
-                  </Button>
-                </form>
+                  <form action={rejectListing} style={{ display: 'flex', gap: '8px', flex: 1, maxWidth: '400px' }}>
+                    <input type="hidden" name="id" value={item.id} />
+                    <input type="text" name="reason" placeholder="Motivo da recusa..." required style={{
+                      flex: 1, background: '#1f2025', border: '1px solid #3f424d', borderRadius: '8px',
+                      padding: '10px 14px', color: '#fff', fontSize: '0.85rem', outline: 'none'
+                    }} />
+                    <button type="submit" style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      background: '#ef444415', border: '1px solid #ef444430', borderRadius: '10px',
+                      padding: '10px 20px', color: '#ef4444', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer'
+                    }}>
+                      <XCircle size={16} /> Rejeitar
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
-          </Card>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   )
