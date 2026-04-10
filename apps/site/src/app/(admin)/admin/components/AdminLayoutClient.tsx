@@ -40,7 +40,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           top: 0; left: 0; width: 100vw; height: 100vh;
           background: rgba(0,0,0,0.5);
           backdrop-filter: blur(4px);
-          z-index: 99;
+          z-index: 9998;
           opacity: 0;
           transition: opacity 0.3s;
         }
@@ -59,7 +59,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
             top: 0;
             left: 0;
             height: 100vh;
-            z-index: 100;
+            z-index: 9999;
             transform: translateX(-100%);
           }
           .admin-sidebar-container.open {
