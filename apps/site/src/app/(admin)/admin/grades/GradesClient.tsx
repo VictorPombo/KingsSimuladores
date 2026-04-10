@@ -1,0 +1,203 @@
+'use client'
+
+import React, { useState, useTransition } from 'react'
+import { Plus, Grid3X3, Loader2, Save, X, Settings2, ShieldAlert, Trash2 } from 'lucide-react'
+import { createGridAction, deleteGridAction } from './actions'
+
+type VariationGrid = { id: string; name: string; options: string[] }
+
+const inputStyle: React.CSSProperties = { 
+  width: '100%', background: '#1c1d22', border: '1px solid #3f424d', 
+  borderRadius: '8px', padding: '12px 14px', color: '#f8fafc', 
+  fontSize: '0.95rem', outline: 'none', transition: 'border-color 0.2s' 
+}
+
+export function GradesClient({ grids }: { grids: VariationGrid[] }) {
+  const [showForm, setShowForm] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  
+  const [name, setName] = useState('')
+  const [tagInput, setTagInput] = useState('')
+  const [options, setOptions] = useState<string[]>([])
+
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const val = tagInput.trim()
+      if (val && !options.includes(val)) {
+        setOptions([...options, val])
+      }
+      setTagInput('')
+    }
+  }
+
+  const removeTag = (tag: string) => {
+    setOptions(options.filter(o => o !== tag))
+  }
+
+  const handleSave = () => {
+    startTransition(async () => {
+      const res = await createGridAction({ name, options })
+      if (res.success) {
+        setShowForm(false)
+        setName('')
+        setOptions([])
+        setTagInput('')
+      } else {
+        alert('Erro ao salvar grade: ' + res.error)
+      }
+    })
+  }
+
+  const handleDelete = (id: string, gridName: string) => {
+    if (confirm(`Tem certeza que deseja excluir a grade "${gridName}"? Produtos já vinculados poderão perder essa referência.`)) {
+      startTransition(async () => {
+        const res = await deleteGridAction(id)
+        if (!res.success) alert('Erro ao excluir: ' + res.error)
+      })
+    }
+  }
+
+  return (
+    <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      
+      {/* Header Premium */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#24252b', padding: '24px', borderRadius: '16px', border: '1px solid #3f424d80' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div style={{ width: '48px', height: '48px', background: '#22d3ee20', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #22d3ee50' }}>
+            <Grid3X3 size={24} color="#22d3ee" />
+          </div>
+          <div>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f8fafc', margin: 0, letterSpacing: '-0.5px' }}>Grades de Variação</h1>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '2px', margin: 0 }}>Gerencie matrizes de Tamanhos, Cores e Materiais</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setShowForm(!showForm)} 
+          disabled={showForm}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            background: showForm ? '#3f424d' : '#22d3ee', border: 'none', borderRadius: '10px',
+            padding: '12px 24px', color: showForm ? '#fff' : '#0f172a', fontWeight: 700, fontSize: '0.9rem', cursor: showForm ? 'default' : 'pointer',
+            transition: 'transform 0.2s, background 0.2s',
+            boxShadow: showForm ? 'none' : '0 4px 12px rgba(34, 211, 238, 0.3)'
+          }}>
+          <Plus size={18} /> Nova Grade
+        </button>
+      </div>
+
+      {/* Editor / Form */}
+      {showForm && (
+        <div style={{ background: '#24252b', borderRadius: '16px', border: '1px solid #22d3ee80', padding: '24px', animation: 'fadeIn 0.3s ease-out' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+            <Settings2 size={18} color="#22d3ee" />
+            <h3 style={{ color: '#e2e8f0', fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Montar Matriz de Variações</h3>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(250px, 1fr) 2fr', gap: '20px', alignItems: 'start' }}>
+            <div>
+              <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Nome (ex: Tamanho) *</label>
+              <input 
+                type="text" value={name} 
+                onChange={e => setName(e.target.value)} 
+                placeholder="Ex: Cor do Tecido" 
+                style={inputStyle} 
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Opções (Pressione ENTER) *</label>
+              <div style={{ ...inputStyle, display: 'flex', flexWrap: 'wrap', gap: '8px', minHeight: '48px', padding: '8px' }}>
+                {options.map(opt => (
+                  <span key={opt} style={{ background: '#3f424d', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {opt}
+                    <button onClick={() => removeTag(opt)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0, display: 'flex' }}><X size={12} /></button>
+                  </span>
+                ))}
+                <input 
+                  type="text" 
+                  value={tagInput}
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={handleAddTag}
+                  placeholder={options.length === 0 ? "Digite a opção e aperte ENTER..." : "Adicionar mais..."}
+                  style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', minWidth: '150px', color: '#fff', fontSize: '0.85rem' }} 
+                />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #3f424d80' }}>
+            <button 
+              onClick={() => setShowForm(false)}
+              style={{ padding: '10px 20px', background: 'transparent', border: '1px solid #3f424d', borderRadius: '8px', color: '#94a3b8', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <X size={16} /> Cancelar
+            </button>
+            <button 
+              onClick={handleSave} disabled={isPending || !name || options.length === 0}
+              style={{ padding: '10px 24px', background: '#10b981', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 600, cursor: (isPending || !name || options.length === 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: (isPending || !name || options.length === 0) ? 0.6 : 1 }}>
+              {isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Salvar Matriz
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Lista Premium via Grid */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        
+        {grids.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr 80px', gap: '16px', padding: '0 20px', color: '#64748b', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+            <div>Nome da Matriz</div>
+            <div>Opções Disponíveis</div>
+            <div style={{ textAlign: 'right' }}>Ações</div>
+          </div>
+        )}
+
+        {grids.length === 0 ? (
+          <div style={{ background: '#24252b', borderRadius: '16px', border: '1px dashed #3f424d', padding: '60px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ background: '#1c1d22', padding: '20px', borderRadius: '50%', marginBottom: '16px' }}>
+              <ShieldAlert size={32} color="#64748b" />
+            </div>
+            <h3 style={{ color: '#f8fafc', fontSize: '1.2rem', margin: '0 0 8px 0' }}>Sem grades cadastradas</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: 0, maxWidth: '400px' }}>As grades são usadas amarrar tamanhos ou cores diferentes aos seus produtos.</p>
+          </div>
+        ) : (
+          grids.map(g => (
+            <div key={g.id} style={{ 
+              display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr 80px', gap: '16px', alignItems: 'center',
+              background: '#24252b', padding: '16px 20px', borderRadius: '12px', border: '1px solid #3f424d80',
+              transition: 'transform 0.2s, border-color 0.2s', cursor: 'default'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = '#22d3ee80'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3f424d80'}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '36px', height: '36px', background: '#1c1d22', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #3f424d50' }}>
+                  <Grid3X3 size={16} color="#22d3ee" />
+                </div>
+                <span style={{ color: '#f8fafc', fontWeight: 600, fontSize: '0.95rem' }}>{g.name}</span>
+              </div>
+              
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {g.options.map((opt, idx) => (
+                  <span key={idx} style={{ background: '#1c1d22', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', color: '#94a3b8', border: '1px solid #3f424d50' }}>
+                    {opt}
+                  </span>
+                ))}
+              </div>
+              
+              <div style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}>
+                <button 
+                  disabled={isPending}
+                  onClick={() => handleDelete(g.id, g.name)}
+                  style={{ background: '#ef444415', border: '1px solid #ef444430', color: '#ef4444', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+    </div>
+  )
+}
