@@ -179,17 +179,21 @@ export function AdminSidebar() {
         flexDirection: 'column',
         gap: '4px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img 
-            src="https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png" 
-            alt="Kings Simuladores" 
-            style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'contain' }}
-          />
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.5px' }}>
-            Kings<span style={{ color: '#aaa', fontWeight: 400 }}>Hub</span>
-          </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+            <img 
+              src="https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png" 
+              alt="Kings Simuladores" 
+              style={{ width: '30px', height: '30px', objectFit: 'contain' }}
+            />
+          </div>
+          <div>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
+              Kings<span style={{ color: '#aaa', fontWeight: 400 }}>Hub</span>
+            </h2>
+            <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#06b6d4', letterSpacing: '2px' }}>EXPANSÃO</span>
+          </div>
         </div>
-        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#06b6d4', letterSpacing: '1.5px', marginLeft: '42px' }}>EXPANSÃO</span>
       </div>
 
       {/* Menu Principal com scroller nativo */}
