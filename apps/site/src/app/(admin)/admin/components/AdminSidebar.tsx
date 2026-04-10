@@ -180,15 +180,11 @@ export function AdminSidebar() {
         gap: '4px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ 
-            width: '42px', height: '42px', borderRadius: '12px', 
-            background: 'linear-gradient(135deg, #10b981, #059669)', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, 
-            boxShadow: '0 4px 12px rgba(16,185,129,0.4)',
-            border: '2px solid rgba(16,185,129,0.3)'
-          }}>
-            <span style={{ fontSize: '22px', fontWeight: 900, color: '#fff', fontFamily: 'Rajdhani, sans-serif', lineHeight: 1 }}>K</span>
-          </div>
+          <img 
+            src="https://cdn.awsli.com.br/400x300/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png"
+            alt="Kings Simuladores"
+            style={{ width: 'auto', height: '36px', objectFit: 'contain' }}
+          />
           <div>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
               Kings<span style={{ color: '#64748b', fontWeight: 400 }}>Hub</span>
