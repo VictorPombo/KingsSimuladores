@@ -172,7 +172,7 @@ export function RelatoriosClient() {
               <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
             </div>
           ) : reportData && reportData.length > 0 ? (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="admin-overflow-table">
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #3f424d' }}>

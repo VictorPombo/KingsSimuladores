@@ -270,7 +270,7 @@ export default function CriarProdutoPage() {
             </div>
 
             {selectedGridId && variationsData.length > 0 && (
-              <div style={{ overflowX: 'auto' }}>
+              <div className="admin-overflow-table">
                 <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>

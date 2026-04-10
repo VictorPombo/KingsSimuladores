@@ -139,7 +139,7 @@ export default function ImportarProdutosPage() {
               </h3>
               <span style={{ color: '#64748b', fontSize: '0.75rem' }}>{headers.length} colunas detectadas</span>
             </div>
-            <div style={{ overflowX: 'auto' }}>
+            <div className="admin-overflow-table">
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>

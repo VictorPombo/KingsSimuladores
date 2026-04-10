@@ -131,7 +131,7 @@ const MENU_SECTIONS = [
   }
 ]
 
-export function AdminSidebar() {
+export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) {
   const pathname = usePathname()
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({})
 
@@ -179,18 +179,25 @@ export function AdminSidebar() {
         flexDirection: 'column',
         gap: '4px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img 
-            src="https://cdn.awsli.com.br/400x300/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png"
-            alt="Kings Simuladores"
-            style={{ width: 'auto', height: '36px', objectFit: 'contain' }}
-          />
-          <div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
-              Kings<span style={{ color: '#64748b', fontWeight: 400 }}>Hub</span>
-            </h2>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#06b6d4', letterSpacing: '2px' }}>EXPANSÃO</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img 
+              src="https://cdn.awsli.com.br/400x300/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png"
+              alt="Kings Simuladores"
+              style={{ width: 'auto', height: '36px', objectFit: 'contain' }}
+            />
+            <div>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
+                Kings<span style={{ color: '#64748b', fontWeight: 400 }}>Hub</span>
+              </h2>
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#06b6d4', letterSpacing: '2px' }}>EXPANSÃO</span>
+            </div>
           </div>
+          {onCloseMobile && (
+            <button onClick={onCloseMobile} className="mobile-close-btn" style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', display: 'none' }}>
+              <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>&times;</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -202,6 +209,10 @@ export function AdminSidebar() {
           .sidebar-item-hover:hover { background: rgba(255,255,255,0.05); }
           .sidebar-item-hover:focus, button:focus { outline: none !important; }
           .sidebar-sub-hover:hover { background: rgba(255,255,255,0.08); color: #fff; }
+          @media (max-width: 1024px) {
+            .mobile-close-btn { display: block !important; margin-right: 8px; }
+            aside { width: 280px !important; }
+          }
         `}} />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

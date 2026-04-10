@@ -88,7 +88,7 @@ export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
           </select>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="admin-overflow-table">
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
             <thead>
               <tr>

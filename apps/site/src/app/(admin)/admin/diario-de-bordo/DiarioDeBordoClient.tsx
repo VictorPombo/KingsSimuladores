@@ -278,7 +278,7 @@ export function DiarioDeBordoClient() {
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#e2e8f0', margin: 0 }}>Produtos mais vendidos / últimos 30 dias</h3>
               </div>
-              <div style={{ overflowX: 'auto' }}>
+              <div className="admin-overflow-table">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
                   <thead>
                     <tr style={{ background: '#22252e', color: '#94a3b8' }}>

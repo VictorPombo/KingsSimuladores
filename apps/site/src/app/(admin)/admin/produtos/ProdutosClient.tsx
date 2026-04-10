@@ -186,7 +186,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
 
   // ── DESKTOP TABLE LAYOUT ──
   const renderDesktopTable = () => (
-    <div style={{ overflowX: 'auto' }}>
+    <div className="admin-overflow-table">
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>

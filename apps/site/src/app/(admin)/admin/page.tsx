@@ -146,7 +146,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
             </Link>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <div className="admin-header-flex" style={{ marginBottom: '24px' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', color: '#f8fafc', margin: 0 }}>
               {isMsuTab ? 'Visão Geral C2C (MSU)' : 'Visão Corporativa (Kings Store)'}
             </h2>
@@ -154,7 +154,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
           </div>
 
           {/* KPIs ENTERPRISE */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+          <div className="admin-kpi-grid" style={{ marginBottom: '32px' }}>
             <div style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '24px', border: `1px solid ${isMsuTab ? 'rgba(6, 182, 212, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`, position: 'relative', overflow: 'hidden' }}>
               <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
                 {isMsuTab ? 'GMV Transacionado' : 'Faturamento Próprio'}
@@ -216,7 +216,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
           </div>
 
           {/* GRÁFICOS E AÇÕES RÁPIDAS (SPLIT VIEW) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '40px' }}>
+          <div className="admin-grid-2-1" style={{ marginBottom: '40px' }}>
             <div>
               <RevenueChart isMsu={isMsuTab} />
             </div>
@@ -268,7 +268,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
             </Link>
           </div>
           
-          <div style={{ background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+          <div className="admin-overflow-table" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
               <thead>
                 <tr style={{ background: '#1e293b', color: '#94a3b8' }}>

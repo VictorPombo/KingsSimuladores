@@ -114,7 +114,7 @@ export function ClientesClient({ clients }: { clients: Client[] }) {
         </div>
 
         {/* Table */}
-        <div style={{ overflowX: 'auto' }}>
+        <div className="admin-overflow-table">
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
             <thead>
               <tr>

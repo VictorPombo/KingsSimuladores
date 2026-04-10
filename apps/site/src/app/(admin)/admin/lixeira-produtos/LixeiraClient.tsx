@@ -27,7 +27,7 @@ export function LixeiraClient({ products }: { products: any[] }) {
 
   return (
     <div style={{ background: '#2c2e36', borderRadius: '8px', border: '1px solid #3f424d', overflow: 'hidden' }}>
-      <div style={{ overflowX: 'auto' }}>
+      <div className="admin-overflow-table">
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
           <thead>
             <tr>
