@@ -4,10 +4,12 @@ import React from 'react'
 import { Truck, CheckCircle, AlertCircle, MapPin } from 'lucide-react'
 
 const carriers = [
-  { name: 'PAC (Correios)', desc: 'Encomenda econômica — 5 a 12 dias úteis', icon: '📦', active: true, provider: 'Melhor Envio' },
   { name: 'SEDEX (Correios)', desc: 'Encomenda expressa — 1 a 5 dias úteis', icon: '⚡', active: true, provider: 'Melhor Envio' },
-  { name: 'Jadlog', desc: 'Transportadora — 3 a 8 dias úteis', icon: '🚛', active: true, provider: 'Melhor Envio' },
-  { name: 'Azul Cargo', desc: 'Frete aéreo — 2 a 5 dias úteis', icon: '✈️', active: true, provider: 'Melhor Envio' },
+  { name: 'Jadlog .Package', desc: 'Transportadora terrestre econômica — 3 a 8 dias úteis', icon: '🚛', active: true, provider: 'Melhor Envio' },
+  { name: 'Jadlog .Com', desc: 'Transportadora terrestre expressa — 2 a 6 dias úteis', icon: '🚛', active: true, provider: 'Melhor Envio' },
+  { name: 'Azul Cargo Express', desc: 'Frete aéreo expresso — 2 a 5 dias úteis', icon: '✈️', active: true, provider: 'Melhor Envio' },
+  { name: 'LATAM Cargo', desc: 'Frete aéreo nacional — 2 a 5 dias úteis', icon: '✈️', active: true, provider: 'Melhor Envio' },
+  { name: 'Buslog', desc: 'Transporte rodoviário — 4 a 10 dias úteis', icon: '🚌', active: true, provider: 'Melhor Envio' },
   { name: 'Retirada na loja', desc: 'O cliente busca pessoalmente o produto', icon: '🏪', active: false, provider: 'Interno' },
 ]
 

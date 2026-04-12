@@ -1,5 +1,14 @@
 /**
  * Melhor Envio API Wrapper (with Mock/Stub fallback)
+ * 
+ * Transportadoras Ativas:
+ *  - Correios SEDEX (expressa)
+ *  - Jadlog .Package / .Com
+ *  - Azul Cargo Express
+ *  - LATAM Cargo
+ *  - Buslog
+ * 
+ * Removido: Correios PAC (logística lenta, incompatível com simuladores pesados)
  */
 
 interface Dimensions {
@@ -18,6 +27,21 @@ interface ShippingOption {
   price: string;
   custom_delivery_time: number;
   error?: string;
+  logo?: string;
+}
+
+/**
+ * Nomes de serviços que devem ser EXCLUÍDOS dos resultados.
+ * Comparação case-insensitive parcial (inclui variações como "PAC", "Mini Envios", etc.)
+ */
+const BLOCKED_SERVICES = [
+  'pac',
+  'mini envios',
+]
+
+function isBlocked(serviceName: string): boolean {
+  const lower = serviceName.toLowerCase()
+  return BLOCKED_SERVICES.some(blocked => lower.includes(blocked))
 }
 
 export async function calculateShipping(fromPostalCode: string, toPostalCode: string, dimensions: Dimensions[]): Promise<ShippingOption[]> {
@@ -28,7 +52,8 @@ export async function calculateShipping(fromPostalCode: string, toPostalCode: st
     ? 'https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate'
     : 'https://www.melhorenvio.com.br/api/v2/me/shipment/calculate'
 
-  if (token) {
+  // Se existe token real (não placeholder), tenta a API real
+  if (token && !token.includes('preencher')) {
     try {
       const payload = {
         from: { postal_code: fromPostalCode.replace(/\D/g, '') },
@@ -58,61 +83,91 @@ export async function calculateShipping(fromPostalCode: string, toPostalCode: st
       if (res.ok) {
         const data = await res.json()
         
-        // Filter out errors and map to standard KingsHub shape
+        // Filter out errors, map to standard shape, then REMOVE blocked services (PAC)
         const validOptions = data
-          .filter((opt: any) => !opt.error)
+          .filter((opt: any) => !opt.error && opt.price)
+          .filter((opt: any) => !isBlocked(opt.name || ''))
           .map((opt: any) => ({
             id: opt.id,
             name: opt.name,
-            company: opt.company.name,
-            price: opt.price, // API returns string
-            custom_delivery_time: opt.custom_delivery_time
+            company: opt.company?.name || opt.company,
+            price: opt.price,
+            custom_delivery_time: opt.custom_delivery_time || opt.delivery_time,
+            logo: opt.company?.picture || null
           }))
+          .sort((a: ShippingOption, b: ShippingOption) => parseFloat(a.price) - parseFloat(b.price))
 
-        // Se retornou opções válidas, usa da API! Se não, cai pro Fallback
-        if (validOptions.length > 0) return validOptions
+        if (validOptions.length > 0) {
+          console.log(`[Kings Shipping] ${validOptions.length} opções retornadas (PAC removido)`)
+          return validOptions
+        }
       }
     } catch (e) {
       console.warn('[Kings Shipping] Falha ao comunicar com Melhor Envio, usando fallback:', e)
     }
   }
 
-  // ============== FALLBACK (MOCK) ================= MOCK FALLBACK ========
+  // ============== FALLBACK (MOCK) ================= 
   return calculateMockShipping(fromPostalCode, toPostalCode, dimensions)
 }
 
+/**
+ * Mock de transportadoras para quando o token real não está configurado.
+ * Reproduz a mesma estrutura da API real — SEM o Correios PAC.
+ */
 async function calculateMockShipping(fromPostalCode: string, toPostalCode: string, dimensions: Dimensions[]): Promise<ShippingOption[]> {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 600))
   
-  // Base calculations
-  const ending = parseInt(toPostalCode.slice(-1) || '0')
+  // Base calculations using CEP digit variation
+  const ending = parseInt(toPostalCode.replace(/\D/g, '').slice(-1) || '0')
   const basePrice = 85.00 + (ending * 5)
-  const baseDays = 4 + (ending % 3)
+  const baseDays = 3 + (ending % 3)
   
   return [
     {
-      id: 1,
-      name: 'PAC (Simulado)',
-      company: 'Correios',
-      price: basePrice.toFixed(2),
-      custom_delivery_time: baseDays + 5,
-    },
-    {
       id: 2,
-      name: 'SEDEX (Simulado)',
+      name: 'SEDEX',
       company: 'Correios',
-      price: (basePrice * 1.8).toFixed(2),
+      price: (basePrice * 1.6).toFixed(2),
       custom_delivery_time: baseDays,
     },
     {
       id: 3,
-      name: '.Package (Sim)',
-      company: 'JadLog',
-      price: (basePrice * 0.9).toFixed(2),
+      name: '.Package',
+      company: 'Jadlog',
+      price: (basePrice * 0.85).toFixed(2),
       custom_delivery_time: baseDays + 2,
-    }
-  ]
+    },
+    {
+      id: 4,
+      name: '.Com',
+      company: 'Jadlog',
+      price: (basePrice * 1.1).toFixed(2),
+      custom_delivery_time: baseDays + 1,
+    },
+    {
+      id: 9,
+      name: 'Azul Cargo Express',
+      company: 'Azul Cargo',
+      price: (basePrice * 1.3).toFixed(2),
+      custom_delivery_time: Math.max(2, baseDays - 1),
+    },
+    {
+      id: 12,
+      name: 'LATAM Cargo',
+      company: 'LATAM',
+      price: (basePrice * 1.5).toFixed(2),
+      custom_delivery_time: Math.max(2, baseDays - 1),
+    },
+    {
+      id: 15,
+      name: 'Buslog',
+      company: 'Buslog',
+      price: (basePrice * 0.75).toFixed(2),
+      custom_delivery_time: baseDays + 3,
+    },
+  ].sort((a, b) => parseFloat(a.price) - parseFloat(b.price))
 }
 
 /**
@@ -123,7 +178,7 @@ export async function generateShippingLabel(orderData: any, itemsData: any[]) {
   const token = process.env.MELHOR_ENVIO_TOKEN
   const sandbox = process.env.MELHOR_ENVIO_SANDBOX !== 'false'
 
-  if (token) {
+  if (token && !token.includes('preencher')) {
     try {
       console.log(`[Melhor Envio] Adicionando pedido #${orderData.id} ao carrinho real...`)
       
@@ -152,3 +207,4 @@ export async function generateShippingLabel(orderData: any, itemsData: any[]) {
     ticket_url: "https://mock.melhorenvio.com.br/etiqueta/impressao"
   }
 }
+

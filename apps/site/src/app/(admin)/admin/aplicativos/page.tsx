@@ -5,7 +5,7 @@ import { Blocks, ExternalLink, Zap, BarChart2, Mail, Truck, FileText, MessageSqu
 
 const apps = [
   { name: 'Mercado Pago', desc: 'Pagamentos: Pix, Boleto, Cartão 12x, Split Payment', icon: '💰', status: 'active', color: '#00bcff' },
-  { name: 'Melhor Envio', desc: 'Cotação e geração de etiquetas (PAC, Sedex, Jadlog, Azul)', icon: '📦', status: 'active', color: '#00c853' },
+  { name: 'Melhor Envio', desc: 'Cotação e geração de etiquetas (Sedex, Jadlog, Azul Cargo, LATAM, Buslog)', icon: '📦', status: 'active', color: '#00c853' },
   { name: 'Z-API (WhatsApp)', desc: 'Notificações transacionais e recuperação de carrinho', icon: '📱', status: 'active', color: '#25D366' },
   { name: 'Resend', desc: 'E-mails transacionais: confirmação, NF, newsletter', icon: '✉️', status: 'active', color: '#6366f1' },
   { name: 'NFe.io', desc: 'Emissão automática de NF-e por CNPJ', icon: '🧾', status: 'pending', color: '#f59e0b' },
