@@ -985,48 +985,32 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     </div></div>
   </div>
 <br>
-  <div class="phase-card open">
+  <div class="phase-card" onclick="this.classList.toggle('open')">
     <div class="phase-header">
       <span class="phase-number font-display">08B</span>
       <div class="phase-info">
-        <div class="phase-name">Marketplace: Meu Simulador Usado (MSU)</div>
-        <div class="phase-meta"><span>⏱ 1 semana</span><span>📦 11 planos</span><span>🔥 CRÍTICA</span></div>
+        <div class="phase-name">Marketplace: Meu Simulador Usado (P2P + Escrow)</div>
+        <div class="phase-meta"><span>⏱ FINALIZADO</span><span>📦 11 planos</span><span>🔥 CRÍTICA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">65%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:65%"></div></div>
+        <div class="phase-pct" style="color:var(--green)">100%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--green);width:100%"></div></div>
       </div>
-      <span class="phase-status progress">Em Progresso</span>
+      <span class="phase-status done">Concluída</span>
   </div>
     <div class="phase-body"><div class="phase-content">
-      <div class="alert decided" style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15)">📦 <strong style="color:var(--accent)">Estratégia MSU:</strong> Tudo no mesmo repositório e mesmo projeto Supabase. Tabelas segregadas. Auth compartilhada (Kings & MSU). O Admin herdará uma seção dedicada para gestão.</div>
-      <div class="task-group"><div class="task-group-title">Storefront (UI/UX Profissionalização)</div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Home (/usado) — Trocar mocks da vitrine por dados reais <code>marketplace_listings</code> apontando para loja real</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Login MSU (/usado/login) — Criada página protegendo garagem c/ Supabase SSR</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Explorar (/usado/produtos) — Implementar filtros funcionais da base com Supabase active filters</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Detalhe do Produto (/usado/produto/[id]) — Criar página detalhada com design original fluido</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">A rota /usado/produto/[id] deve usar generateMetadata() do Next.js para gerar Open Graph tags ricas (título, preço, imagem), otimizando o compartilhamento no WhatsApp.</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Vender (/usado/vender) — Formulário funcional enviando status 'pending_review' fake session</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Vender (+Foto) — Integrar compressão Client-Side (ex: browser-image-compression) para converter para WebP e limitar a 1080p antes do envio ao Supabase Storage.</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Minha Garagem (/usado/account) — Histórico de meus classificados atrelados ao usuário logado</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">MVP de Negociação: Criar botão 'Fazer Oferta' que redireciona o comprador para o WhatsApp do vendedor com mensagem pré-formatada, operando ao lado do botão 'Comprar Agora' (Split Payment).</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Inserir selo visual de segurança C2C na página do anúncio ('Segurança Kings: Pague pela plataforma...').</span><span class="task-priority medium">P2</span></div>
+      <div class="alert decided" style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15)">📦 <strong style="color:var(--accent)">Estratégia MSU:</strong> Ecosistema P2P totalmente profissionalizado com retenção de Escrow (segurança de fundos), Comprovantes e painéis C2C/Admin separados.</div>
+      <div class="task-group"><div class="task-group-title">Experiência Pública & Área Logada</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Home (/usado) & Explorar — Integração visual e links do banner fluidos para "Quem Somos" no mobile</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Login MSU (/usado/login) — Proteção SSG via Supabase resolvida e otimizada</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Vender (/usado/vender) — Preenchimento obrigatório de frete logístico, caixa e peso + Alertas de Split Payment</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Minha Garagem (/usado/account) — Histórico de P2P com calculadora detalhada de Split (Lucro Vendedor vs Fee)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Comprovante Profissional (/usado/comprovante/[id]) — Layout imprimível p/ transações resolvidas</span><span class="task-priority high">P1</span></div>
       </div>
-      <div class="task-group"><div class="task-group-title">UX / Integração Kings ↔ MSU (Cross-Selling) & Arquitetura</div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Revisão de RLS e Segregação: Garantir que a tabela profiles seja compartilhada (SSO), mas products (Kings) e marketplace_listings (MSU) estejam 100% isoladas via Row Level Security.</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Criar tabela marketplace_orders isolada de orders (da Kings), conectando-a à tabela commissions para gerenciar repasses do Split Payment sem misturar faturamento.</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Implementar Toggle/Link destacado na Navbar principal para navegação cruzada (Loja Kings | Usados MSU).</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Adicionar carrossel na Home da Kings com fallback de cross-sell: 'Veja os últimos usados adicionados no MSU'.</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fallback de Estoque Esgotado: Se um produto novo da Kings ficar sem estoque, exibir botão de busca por aquele modelo no MSU.</span><span class="task-priority medium">P2</span></div>
-      </div>
-      <div class="task-group"><div class="task-group-title">Admin — Seção MSU Market <span style="color:var(--green);font-size:.6rem;margin-left:8px">REDESIGN PREMIUM 10/04</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Sidebar & Layout — Criar grupo "Meu Simulador Usado" auto-nav no side AdminSidebar completado com todos os links</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Dashboard MSU (/admin/msu) e outras rotas — Placeholder estabelecido no admin</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Moderação (/admin/moderacao) — Redesign premium: cards com imagem 160px, botões gradiente Aprovar/Rejeitar, KPI fila, explainer</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Anúncios MSU (/admin/msu-anuncios) — Redesign premium: KPIs, filtros por status, tabela com thumbnails, badges coloridos, ações Pausar/Reativar/Remover</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Vendedores MSU (/admin/msu-vendedores) — Redesign premium: KPIs (Total/Ativos/Vendas), tabela preparada, explainer, empty state</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Comissões MSU (/admin/msu-comissoes) — Redesign premium: KPIs financeiros (Receita/Comissão 12%/Repasses/Pendentes), explainer split, tabela transações</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fix API Core /api/vender — Usar Auth User ID em vez do Mock ID conectando cadastro com Supabase (Segurança)</span><span class="task-priority critical">P0</span></div>
+      <div class="task-group"><div class="task-group-title">Admin Management — P2P</div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Dashboard MSU (/admin) — Visão de GMV (Volume Finaneiro Transacionado) e fila pendente</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fila de Moderação (/admin/moderacao) — Injeção de verificação dupla de tamanho de pacote para evitar prejuízo logístico</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Pedidos & Transações (/admin/msu-pedidos) — Escrow tag com status de retenção (Mercado Pago) mapeados</span><span class="task-priority critical">P0</span></div>
       </div>
     </div></div>
   </div>
@@ -1035,14 +1019,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="phase-header">
       <span class="phase-number font-display">09</span>
       <div class="phase-info">
-        <div class="phase-name">Testes, Migração & Go Live</div>
-        <div class="phase-meta"><span>⏱ 1–2 semanas</span><span>📦 7 planos</span><span>🔥 CRÍTICA</span></div>
+        <div class="phase-name">Testes, Integração de API & Go Live</div>
+        <div class="phase-meta"><span>⏱ Bloqueado por APIs</span><span>📦 7 planos</span><span>🔥 CRÍTICA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--accent)">55%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--accent);width:55%"></div></div>
+        <div class="phase-pct" style="color:var(--yellow)">55%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--yellow);width:55%"></div></div>
       </div>
-      <span class="phase-status progress">Em Progresso</span>
+      <span class="phase-status pending">Aguardando APIs</span>
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="alert decided" style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15)">📦 <strong style="color:var(--accent)">Migração de dados:</strong> Scripts de migração devem ser criados durante as fases anteriores e testados em staging. A decisão de <em>quando</em> executar a migração real (Loja Integrada → Supabase e Firebase → Supabase) será tomada nesta fase.</div>
@@ -1054,7 +1038,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="task-group"><div class="task-group-title">Tasks</div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Testes E2E — Playwright — fluxo completo (Setup Configurado -> Necessita Chaves para finalização)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Testes de carga — k6 — 100 compras simultâneas (Script k6-loadtest.js Criado)</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Compra real em sandbox MP (cartão, Pix, boleto) — AGUARDANDO API_KEY</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Compra real em sandbox MP (cartão, Pix, boleto) — AGUARDANDO CRIAÇÃO DO APLICATIVO E API_KEY (Mercado Pago)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Loja Integrada → tabela products do Supabase (85 produtos importados via scraper)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Loja Integrada → usuarios Supabase (importados e bypass trigger de profiles)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Script de migração: Firebase (MSU) 👉 CANCELADO (Não há base legada para migrar)</span><span class="task-priority low">P3</span></div>
@@ -1062,11 +1046,37 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check"></span><span class="task-text">DNS swap — Kings + MSU + Admin simultâneos — Go Live 🚀</span><span class="task-priority critical">P0</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Go Live</div>
+        <div class="verify-item">▸ Chaves do Mercado Pago (Production e Sandbox) informadas no projeto no Vercel</div>
+        <div class="verify-item">▸ Compra real com cartão/Pix processada e pagamento liquidado no Painel MP</div>
         <div class="verify-item">▸ 0 erros nos testes E2E em produção (staging)</div>
-        <div class="verify-item">▸ Compra real com cartão/Pix processada e NF emitida</div>
-        <div class="verify-item">▸ Dados migrados: produtos visíveis na loja, anúncios no marketplace</div>
         <div class="verify-item">▸ URLs antigas redirecionam corretamente (301)</div>
         <div class="verify-item">▸ 3 domínios respondendo com SSL válido</div>
+      </div>
+    </div></div>
+  </div>
+<br>
+  <div class="phase-card open">
+    <div class="phase-header">
+      <span class="phase-number font-display">10</span>
+      <div class="phase-info">
+        <div class="phase-name">Roadmap MSU: Evolução V2</div>
+        <div class="phase-meta"><span>⏱ FUTURO</span><span>📦 6 verticais</span><span>🔥 SCALING</span></div>
+      </div>
+      <div class="phase-progress">
+        <div class="phase-pct" style="color:var(--purple)">ROADMAP</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--purple);width:5%"></div></div>
+      </div>
+      <span class="phase-status progress" style="background:rgba(139,92,246,.15);color:var(--purple);border-color:var(--purple)">Projetado</span>
+  </div>
+    <div class="phase-body"><div class="phase-content">
+      <div class="alert decided" style="background:rgba(139,92,246,.05);border:1px solid rgba(139,92,246,.15)">📦 <strong style="color:var(--purple)">Ponto de Maturação:</strong> Estes são os requisitos desenhados para quando o MSU escalar drasticamente e a equipe da KingsHub precisar que sistemas trabalhem de forma 100% autônoma para evitar trabalho braçal.</div>
+      <div class="task-group">
+        <div class="task"><span class="task-check"></span><span class="task-text"><strong>KYC + Anti-Fraude:</strong> Validação de CPF via consulta governamental e envio de SMS real via Twilio/Z-API antes de autorizar o 1º anúncio.</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text"><strong>Gateway Webhook MP:</strong> Automação que anula a ordem preventivamente em caso de chargeback/cartão negado sem intervenção humana.</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text"><strong>Logística Unificada:</strong> Assim que pago, o backend gera PDF da etiqueta Melhor Envio automaticamente e anexa no portal "Minha Garagem" para o vendedor.</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text"><strong>Sistema de Disputas:</strong> Um 'Tribunal' dentro de (/admin/disputas) onde a Kings julga mediação entre Comprador x Vendedor com upload pesado de provas.</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text"><strong>Sistema de Avaliações (Trust Score):</strong> Nota de 1 a 5 estrelas pública abaixo do nome do vendedor ('Daleste - ⭐ 4.9') para forçar engajamento positivo.</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text"><strong>SEO Automático Absoluto:</strong> Canonical URLs dinâmicas e sitemap.xml regerando a cada hora com imagens blurDataURL formatadas para o Google bot indexar de graça o acervo de semi-novos.</span><span class="task-priority medium">P2</span></div>
       </div>
     </div></div>
   </div>
