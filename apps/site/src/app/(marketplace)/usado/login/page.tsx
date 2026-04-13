@@ -13,7 +13,7 @@ export default function MsuLogin() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  const supabase = createBrowserClient(
+  const getSupabase = () => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
@@ -22,6 +22,7 @@ export default function MsuLogin() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    const supabase = getSupabase()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(error.message)
@@ -46,6 +47,7 @@ export default function MsuLogin() {
     }
 
     setLoading(true)
+    const supabase = getSupabase()
     const { error } = await supabase.auth.signUp({
       email,
       password,
