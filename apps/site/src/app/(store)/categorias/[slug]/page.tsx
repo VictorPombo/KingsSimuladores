@@ -141,9 +141,9 @@ export default async function CategoryShowcasePage({ params }: { params: { slug:
                     display: 'flex',
                     flexDirection: 'column'
                   }}>
-                    <div style={{ aspectRatio: '1', background: '#fff', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ height: '240px', background: '#fff', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {product.images && product.images.length > 0 ? (
-                        <img src={product.images[0]} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '16px' }} />
+                        <img src={product.images[0]} alt={product.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', padding: '16px' }} />
                       ) : (
                         <div style={{ color: '#ccc' }}>Sem Imagem</div>
                       )}

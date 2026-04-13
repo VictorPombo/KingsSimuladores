@@ -15,7 +15,12 @@ export default function VenderPage() {
     title: '',
     price: '',
     condition: 'good',
-    description: ''
+    description: '',
+    weight: '',
+    width: '',
+    height: '',
+    length: '',
+    zip: ''
   })
   
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -87,7 +92,14 @@ export default function VenderPage() {
           price: parseFloat(form.price),
           condition: form.condition,
           imageUrl: uploadedUrl,
-          description: form.description
+          description: form.description,
+          shipping_options: {
+            weight: parseFloat(form.weight),
+            width: parseFloat(form.width),
+            height: parseFloat(form.height),
+            length: parseFloat(form.length),
+            zip_origin: form.zip
+          }
         })
       })
 
@@ -142,6 +154,18 @@ export default function VenderPage() {
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(10, 14, 26, 0.6)', padding: '2.5rem', borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
             
+            {/* Securtiy Alert */}
+            <div style={{ background: 'rgba(255, 107, 53, 0.1)', border: '1px solid rgba(255, 107, 53, 0.3)', padding: '16px', borderRadius: '12px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <div style={{ fontSize: '1.2rem', marginTop: '2px' }}>🔒</div>
+              <div>
+                <strong style={{ color: '#FF6B35', display: 'block', marginBottom: '4px', fontSize: '0.9rem' }}>Requisitos Obrigatórios para Vendedores</strong>
+                <ul style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <li>Você precisa ter uma conta no <strong>Mercado Pago</strong> cadastrada com o mesmo e-mail dessa conta para receber o valor das suas vendas.</li>
+                  <li>As **dimensões exatas** da caixa devem ser informadas para o cálculo de frete do comprador. Fraudes nas dimensões causarão o bloqueio do seu pagamento.</li>
+                </ul>
+              </div>
+            </div>
+
             {/* Bloco de Upload Focado */}
             <div>
               <label style={labelStyle}>Fotos Reais do Equipamento *</label>
@@ -211,6 +235,39 @@ export default function VenderPage() {
                 required value={form.description} onChange={e => setForm({...form, description: e.target.value})}
                 placeholder="Conte o tempo de uso, motivo da venda, o que acompanha a caixa e detalhes de funcionamento..." style={{ ...inputStyle, minHeight: '140px', resize: 'vertical' }} 
               />
+            </div>
+
+            <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0.5rem 0' }} />
+
+            <div style={{ marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 700, marginBottom: '4px' }}>📦 Dados para Envio</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>O comprador pagará o frete com base nessas informações. Seja preciso.</p>
+            </div>
+
+            <div className="vender-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <div>
+                <label style={labelStyle}>CEP de Origem *</label>
+                <input required value={form.zip} onChange={e => setForm({...form, zip: e.target.value})} type="text" placeholder="Ex: 01000-000" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Peso Bruto (kg) *</label>
+                <input required value={form.weight} onChange={e => setForm({...form, weight: e.target.value})} type="number" step="0.1" placeholder="Ex: 8.5" style={inputStyle} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={labelStyle}>Largura (cm) *</label>
+                <input required value={form.width} onChange={e => setForm({...form, width: e.target.value})} type="number" placeholder="Ex: 40" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Altura (cm) *</label>
+                <input required value={form.height} onChange={e => setForm({...form, height: e.target.value})} type="number" placeholder="Ex: 30" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Profundidade (cm) *</label>
+                <input required value={form.length} onChange={e => setForm({...form, length: e.target.value})} type="number" placeholder="Ex: 40" style={inputStyle} />
+              </div>
             </div>
 
             <Button type="submit" disabled={isSubmitting} style={{ background: '#06b6d4', color: '#000', fontSize: '1.1rem', fontWeight: 800, padding: '1.5rem', borderRadius: '0.75rem', marginTop: '1rem' }}>

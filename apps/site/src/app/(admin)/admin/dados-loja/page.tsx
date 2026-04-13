@@ -33,7 +33,7 @@ export default function DadosLojaPage() {
         <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={18} color="#10b981" /> Endereço</h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px', marginBottom: '16px' }}>
           <div><label style={labelStyle}>CEP</label><input type="text" placeholder="00000-000" style={inputStyle} /></div>
-          <div><label style={labelStyle}>Logradouro</label><input type="text" placeholder="Rua / Avenida" style={inputStyle} /></div>
+          <div><label style={labelStyle}>Endereço</label><input type="text" placeholder="Rua / Avenida" style={inputStyle} /></div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
           <div><label style={labelStyle}>Número</label><input type="text" placeholder="000" style={inputStyle} /></div>

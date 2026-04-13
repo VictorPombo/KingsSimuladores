@@ -94,19 +94,20 @@ export function DalesteSticker() {
         </Link>
       </div>
 
-      {/* VERSÃO MOBILE (BANNER ESTÁTICO - SEM AÇÃO AO CLICAR) */}
+      {/* VERSÃO MOBILE (BANNER CLICÁVEL REDIRECIONANDO PARA A HISTÓRIA) */}
       <div className="mobile-only w-full mx-auto" style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '0 16px', margin: '-50px 0 -50px', zIndex: 10 }}>
-        <img
-          src="/banner-fernando.png"
-          alt="Sou Fernando Albertoni, conhecido como Daleste"
-          style={{
-            width: '100%',
-            height: 'auto',
-            objectFit: 'contain',
-            borderRadius: '16px',
-            pointerEvents: 'none'
-          }}
-        />
+        <Link href="/quem-somos" style={{ display: 'block', width: '100%', textDecoration: 'none' }}>
+          <img
+            src="/banner-fernando.png"
+            alt="Sou Fernando Albertoni, conhecido como Daleste. Clica pra ver a história!"
+            style={{
+              width: '100%',
+              height: 'auto',
+              objectFit: 'contain',
+              borderRadius: '16px',
+            }}
+          />
+        </Link>
       </div>
     </>
   )

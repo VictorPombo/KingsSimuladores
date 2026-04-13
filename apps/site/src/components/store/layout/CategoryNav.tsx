@@ -6,6 +6,10 @@ import { useState } from 'react'
 const MENU_ITEMS = [
 
   {
+    label: "TODOS PRODUTOS",
+    href: "/produtos"
+  },
+  {
     label: "THERMALTAKE",
     href: "/marcas/thermaltake"
   },

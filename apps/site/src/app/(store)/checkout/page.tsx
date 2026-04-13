@@ -134,7 +134,7 @@ export default function CheckoutPage() {
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff', marginTop: '1rem' }}>Endereço de Entrega</h2>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <input type="text" placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} onBlur={preencherCep} style={{...inputStyle, width: '150px'}} />
-                  <input type="text" placeholder="Logradouro" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 1}} />
                   <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px'}} />
                 </div>
                 

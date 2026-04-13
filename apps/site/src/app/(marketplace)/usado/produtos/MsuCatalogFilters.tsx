@@ -4,55 +4,60 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
 
-const CATEGORIES = [
-  { id: 'cockpits', label: 'Cockpits' },
-  { id: 'volantes', label: 'Volantes' },
-  { id: 'pedais', label: 'Pedais' },
-  { id: 'acessorios', label: 'Acessórios' },
+const CONDITIONS = [
+  { id: 'like_new', label: 'Como Novo' },
+  { id: 'good', label: 'Bom' },
+  { id: 'fair', label: 'Justo' },
 ]
 
-const BRANDS = [
-  { id: 'xtreme', label: 'Xtreme Racing' },
-  { id: 'fanatec', label: 'Fanatec' },
-  { id: 'moza', label: 'Moza Racing' },
-]
-
-export function CatalogFilters() {
+export function MsuCatalogFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '')
 
-  const toggleFilter = useCallback(
-    (type: 'category' | 'brand', value: string) => {
+  const currentCondition = searchParams.get('condition')
+  const activeCount = (currentCondition ? 1 : 0) + (searchParams.get('q') ? 1 : 0)
+
+  const toggleCondition = useCallback(
+    (value: string) => {
       const current = new URLSearchParams(Array.from(searchParams.entries()))
-      const paramExists = current.get(type) === value
-      
-      if (paramExists) {
-        current.delete(type)
+      if (current.get('condition') === value) {
+        current.delete('condition')
       } else {
-        current.set(type, value)
+        current.set('condition', value)
       }
-
-      router.push(`/produtos?${current.toString()}`, { scroll: false })
+      router.push(`/usado/produtos?${current.toString()}`, { scroll: false })
     },
     [router, searchParams]
   )
 
-  const clearAll = useCallback(() => {
-    router.push('/produtos', { scroll: false })
-  }, [router])
+  const handleSearch = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      const current = new URLSearchParams(Array.from(searchParams.entries()))
+      if (searchTerm.trim()) {
+        current.set('q', searchTerm.trim())
+      } else {
+        current.delete('q')
+      }
+      router.push(`/usado/produtos?${current.toString()}`, { scroll: false })
+    },
+    [router, searchParams, searchTerm]
+  )
 
-  const currentCategory = searchParams.get('category')
-  const currentBrand = searchParams.get('brand')
-  const activeCount = (currentCategory ? 1 : 0) + (currentBrand ? 1 : 0)
+  const clearAll = useCallback(() => {
+    setSearchTerm('')
+    router.push('/usado/produtos', { scroll: false })
+  }, [router])
 
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
-        .kings-filter-bar {
+        .msu-filter-bar {
           margin-bottom: 24px;
         }
-        .kings-filter-chip {
+        .msu-filter-chip {
           display: inline-flex;
           align-items: center;
           gap: 6px;
@@ -67,45 +72,44 @@ export function CatalogFilters() {
           color: var(--text-secondary);
           white-space: nowrap;
         }
-        .kings-filter-chip:hover {
+        .msu-filter-chip:hover {
           background: rgba(255,255,255,0.06);
           color: var(--text-primary);
         }
-        .kings-filter-chip.active {
-          background: rgba(0, 229, 255, 0.1);
-          border-color: rgba(0, 229, 255, 0.3);
-          color: var(--accent);
+        .msu-filter-chip.active {
+          background: rgba(255, 107, 53, 0.12);
+          border-color: rgba(255, 107, 53, 0.35);
+          color: #FF6B35;
           font-weight: 600;
         }
-        .kings-filter-panel {
+        .msu-filter-panel {
           overflow: hidden;
           transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.3s ease;
         }
         @media (max-width: 768px) {
-          .kings-filter-sections {
+          .msu-filter-sections {
             flex-direction: column !important;
             gap: 16px !important;
-          }
-          .kings-filter-chips-row {
-            flex-wrap: wrap !important;
           }
         }
       `}} />
 
-      <div className="kings-filter-bar">
+      <div className="msu-filter-bar">
         <div style={{
-          background: 'var(--bg-card)',
+          background: 'rgba(15, 18, 30, 0.6)',
+          backdropFilter: 'blur(12px)',
           borderRadius: 'var(--radius)',
-          border: '1px solid var(--border)',
+          border: '1px solid rgba(255,255,255,0.08)',
           overflow: 'hidden',
           display: 'inline-block',
         }}>
-          {/* Toggle Button Row */}
+          {/* Toggle Button */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 20px',
+            gap: '16px',
           }}>
             <button
               onClick={() => setIsOpen(prev => !prev)}
@@ -120,14 +124,14 @@ export function CatalogFilters() {
                 padding: 0,
               }}
             >
-              <SlidersHorizontal size={16} color="var(--accent)" />
+              <SlidersHorizontal size={16} color="#FF6B35" />
               <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>
                 Filtros
               </span>
               {activeCount > 0 && (
                 <span style={{
-                  background: 'var(--accent)',
-                  color: '#000',
+                  background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
+                  color: '#fff',
                   fontSize: '0.6rem',
                   fontWeight: 800,
                   width: '18px',
@@ -164,63 +168,66 @@ export function CatalogFilters() {
                 }}
               >
                 <X size={12} />
-                Limpar filtros
+                Limpar
               </button>
             )}
           </div>
 
           {/* Expandable Panel */}
           <div
-            className="kings-filter-panel"
+            className="msu-filter-panel"
             style={{
               maxHeight: isOpen ? '300px' : '0px',
               opacity: isOpen ? 1 : 0,
               padding: isOpen ? '0 20px 20px' : '0 20px 0',
-              borderTop: isOpen ? '1px solid var(--border)' : 'none',
+              borderTop: isOpen ? '1px solid rgba(255,255,255,0.06)' : 'none',
             }}
           >
-            <div className="kings-filter-sections" style={{ display: 'flex', gap: '40px', paddingTop: '16px' }}>
-              {/* Categorias */}
-              <div>
+            <div className="msu-filter-sections" style={{ display: 'flex', gap: '32px', paddingTop: '16px', alignItems: 'flex-end' }}>
+              {/* Busca */}
+              <div style={{ flex: 1, minWidth: '200px' }}>
                 <h4 style={{
-                  fontSize: '0.65rem',
-                  color: 'var(--text-muted)',
-                  marginBottom: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1.5px',
-                  fontWeight: 700,
-                }}>Categorias</h4>
-                <div className="kings-filter-chips-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {CATEGORIES.map(cat => (
-                    <button
-                      key={cat.id}
-                      className={`kings-filter-chip ${currentCategory === cat.id ? 'active' : ''}`}
-                      onClick={() => toggleFilter('category', cat.id)}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
+                  fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '10px',
+                  textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700,
+                }}>Buscar</h4>
+                <form onSubmit={handleSearch} style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Ex: Volante, Pedal..."
+                    style={{
+                      flex: 1, background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+                      padding: '8px 14px', borderRadius: '8px', fontSize: '0.85rem',
+                      outline: 'none',
+                    }}
+                  />
+                  <button type="submit" style={{
+                    background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
+                    color: '#fff', border: 'none', padding: '8px 16px',
+                    borderRadius: '8px', fontWeight: 700, fontSize: '0.8rem',
+                    cursor: 'pointer', whiteSpace: 'nowrap',
+                  }}>
+                    Buscar
+                  </button>
+                </form>
               </div>
 
-              {/* Marcas */}
+              {/* Estado */}
               <div>
                 <h4 style={{
-                  fontSize: '0.65rem',
-                  color: 'var(--text-muted)',
-                  marginBottom: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1.5px',
-                  fontWeight: 700,
-                }}>Marcas</h4>
-                <div className="kings-filter-chips-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {BRANDS.map(brand => (
+                  fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '10px',
+                  textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700,
+                }}>Estado</h4>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {CONDITIONS.map(cond => (
                     <button
-                      key={brand.id}
-                      className={`kings-filter-chip ${currentBrand === brand.id ? 'active' : ''}`}
-                      onClick={() => toggleFilter('brand', brand.id)}
+                      key={cond.id}
+                      className={`msu-filter-chip ${currentCondition === cond.id ? 'active' : ''}`}
+                      onClick={() => toggleCondition(cond.id)}
                     >
-                      {brand.label}
+                      {cond.label}
                     </button>
                   ))}
                 </div>

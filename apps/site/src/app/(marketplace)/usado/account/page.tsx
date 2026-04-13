@@ -3,6 +3,7 @@ import React from 'react'
 import { Container } from '@kings/ui'
 import { createServerSupabaseClient } from '@kings/db'
 import { redirect } from 'next/navigation'
+import { GarageClient } from './GarageClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,58 +15,92 @@ export default async function AccountPage() {
     redirect('/usado/login')
   }
 
+  // 1. Buscar anúncios do vendedor
   const { data: meusAnunciosData } = await supabase
     .from('marketplace_listings')
     .select('*')
     .eq('seller_id', user.id)
     .order('created_at', { ascending: false })
 
-  const meusAnuncios = meusAnunciosData as any[]
+  // 2. Buscar vendas realizadas (orders onde o user é o vendedor)
+  const { data: ordersData } = await supabase
+    .from('marketplace_orders')
+    .select(`
+      id,
+      total_price,
+      kings_fee,
+      seller_net,
+      status,
+      tracking_code,
+      created_at,
+      listing_id,
+      buyer_id
+    `)
+    .eq('seller_id', user.id)
+    .order('created_at', { ascending: false })
+
+  // 3. Para cada order, buscar listing e buyer info
+  const ordersEnriched = await Promise.all(
+    (ordersData || []).map(async (order: any) => {
+      // Listing info
+      const { data: listing } = await supabase
+        .from('marketplace_listings')
+        .select('title, images')
+        .eq('id', order.listing_id)
+        .single()
+
+      // Buyer info
+      const { data: buyer } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', order.buyer_id)
+        .single()
+
+      return {
+        ...order,
+        listing: listing || { title: 'Produto removido', images: [] },
+        buyer: buyer || { full_name: 'Piloto' },
+      }
+    })
+  )
+
+  // 4. Profile info
+  const profile = {
+    email: user.email || '',
+    full_name: user.user_metadata?.full_name || '',
+    created_at: user.created_at || '',
+  }
 
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '100px' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', paddingBottom: '80px' }}>
       <Container>
-        <h1 style={{ fontSize: '2rem', color: '#fff', fontWeight: 800, marginBottom: '2rem' }}>Minha Garagem (MSU)</h1>
-
-        <h2 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 700, marginBottom: '1rem' }}>Meus Desapegos</h2>
-        
-        {meusAnuncios?.length === 0 && (
-          <p style={{ color: 'var(--text-muted)' }}>Você ainda não anunciou nada.</p>
-        )}
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {meusAnuncios?.map(anuncio => (
-            <div key={anuncio.id} style={{ 
-              background: 'var(--bg-card)', 
-              padding: '1.5rem', 
-              borderRadius: '0.75rem', 
-              border: `1px solid ${anuncio.status === 'rejected' ? '#ef4444' : 'var(--border)'}`,
-              display: 'flex',
-              gap: '1.5rem',
-              alignItems: 'center'
+        {/* Header */}
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '12px',
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
+              padding: '6px 14px', borderRadius: '6px',
+              fontSize: '0.85rem', fontWeight: 900, color: '#fff',
+              letterSpacing: '2px',
             }}>
-              <img src={anuncio.images[0]} alt="thumb" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '0.25rem' }} />
-              
-              <div style={{ flex: 1 }}>
-                <h3 style={{ color: '#fff', margin: '0 0 0.25rem 0', fontSize: '1.1rem' }}>{anuncio.title}</h3>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>R$ {anuncio.price}</div>
-              </div>
-
-              <div>
-                {anuncio.status === 'pending_review' && <span style={{ background: '#f59e0b', color: '#000', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', fontWeight: 700 }}>EM ANÁLISE</span>}
-                {anuncio.status === 'active' && <span style={{ background: '#10b981', color: '#fff', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', fontWeight: 700 }}>ATIVO - PUBLICADO</span>}
-                {anuncio.status === 'rejected' && <span style={{ background: '#ef4444', color: '#fff', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', fontWeight: 700 }}>REJEITADO</span>}
-                {anuncio.status === 'sold' && <span style={{ background: 'var(--text-muted)', color: '#fff', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', fontWeight: 700 }}>VENDIDO</span>}
-              </div>
-
-              {anuncio.status === 'rejected' && (
-                <div style={{ width: '100%', flexBasis: '100%', marginTop: '1rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.75rem', borderRadius: '0.5rem', fontSize: '0.9rem' }}>
-                  <strong>Motivo da recusa:</strong> {anuncio.rejection_reason}
-                </div>
-              )}
+              MSU
             </div>
-          ))}
+          </div>
+          <h1 style={{ fontSize: '2rem', color: '#fff', fontWeight: 800, margin: '0 0 4px' }}>
+            Minha Garagem
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
+            Gerencie seus anúncios, acompanhe vendas e gere comprovantes.
+          </p>
         </div>
+
+        <GarageClient
+          listings={(meusAnunciosData || []) as any[]}
+          orders={ordersEnriched as any[]}
+          profile={profile}
+        />
       </Container>
     </div>
   )

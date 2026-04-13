@@ -62,15 +62,6 @@ export function Header() {
               <a href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #FF6B35, #FF3B5C)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)' }} className="kings-btn-hover">
                 Loja de Usados (MSU)
               </a>
-              <a href="/produtos" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }} className="kings-nav-hover">
-                Produtos
-              </a>
-              <a href="/categorias" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }} className="kings-nav-hover">
-                Categorias
-              </a>
-              <a href="/" style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }} className="kings-nav-hover">
-                Início
-              </a>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
               <div className="kings-btn-hover cursor-pointer">
                 <CartIcon />

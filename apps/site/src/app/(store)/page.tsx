@@ -314,6 +314,8 @@ export default async function HomePage() {
         <section id="vitrines" style={{ padding: 'clamp(32px, 8vw, 80px) 0', overflow: 'hidden' }}>
           <Container>
             <ProductCarousel title="LANÇAMENTOS" prods={lancamentos} />
+            <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
+            <ProductCarousel title="DESTAQUES" prods={destaques} />
             
             {msuListings.length > 0 && (
               <div style={{ marginBottom: '80px' }}>
@@ -343,9 +345,6 @@ export default async function HomePage() {
                 </div>
               </div>
             )}
-
-            <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
-            <ProductCarousel title="DESTAQUES" prods={destaques} />
           </Container>
         </section>
       )}

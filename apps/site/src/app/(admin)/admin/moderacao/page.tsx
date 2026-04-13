@@ -111,6 +111,15 @@ export default async function ModeracaoPage() {
                   </div>
                   
                   <p style={{ color: '#cbd5e1', fontSize: '0.9rem', margin: 0, lineHeight: 1.6, maxHeight: '4.8em', overflow: 'hidden' }}>{item.description || 'Sem descrição fornecida.'}</p>
+                  
+                  {/* Dados de Frete Declarados */}
+                  {item.shipping_options && (
+                    <div style={{ marginTop: '12px', background: '#1f2025', border: '1px dashed #3f424d', padding: '12px', borderRadius: '8px', fontSize: '0.8rem', color: '#94a3b8', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                      <span style={{ color: '#e2e8f0', fontWeight: 600 }}><span style={{ color: '#06b6d4' }}>📦 Peso:</span> {item.shipping_options.weight} kg</span>
+                      <span style={{ color: '#e2e8f0', fontWeight: 600 }}><span style={{ color: '#06b6d4' }}>📏 Dimensões:</span> {item.shipping_options.width}x{item.shipping_options.height}x{item.shipping_options.length} cm</span>
+                      <span style={{ color: '#e2e8f0', fontWeight: 600 }}><span style={{ color: '#06b6d4' }}>📍 CEP Origem:</span> {item.shipping_options.zip_origin}</span>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Ações */}

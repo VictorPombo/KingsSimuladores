@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { Container } from '@kings/ui'
 import { ListingCard } from '@/components/marketplace/ListingCard'
 import { createAdminClient } from '@kings/db'
+import { MsuCatalogFilters } from './MsuCatalogFilters'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,81 +22,79 @@ export default async function ProdutosPage({ searchParams }: { searchParams: { q
   const listings = listingsData as any[]
 
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '100px' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px' }}>
       <Container>
-        <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '2rem', color: '#fff', fontWeight: 800 }}>Mural de Anúncios</h1>
-            <div style={{ color: 'var(--text-muted)' }}>
-              {listings?.length || 0} desapegos encontrados.
-            </div>
+            <h1 style={{ fontSize: '2rem', color: '#fff', fontWeight: 800, margin: 0 }}>Mural de Anúncios</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>
+              {listings?.length || 0} desapegos encontrados
+            </p>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '2rem' }}>
-          {/* Sidebar de Filtros (Simulada para visualização rápida) */}
-          <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid var(--border)', height: 'fit-content' }}>
-            <h3 style={{ color: '#fff', fontWeight: 600, marginBottom: '1rem' }}>Filtros</h3>
-            
-            <form action="/usado/produtos" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Busca</label>
-                <input 
-                  type="text" 
-                  name="q" 
-                  defaultValue={searchParams.q}
-                  placeholder="Ex: Volante..." 
-                  style={{ width: '100%', background: 'var(--bg-primary)', border: '1px solid var(--border)', color: '#fff', padding: '0.5rem', borderRadius: '0.25rem', outline: 'none' }}
-                />
-              </div>
+        {/* Filter Bar */}
+        <Suspense fallback={<div style={{ padding: '12px 20px', background: 'rgba(15,18,30,0.6)', borderRadius: 'var(--radius)', marginBottom: '24px', display: 'inline-block' }}>Carregando filtros...</div>}>
+          <MsuCatalogFilters />
+        </Suspense>
 
-              <div>
-                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Estado</label>
-                <select name="condition" defaultValue={searchParams.condition || ''} style={{ width: '100%', background: 'var(--bg-primary)', border: '1px solid var(--border)', color: '#fff', padding: '0.5rem', borderRadius: '0.25rem', outline: 'none' }}>
-                  <option value="">Qualquer</option>
-                  <option value="like_new">Como Novo</option>
-                  <option value="good">Bom</option>
-                  <option value="fair">Justo</option>
-                </select>
-              </div>
+        {/* Listings Grid */}
+        <style dangerouslySetInnerHTML={{__html: `
+          .msu-listing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+          }
+          @media (max-width: 1200px) {
+            .msu-listing-grid {
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }
+          @media (max-width: 768px) {
+            .msu-listing-grid {
+              grid-template-columns: repeat(2, 1fr);
+              gap: 12px;
+            }
+          }
+          @media (max-width: 480px) {
+            .msu-listing-grid {
+              grid-template-columns: 1fr;
+              gap: 16px;
+            }
+          }
+        `}} />
 
-              <button type="submit" style={{ background: 'var(--accent)', color: '#000', padding: '0.5rem', borderRadius: '0.25rem', fontWeight: 600, cursor: 'pointer', border: 'none' }}>
-                Aplicar
-              </button>
-            </form>
+        {error && (
+          <div style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', padding: '16px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.3)', marginBottom: '24px', fontSize: '0.9rem' }}>
+            Erro ao puxar anúncios: {error.message}
           </div>
+        )}
 
-          {/* Lista */}
-          <div>
-            {error && (
-              <div style={{ background: 'rgba(255,0,0,0.1)', color: 'red', padding: '1rem', borderRadius: '0.5rem', border: '1px solid red' }}>
-                Erro ao puxar anúncios: {error.message}
-              </div>
-            )}
-
-            {!listings?.length && !error && (
-              <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-                Nenhum equipamento à venda no momento 😢
-              </div>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-              {listings?.map(listing => (
-                <ListingCard 
-                  key={listing.id}
-                  id={listing.id}
-                  title={listing.title}
-                  price={listing.price}
-                  condition={listing.condition}
-                  imageUrl={listing.images[0]}
-                  location="Brasil"
-                  sellerName="Piloto Oculto"
-                />
-              ))}
-            </div>
+        {!listings?.length && !error && (
+          <div style={{ textAlign: 'center', padding: '80px 40px', color: 'var(--text-muted)', background: 'rgba(15,18,30,0.4)', borderRadius: 'var(--radius)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🏁</div>
+            <p style={{ fontSize: '1rem', margin: 0 }}>Nenhum equipamento à venda no momento.</p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px' }}>Seja o primeiro a anunciar!</p>
           </div>
-        </div>
+        )}
 
+        {listings?.length > 0 && (
+          <div className="msu-listing-grid">
+            {listings.map(listing => (
+              <ListingCard 
+                key={listing.id}
+                id={listing.id}
+                title={listing.title}
+                price={listing.price}
+                condition={listing.condition}
+                imageUrl={listing.images?.[0]}
+                location="Brasil"
+                sellerName="Piloto Vendedor"
+              />
+            ))}
+          </div>
+        )}
       </Container>
     </div>
   )
