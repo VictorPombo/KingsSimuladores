@@ -46,15 +46,101 @@ export default function QuemSomosPage() {
           <DalesteVideoPlayer />
 
           <div style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-            <p style={{ marginBottom: '20px' }}>
+            <p style={{ marginBottom: '32px' }}>
               Nossa história começa com a paixão pelo automobilismo virtual. A Kings Simuladores nasceu do sonho de trazer o que há de melhor em equipamentos e tecnologia para o ecossistema brasileiro de simuladores.
             </p>
-            <p style={{ marginBottom: '20px' }}>
-              <em style={{color: 'var(--text-muted)'}}>(Use este espaço para contar toda a trajetória do Daleste, criação da loja e a essência da marca!)</em>
-            </p>
-            <p>
-              Hoje, somos a grande referência nacional quando o assunto é qualidade, imersão e performance. Seja bem-vindo à família Kings Simuladores!
-            </p>
+            
+            {/* MISSÃO & VISÃO */}
+            <div style={{ marginBottom: '32px' }}>
+              <h2 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '16px' }}>
+                🎯 Missão & Visão
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>🏁</span> Nossa Missão
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.95rem' }}>
+                    Proporcionar a experiência de pilotagem mais realista e imersiva possível, entregando equipamentos de elite que transformam entusiastas em pilotos e simulação em realidade — sempre com excelência técnica e suporte especializado.
+                  </p>
+                </div>
+                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>🔭</span> Nossa Visão
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.95rem' }}>
+                    Ser a maior referência nacional em SimRacing de alto desempenho, reconhecida não apenas como uma loja, mas como o verdadeiro quartel-general do simulador profissional no Brasil.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* FUNDAMENTO */}
+            <div style={{ marginBottom: '32px', background: 'rgba(255, 255, 255, 0.03)', padding: '24px', borderRadius: '12px', borderLeft: '4px solid var(--accent)' }}>
+              <h2 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>✝️</span> Fundamento: Nossa Fé, Nossa Base
+              </h2>
+              <blockquote style={{ fontStyle: 'italic', color: 'var(--text-muted)', borderLeft: '2px solid var(--border)', paddingLeft: '16px', margin: '0 0 16px 0' }}>
+                "Tudo o que fizerem, façam de todo o coração, como para o Senhor, e não para os homens." <br/>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>— Colossenses 3:23</strong>
+              </blockquote>
+              <p style={{ margin: 0, fontSize: '0.95rem' }}>
+                A Kings Simuladores é fundada sobre valores cristãos. Reconhecemos que todo crescimento, toda oportunidade e todo talento provêm de Deus. Trabalhamos com alegria e gratidão, submetendo nossos planos à vontade divina — porque acreditamos que servir ao cliente é, acima de tudo, uma forma de servir ao próximo.
+              </p>
+            </div>
+
+            {/* VALORES */}
+            <div style={{ marginBottom: '32px' }}>
+              <h2 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '16px' }}>
+                💎 Nossos Valores
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {[
+                  { icon: '🔍', title: 'Verdade & Integridade', text: 'Acreditamos que "a verdade sempre prevalece". Nossas negociações são transparentes, sem ilusões, baseadas na palavra empenhada e na justiça. Não vendemos o que você não precisa — vendemos o que vai te fazer evoluir.', ref: '"O que é torto não pode ser endireitado; o que falta não pode ser contado." — Eclesiastes 1:15' },
+                  { icon: '🙏', title: 'Serviço como Ministério', text: 'Enxergamos nosso trabalho como uma oportunidade de servir ao próximo. Cada suporte técnico e cada venda é uma forma de expressar cuidado e respeito pelo sonho do cliente.', ref: '"Sirvam uns aos outros com amor." — Gálatas 5:13' },
+                  { icon: '⚡', title: 'Excelência & Mordomia', text: 'Buscamos o mais alto nível de performance técnica. Entendemos que nossos talentos e recursos são dons que devem ser administrados com dedicação e aprimoramento constante. Se não está perfeito, não está pronto.', ref: '"Ao fiel mordomo, muito mais será dado." — Lucas 19:17' },
+                  { icon: '❤️', title: 'Família & Comunidade', text: 'Valorizamos os laços que unem as pessoas. Promovemos um ambiente de simulação que fortalece a amizade e o respeito mútuo, refletindo o amor cristão em nossa comunidade de pilotos.', ref: '"Amai-vos uns aos outros." — João 13:34' },
+                  { icon: '🙌', title: 'Soberania de Deus', text: 'Reconhecemos que todo crescimento e toda oportunidade provêm do Senhor. Trabalhamos com alegria e gratidão, submetendo nossos planos à vontade divina.', ref: '"Entrega o teu caminho ao Senhor; confia nele, e ele tudo fará." — Salmos 37:5' },
+                  { icon: '🏆', title: 'Legado', text: 'Não trabalhamos apenas para o presente. Queremos construir algo que inspire a próxima geração de pilotos brasileiros — dentro e fora das pistas — deixando um legado de excelência, fé e propósito.', ref: '"Uma boa herança é deixada pelos pais para os filhos." — Provérbios 13:22' }
+                ].map((val, idx) => (
+                  <div key={idx} style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>{val.icon}</span> {val.title}
+                    </h3>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '0.9rem', lineHeight: 1.6 }}>{val.text}</p>
+                    <p style={{ margin: 0, fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--text-muted)' }}>{val.ref}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* DISTRIBUIDORES OFICIAIS */}
+            <div style={{ marginBottom: '32px' }}>
+              <h2 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '16px' }}>
+                🏆 Distribuidores Oficiais
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+                {[
+                  { name: 'Moza Racing', desc: 'Direct Drive & periféricos de alto desempenho' },
+                  { name: 'Thermaltake', desc: 'Cockpits GR500, G6 e acessórios premium' },
+                  { name: 'Simagic', desc: 'Bases e volantes de simulação profissional' }
+                ].map((dist, idx) => (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '16px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{dist.name}</h3>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{dist.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid var(--border)', textAlign: 'center', fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+              <p>
+                Hoje, somos a grande referência nacional quando o assunto é qualidade, imersão e performance.
+              </p>
+              <p style={{ fontWeight: 800, color: 'var(--accent)', marginTop: '8px' }}>
+                Seja bem-vindo à família Kings Simuladores!
+              </p>
+            </div>
           </div>
         </div>
       </Container>

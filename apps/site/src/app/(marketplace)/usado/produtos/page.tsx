@@ -59,8 +59,8 @@ export default async function ProdutosPage({ searchParams }: { searchParams: { q
           }
           @media (max-width: 480px) {
             .msu-listing-grid {
-              grid-template-columns: 1fr;
-              gap: 16px;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 8px;
             }
           }
         `}} />

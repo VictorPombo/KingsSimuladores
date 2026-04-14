@@ -178,26 +178,7 @@ export function MobileCategoryNav() {
           scrollSnapType: 'x mandatory'
         }}
       >
-        {/* Chip persistente para "Todos os Produtos" */}
-        <Link 
-          href="/produtos"
-          style={{
-            display: 'block',
-            padding: '5px 12px',
-            background: 'var(--success)',
-            color: '#000',
-            borderRadius: '16px',
-            fontWeight: 700,
-            fontSize: '11px',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-            scrollSnapAlign: 'start',
-            flexShrink: 0,
-            boxShadow: '0 4px 10px rgba(0, 229, 255, 0.4)'
-          }}
-        >
-          + Produtos
-        </Link>
+        {/* Chip persistente removido a pedido do usuário, mantendo o original via MENU_ITEMS */}
         <Link 
           href="/usado"
           style={{
