@@ -1,79 +1,129 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts'
+import { createClient } from '@kings/db'
 
-// Mock Data for a robust appearance
-const dataKings = [
-  { name: '01 Abr', revenue: 12000 },
-  { name: '02 Abr', revenue: 15500 },
-  { name: '03 Abr', revenue: 10200 },
-  { name: '04 Abr', revenue: 23000 },
-  { name: '05 Abr', revenue: 18000 },
-  { name: '06 Abr', revenue: 27500 },
-  { name: '07 Abr', revenue: 31200 }
-];
-
-const dataMsu = [
-  { name: '01 Abr', revenue: 4000 },
-  { name: '02 Abr', revenue: 3500 },
-  { name: '03 Abr', revenue: 5200 },
-  { name: '04 Abr', revenue: 4800 },
-  { name: '05 Abr', revenue: 8000 },
-  { name: '06 Abr', revenue: 7500 },
-  { name: '07 Abr', revenue: 11200 }
-];
+type DayRevenue = { name: string; revenue: number }
 
 export function RevenueChart({ isMsu }: { isMsu: boolean }) {
-  const data = isMsu ? dataMsu : dataKings
+  const [data, setData] = useState<DayRevenue[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchRevenue() {
+      try {
+        const supabase = createClient()
+        const sevenDaysAgo = new Date()
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+        const isoStart = sevenDaysAgo.toISOString()
+
+        let query
+        if (isMsu) {
+          query = supabase
+            .from('marketplace_orders')
+            .select('total_price, created_at')
+            .gte('created_at', isoStart)
+        } else {
+          query = supabase
+            .from('orders')
+            .select('total, created_at')
+            .eq('brand_origin', 'kings')
+            .eq('status', 'paid')
+            .gte('created_at', isoStart)
+        }
+
+        const { data: rows } = await query
+
+        // Group by day
+        const byDay: Record<string, number> = {}
+        for (let i = 0; i < 7; i++) {
+          const d = new Date()
+          d.setDate(d.getDate() - (6 - i))
+          const key = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+          byDay[key] = 0
+        }
+
+        ;(rows || []).forEach((row: any) => {
+          const d = new Date(row.created_at)
+          const key = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+          const value = isMsu ? (row.total_price || 0) : (row.total || 0)
+          if (byDay[key] !== undefined) {
+            byDay[key] += Number(value)
+          }
+        })
+
+        const chartData = Object.entries(byDay).map(([name, revenue]) => ({ name, revenue }))
+        setData(chartData)
+      } catch (err) {
+        console.error('RevenueChart error:', err)
+        setData([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRevenue()
+  }, [isMsu])
+
   const strokeColor = isMsu ? '#06b6d4' : '#10b981'
-  const fillColor = isMsu ? 'rgba(6, 182, 212, 0.2)' : 'rgba(16, 185, 129, 0.2)'
 
   return (
     <div style={{ width: '100%', height: '350px', marginTop: '16px', background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)' }}>
       <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '24px' }}>
-        Projeção de GMV dos Últimos 7 Dias
+        {isMsu ? 'GMV Transacionado' : 'Faturamento'} — Últimos 7 Dias
       </h3>
-      <ResponsiveContainer width="100%" height="85%">
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <defs>
-            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={strokeColor} stopOpacity={0.4}/>
-              <stop offset="95%" stopColor={strokeColor} stopOpacity={0}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-          <XAxis 
-            dataKey="name" 
-            stroke="#94a3b8" 
-            fontSize={12} 
-            tickLine={false}
-            axisLine={false}
-          />
-          <YAxis 
-            stroke="#94a3b8" 
-            fontSize={12} 
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(value) => `R$${(value / 1000).toFixed(1)}k`}
-          />
-          <Tooltip 
-            contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-            itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
-            formatter={(value: any) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0), 'Faturamento']}
-          />
-          <Area 
-            type="monotone" 
-            dataKey="revenue" 
-            stroke={strokeColor} 
-            strokeWidth={3}
-            fillOpacity={1} 
-            fill="url(#colorRevenue)" 
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      {loading ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80%', color: '#64748b', fontSize: '0.85rem' }}>
+          Carregando dados reais...
+        </div>
+      ) : data.every(d => d.revenue === 0) ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80%', color: '#64748b', fontSize: '0.85rem', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontSize: '2rem', opacity: 0.3 }}>📊</span>
+          Nenhuma venda nos últimos 7 dias
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height="85%">
+          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={strokeColor} stopOpacity={0.4}/>
+                <stop offset="95%" stopColor={strokeColor} stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+            <XAxis 
+              dataKey="name" 
+              stroke="#94a3b8" 
+              fontSize={12} 
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis 
+              stroke="#94a3b8" 
+              fontSize={12} 
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `R$${(value / 1000).toFixed(1)}k`}
+            />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+              itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
+              formatter={(value: any) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0), 'Faturamento']}
+            />
+            <Area 
+              type="monotone" 
+              dataKey="revenue" 
+              stroke={strokeColor} 
+              strokeWidth={3}
+              fillOpacity={1} 
+              fill="url(#colorRevenue)" 
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
     </div>
   )
 }

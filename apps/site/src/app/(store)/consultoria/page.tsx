@@ -2,7 +2,6 @@ import { Container } from '@kings/ui'
 import { createServerSupabaseClient } from '@kings/db'
 import { formatPrice } from '@kings/utils'
 import Link from 'next/link'
-import Image from 'next/image'
 
 
 export const revalidate = 60

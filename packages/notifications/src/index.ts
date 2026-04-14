@@ -1,2 +1,2 @@
 export * from "./resend";
-export * from "./zapi";
+export * from "./chatwoot";

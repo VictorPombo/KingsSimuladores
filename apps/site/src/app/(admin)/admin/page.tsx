@@ -2,7 +2,7 @@ import { Card, Container, Badge } from '@kings/ui'
 import { createServerSupabaseClient } from '@kings/db/server'
 import Link from 'next/link'
 import { RevenueChart } from './components/AdminCharts'
-import { TrendingUp, TrendingDown, Clock, MoveRight, ShoppingBag, ShieldCheck, Mail, Zap } from 'lucide-react'
+import { TrendingUp, Clock, MoveRight, ShoppingBag, ShieldCheck, Zap } from 'lucide-react'
 
 
 export default async function AdminDashboard({ searchParams }: { searchParams: { tab?: string } }) {
@@ -165,8 +165,8 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
               <div style={{ fontSize: '2.2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: '#f8fafc' }}>
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.revenue)}
               </div>
-              <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                <TrendingUp size={12} /> +14.2% desde o mês passado
+              <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                Acumulado total
               </div>
             </div>
 
@@ -175,8 +175,8 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
                 {isMsuTab ? 'Vendas P2P' : 'Pedidos (Hub)'}
               </div>
               <div style={{ fontSize: '2.2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: '#f8fafc' }}>{stats.orders}</div>
-              <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                <TrendingUp size={12} /> +8.5% desde o mês passado
+              <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                Todas as transações registradas
               </div>
             </div>
 

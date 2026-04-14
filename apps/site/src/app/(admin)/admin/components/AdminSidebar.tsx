@@ -4,71 +4,45 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
-  Home, 
   PieChart, 
   ShoppingCart, 
   Package, 
-  Megaphone,
-  Share2,
-  DollarSign,
   Settings,
   ChevronDown,
   ChevronRight,
   ExternalLink,
   ChevronLeft,
   Store,
-  LayoutDashboard,
   Tag,
-  ShieldCheck,
-  Users
+  Users,
+  FileText
 } from 'lucide-react'
 
-// Estrutura separada por ecossistema
+// Estrutura separada por ecossistema de forma limpa
 const MENU_SECTIONS = [
   {
-    title: 'LOJA KINGS',
+    title: 'LOJA KINGS B2C',
     color: '#25d366',
+    logoUrl: '/logo_kings.png',
     items: [
-      { label: 'Início', icon: Home, href: '/admin' },
+      { label: 'Visão Geral', icon: PieChart, href: '/admin' },
       {
-        label: 'Vendas',
+        label: 'Pedidos',
         icon: ShoppingCart,
         subItems: [
-          { label: 'Listar pedidos', href: '/admin/pedidos' },
-          { label: 'Criar pedido', href: '/admin/criar-pedido' },
-          { label: 'Link de carrinho', href: '/admin/link-carrinho' },
-          { label: 'Clientes', href: '/admin/clientes' },
-          { label: 'Relatórios', href: '/admin/relatorios' },
-          { label: 'Notas fiscais BETA', href: '/admin/notas-fiscais' }
+          { label: 'Todos os Pedidos', href: '/admin/pedidos' },
+          { label: 'Rascunhos (Criar)', href: '/admin/criar-pedido' },
+          { label: 'Clientes', href: '/admin/clientes' }
         ]
       },
       {
-        label: 'Produtos',
+        label: 'Catálogo',
         icon: Package,
         subItems: [
-          { label: 'Listar produtos', href: '/admin/produtos' },
-          { label: 'Criar produto', href: '/admin/criar-produto' },
-          { label: 'Avaliações', href: '/admin/avaliacoes' },
-          { label: 'Importar', href: '/admin/importar-produtos' },
-          { label: 'Preços segmentados', href: '/admin/precos-segmentados' },
+          { label: 'Produtos', href: '/admin/produtos' },
           { label: 'Categorias', href: '/admin/categorias' },
           { label: 'Marcas', href: '/admin/marcas' },
-          { label: 'Grades', href: '/admin/grades' },
-          { label: 'Lixeira de produtos', href: '/admin/lixeira-produtos' }
-        ]
-      },
-      {
-        label: 'Ofertas & Engajamento',
-        icon: Megaphone,
-        subItems: [
-          { label: 'Descontos Automáticos', href: '/admin/promocoes' },
-          { label: 'Cupons de desconto', href: '/admin/cupons' },
-          { label: 'Brinde no Carrinho', href: '/admin/brindes' },
-          { label: 'Automações', href: '/admin/automacoes' },
-          { label: 'Compre junto', href: '/admin/compre-junto' },
-          { label: 'Frete grátis', href: '/admin/frete-gratis' },
-          { label: 'Newsletter', href: '/admin/newsletter' },
-          { label: 'Avise-me', href: '/admin/avise-me' }
+          { label: 'Grades', href: '/admin/grades' }
         ]
       }
     ]
@@ -76,55 +50,55 @@ const MENU_SECTIONS = [
   {
     title: 'MARKETPLACE MSU',
     color: '#06b6d4',
+    logoUrl: '/logo_msu.png',
     items: [
-      { label: 'Dashboard MSU', icon: LayoutDashboard, href: '/admin?tab=msu' },
-      { label: 'Anúncios', icon: Tag, href: '/admin/msu-anuncios' },
-      { label: 'Moderação', icon: ShieldCheck, href: '/admin/moderacao' },
-      { label: 'Vendedores', icon: Users, href: '/admin/msu-vendedores' },
-      { label: 'Comissões MSU', icon: DollarSign, href: '/admin/msu-comissoes' }
+      {
+        label: 'Anúncios',
+        icon: Tag,
+        subItems: [
+          { label: 'Fila de Moderação', href: '/admin/moderacao' },
+          { label: 'Anúncios Ativos', href: '/admin/msu-anuncios' }
+        ]
+      },
+      {
+        label: 'Autores & Financeiro',
+        icon: Users,
+        subItems: [
+          { label: 'Vendedores', href: '/admin/msu-vendedores' },
+          { label: 'Extrato de Comissões', href: '/admin/msu-comissoes' }
+        ]
+      }
     ]
   },
   {
-    title: 'SISTEMA',
+    title: 'SISTEMA E INTEGRAÇÕES',
     color: '#94a3b8',
     items: [
       {
-        label: 'Visão de Negócio',
-        icon: PieChart,
+        label: 'Integrações Externas',
+        icon: Store,
         subItems: [
-          { label: 'Diário de Bordo', href: '/admin/diario-de-bordo' },
-          { label: 'Relatórios', href: '/admin/relatorios' }
+          { label: 'Aplicativos & APIs (Bling/Olist)', href: '/admin/aplicativos' },
+          { label: 'Mercado Livre', href: '/admin/mercado-livre' },
+          { label: 'Google Shopping', href: '/admin/google-shopping' }
         ]
       },
       {
-        label: 'Canais de vendas',
-        icon: Share2,
-        subItems: [
-          { label: 'Google Shopping', href: '/admin/google-shopping' },
-          { label: 'Mercado Livre', href: '/admin/mercado-livre' }
-        ]
-      },
-      {
-        label: 'Financeiro',
-        icon: DollarSign,
-        subItems: [
-          { label: 'Comissões (Split)', href: '/admin/comissoes' },
-          { label: 'Faturas', href: '/admin/faturas' }
-        ]
-      },
-      {
-        label: 'Configurações',
+        label: 'Configurações Globais',
         icon: Settings,
         subItems: [
-          { label: 'Gerais', href: '/admin/config-gerais' },
-          { label: 'Dados da loja', href: '/admin/dados-loja' },
-          { label: 'Usuários', href: '/admin/usuarios' },
-          { label: 'Formas de pagamento', href: '/admin/formas-pagamento' },
-          { label: 'Formas de envio', href: '/admin/formas-envio' },
-          { label: 'Domínio próprio', href: '/admin/dominio' },
-          { label: 'Chave para API', href: '/admin/chave-api' },
-          { label: 'Gerenciador de arquivos', href: '/admin/gerenciador-arquivos' },
-          { label: 'Aplicativos', href: '/admin/aplicativos' }
+          { label: 'Dados Básicos', href: '/admin/dados-loja' },
+          { label: 'Equipe de Usuários', href: '/admin/usuarios' },
+          { label: 'Processadores de Pagamento', href: '/admin/formas-pagamento' },
+          { label: 'Logística de Envios', href: '/admin/formas-envio' },
+          { label: 'Domínio Web', href: '/admin/dominio' }
+        ]
+      },
+      {
+        label: 'Manutenção do Sistema',
+        icon: FileText,
+        subItems: [
+          { label: 'Diário de Bordo (Logs)', href: '/admin/diario-de-bordo' }
         ]
       }
     ]
@@ -180,12 +154,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
         gap: '4px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img 
-              src="https://cdn.awsli.com.br/400x300/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png"
-              alt="Kings Simuladores"
-              style={{ width: 'auto', height: '36px', objectFit: 'contain' }}
-            />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
                 Kings<span style={{ color: '#64748b', fontWeight: 400 }}>Hub</span>
@@ -229,10 +198,26 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                 paddingTop: sIdx > 0 ? '16px' : '8px',
                 marginTop: sIdx > 0 ? '8px' : '0'
               }}>
-                {section.title}
+                {section.logoUrl ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '8px', paddingBottom: '8px', paddingTop: '4px' }}>
+                    <img 
+                      src={section.logoUrl} 
+                      alt={section.title} 
+                      style={{ 
+                        height: '36px', 
+                        objectFit: 'contain', 
+                        objectPosition: 'left',
+                        maxWidth: '100%'
+                      }} 
+                    />
+                    <span style={{ color: section.color, opacity: 0.9, textAlign: 'left', width: '100%', paddingLeft: '2px' }}>{section.title}</span>
+                  </div>
+                ) : (
+                  section.title
+                )}
               </div>
               
-              {section.items.map((item, idx) => {
+              {section.items.map((item: any, idx: number) => {
                 const hasSub = !!item.subItems
                 const isOpen = openMenus[item.label]
                 const Icon = item.icon
@@ -301,7 +286,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                     flexDirection: 'column', 
                     gap: '2px' 
                   }}>
-                    {item.subItems.map((sub, sIdx) => {
+                    {item.subItems.map((sub: any, sIdx: number) => {
                       const isActive = isMenuPathActive(sub.href)
                       const isMock = sub.href === 'javascript:;'
 

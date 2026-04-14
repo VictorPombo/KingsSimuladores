@@ -11,5 +11,5 @@
 - Tailwind CSS v4 (Dark mode premium)
 - Mercado Pago API
 - Olist API
-- Z-API (WhatsApp)
+- Chatwoot (WhatsApp)
 - Vitest (Testes)

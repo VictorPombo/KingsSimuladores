@@ -88,7 +88,7 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
                   
                   {order.tracking_code && (
                     <div style={{ background: 'rgba(0,0,0,0.5)', padding: '1rem', borderRadius: '0.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                      <div style={{ fontSize: '0.9rem', color: '#a1a1aa', marginBottom: '0.25rem' }}>Código de Rastreio (Melhor Envio)</div>
+                      <div style={{ fontSize: '0.9rem', color: '#a1a1aa', marginBottom: '0.25rem' }}>Código de Rastreio (Frenet)</div>
                       <div style={{ fontWeight: 600, letterSpacing: '2px' }}>{order.tracking_code}</div>
                     </div>
                   )}

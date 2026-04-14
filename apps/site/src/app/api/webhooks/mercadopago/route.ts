@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { verifyPaymentStatus } from '@kings/payments'
-import { issueInvoiceReal } from '@kings/payments'
+import { pushOrderToOlist } from '@kings/payments'
 import { sendWhatsappMessage } from '@kings/notifications'
 import { sendEmailMessage } from '@kings/notifications'
 import { generateShippingLabel } from '@kings/shipping'
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
 
         console.log(`[Webhook MP] Sucesso! Pedido ${orderId} aprovado e estoque atualizado.`)
         
-        // 4. Emissão de Nota Fiscal NFe.io (Assíncrona para não prender o Webhook)
+        // 4. Injeção no Olist ERP (Emissão de NF-e e Baixa de Estoque)
         const profilesData = order.profiles as any
         const profile = Array.isArray(profilesData) ? profilesData[0] : profilesData
 
@@ -101,8 +101,8 @@ export async function POST(req: Request) {
           shipping: order.shipping_address
         }
 
-        // Emitir e guardar a NF-e
-        const nfeRes = await issueInvoiceReal(orderPayload, order.brand_origin)
+        // Emitir e guardar a NF-e via ERP
+        const nfeRes = await pushOrderToOlist(orderPayload, order.brand_origin)
         
         await supabase.from('invoices').insert({
           id: nfeRes.id,
@@ -117,7 +117,7 @@ export async function POST(req: Request) {
         
         console.log(`[Webhook MP] NF-e do Pedido ${orderId} enfileirada e salva no banco.`)
         
-        // 5. Notificação via Z-API (WhatsApp)
+        // 5. Notificação via Chatwoot (WhatsApp)
         const clienteNome = profile?.full_name?.split(' ')[0] || 'Cliente'
         const clientePhone = profile?.phone
         
@@ -163,7 +163,7 @@ export async function POST(req: Request) {
           })
         }
         
-        // 7. Integração Logística: Gerar Etiqueta (Melhor Envio)
+        // 7. Integração Logística: Gerar Etiqueta (Frenet)
         const labelResult = await generateShippingLabel(order, items || [])
         
         if (labelResult.success && labelResult.tracking_code) {

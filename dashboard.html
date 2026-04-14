@@ -451,9 +451,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       🔴 <strong style="color:var(--red)">AÇÃO PENDENTE — Conectar Chaves Reais de Produção:</strong><br>
       <span style="font-size:.82rem;line-height:1.8">
         ⬜ <strong>Mercado Pago</strong> — <code>MP_ACCESS_TOKEN</code>, <code>MP_PUBLIC_KEY</code>, <code>MP_WEBHOOK_SECRET</code> → <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" style="color:var(--accent)">Painel MP</a><br>
-        ⬜ <strong>Melhor Envio</strong> — <code>MELHOR_ENVIO_TOKEN</code> → <a href="https://melhorenvio.com.br/painel/integracoes/tokens" target="_blank" style="color:var(--accent)">Painel ME</a><br>
+        ⬜ <strong>Frenet</strong> — <code>FRENET_TOKEN</code> → <a href="https://frenet.com.br/painel/integracoes/tokens" target="_blank" style="color:var(--accent)">Painel ME</a><br>
         ⬜ <strong>Olist ERP</strong> — <code>OLIST_API_KEY</code> → Emissão de Notas Centralizada<br>
-        ⬜ <strong>Z-API (WhatsApp)</strong> — <code>ZAPI_INSTANCE_ID</code>, <code>ZAPI_TOKEN</code>, <code>ZAPI_CLIENT_TOKEN</code> → <a href="https://z-api.io" target="_blank" style="color:var(--accent)">z-api.io</a><br>
+        ⬜ <strong>Chatwoot (WhatsApp)</strong> — <code>ZAPI_INSTANCE_ID</code>, <code>ZAPI_TOKEN</code>, <code>ZAPI_CLIENT_TOKEN</code> → <a href="https://z-api.io" target="_blank" style="color:var(--accent)">z-api.io</a><br>
         ⬜ <strong>Resend (E-mail)</strong> — <code>RESEND_API_KEY</code> → <a href="https://resend.com/api-keys" target="_blank" style="color:var(--accent)">resend.com/api-keys</a><br>
         <span style="color:var(--text-muted);font-size:.75rem">✅ Supabase — Já conectado | ✅ CRON_SECRET — Já configurado</span>
       </span>
@@ -469,17 +469,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="env-row"><span class="env-key">MP_PUBLIC_KEY</span><span class="env-val"><span class="placeholder">APP_USR-xxxx (para uso no frontend)</span></span></div>
     <div class="env-row"><span class="env-key">MP_WEBHOOK_SECRET</span><span class="env-val"><span class="placeholder">Gerado ao criar webhook no MP</span></span></div>
 <br>
-    <div class="env-section-label">── Melhor Envio</div>
-    <div class="env-row"><span class="env-key">MELHOR_ENVIO_TOKEN</span><span class="env-val"><span class="placeholder">Bearer token da conta Melhor Envio</span></span></div>
-    <div class="env-row"><span class="env-key">MELHOR_ENVIO_SANDBOX</span><span class="env-val">true <span class="masked">(mudar para false em produção)</span></span></div>
+    <div class="env-section-label">── Frenet</div>
+    <div class="env-row"><span class="env-key">FRENET_TOKEN</span><span class="env-val"><span class="placeholder">Bearer token da conta Frenet</span></span></div>
+    <div class="env-row"><span class="env-key">FRENET_SANDBOX</span><span class="env-val">true <span class="masked">(mudar para false em produção)</span></span></div>
 <br>
     <div class="env-section-label">── Olist (ERP & Hub)</div>
     <div class="env-row"><span class="env-key">OLIST_API_KEY</span><span class="env-val"><span class="placeholder">Chave da API Olist (para NF-e)</span></span></div>
 <br>
-    <div class="env-section-label">── Z-API (WhatsApp)</div>
-    <div class="env-row"><span class="env-key">ZAPI_INSTANCE_ID</span><span class="env-val"><span class="placeholder">ID da instância Z-API</span></span></div>
-    <div class="env-row"><span class="env-key">ZAPI_TOKEN</span><span class="env-val"><span class="placeholder">Token da instância Z-API</span></span></div>
-    <div class="env-row"><span class="env-key">ZAPI_CLIENT_TOKEN</span><span class="env-val"><span class="placeholder">Client token de segurança Z-API</span></span></div>
+    <div class="env-section-label">── Chatwoot (WhatsApp)</div>
+    <div class="env-row"><span class="env-key">ZAPI_INSTANCE_ID</span><span class="env-val"><span class="placeholder">ID da instância Chatwoot</span></span></div>
+    <div class="env-row"><span class="env-key">ZAPI_TOKEN</span><span class="env-val"><span class="placeholder">Token da instância Chatwoot</span></span></div>
+    <div class="env-row"><span class="env-key">ZAPI_CLIENT_TOKEN</span><span class="env-val"><span class="placeholder">Client token de segurança Chatwoot</span></span></div>
 <br>
     <div class="env-section-label">── Resend (E-mail)</div>
     <div class="env-row"><span class="env-key">RESEND_API_KEY</span><span class="env-val"><span class="placeholder">re_xxxx (resend.com → API Keys)</span></span></div>
@@ -668,8 +668,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="tech-item"><div class="tech-name">Mercado Pago</div><div class="tech-role">Pagamentos + Split</div></div>
     <div class="tech-item"><div class="tech-name">Vercel</div><div class="tech-role">3 projetos em deploy</div></div>
     <div class="tech-item"><div class="tech-name">Olist</div><div class="tech-role">Hub / ERP / NF-e</div></div>
-    <div class="tech-item"><div class="tech-name">Melhor Envio</div><div class="tech-role">Frete + Etiqueta</div></div>
-    <div class="tech-item"><div class="tech-name">Z-API</div><div class="tech-role">WhatsApp</div></div>
+    <div class="tech-item"><div class="tech-name">Frenet</div><div class="tech-role">Frete + Etiqueta</div></div>
+    <div class="tech-item"><div class="tech-name">Chatwoot</div><div class="tech-role">WhatsApp</div></div>
     <div class="tech-item"><div class="tech-name">Resend</div><div class="tech-role">E-mail transacional</div></div>
   </div>
 </div>
@@ -765,7 +765,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Página de produto (galeria, variantes, cálculo de frete, parcelas 12x)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Carrinho persistente (localStorage fallback ativo)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Checkout transparente (Mercado Pago — Pix, Boleto, Cartão) com preference_id</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cálculo de frete dinâmico (Melhor Envio) com cotação em tempo real</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cálculo de frete dinâmico (Frenet) com cotação em tempo real</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Fluxo de pedido (criação na tabela orders → pagamento → status)</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Área do cliente (pedidos, perfil, endereços) com dados de profiles + orders</span><span class="task-priority high">P1</span></div>
       </div>
@@ -797,10 +797,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="task-group"><div class="task-group-title">Tasks</div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Webhook Mercado Pago em /api/webhooks/mercadopago — atualiza orders.status + dispara triggers</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Emissão de NF-e via Olist ERP — Webhook de faturamento enviado ao status 'paid'.</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Geração de etiqueta Melhor Envio após pagamento confirmado</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações WhatsApp via Z-API: pedido confirmado, enviado, entregue</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Geração de etiqueta Frenet após pagamento confirmado</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações WhatsApp via Chatwoot: pedido confirmado, enviado, entregue</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Notificações E-mail via Resend: confirmação + NF em PDF anexo</span><span class="task-priority high">P1</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text">Integração Avançada: Z-API / WhatsApp Bot Oficial e Caixa de Entrada Unificada</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text">Integração Avançada: Chatwoot / WhatsApp Bot Oficial e Caixa de Entrada Unificada</span><span class="task-priority medium">P2</span></div>
       </div>
       <div class="verify-block"><div class="verify-title">✅ Critérios de Verificação</div>
         <div class="verify-item">▸ Webhook recebe POST do MP, valida assinatura e atualiza orders.status</div>
@@ -897,7 +897,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
   </div>
     <div class="phase-body"><div class="phase-content">
       <div class="task-group"><div class="task-group-title">Tasks</div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Recuperação de carrinho abandonado — Z-API (1h) + Resend (24h)</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Recuperação de carrinho abandonado — Chatwoot (1h) + Resend (24h)</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Upsell/Cross-sell inteligente no checkout ("comprou volante → sugere cockpit")</span><span class="task-priority medium">P2</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Cupons avançados (tabela coupons — por marca, categoria, first-buy, frete grátis)</span><span class="task-priority medium">P2</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">SEO avançado (schema markup JSON-LD, sitemap dinâmico, meta tags SSR Next.js)</span><span class="task-priority high">P1</span></div>
@@ -979,7 +979,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Domínio Próprio — Status DNS, SSL, registros A/CNAME</span><span class="task-priority medium">P2</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Chave para API — Visualização segura, cópia, variáveis de ambiente</span><span class="task-priority medium">P2</span></div>
         <div class="task"><span class="task-check done">✓</span><span class="task-text done">Gerenciador de Arquivos — Drag-and-drop, buckets Supabase Storage</span><span class="task-priority medium">P2</span></div>
-        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Aplicativos — 8 integrações com status (MP, Melhor Envio, Z-API, Resend, Olist, Google, TikTok, GA)</span><span class="task-priority medium">P2</span></div>
+        <div class="task"><span class="task-check done">✓</span><span class="task-text done">Aplicativos — 8 integrações com status (MP, Frenet, Chatwoot, Resend, Olist, Google, TikTok, GA)</span><span class="task-priority medium">P2</span></div>
       </div>
       </div>
     </div></div>
@@ -1071,9 +1071,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     <div class="phase-body"><div class="phase-content">
       <div class="alert decided" style="background:rgba(139,92,246,.05);border:1px solid rgba(139,92,246,.15)">📦 <strong style="color:var(--purple)">Ponto de Maturação:</strong> Estes são os requisitos desenhados para quando o MSU escalar drasticamente e a equipe da KingsHub precisar que sistemas trabalhem de forma 100% autônoma para evitar trabalho braçal.</div>
       <div class="task-group">
-        <div class="task"><span class="task-check"></span><span class="task-text"><strong>KYC + Anti-Fraude:</strong> Validação de CPF via consulta governamental e envio de SMS real via Twilio/Z-API antes de autorizar o 1º anúncio.</span><span class="task-priority critical">P0</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text"><strong>KYC + Anti-Fraude:</strong> Validação de CPF via consulta governamental e envio de SMS real via Twilio/Chatwoot antes de autorizar o 1º anúncio.</span><span class="task-priority critical">P0</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text"><strong>Gateway Webhook MP:</strong> Automação que anula a ordem preventivamente em caso de chargeback/cartão negado sem intervenção humana.</span><span class="task-priority critical">P0</span></div>
-        <div class="task"><span class="task-check"></span><span class="task-text"><strong>Logística Unificada:</strong> Assim que pago, o backend gera PDF da etiqueta Melhor Envio automaticamente e anexa no portal "Minha Garagem" para o vendedor.</span><span class="task-priority high">P1</span></div>
+        <div class="task"><span class="task-check"></span><span class="task-text"><strong>Logística Unificada:</strong> Assim que pago, o backend gera PDF da etiqueta Frenet automaticamente e anexa no portal "Minha Garagem" para o vendedor.</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text"><strong>Sistema de Disputas:</strong> Um 'Tribunal' dentro de (/admin/disputas) onde a Kings julga mediação entre Comprador x Vendedor com upload pesado de provas.</span><span class="task-priority high">P1</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text"><strong>Sistema de Avaliações (Trust Score):</strong> Nota de 1 a 5 estrelas pública abaixo do nome do vendedor ('Daleste - ⭐ 4.9') para forçar engajamento positivo.</span><span class="task-priority medium">P2</span></div>
         <div class="task"><span class="task-check"></span><span class="task-text"><strong>SEO Automático Absoluto:</strong> Canonical URLs dinâmicas e sitemap.xml regerando a cada hora com imagens blurDataURL formatadas para o Google bot indexar de graça o acervo de semi-novos.</span><span class="task-priority medium">P2</span></div>
@@ -1096,7 +1096,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="int-status active">✓ Definido</div>
     </div>
     <div class="int-card">
-      <div class="int-icon">📦</div><div class="int-name">Melhor Envio</div>
+      <div class="int-icon">📦</div><div class="int-name">Frenet</div>
       <div class="int-desc">Cotação em tempo real na página de produto. Geração de etiqueta após pagamento. Rastreio via webhook.</div>
       <div class="int-status active">✓ Definido</div>
     </div>
@@ -1107,7 +1107,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="int-status active">✓ Definido</div>
     </div>
     <div class="int-card">
-      <div class="int-icon">📱</div><div class="int-name">Z-API (WhatsApp)</div>
+      <div class="int-icon">📱</div><div class="int-name">Chatwoot (WhatsApp)</div>
       <div class="int-desc">Notificações transacionais: pedido confirmado, enviado, entregue. Recuperação de carrinho abandonado (1h após abandono).</div>
       <div class="int-status active">✓ Definido</div>
     </div>
@@ -1134,7 +1134,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <div class="tech-role">R$ 115 / $20</div>
     </div>
     <div class="tech-item" style="border-left: 3px solid var(--green)">
-      <div class="tech-name">Z-API (WhatsApp)</div>
+      <div class="tech-name">Chatwoot (WhatsApp)</div>
       <div class="tech-role">R$ 139</div>
     </div>
     <div class="tech-item" style="border-left: 3px solid var(--orange)">
@@ -1159,12 +1159,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/checkout</span></td><td><span class="int-status active">Construído</span></td><td>Processa pagamentos, calcula regras de split de frete/valor no cart.</td><td>Mercado Pago</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/webhooks/mercadopago</span></td><td><span class="int-status active">Construído</span></td><td>Confirma pagamentos, deduz estoque, limpa carrinho, dispara ERP Olist e Notificações.</td><td>Mercado Pago</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/cron/recover-carts</span></td><td><span class="int-status active">Construído</span></td><td>Cron Job faseado (1h WhatsApp / 24h Email) para funil de retenção de funil.</td><td>Vercel Cron</td></tr>
-      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/shipping</span></td><td><span class="int-status active">Construído</span></td><td>Estimativa de múltiplos fretes (PAC/Sedex/Jadlog/Azul) baseado em CEP e Dimensão.</td><td>Melhor Envio</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/shipping</span></td><td><span class="int-status active">Construído</span></td><td>Estimativa de múltiplos fretes (PAC/Sedex/Jadlog/Azul) baseado em CEP e Dimensão.</td><td>Frenet</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/vender</span></td><td><span class="int-status active">Construído</span></td><td>Motor de submissão + Moderador das listagens C2C do APP MSU (Meu Simulador Usado).</td><td>MSU SubApp</td></tr>
       <!-- PENDENTES A PRODUZIR -->
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/google</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML dinâmico em tempo real de produtos estruturados pra Google Shopping.</td><td>Google Merchant Center</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/tiktok</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML variante de catálogo pra TikTok Shops com estoque síncrono.</td><td>TikTok For Business</td></tr>
-      <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/shipping</span></td><td><span class="int-status decide">Pendente</span></td><td>(Fase 07) Receptor passivo que detecta Encomenda "Em Trânsito/Entregue" para Zap.</td><td>Melhor Envio / Z-API</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/shipping</span></td><td><span class="int-status decide">Pendente</span></td><td>(Fase 07) Receptor passivo que detecta Encomenda "Em Trânsito/Entregue" para Zap.</td><td>Frenet / Chatwoot</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/erp/sync</span></td><td><span class="int-status decide">Pendente</span></td><td>Recebe o payload do produto recém-cadastrado na KingsHub (com NCM, EAN, dimensões) e injeta no ERP Olist.</td><td>Olist API</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/erp</span></td><td><span class="int-status decide">Pendente</span></td><td>Webhook passivo que escuta o Olist. Ocorre venda na Shopee/ML -> dá baixa no estoque central do Supabase.</td><td>Olist API</td></tr>
     </tbody>

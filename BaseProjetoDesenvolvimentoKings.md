@@ -54,10 +54,10 @@ graph TB
 
     subgraph "INTEGRAÇÕES EXTERNAS"
         MP["Mercado Pago<br/>Pagamentos"]
-        ME["Melhor Envio<br/>Frete"]
+        ME["Frenet<br/>Frete"]
         OLIST["Olist ERP<br/>Estoque + Pedidos"]
         NF["API NF-e<br/>Nota Fiscal"]
-        ZAPI["Z-API<br/>WhatsApp"]
+        ZAPI["Chatwoot<br/>WhatsApp"]
         EMAIL["Resend<br/>E-mail"]
     end
 
@@ -295,11 +295,11 @@ erDiagram
 | **Pedido misto** | 2 payments separados (1 por CNPJ) |
 | **Webhooks** | `/api/webhooks/mercadopago` → atualiza status do pedido |
 
-### 📦 Melhor Envio (Frete)
+### 📦 Frenet (Frete)
 
 | Funcionalidade | Implementação |
 |----------------|---------------|
-| **Cotação** | API Melhor Envio calcula em tempo real |
+| **Cotação** | API Frenet calcula em tempo real |
 | **Geração de etiqueta** | Após pagamento aprovado |
 | **Rastreio** | Webhook atualiza `tracking_code` no pedido |
 
@@ -324,7 +324,7 @@ erDiagram
 
 | Canal | Ferramenta | Trigger |
 |-------|-----------|---------|
-| **WhatsApp** | Z-API | Pedido confirmado, enviado, entregue |
+| **WhatsApp** | Chatwoot | Pedido confirmado, enviado, entregue |
 | **E-mail** | Resend | Confirmação, NF, recuperação carrinho |
 
 ---
@@ -449,7 +449,7 @@ WAVE 3 (sequencial, depende de Wave 2):
 - [ ] Página de produto (galeria, variantes, frete, parcelas 12x)
 - [ ] Carrinho persistente (Supabase + localStorage fallback)
 - [ ] Checkout transparente completo (Mercado Pago — Pix, Boleto, Cartão)
-- [ ] Cálculo de frete dinâmico (Melhor Envio)
+- [ ] Cálculo de frete dinâmico (Frenet)
 - [ ] Fluxo de pedido (confirmação → pagamento → status)
 - [ ] Área do cliente (pedidos, perfil, endereços)
 
@@ -471,7 +471,7 @@ WAVE 3 (sequencial, depende de Wave 2):
 - [ ] Webhook Mercado Pago (confirmação de pagamento automática)
 - [ ] Integração Olist (sync bidirecional de estoque e pedidos)
 - [ ] Emissão de NF-e automática (simples e dupla por CNPJ)
-- [ ] Notificações WhatsApp (Z-API) — pedido confirmado, enviado
+- [ ] Notificações WhatsApp (Chatwoot) — pedido confirmado, enviado
 - [ ] Notificações E-mail (Resend) — confirmação, NF anexa
 
 **Verify:**
@@ -692,7 +692,7 @@ KingsSimuladores/
 │   ├── ui/                   → Componentes compartilhados (design system)
 │   ├── db/                   → Supabase client + generated types
 │   ├── payments/             → Abstração de gateway (MP hoje, Stripe amanhã)
-│   ├── shipping/             → Abstração de frete (Melhor Envio)
+│   ├── shipping/             → Abstração de frete (Frenet)
 │   ├── invoicing/            → Abstração de NF (NFe.io / FocusNFe)
 │   ├── notifications/        → WhatsApp + Email unificado
 │   ├── config/               → Tailwind, ESLint, TS configs

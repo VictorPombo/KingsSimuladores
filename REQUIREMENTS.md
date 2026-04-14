@@ -4,12 +4,12 @@
 - [ ] Banco de dados com produtos possuindo `cnpj_emitente` obrigatório
 - [ ] Listagem e filtros de produtos (marca, preço, categoria)
 - [ ] Checkout transparente completo via Mercado Pago (Pix, Boleto, Cartão 12x)
-- [ ] Cálculo de frete dinâmico (Melhor Envio / Enviali)
+- [ ] Cálculo de frete dinâmico (Frenet / Enviali)
 - [ ] Sincronização bidirecional de estoque/pedidos com ERP Olist
 - [ ] Emissão automática de NF por CNPJ (incluindo pedido misto com 2 NFs paralelas)
 - [ ] Marketplace: área para usuários anunciarem simuladores usados (com aprovação admin)
 - [ ] Retenção automática de comissão no marketplace
-- [ ] Notificações transacionais via WhatsApp (Z-API) e E-mail
+- [ ] Notificações transacionais via WhatsApp (Chatwoot) e E-mail
 - [ ] Dashboard Financeiro segregado por CNPJ (Admin)
 
 ## V2 (Fast Follows)

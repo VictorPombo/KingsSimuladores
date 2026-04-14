@@ -1,5 +1,5 @@
 /**
- * Melhor Envio API Wrapper (with Mock/Stub fallback)
+ * Frenet API Wrapper (with Mock/Stub fallback)
  * 
  * Transportadoras Ativas:
  *  - Correios SEDEX (expressa)
@@ -45,12 +45,12 @@ function isBlocked(serviceName: string): boolean {
 }
 
 export async function calculateShipping(fromPostalCode: string, toPostalCode: string, dimensions: Dimensions[]): Promise<ShippingOption[]> {
-  const token = process.env.MELHOR_ENVIO_TOKEN
-  const sandbox = process.env.MELHOR_ENVIO_SANDBOX !== 'false' // default true
+  const token = process.env.FRENET_TOKEN
+  const sandbox = process.env.FRENET_SANDBOX !== 'false' // default true
   
   const endpoint = sandbox 
-    ? 'https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate'
-    : 'https://www.melhorenvio.com.br/api/v2/me/shipment/calculate'
+    ? 'https://api.frenet.com.br/shipping/quote'
+    : 'https://api.frenet.com.br/shipping/quote'
 
   // Se existe token real (não placeholder), tenta a API real
   if (token && !token.includes('preencher')) {
@@ -61,7 +61,7 @@ export async function calculateShipping(fromPostalCode: string, toPostalCode: st
         products: dimensions.map((d, index) => ({
           id: (index + 1).toString(),
           weight: d.weight,
-          width: d.width || 11, // Melhor Envio requires min 11cm
+          width: d.width || 11, // Frenet requires min 11cm
           height: d.height || 2, // min 2cm
           length: d.length || 16, // min 16cm
           insurance_value: d.insurance_value || 0,
@@ -74,7 +74,7 @@ export async function calculateShipping(fromPostalCode: string, toPostalCode: st
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'token': `${token}`,
           'User-Agent': 'KingsHub E-commerce Support (contato@kingssimuladores.com.br)'
         },
         body: JSON.stringify(payload)
@@ -103,7 +103,7 @@ export async function calculateShipping(fromPostalCode: string, toPostalCode: st
         }
       }
     } catch (e) {
-      console.warn('[Kings Shipping] Falha ao comunicar com Melhor Envio, usando fallback:', e)
+      console.warn('[Kings Shipping] Falha ao comunicar com Frenet, usando fallback:', e)
     }
   }
 
@@ -171,16 +171,16 @@ async function calculateMockShipping(fromPostalCode: string, toPostalCode: strin
 }
 
 /**
- * Geração de Etiqueta (Melhor Envio)
+ * Geração de Etiqueta (Frenet)
  * Adiciona ao Carrinho, faz checkout com saldo e gera a URL de impressão logísitca.
  */
 export async function generateShippingLabel(orderData: any, itemsData: any[]) {
-  const token = process.env.MELHOR_ENVIO_TOKEN
-  const sandbox = process.env.MELHOR_ENVIO_SANDBOX !== 'false'
+  const token = process.env.FRENET_TOKEN
+  const sandbox = process.env.FRENET_SANDBOX !== 'false'
 
   if (token && !token.includes('preencher')) {
     try {
-      console.log(`[Melhor Envio] Adicionando pedido #${orderData.id} ao carrinho real...`)
+      console.log(`[Frenet] Adicionando pedido #${orderData.id} ao carrinho real...`)
       
       // Passos reais seriam:
       // 1. POST /api/v2/me/cart (Cria o ticket no carrinho)
@@ -191,10 +191,10 @@ export async function generateShippingLabel(orderData: any, itemsData: any[]) {
       return {
         success: true,
         tracking_code: `REAL_${Math.random() * 100000}`,
-        ticket_url: "https://sandbox.melhorenvio.com.br/painel/minhas-etiquetas" // Exemplo
+        ticket_url: "https://Frenet.com.br/painel/minhas-etiquetas" // Exemplo
       }
     } catch (e) {
-      console.error('[Kings Shipping Erro] Falha ao gerar etiqueta oficial Melhor Envio:', e)
+      console.error('[Kings Shipping Erro] Falha ao gerar etiqueta oficial Frenet:', e)
     }
   }
 
@@ -203,8 +203,8 @@ export async function generateShippingLabel(orderData: any, itemsData: any[]) {
   
   return {
     success: true,
-    tracking_code: "https://mock.melhorenvio.com.br/etiqueta/impressao?id=" + Math.floor(Math.random() * 99999), 
-    ticket_url: "https://mock.melhorenvio.com.br/etiqueta/impressao"
+    tracking_code: "https://mock.frenet.com.br/etiqueta/impressao?id=" + Math.floor(Math.random() * 99999), 
+    ticket_url: "https://mock.frenet.com.br/etiqueta/impressao"
   }
 }
 
