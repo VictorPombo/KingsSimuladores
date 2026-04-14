@@ -128,7 +128,7 @@ export default async function CategoryShowcasePage({ params }: { params: { slug:
               <p style={{ color: 'var(--text-muted)' }}>No momento, ainda não etiquetamos nenhum equipamento para "{params.slug}".</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+            <div className="kings-catalog-grid">
               {products.map(product => (
                 <Link key={product.id} href={`/produtos/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div className="hover:-translate-y-1 hover:border-[var(--accent)]" style={{ 

@@ -138,7 +138,7 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+            <div className="kings-catalog-grid">
               {products.map(product => (
                 <Link key={product.id} href={`/produtos/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div className="hover:-translate-y-1 group" style={{ 

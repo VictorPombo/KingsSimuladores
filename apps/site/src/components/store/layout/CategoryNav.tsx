@@ -83,18 +83,36 @@ export function CategoryNav() {
         gap: '32px',
         flexWrap: 'wrap',
       }}>
-        {MENU_ITEMS.map((item, idx) => (
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes pulseGlowConsultoria {
+            0% { box-shadow: 0 0 5px rgba(0, 229, 255, 0.2); filter: brightness(1); }
+            50% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.8), inset 0 0 10px rgba(0, 229, 255, 0.4); filter: brightness(1.2); }
+            100% { box-shadow: 0 0 5px rgba(0, 229, 255, 0.2); filter: brightness(1); }
+          }
+          .btn-consultoria-pulse {
+            animation: pulseGlowConsultoria 2s infinite ease-in-out;
+            background: rgba(0, 229, 255, 0.15) !important;
+            border: 1px solid rgba(0, 229, 255, 0.5) !important;
+            border-radius: 8px !important;
+            color: #fff !important;
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+          }
+        `}} />
+        {MENU_ITEMS.map((item, idx) => {
+          const isConsultoria = item.label === 'CONSULTORIA';
+          return (
           <div 
             key={idx} 
-            style={{ position: 'relative' }}
+            style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
             onMouseEnter={() => setActiveDropdown(idx)}
             onMouseLeave={() => setActiveDropdown(null)}
           >
             <Link 
               href={item.href}
+              className={isConsultoria ? "btn-consultoria-pulse" : ""}
               style={{
                 display: 'block',
-                padding: '16px 4px',
+                padding: isConsultoria ? '6px 12px' : '16px 4px',
                 color: activeDropdown === idx ? 'var(--accent)' : 'var(--text-secondary)',
                 textDecoration: 'none',
                 fontWeight: 600,
@@ -158,7 +176,8 @@ export function CategoryNav() {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
     </nav>
   )
@@ -202,17 +221,20 @@ export function MobileCategoryNav() {
         >
           MSU
         </Link>
-        {MENU_ITEMS.map((item, idx) => (
+        {MENU_ITEMS.map((item, idx) => {
+          const isConsultoria = item.label === 'CONSULTORIA';
+          return (
           <Link 
             key={idx} 
             href={item.href}
+            className={isConsultoria ? "btn-consultoria-pulse" : ""}
             style={{
               display: 'block',
               padding: '5px 12px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: isConsultoria ? 'transparent' : 'rgba(255, 255, 255, 0.05)',
+              border: isConsultoria ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '16px',
-              color: 'var(--text-primary)',
+              color: isConsultoria ? 'inherit' : 'var(--text-primary)',
               textDecoration: 'none',
               fontWeight: 600,
               fontSize: '11px',
@@ -224,7 +246,8 @@ export function MobileCategoryNav() {
           >
             {item.label}
           </Link>
-        ))}
+          );
+        })}
       </div>
     </nav>
   )

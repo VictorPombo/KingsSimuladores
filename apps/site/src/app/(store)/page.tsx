@@ -242,32 +242,41 @@ export default async function HomePage() {
               }
               .hero-btn-grid {
                 display: grid !important;
-                grid-template-columns: 1fr auto 1fr !important;
+                grid-template-columns: repeat(3, 1fr) !important;
                 gap: 8px;
-                align-items: center;
+                align-items: stretch;
+                justify-items: stretch;
               }
               @media (min-width: 768px) {
                 .hero-btn-grid {
                   gap: 16px;
                 }
               }
-              .btn-left { justify-self: end; }
-              .btn-center { justify-self: center; }
-              .btn-right { justify-self: start; }
+              .hero-btn-grid a {
+                display: block;
+                width: 100%;
+              }
+              .hero-btn-grid .kings-btn-pump {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+              }
             `}} />
             <div className="hero-btn-grid w-full max-w-[800px] px-1 md:px-0">
-              <Link href="/niveis/iniciante" style={{ textDecoration: 'none' }} className="btn-left w-max">
+              <Link href="/niveis/iniciante" style={{ textDecoration: 'none' }} className="w-full">
                 <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
                   INICIANTE
                 </div>
               </Link>
-              <Link href="/niveis/semiprofissional" style={{ textDecoration: 'none' }} className="btn-center w-max">
+              <Link href="/niveis/semiprofissional" style={{ textDecoration: 'none' }} className="w-full">
                 <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
                   SEMIPROFISSIONAL
                 </div>
               </Link>
 
-              <Link href="/niveis/profissional" style={{ textDecoration: 'none' }} className="btn-right w-max">
+              <Link href="/niveis/profissional" style={{ textDecoration: 'none' }} className="w-full">
                 <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
                   PROFISSIONAL
                 </div>
@@ -317,34 +326,6 @@ export default async function HomePage() {
             <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
             <ProductCarousel title="DESTAQUES" prods={destaques} />
             
-            {msuListings.length > 0 && (
-              <div style={{ marginBottom: '80px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', gap: '24px' }}>
-                  <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to right, transparent, rgba(6, 182, 212, 0.4))' }} />
-                  <h2 className="font-display" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '4px', textTransform: 'uppercase', color: '#06b6d4', textShadow: '0 0 10px rgba(6, 182, 212, 0.2)' }}>
-                    OPORTUNIDADES MSU
-                  </h2>
-                  <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to left, transparent, rgba(6, 182, 212, 0.4))' }} />
-                </div>
-                <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Equipamentos premium da comunidade com a Segurança Kings.</p>
-                
-                <div className="hide-scroll" style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px', scrollSnapType: 'x mandatory' }}>
-                  {msuListings.map(listing => (
-                    <div key={listing.id} style={{ minWidth: 'min(300px, 80vw)', scrollSnapAlign: 'start', flexShrink: 0 }}>
-                      <ListingCard 
-                        id={listing.id}
-                        title={listing.title}
-                        price={listing.price}
-                        condition={listing.condition}
-                        imageUrl={listing.images[0]}
-                        location="Brasil"
-                        sellerName={listing.profiles?.full_name || 'Piloto Vendedor'}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </Container>
         </section>
       )}
