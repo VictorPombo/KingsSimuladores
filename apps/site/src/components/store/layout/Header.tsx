@@ -60,7 +60,7 @@ export function Header() {
             `}} />
             <nav style={{ display: 'flex', gap: '24px', alignItems: 'center', flexShrink: 0 }}>
               <a href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #FF6B35, #FF3B5C)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)' }} className="kings-btn-hover">
-                Loja de Usados (MSU)
+                MEU SIMULADOR USADO
               </a>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
               <div className="kings-btn-hover cursor-pointer">

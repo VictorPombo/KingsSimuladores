@@ -110,7 +110,7 @@ export default async function ConsultoriaPage() {
           ) : (
             <div className="kings-catalog-grid">
               {products.map(product => (
-                <Link key={product.id} href={\`/produtos/\${product.id}\`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Link key={product.id} href={`/produtos/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div style={{ 
                     background: 'var(--bg-card)', 
                     borderRadius: 'var(--radius)', 
