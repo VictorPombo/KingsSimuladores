@@ -102,6 +102,26 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
                   {data.desc}
                 </p>
               </div>
+              
+              <div style={{ marginTop: '32px', display: 'inline-flex', alignItems: 'center', gap: '16px', background: 'rgba(0, 0, 0, 0.4)', padding: '16px 24px', borderRadius: '12px', border: `1px solid ${data.color}30`, boxShadow: `0 4px 20px rgba(0,0,0,0.5)` }}>
+                <div style={{
+                  width: '20px', height: '32px', borderRadius: '10px', border: `2px solid ${data.color}`, display: 'flex', justifyContent: 'center', paddingTop: '4px', flexShrink: 0
+                }}>
+                  <div style={{ width: '2px', height: '6px', borderRadius: '2px', background: data.color, animation: 'mouseScroll 1.5s ease-in-out infinite' }} />
+                </div>
+                <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Role para baixo para ver os produtos
+                </span>
+                
+                <style dangerouslySetInnerHTML={{__html: `
+                  @keyframes mouseScroll {
+                    0% { transform: translateY(0); opacity: 1; }
+                    30% { transform: translateY(6px); opacity: 0; }
+                    31% { transform: translateY(-6px); opacity: 0; }
+                    100% { transform: translateY(0); opacity: 1; }
+                  }
+                `}} />
+              </div>
             </div>
             
             {/* Vídeo do Nível */}
