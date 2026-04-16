@@ -4,6 +4,7 @@ import { formatPrice } from '@kings/utils'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Button } from '@kings/ui'
+import { LevelVideo } from './LevelVideo'
 
 export const revalidate = 60
 
@@ -114,14 +115,7 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
               overflow: 'hidden',
               position: 'relative'
             }}>
-              <video 
-                src={data.video}
-                autoPlay 
-                loop 
-                controls
-                playsInline
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              <LevelVideo src={data.video} />
             </div>
           </div>
         </div>
