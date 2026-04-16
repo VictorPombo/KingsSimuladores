@@ -7,21 +7,24 @@ import { Button } from '@kings/ui'
 
 export const revalidate = 60
 
-const NIVEIS_DATA: Record<string, { title: string, desc: string, color: string }> = {
+const NIVEIS_DATA: Record<string, { title: string, desc: string, color: string, video: string }> = {
   iniciante: {
     title: "INICIANTE - HOBBIE O INÍCIO.",
     desc: "Esta categoria é o ponto de partida ideal para quem está entrando no mundo da simulação. Oferece equipamentos e softwares fáceis de usar, acessíveis e com configurações simplificadas. O foco é proporcionar uma primeira experiência imersiva e divertida, sem exigir um grande investimento inicial ou conhecimento técnico avançado.",
-    color: "#00e5ff" // Ciano/Kings
+    color: "#00e5ff", // Ciano/Kings
+    video: "/IMG_8543.MOV"
   },
   semiprofissional: {
     title: "SEMIPROFISSIONAIS - 3X NA SEMANA, FOCO!!!",
     desc: "Esta categoria representa um passo acima para pilotos virtuais que já possuem alguma experiência e buscam um equipamento com maior realismo, precisão e imersão. Os produtos aqui oferecem um melhor feedback de força em wheelbases (9 a 12NM), pedaleiras mais avançadas e componentes de maior durabilidade.",
-    color: "#10b981" // Verde/Kings
+    color: "#10b981", // Verde/Kings
+    video: "/IMG_8541.MOV"
   },
   profissional: {
     title: "PROFISSIONAIS - TODO MILÉSIMO CONTA!",
     desc: "O ápice da simulação. Aqui o foco é extrair cada pentelhésimo de segundo da pista. Equipamentos de categoria mundial, pedais ativos, cockpits de movimento reais (Motion) e simuladores em níveis de fidelidade usados livremente por pilotos de F1, GT3 e Porsche Cup para treinar na vida real.",
-    color: "#f59e0b" // Amarelo Gold
+    color: "#f59e0b", // Amarelo Gold
+    video: "/IMG_8542.MOV"
   }
 }
 
@@ -100,26 +103,25 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
               </div>
             </div>
             
-            {/* Espaço reservado para o vídeo */}
+            {/* Vídeo do Nível */}
             <div style={{ 
               width: '100%', 
               aspectRatio: '16/9', 
-              background: 'rgba(0,0,0,0.4)', 
+              background: '#000', 
               borderRadius: '12px',
               border: `1px solid ${data.color}30`,
-              boxShadow: `inset 0 0 30px rgba(0,0,0,0.5)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              color: 'var(--text-muted)',
+              boxShadow: `0 0 30px rgba(0,0,0,0.5)`,
               overflow: 'hidden',
               position: 'relative'
             }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '12px', color: data.color, opacity: 0.8 }}>
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Espaço para Vídeo</span>
+              <video 
+                src={data.video}
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             </div>
           </div>
         </div>
