@@ -12,19 +12,19 @@ const NIVEIS_DATA: Record<string, { title: string, desc: string, color: string, 
     title: "INICIANTE - HOBBIE O INÍCIO.",
     desc: "Esta categoria é o ponto de partida ideal para quem está entrando no mundo da simulação. Oferece equipamentos e softwares fáceis de usar, acessíveis e com configurações simplificadas. O foco é proporcionar uma primeira experiência imersiva e divertida, sem exigir um grande investimento inicial ou conhecimento técnico avançado.",
     color: "#00e5ff", // Ciano/Kings
-    video: "/IMG_8543.MOV"
+    video: "/IMG_8543.mp4"
   },
   semiprofissional: {
     title: "SEMIPROFISSIONAIS - 3X NA SEMANA, FOCO!!!",
     desc: "Esta categoria representa um passo acima para pilotos virtuais que já possuem alguma experiência e buscam um equipamento com maior realismo, precisão e imersão. Os produtos aqui oferecem um melhor feedback de força em wheelbases (9 a 12NM), pedaleiras mais avançadas e componentes de maior durabilidade.",
     color: "#10b981", // Verde/Kings
-    video: "/IMG_8541.MOV"
+    video: "/IMG_8541.mp4"
   },
   profissional: {
     title: "PROFISSIONAIS - TODO MILÉSIMO CONTA!",
     desc: "O ápice da simulação. Aqui o foco é extrair cada pentelhésimo de segundo da pista. Equipamentos de categoria mundial, pedais ativos, cockpits de movimento reais (Motion) e simuladores em níveis de fidelidade usados livremente por pilotos de F1, GT3 e Porsche Cup para treinar na vida real.",
     color: "#f59e0b", // Amarelo Gold
-    video: "/IMG_8542.MOV"
+    video: "/IMG_8542.mp4"
   }
 }
 
@@ -118,7 +118,7 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
                 src={data.video}
                 autoPlay 
                 loop 
-                muted 
+                controls
                 playsInline
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
