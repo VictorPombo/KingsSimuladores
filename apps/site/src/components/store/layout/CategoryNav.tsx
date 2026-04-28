@@ -205,7 +205,7 @@ export function MobileCategoryNav() {
             alignItems: 'center',
             gap: '4px',
             padding: '5px 12px',
-            background: 'linear-gradient(to right, #FF6B35, #FF3B5C)',
+            background: 'linear-gradient(to right, #8b5cf6, #d946ef)',
             border: 'none',
             borderRadius: '16px',
             color: '#fff',
@@ -216,7 +216,7 @@ export function MobileCategoryNav() {
             whiteSpace: 'nowrap',
             scrollSnapAlign: 'start',
             flexShrink: 0,
-            boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)'
+            boxShadow: '0 4px 10px rgba(139, 92, 246, 0.3)'
           }}
         >
           MSU

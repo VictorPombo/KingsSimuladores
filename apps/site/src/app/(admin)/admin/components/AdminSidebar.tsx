@@ -15,7 +15,8 @@ import {
   Store,
   Tag,
   Users,
-  FileText
+  FileText,
+  Bell
 } from 'lucide-react'
 
 // Estrutura separada por ecossistema de forma limpa
@@ -31,6 +32,7 @@ const MENU_SECTIONS = [
         icon: ShoppingCart,
         subItems: [
           { label: 'Todos os Pedidos', href: '/admin/pedidos' },
+          { label: 'Notas Fiscais', href: '/admin/notas-fiscais' },
           { label: 'Rascunhos (Criar)', href: '/admin/criar-pedido' },
           { label: 'Clientes', href: '/admin/clientes' }
         ]
@@ -81,6 +83,14 @@ const MENU_SECTIONS = [
           { label: 'Aplicativos & APIs (Bling/Olist)', href: '/admin/aplicativos' },
           { label: 'Mercado Livre', href: '/admin/mercado-livre' },
           { label: 'Google Shopping', href: '/admin/google-shopping' }
+        ]
+      },
+      {
+        label: 'Comunicação',
+        icon: Bell,
+        subItems: [
+          { label: 'Notificações Globais', href: '/admin/notificacoes' },
+          { label: 'Newsletter', href: '/admin/newsletter' }
         ]
       },
       {

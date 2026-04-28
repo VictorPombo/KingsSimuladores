@@ -83,7 +83,7 @@ export default async function Home() {
               <h2 style={{ fontSize: '1.8rem', color: '#fff', fontWeight: 700 }}>Últimos Anúncios</h2>
               <div style={{ color: 'var(--text-muted)' }}>Oportunidades quentes da comunidade</div>
             </div>
-            <a href="#" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Ver Todos →</a>
+            <a href="/usado/produtos" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Ver Todos →</a>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
@@ -95,8 +95,12 @@ export default async function Home() {
                 price={listing.price}
                 condition={listing.condition}
                 imageUrl={listing.images[0]}
-                location="Brasil"
+                location={listing.city && listing.state ? `${listing.city} - ${listing.state}` : 'Brasil'}
                 sellerName={(listing as any).profiles?.full_name || 'Piloto Oculto'}
+                brand={listing.brand}
+                model={listing.model}
+                hasOriginalBox={listing.has_original_box}
+                hasUsageMarks={listing.has_usage_marks}
               />
             ))}
             

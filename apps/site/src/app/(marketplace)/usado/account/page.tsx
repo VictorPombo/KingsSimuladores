@@ -80,7 +80,7 @@ export default async function AccountPage() {
             display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '12px',
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
+              background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
               padding: '6px 14px', borderRadius: '6px',
               fontSize: '0.85rem', fontWeight: 900, color: '#fff',
               letterSpacing: '2px',

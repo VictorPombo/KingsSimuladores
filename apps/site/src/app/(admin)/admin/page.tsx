@@ -42,6 +42,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
       if (latest) recentOrders = latest.map(o => ({
         id: o.id,
         total: o.total_price,
+        status: o.status,
         created_at: o.created_at,
         client: Array.isArray(o.profiles) ? o.profiles[0]?.full_name : (o.profiles as any)?.full_name || 'Comprador'
       }))
@@ -75,6 +76,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
       if (latest) recentOrders = latest.map(o => ({
         id: o.id,
         total: o.total,
+        status: o.status,
         created_at: o.created_at,
         client: Array.isArray(o.profiles) ? o.profiles[0]?.full_name : (o.profiles as any)?.full_name || 'Anônimo'
       }))
@@ -303,7 +305,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
                           color: o.status === 'paid' || o.status === 'completed' ? '#10b981' : '#f59e0b',
                           border: `1px solid ${o.status === 'paid' || o.status === 'completed' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`
                         }}>
-                          {o.status === 'paid' ? 'PAGO' : o.status === 'pending' ? 'AGUARDANDO' : o.status.toUpperCase()}
+                          {o.status === 'paid' ? 'PAGO' : o.status === 'pending' ? 'AGUARDANDO' : o.status?.toUpperCase() || 'DESCONHECIDO'}
                         </span>
                       </td>
                       <td style={{ padding: '16px 24px', color: '#94a3b8', fontSize: '0.8rem' }}>Pix</td>

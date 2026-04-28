@@ -81,7 +81,7 @@ export default function QuemSomosPage() {
                 <span>✝️</span> Fundamento: Nossa Fé, Nossa Base
               </h2>
               <blockquote style={{ fontStyle: 'italic', color: 'var(--text-muted)', borderLeft: '2px solid var(--border)', paddingLeft: '16px', margin: '0 0 16px 0' }}>
-                "Tudo o que fizerem, façam de todo o coração, como para o Senhor, e não para os homens." <br/>
+                &quot;Tudo o que fizerem, façam de todo o coração, como para o Senhor, e não para os homens.&quot; <br/>
                 <strong style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>— Colossenses 3:23</strong>
               </blockquote>
               <p style={{ margin: 0, fontSize: '0.95rem' }}>
@@ -128,6 +128,32 @@ export default function QuemSomosPage() {
                   <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '16px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '12px', border: '1px solid var(--border)' }}>
                     <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{dist.name}</h3>
                     <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{dist.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* QUEM JÁ ATENDEMOS */}
+            <div style={{ marginBottom: '32px' }}>
+              <h2 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '16px' }}>
+                🤝 Quem Já Atendemos
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
+                {[
+                  { name: 'Tony Kanaan', role: 'Piloto Profissional', emoji: '🏎️' },
+                  { name: 'Cerol da Fluxo', role: 'Influencer / Creator', emoji: '🎬' },
+                  { name: 'Brasil Game Show', role: 'Evento Oficial', emoji: '🎮' },
+                  { name: 'Hotel Tauá — SP', role: 'Parceiro Corporativo', emoji: '🏨' },
+                  { name: 'Resort Morro dos Anjos', role: 'Parceiro Corporativo', emoji: '🏔️' },
+                ].map((client, idx) => (
+                  <div key={idx} style={{
+                    background: 'rgba(255,255,255,0.03)', padding: '20px',
+                    borderRadius: '12px', border: '1px solid var(--border)',
+                    textAlign: 'center', transition: 'border-color 0.2s',
+                  }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '10px' }}>{client.emoji}</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>{client.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{client.role}</div>
                   </div>
                 ))}
               </div>

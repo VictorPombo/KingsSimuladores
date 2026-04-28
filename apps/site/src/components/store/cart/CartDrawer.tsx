@@ -6,10 +6,22 @@ import { Button } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
 import { CouponInput } from './CouponInput'
 import { UpsellEngine } from '../upsell/UpsellEngine'
+import { UpsellPopup } from '../upsell/UpsellPopup'
+import { useState } from 'react'
 
 export function CartDrawer() {
   const { items, isOpen, setIsOpen, updateQuantity, subtotal, discount, totalPrice } = useCart()
   const router = useRouter()
+  const [showUpsellPopup, setShowUpsellPopup] = useState(false)
+
+  const handleCheckout = () => {
+    if (items.length === 1 && !sessionStorage.getItem('kings_upsell_shown')) {
+      setShowUpsellPopup(true)
+    } else {
+      setIsOpen(false)
+      router.push('/checkout')
+    }
+  }
 
   if (!isOpen) return null
 
@@ -106,10 +118,7 @@ export function CartDrawer() {
             <Button 
               size="lg" 
               style={{ width: '100%' }}
-              onClick={() => {
-                setIsOpen(false)
-                router.push('/checkout')
-              }}
+              onClick={handleCheckout}
             >
               Finalizar Compra
             </Button>
@@ -125,6 +134,16 @@ export function CartDrawer() {
           to { transform: translateX(0); }
         }
       `}} />
+      {showUpsellPopup && (
+        <UpsellPopup
+          onClose={() => setShowUpsellPopup(false)}
+          onProceed={() => {
+            setShowUpsellPopup(false)
+            setIsOpen(false)
+            router.push('/checkout')
+          }}
+        />
+      )}
     </>
   )
 }

@@ -5,7 +5,7 @@ import { createPreference } from '@kings/payments'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { items, customer, address, shipping, total } = body
+    const { items, customer, address, shipping, total, coupon_id } = body
 
     // 1. Authenticate user from session
     const supabase = await createServerSupabaseClient()
@@ -15,25 +15,39 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { data: profile } = await supabase.from('profiles').select('id').eq('auth_id', user.id).single()
+
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 403 })
+    }
+
     // 2. Validate input minimally
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Cart empty' }, { status: 400 })
     }
 
-    // 3. Mercado Pago Mock Preference Creation
-    const preference = await createPreference(items, customer)
+    // 2.5. Deduce and Validate Store Context
+    const firstBrand = items[0].brand || 'kings'
+    const isMixed = items.some((item: any) => (item.brand || 'kings') !== firstBrand)
+    
+    if (isMixed) {
+      return NextResponse.json({ error: 'Mixed cart is not allowed' }, { status: 400 })
+    }
 
-    // 4. Native Order Creation in Database
+    const storeContext = firstBrand === 'seven' ? 'seven' : (firstBrand === 'msu' ? 'msu' : 'kings')
+
+    // 3. Native Order Creation in Database FIRST to get an ID
     const orderData = {
-      customer_id: user.id,
-      brand_origin: 'kings',
+      customer_id: profile.id,
+      brand_origin: storeContext,
       order_type: 'direct',
       status: 'pending',
       subtotal: total - (shipping ? parseFloat(shipping.price) : 0),
       shipping_cost: shipping ? parseFloat(shipping.price) : 0,
       total: total,
       shipping_address: address,
-      preference_id: preference.id, // Armazenando preference gerada
+      preference_id: null,
+      coupon_id: coupon_id || null,
     }
 
     const { data: newOrder, error: orderErr } = await supabase
@@ -45,6 +59,14 @@ export async function POST(req: Request) {
     if (orderErr || !newOrder) {
       console.error('Insert Order Error:', orderErr)
       return NextResponse.json({ error: 'Database failed to create order' }, { status: 500 })
+    }
+
+    // 4. Mercado Pago Preference Creation with External Reference
+    const preference = await createPreference(items, customer, newOrder.id, undefined, storeContext)
+
+    // 4.5. Update Order with Preference ID
+    if (preference.id) {
+       await supabase.from('orders').update({ preference_id: preference.id }).eq('id', newOrder.id)
     }
 
     // 5. Insert Order Items natively

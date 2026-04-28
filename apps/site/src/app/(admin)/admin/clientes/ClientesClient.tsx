@@ -18,6 +18,7 @@ type Client = {
 export function ClientesClient({ clients }: { clients: Client[] }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState<'all' | 'with_orders' | 'without_orders'>('all')
+  const [isExporting, setIsExporting] = useState(false)
 
   const filtered = clients.filter(c => {
     const matchSearch = (c.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,18 +35,32 @@ export function ClientesClient({ clients }: { clients: Client[] }) {
   const withOrders = clients.filter(c => c.order_count > 0).length
   const totalRevenue = clients.reduce((a, c) => a + c.total_spent, 0)
 
-  function exportCSV() {
-    if (!filtered.length) return
-    const headers = ['Nome', 'Email', 'Telefone', 'CPF/CNPJ', 'Pedidos', 'Total Gasto', 'Cadastro']
-    const rows = filtered.map(c => [
-      c.full_name || '-', c.email || '-', c.phone || '-', c.cpf_cnpj || '-',
-      String(c.order_count), `R$ ${c.total_spent.toFixed(2)}`,
-      new Date(c.created_at).toLocaleDateString('pt-BR')
-    ])
-    const csv = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.map(v => `"${v}"`).join(';'))].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
-    a.download = `clientes_${new Date().toISOString().split('T')[0]}.csv`; a.click()
+  async function exportCSV() {
+    try {
+      setIsExporting(true)
+      const res = await fetch('/api/clientes/exportar')
+      
+      if (!res.ok) {
+        let errorMessage = 'Erro ao exportar clientes.'
+        try {
+          const errorData = await res.json()
+          if (errorData.error) errorMessage = errorData.error
+        } catch (e) {}
+        alert(errorMessage)
+        return
+      }
+
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `clientes_loja_integrada_${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+    } catch (error) {
+      console.error(error)
+      alert('Erro inesperado ao gerar CSV.')
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   return (
@@ -55,14 +70,15 @@ export function ClientesClient({ clients }: { clients: Client[] }) {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>Clientes</h1>
           <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Base de clientes cadastrados</p>
         </div>
-        <button onClick={exportCSV} style={{
+        <button onClick={exportCSV} disabled={isExporting} style={{
           display: 'flex', alignItems: 'center', gap: '8px',
-          background: 'linear-gradient(135deg, #10b981, #059669)',
+          background: isExporting ? '#64748b' : 'linear-gradient(135deg, #10b981, #059669)',
           border: 'none', borderRadius: '8px', padding: '10px 20px',
-          color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
-          boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
+          color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: isExporting ? 'not-allowed' : 'pointer',
+          boxShadow: isExporting ? 'none' : '0 2px 8px rgba(16,185,129,0.3)',
+          opacity: isExporting ? 0.7 : 1
         }}>
-          <Download size={16} /> Exportar CSV
+          <Download size={16} /> {isExporting ? 'Exportando...' : 'Exportar CSV'}
         </button>
       </div>
 

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts'
-import { createClient } from '@kings/db'
+import { createClient } from '@kings/db/client'
 
 type DayRevenue = { name: string; revenue: number }
 

@@ -188,11 +188,27 @@ export function UpsellEngine({ variant = 'compact', maxItems = 2 }: UpsellEngine
         ⚡ Pilotos que compraram isso também levaram
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(suggestions.length, 3)}, 1fr)`, gap: '12px' }}>
+      <div style={{
+        display: 'flex',
+        overflowX: 'auto',
+        gap: '12px',
+        paddingBottom: '8px',
+        scrollSnapType: 'x mandatory',
+        WebkitOverflowScrolling: 'touch',
+      }}>
+        <style dangerouslySetInnerHTML={{__html: `
+          .upsell-scroll::-webkit-scrollbar { height: 4px; }
+          .upsell-scroll::-webkit-scrollbar-track { background: transparent; }
+          .upsell-scroll::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius: 2px; }
+        `}} />
         {suggestions.map(product => (
           <div
             key={product.id}
             style={{
+              minWidth: '180px',
+              maxWidth: '220px',
+              flexShrink: 0,
+              scrollSnapAlign: 'start',
               background: 'rgba(10,14,26,0.8)',
               border: '1px solid rgba(255,255,255,0.06)',
               borderRadius: '10px',

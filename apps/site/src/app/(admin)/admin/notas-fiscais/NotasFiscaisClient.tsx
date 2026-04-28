@@ -42,6 +42,26 @@ export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
   const emitidas = invoices.filter(i => i.status === 'issued').length
   const pendentes = invoices.filter(i => i.status === 'pending').length
 
+  const downloadXMLsLote = async () => {
+    const comXML = filtered.filter(i => i.xml_url)
+    if (comXML.length === 0) return alert('Nenhuma NFe com XML dentre os resultados filtrados.')
+    
+    if (!confirm(`Baixar os ${comXML.length} XMLs individualmente para sua pasta Downloads? O navegador pode pedir permissão de "múltiplos downloads".`)) return
+    
+    // Download sequencial pra evitar travamento do navegador
+    for (let i = 0; i < comXML.length; i++) {
+        setTimeout(() => {
+            const link = document.createElement('a')
+            link.href = comXML[i].xml_url as string
+            link.download = `NFe_${comXML[i].nfe_number || comXML[i].id}.xml`
+            link.setAttribute('target', '_blank')
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+        }, i * 400) // Delay de 400ms entre arquivos
+    }
+  }
+
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
@@ -50,14 +70,25 @@ export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
             Notas Fiscais
             <span style={{ fontSize: '0.65rem', fontWeight: 'bold', padding: '3px 8px', borderRadius: '4px', background: '#3b82f620', color: '#3b82f6', border: '1px solid #3b82f630' }}>BETA</span>
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Gestão de NF-e vinculadas aos pedidos</p>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Gestão de notas fiscais geradas para os pedidos</p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={downloadXMLsLote} style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: 'rgba(59, 130, 246, 0.1)', border: '1px solid #3b82f630', borderRadius: '8px', padding: '10px 16px',
+                color: '#3b82f6', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e: any) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)'}
+            onMouseLeave={(e: any) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'}>
+                <Download size={16} /> Baixar XMLs em Lote
+            </button>
         </div>
       </div>
 
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         <div style={{ background: '#2c2e36', borderRadius: '8px', padding: '20px', border: '1px solid #3f424d' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase' }}>Total NF-e</div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase' }}>Total de Notas</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginTop: '8px' }}>{invoices.length}</div>
         </div>
         <div style={{ background: '#2c2e36', borderRadius: '8px', padding: '20px', border: '1px solid #3f424d' }}>
@@ -92,7 +123,7 @@ export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
             <thead>
               <tr>
-                {['NF-e', 'Pedido', 'Cliente', 'CNPJ Emitente', 'Valor Pedido', 'Status', 'Emissão', 'Ações'].map(h => (
+                {['Nota Fiscal', 'Pedido', 'Cliente', 'CNPJ Emitente', 'Valor Pedido', 'Status', 'Emissão', 'Ações'].map(h => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#1f2025', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>

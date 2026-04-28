@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerSupabaseClient } from '@kings/db'
 
 export async function applySegmentedPrices(products: Record<string, any>[]) {

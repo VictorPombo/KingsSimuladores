@@ -33,7 +33,7 @@ export function SearchBar() {
     >
       <input
         type="text"
-        placeholder="Tá procurando de alguma coisa?"
+        placeholder="Tá procurando alguma coisa?"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         style={{

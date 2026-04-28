@@ -5,7 +5,6 @@ import crypto from 'crypto'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    // Precisamos do client com auth para identificar o usuário, mas vamos usar service_role ou auth client
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -18,11 +17,18 @@ export async function POST(req: Request) {
       title: body.title,
       price: body.price,
       condition: body.condition,
-      images: [body.imageUrl],
+      images: body.imageUrls || (body.imageUrl ? [body.imageUrl] : []),
       description: body.description,
+      brand: body.brand || null,
+      model: body.model || null,
+      city: body.city || null,
+      state: body.state || null,
+      has_original_box: body.has_original_box ?? false,
+      has_usage_marks: body.has_usage_marks ?? false,
+      shipping_options: body.shipping_options || null,
       status: 'pending_review',
       seller_id: user.id,
-      commission_rate: 0.1,
+      commission_rate: 0.15,
     })
 
     if (error) {

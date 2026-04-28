@@ -54,8 +54,8 @@ const STREAMING_CSS = `
   }
 
   .streaming-bg-root[data-theme="msu"] {
-    --sb-accent: 255, 107, 53;     /* Orange */
-    --sb-secondary: 255, 59, 92;   /* Red */
+    --sb-accent: 139, 92, 246;     /* Purple */
+    --sb-secondary: 217, 70, 239;  /* Pink */
   }
 
   /* ─── Container ─── */

@@ -73,7 +73,7 @@ export default function MsuLogin() {
       <div style={{
         position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
         width: '600px', height: '400px',
-        background: 'radial-gradient(ellipse, rgba(255, 107, 53, 0.08) 0%, rgba(255, 59, 92, 0.04) 40%, transparent 70%)',
+        background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.08) 0%, rgba(217, 70, 239, 0.04) 40%, transparent 70%)',
         filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0,
       }} />
 
@@ -84,7 +84,7 @@ export default function MsuLogin() {
             display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '16px',
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
+              background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
               padding: '8px 16px', borderRadius: '8px',
               fontSize: '1.1rem', fontWeight: 900, color: '#fff',
               letterSpacing: '2px',
@@ -167,7 +167,7 @@ export default function MsuLogin() {
                   padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
                   outline: 'none', transition: 'border-color 0.2s',
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(255, 107, 53, 0.5)'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)'}
                 onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
             </div>
@@ -188,7 +188,7 @@ export default function MsuLogin() {
                 padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
                 outline: 'none', transition: 'border-color 0.2s',
               }}
-              onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(255, 107, 53, 0.5)'}
+              onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)'}
               onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
             />
           </div>
@@ -208,7 +208,7 @@ export default function MsuLogin() {
                 padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
                 outline: 'none', transition: 'border-color 0.2s',
               }}
-              onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(255, 107, 53, 0.5)'}
+              onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)'}
               onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
             />
           </div>
@@ -229,7 +229,7 @@ export default function MsuLogin() {
                   padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
                   outline: 'none', transition: 'border-color 0.2s',
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(255, 107, 53, 0.5)'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)'}
                 onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
             </div>
@@ -242,8 +242,8 @@ export default function MsuLogin() {
               width: '100%',
               padding: '14px',
               background: loading
-                ? 'rgba(255, 107, 53, 0.5)'
-                : 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
+                ? 'rgba(139, 92, 246, 0.5)'
+                : 'linear-gradient(135deg, #8b5cf6, #d946ef)',
               color: '#fff',
               border: 'none',
               borderRadius: '10px',
@@ -253,7 +253,7 @@ export default function MsuLogin() {
               letterSpacing: '1px',
               textTransform: 'uppercase',
               transition: 'transform 0.2s, box-shadow 0.2s',
-              boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
+              boxShadow: '0 4px 16px rgba(139, 92, 246, 0.3)',
               marginTop: '4px',
             }}
             onMouseOver={(e) => { if (!loading) e.currentTarget.style.transform = 'translateY(-1px)' }}
@@ -281,7 +281,7 @@ export default function MsuLogin() {
                   type="button"
                   onClick={() => { setMode('register'); setError(''); setSuccess('') }}
                   style={{
-                    background: 'none', border: 'none', color: '#FF6B35',
+                    background: 'none', border: 'none', color: '#8b5cf6',
                     fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem',
                     textDecoration: 'underline', textUnderlineOffset: '3px',
                   }}
@@ -296,7 +296,7 @@ export default function MsuLogin() {
                   type="button"
                   onClick={() => { setMode('login'); setError(''); setSuccess('') }}
                   style={{
-                    background: 'none', border: 'none', color: '#FF6B35',
+                    background: 'none', border: 'none', color: '#8b5cf6',
                     fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem',
                     textDecoration: 'underline', textUnderlineOffset: '3px',
                   }}

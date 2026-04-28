@@ -4,7 +4,9 @@
  */
 
 export const pushOrderToOlist = async (orderPayload: any, brand_origin: string) => {
-  const token = process.env.OLIST_ACCESS_TOKEN
+  const token = brand_origin === 'seven' 
+    ? process.env.OLIST_API_KEY_SEVEN 
+    : process.env.OLIST_API_KEY_KINGS
   
   if (token && !token.includes('preencher')) {
     try {
