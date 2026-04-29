@@ -4,24 +4,28 @@ import { formatPrice } from '@kings/utils'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Button } from '@kings/ui'
+import { LevelVideo } from './LevelVideo'
 
 export const revalidate = 60
 
-const NIVEIS_DATA: Record<string, { title: string, desc: string, color: string }> = {
+const NIVEIS_DATA: Record<string, { title: string, desc: string, color: string, video: string }> = {
   iniciante: {
     title: "INICIANTE - HOBBIE O INÍCIO.",
     desc: "Esta categoria é o ponto de partida ideal para quem está entrando no mundo da simulação. Oferece equipamentos e softwares fáceis de usar, acessíveis e com configurações simplificadas. O foco é proporcionar uma primeira experiência imersiva e divertida, sem exigir um grande investimento inicial ou conhecimento técnico avançado.",
-    color: "#00e5ff" // Ciano/Kings
+    color: "#00e5ff", // Ciano/Kings
+    video: "/IMG_8543.mp4"
   },
   semiprofissional: {
     title: "SEMIPROFISSIONAIS - 3X NA SEMANA, FOCO!!!",
     desc: "Esta categoria representa um passo acima para pilotos virtuais que já possuem alguma experiência e buscam um equipamento com maior realismo, precisão e imersão. Os produtos aqui oferecem um melhor feedback de força em wheelbases (9 a 12NM), pedaleiras mais avançadas e componentes de maior durabilidade.",
-    color: "#10b981" // Verde/Kings
+    color: "#10b981", // Verde/Kings
+    video: "/IMG_8541.mp4"
   },
   profissional: {
     title: "PROFISSIONAIS - TODO MILÉSIMO CONTA!",
     desc: "O ápice da simulação. Aqui o foco é extrair cada pentelhésimo de segundo da pista. Equipamentos de categoria mundial, pedais ativos, cockpits de movimento reais (Motion) e simuladores em níveis de fidelidade usados livremente por pilotos de F1, GT3 e Porsche Cup para treinar na vida real.",
-    color: "#f59e0b" // Amarelo Gold
+    color: "#f59e0b", // Amarelo Gold
+    video: "/IMG_8542.mp4"
   }
 }
 
@@ -133,28 +137,40 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
                   {data.desc}
                 </p>
               </div>
+              
+              <div style={{ marginTop: '32px', display: 'inline-flex', alignItems: 'center', gap: '16px', background: 'rgba(0, 0, 0, 0.4)', padding: '16px 24px', borderRadius: '12px', border: `1px solid ${data.color}30`, boxShadow: `0 4px 20px rgba(0,0,0,0.5)` }}>
+                <div style={{
+                  width: '20px', height: '32px', borderRadius: '10px', border: `2px solid ${data.color}`, display: 'flex', justifyContent: 'center', paddingTop: '4px', flexShrink: 0
+                }}>
+                  <div style={{ width: '2px', height: '6px', borderRadius: '2px', background: data.color, animation: 'mouseScroll 1.5s ease-in-out infinite' }} />
+                </div>
+                <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Role para baixo para ver os produtos
+                </span>
+                
+                <style dangerouslySetInnerHTML={{__html: `
+                  @keyframes mouseScroll {
+                    0% { transform: translateY(0); opacity: 1; }
+                    30% { transform: translateY(6px); opacity: 0; }
+                    31% { transform: translateY(-6px); opacity: 0; }
+                    100% { transform: translateY(0); opacity: 1; }
+                  }
+                `}} />
+              </div>
             </div>
             
-            {/* Espaço reservado para o vídeo */}
+            {/* Vídeo do Nível */}
             <div style={{ 
               width: '100%', 
               aspectRatio: '16/9', 
-              background: 'rgba(0,0,0,0.4)', 
+              background: '#000', 
               borderRadius: '12px',
               border: `1px solid ${data.color}30`,
-              boxShadow: `inset 0 0 30px rgba(0,0,0,0.5)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              color: 'var(--text-muted)',
+              boxShadow: `0 0 30px rgba(0,0,0,0.5)`,
               overflow: 'hidden',
               position: 'relative'
             }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '12px', color: data.color, opacity: 0.8 }}>
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Espaço para Vídeo</span>
+              <LevelVideo src={data.video} />
             </div>
           </div>
         </div>
