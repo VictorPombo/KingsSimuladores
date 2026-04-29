@@ -56,7 +56,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
       new Date(o.created_at).toLocaleDateString('pt-BR'),
       o.profiles?.full_name || '-',
       o.profiles?.email || '-',
-      o.brand_origin === 'kings' ? 'Kings' : 'MSU',
+      o.brand_origin === 'kings' ? 'Kings' : o.brand_origin === 'seven' ? 'Seven' : 'MSU',
       STATUS_CONFIG[o.status]?.label || o.status,
       Number(o.subtotal).toFixed(2),
       Number(o.shipping_cost).toFixed(2),
@@ -141,6 +141,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
             <option value="all">Todas as Marcas</option>
             <option value="kings">Kings Simuladores</option>
             <option value="msu">Meu Simulador Usado</option>
+            <option value="seven">Seven Sim Racing</option>
           </select>
           <div style={{ marginLeft: 'auto', color: '#64748b', fontSize: '0.8rem' }}>
             {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
@@ -192,11 +193,11 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                       <td style={{ padding: '14px 16px' }}>
                         <span style={{
                           padding: '3px 10px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
-                          background: order.brand_origin === 'kings' ? '#3b82f620' : '#f59e0b20',
-                          color: order.brand_origin === 'kings' ? '#3b82f6' : '#f59e0b',
-                          border: `1px solid ${order.brand_origin === 'kings' ? '#3b82f630' : '#f59e0b30'}`
+                          background: order.brand_origin === 'kings' ? '#3b82f620' : order.brand_origin === 'seven' ? '#ea580c20' : '#f59e0b20',
+                          color: order.brand_origin === 'kings' ? '#3b82f6' : order.brand_origin === 'seven' ? '#ea580c' : '#f59e0b',
+                          border: `1px solid ${order.brand_origin === 'kings' ? '#3b82f630' : order.brand_origin === 'seven' ? '#ea580c30' : '#f59e0b30'}`
                         }}>
-                          {order.brand_origin === 'kings' ? 'KINGS' : 'MSU'}
+                          {order.brand_origin === 'kings' ? 'KINGS' : order.brand_origin === 'seven' ? 'SEVEN' : 'MSU'}
                         </span>
                       </td>
                       <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontSize: '0.85rem', color: '#94a3b8' }}>

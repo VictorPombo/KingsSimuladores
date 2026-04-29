@@ -4,8 +4,13 @@ import React from 'react'
 import { useCart } from '@/contexts/CartContext'
 import { ShoppingCart } from 'lucide-react'
 
-export function CartIcon() {
+export function CartIcon({ variant = 'kings' }: { variant?: 'kings' | 'seven' | 'msu' }) {
   const { totalItems, setIsOpen } = useCart()
+
+  // Define accent color based on variant
+  let accentColor = 'var(--accent)'
+  if (variant === 'msu') accentColor = '#d946ef'
+  if (variant === 'seven') accentColor = '#ea580c'
 
   return (
     <button 
@@ -30,7 +35,7 @@ export function CartIcon() {
           style={{
             position: 'absolute',
             top: '-5px', right: '-5px',
-            background: 'var(--accent)',
+            background: accentColor,
             color: '#fff',
             fontSize: '0.65rem',
             fontWeight: 800,

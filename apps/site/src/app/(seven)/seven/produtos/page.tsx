@@ -2,51 +2,50 @@ import { Container } from '@kings/ui'
 import { ChevronRight, Star, ShoppingCart, CheckSquare, Square } from 'lucide-react'
 import Link from 'next/link'
 
-// Mock Data baseado no screenshot
-const MOCK_PRODUCTS = [
-  {
-    id: '1',
-    title: 'Volante Simagic NEO X 330T - GT',
-    price: 4399.90,
-    pricePix: 3959.91,
-    installments: '10x de R$ 439,99',
-    image: 'https://placehold.co/400x400/141416/f97316?text=Simagic+NEO+X',
-    rating: 5,
-    reviews: 0
-  },
-  {
-    id: '2',
-    title: 'Simagic MagLink Adaptador (Para Bases não Simagic)',
-    price: 440.00,
-    pricePix: 396.00,
-    installments: '10x de R$ 44,00',
-    image: 'https://placehold.co/400x400/141416/f97316?text=MagLink',
-    rating: 5,
-    reviews: 0
-  },
-  {
-    id: '3',
-    title: 'Pedal Simagic P500 Dual Pedal',
-    price: 2600.00,
-    pricePix: 2340.00,
-    installments: '10x de R$ 260,00',
-    image: 'https://placehold.co/400x400/141416/f97316?text=Pedal+P500',
-    rating: 5,
-    reviews: 0
-  },
-  {
-    id: '4',
-    title: 'Pedal Simagic (DUPLO) P2000-S200RF',
-    price: 7700.00,
-    pricePix: 6930.00,
-    installments: '10x de R$ 770,00',
-    image: 'https://placehold.co/400x400/141416/f97316?text=Pedal+P2000',
-    rating: 5,
-    reviews: 0
-  }
-]
+import { createServerSupabaseClient } from '@kings/db/server'
 
-export default function SevenProductsPage() {
+interface Props {
+  searchParams: {
+    categoria?: string
+    ordenar?: string
+  }
+}
+
+export default async function SevenProductsPage({ searchParams }: Props) {
+  const supabase = await createServerSupabaseClient()
+  const currentCategory = searchParams.categoria
+  
+  // 1. Fetch Brand ID
+  const { data: brand } = await supabase.from('brands').select('id').eq('slug', 'seven').single()
+  
+  // 2. Fetch Categories
+  let categories: any[] = []
+  if (brand) {
+    const { data: cats } = await supabase.from('categories').select('id, name, slug').eq('brand_scope', 'seven')
+    if (cats) categories = cats
+  }
+
+  // 3. Fetch Products
+  let query = supabase
+    .from('products')
+    .select('id, title, price, slug, images, category_id, stock')
+    .eq('brand_id', brand?.id)
+    .eq('status', 'active')
+
+  if (currentCategory) {
+    const targetCat = categories.find(c => c.slug === currentCategory)
+    if (targetCat) {
+      query = query.eq('category_id', targetCat.id)
+    }
+  }
+
+  // Ordenação Simples
+  if (searchParams.ordenar === 'menor-preco') query = query.order('price', { ascending: true })
+  else if (searchParams.ordenar === 'maior-preco') query = query.order('price', { ascending: false })
+  else query = query.order('created_at', { ascending: false })
+
+  const { data: products } = await query
+  const displayProducts = products || []
   return (
     <div style={{ padding: '40px 0', minHeight: 'calc(100vh - 100px)' }}>
       <Container>
@@ -89,17 +88,14 @@ export default function SevenProductsPage() {
                 <span style={{ color: '#f8fafc', fontWeight: 800 }}>+</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <FilterCheckbox label="Acessórios e Periféricos" count={12} />
-                <FilterCheckbox label="Base" count={2} />
-                <FilterCheckbox label="Iniciante" count={8} />
-                <FilterCheckbox label="Intermediário" count={7} />
-                <FilterCheckbox label="NOVIDADES" count={3} checked />
-                <FilterCheckbox label="Pedal" count={5} />
-                <FilterCheckbox label="Profissional" count={7} />
-                <FilterCheckbox label="Qual o seu perfil?" count={12} />
-                <FilterCheckbox label="Simagic" count={23} checked />
-                <FilterCheckbox label="Simuladores/Cockpits" count={2} />
-                <FilterCheckbox label="Volante" count={5} />
+                <Link href="/seven/produtos" style={{ textDecoration: 'none' }}>
+                  <FilterCheckbox label="Todas as categorias" checked={!currentCategory} />
+                </Link>
+                {categories.map(cat => (
+                  <Link key={cat.id} href={`/seven/produtos?categoria=${cat.slug}`} style={{ textDecoration: 'none' }}>
+                    <FilterCheckbox label={cat.name} checked={currentCategory === cat.slug} />
+                  </Link>
+                ))}
               </div>
             </div>
 
@@ -138,43 +134,53 @@ export default function SevenProductsPage() {
 
           {/* Grade de Produtos */}
           <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
-            {MOCK_PRODUCTS.map(product => (
-              <div key={product.id} style={{ background: 'rgba(20,20,22,0.6)', backdropFilter: 'blur(12px)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'transform 0.3s, box-shadow 0.3s' }} className="hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(249,115,22,0.15)] group">
-                {/* Imagem (Fundo branco/cinza claro estilo o print original, adaptado pro Dark Mode com um radial gradient) */}
-                <div style={{ height: '220px', background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0) 70%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-                  <img src={product.image} alt={product.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                </div>
-                
-                {/* Infos */}
-                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '38px' }}>
-                    {product.title}
-                  </h3>
-                  
-                  {/* Estrelas */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#f97316', marginBottom: '16px' }}>
-                    <Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" />
-                  </div>
-                  
-                  {/* Preços */}
-                  <div style={{ marginTop: 'auto' }}>
-                    <div style={{ color: '#94a3b8', fontSize: '1rem', textDecoration: 'none' }}>
-                      R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </div>
-                    <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px' }}>
-                      ou <strong>{product.installments}</strong>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ color: '#22c55e', fontWeight: 900, fontSize: '1.4rem' }}>
-                        <span style={{ fontSize: '1rem', marginRight: '2px' }}>R$</span>
-                        {product.pricePix.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </div>
-                      <span style={{ color: '#22c55e', fontSize: '0.7rem', fontWeight: 600 }}>no pix</span>
-                    </div>
-                  </div>
-                </div>
+            {displayProducts.length === 0 ? (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px', color: '#94a3b8' }}>
+                Nenhum produto encontrado.
               </div>
-            ))}
+            ) : displayProducts.map(product => {
+              const mainImage = product.images?.[0] || 'https://placehold.co/400x400/141416/f97316?text=Sem+Foto'
+              const pricePix = product.price * 0.9 // Simulando 10% pix
+              return (
+                <Link key={product.id} href={`/seven/produtos/${product.slug}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ background: 'rgba(20,20,22,0.6)', backdropFilter: 'blur(12px)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'transform 0.3s, box-shadow 0.3s', height: '100%' }} className="hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(249,115,22,0.15)] group">
+                    {/* Imagem */}
+                    <div style={{ height: '220px', background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0) 70%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+                      <img src={mainImage} alt={product.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    </div>
+                    
+                    {/* Infos */}
+                    <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '38px' }}>
+                        {product.title}
+                      </h3>
+                      
+                      {/* Estrelas */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#f97316', marginBottom: '16px' }}>
+                        <Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" />
+                      </div>
+                      
+                      {/* Preços */}
+                      <div style={{ marginTop: 'auto' }}>
+                        <div style={{ color: '#94a3b8', fontSize: '1rem', textDecoration: 'none' }}>
+                          R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px' }}>
+                          ou <strong>10x de R$ {(product.price / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <div style={{ color: '#22c55e', fontWeight: 900, fontSize: '1.4rem' }}>
+                            <span style={{ fontSize: '1rem', marginRight: '2px' }}>R$</span>
+                            {pricePix.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </div>
+                          <span style={{ color: '#22c55e', fontSize: '0.7rem', fontWeight: 600 }}>no pix</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
 
         </div>

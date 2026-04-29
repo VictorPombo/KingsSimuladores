@@ -80,6 +80,16 @@
   --z-toast: 300;
 }
 
+/* ═══════════ Kings Theme Overrides (For nested contexts) ═══════════ */
+.theme-kings {
+  --accent: #00e896;
+  --accent-glow: rgba(0, 232, 150, 0.15);
+  --accent-dim: rgba(0, 232, 150, 0.08);
+  --gradient-primary: linear-gradient(135deg, #00b4f5, #00e896);
+  --info: #00b4f5;
+  --success: #00e896;
+}
+
 /* ═══════════ MSU Theme Overrides ═══════════ */
 .theme-msu {
   /* Accent: Purple */
@@ -93,6 +103,21 @@
   /* Semantic adaptation */
   --info: #8b5cf6;
   --success: #06d6a0;
+}
+
+/* ═══════════ Seven Theme Overrides ═══════════ */
+.theme-seven {
+  /* Accent: Orange */
+  --accent: #ff6b00;
+  --accent-glow: rgba(255, 107, 0, 0.15);
+  --accent-dim: rgba(255, 107, 0, 0.08);
+
+  /* Gradients: Orange to Yellow */
+  --gradient-primary: linear-gradient(135deg, #ff6b00, #facc15);
+  
+  /* Semantic adaptation */
+  --info: #ff6b00;
+  --success: #10b981;
 }
 
 /* ═══════════ Base Reset ═══════════ */

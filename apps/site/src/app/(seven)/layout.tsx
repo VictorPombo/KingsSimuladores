@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import '@kings/ui/globals.css'
-import { StreamingBackground } from '@kings/ui'
+import { StreamingBackground, Button } from '@kings/ui'
 
 export const metadata: Metadata = {
   title: 'Seven Sim Racing',
@@ -14,14 +14,38 @@ export const metadata: Metadata = {
 
 import { Search, ShoppingCart, User, Menu, ChevronLeft, ChevronRight, ChevronDown, Phone, Mail, Clock, CreditCard, QrCode, Barcode, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
+import { CartIcon } from '@/components/store/cart/CartIcon'
+import { SearchBar } from '@/components/store/layout/SearchBar'
+import { ProfileDropdown } from '@/components/store/layout/ProfileDropdown'
+import { CartProvider } from '@/contexts/CartContext'
+import { CartDrawer } from '@/components/store/cart/CartDrawer'
+import { ToastProvider } from '@kings/ui'
+import { AuthAction } from '@/components/store/layout/AuthAction'
+import { StoreSwitcher } from '@/components/store/layout/StoreSwitcher'
+import Script from 'next/script'
 
-export default function SevenLayout({
+export default async function SevenLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <div style={{ minHeight: '100vh', color: '#f8fafc', position: 'relative', fontFamily: 'var(--font-sans)', zIndex: 1 }}>
+    <ToastProvider>
+      <Script 
+        src="https://www.googletagmanager.com/gtag/js?id=AW-11399026698" 
+        strategy="afterInteractive" 
+      />
+      <Script id="google-ads" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'AW-11399026698');
+        `}
+      </Script>
+      <CartProvider>
+        <CartDrawer />
+        <div className="theme-seven" style={{ minHeight: '100vh', color: '#f8fafc', position: 'relative', fontFamily: 'var(--font-sans)', zIndex: 1 }}>
       {/* Background Effect */}
       <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(249,115,22,0.05) 0%, rgba(0,0,0,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
       
@@ -80,17 +104,7 @@ export default function SevenLayout({
 
             {/* Search Bar - Centralizada */}
             <div className="seven-search" style={{ flex: 1, maxWidth: '600px', margin: '0 24px' }}>
-              <div style={{ position: 'relative', width: '100%' }}>
-                <input 
-                  type="text" 
-                  placeholder="BUSCAR NA LOJA" 
-                  style={{ width: '100%', padding: '14px 20px', paddingRight: '50px', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontSize: '0.85rem', outline: 'none', transition: 'all 0.3s' }}
-                  className="focus:border-[#ea580c] focus:bg-[rgba(255,255,255,0.02)]"
-                />
-                <button style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                  <Search size={20} color="#f8fafc" />
-                </button>
-              </div>
+              <SearchBar variant="seven" />
             </div>
 
             {/* Actions - Store Switcher, Usuário e Carrinho */}
@@ -98,33 +112,17 @@ export default function SevenLayout({
               
               {/* Store Switcher Buttons */}
               <div className="seven-switcher" style={{ gap: '24px', alignItems: 'center' }}>
-                <Link href="/" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #10b981, #047857)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)', textDecoration: 'none', transition: 'transform 0.3s ease' }} className="hover:scale-105">
-                  KINGS SIMULADORES
-                </Link>
-                <Link href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #8b5cf6, #d946ef)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(139, 92, 246, 0.3)', textDecoration: 'none', transition: 'transform 0.3s ease' }} className="hover:scale-105">
-                  MEU SIMULADOR USADO
-                </Link>
+                <StoreSwitcher store="kings" />
+                <StoreSwitcher store="msu" />
               </div>
 
-              <div className="seven-divider" style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.1)' }} />
-              <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }} className="group">
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }} className="group-hover:scale-105">
-                  <User size={20} color="#fff" />
-                </div>
-                <div className="seven-panel-text" style={{ flexDirection: 'column', color: '#f8fafc' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>Painel</span>
-                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>do Usuário</span>
-                </div>
-              </a>
+              <div className="seven-divider" style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
               
-              <a href="#" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', position: 'relative' }} className="group">
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s', zIndex: 2 }} className="group-hover:scale-105">
-                  <ShoppingCart size={20} color="#fff" />
-                </div>
-                <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', height: '24px', padding: '0 12px 0 20px', marginLeft: '-12px', borderRadius: '0 12px 12px 0', display: 'flex', alignItems: 'center', color: '#f8fafc', fontSize: '0.8rem', fontWeight: 800, zIndex: 1 }}>
-                  0
-                </div>
-              </a>
+              <AuthAction store="seven" />
+              
+              <div className="seven-btn-hover cursor-pointer">
+                <CartIcon variant="seven" />
+              </div>
             </div>
           </div>
         </div>
@@ -135,20 +133,17 @@ export default function SevenLayout({
             <nav style={{ display: 'flex', alignItems: 'center', height: '38px', whiteSpace: 'nowrap' }}>
               
               {/* Dropdown Qual o Seu Perfil? */}
-              <div style={{ border: '1px solid #ea580c', borderRadius: '20px', padding: '6px 16px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginRight: '40px' }}>
-                <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px' }}>QUAL O SEU PERFIL?</span>
-                <ChevronDown size={14} color="#ea580c" />
-              </div>
+              <ProfileDropdown />
 
               {/* Links Horizontais */}
               <div style={{ display: 'flex', gap: '32px' }}>
-                <a href="#" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simagic</a>
-                <a href="#" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Base</a>
-                <a href="#" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Pedal</a>
-                <a href="#" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Volante</a>
-                <a href="#" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Acessórios e Periféricos</a>
-                <a href="#" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simuladores/Cockpits</a>
-                <a href="#" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Kits Simagic</a>
+                <Link href="/seven/produtos?marca=simagic" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simagic</Link>
+                <Link href="/seven/produtos?categoria=bases" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Base</Link>
+                <Link href="/seven/produtos?categoria=pedais" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Pedal</Link>
+                <Link href="/seven/produtos?categoria=volantes" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Volante</Link>
+                <Link href="/seven/produtos?categoria=acessorios" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Acessórios e Periféricos</Link>
+                <Link href="/seven/produtos?categoria=cockpits" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simuladores/Cockpits</Link>
+                <Link href="/seven/produtos?marca=simagic&tipo=kit" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Kits Simagic</Link>
               </div>
             </nav>
           </div>
@@ -275,5 +270,7 @@ export default function SevenLayout({
         </div>
       </footer>
     </div>
+      </CartProvider>
+    </ToastProvider>
   )
 }

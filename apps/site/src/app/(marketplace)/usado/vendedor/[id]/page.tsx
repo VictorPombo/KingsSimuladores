@@ -109,7 +109,7 @@ export default async function VendedorProfilePage({ params }: { params: { id: st
       {reviews && reviews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {reviews.slice(0, 8).map((rev, idx) => (
-            <Card className="bg-gray-900 border-gray-800">
+            <Card key={idx} className="bg-gray-900 border-gray-800">
               <div className="pt-6 p-6">
                 <div className="flex justify-between mb-2">
                   <span className="font-semibold text-cyan-300">{Array.isArray(rev.profiles) ? (rev.profiles as any)[0]?.full_name : (rev.profiles as any)?.full_name || 'Comprador Verificado'}</span>
