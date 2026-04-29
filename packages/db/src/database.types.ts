@@ -22,7 +22,7 @@ export type Database = {
       brands: {
         Row: {
           id: string
-          name: 'kings' | 'msu'
+          name: 'kings' | 'msu' | 'seven'
           cnpj: string
           display_name: string
           settings: Json
@@ -30,7 +30,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          name: 'kings' | 'msu'
+          name: 'kings' | 'msu' | 'seven'
           cnpj: string
           display_name: string
           settings?: Json
@@ -38,7 +38,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          name?: 'kings' | 'msu'
+          name?: 'kings' | 'msu' | 'seven'
           cnpj?: string
           display_name?: string
           settings?: Json
@@ -92,7 +92,7 @@ export type Database = {
           name: string
           slug: string
           parent_id: string | null
-          brand_scope: 'kings' | 'msu' | null
+          brand_scope: 'kings' | 'msu' | 'seven' | null
           sort_order: number
         }
         Insert: {
@@ -100,7 +100,7 @@ export type Database = {
           name: string
           slug: string
           parent_id?: string | null
-          brand_scope?: 'kings' | 'msu' | null
+          brand_scope?: 'kings' | 'msu' | 'seven' | null
           sort_order?: number
         }
         Update: {
@@ -108,7 +108,7 @@ export type Database = {
           name?: string
           slug?: string
           parent_id?: string | null
-          brand_scope?: 'kings' | 'msu' | null
+          brand_scope?: 'kings' | 'msu' | 'seven' | null
           sort_order?: number
         }
       }
@@ -234,7 +234,7 @@ export type Database = {
         Row: {
           id: string
           customer_id: string
-          brand_origin: 'kings' | 'msu'
+          brand_origin: 'kings' | 'msu' | 'seven'
           order_type: 'direct' | 'marketplace'
           status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
           subtotal: number
@@ -255,7 +255,7 @@ export type Database = {
         Insert: {
           id?: string
           customer_id: string
-          brand_origin: 'kings' | 'msu'
+          brand_origin: 'kings' | 'msu' | 'seven'
           order_type?: 'direct' | 'marketplace'
           status?: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
           subtotal: number
@@ -276,7 +276,7 @@ export type Database = {
         Update: {
           id?: string
           customer_id?: string
-          brand_origin?: 'kings' | 'msu'
+          brand_origin?: 'kings' | 'msu' | 'seven'
           order_type?: 'direct' | 'marketplace'
           status?: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
           subtotal?: number
@@ -457,21 +457,21 @@ export type Database = {
         Row: {
           id: string
           customer_id: string
-          brand: 'kings' | 'msu'
+          brand: 'kings' | 'msu' | 'seven'
           items: Json
           updated_at: string
         }
         Insert: {
           id?: string
           customer_id: string
-          brand: 'kings' | 'msu'
+          brand: 'kings' | 'msu' | 'seven'
           items?: Json
           updated_at?: string
         }
         Update: {
           id?: string
           customer_id?: string
-          brand?: 'kings' | 'msu'
+          brand?: 'kings' | 'msu' | 'seven'
           items?: Json
           updated_at?: string
         }
@@ -480,7 +480,7 @@ export type Database = {
         Row: {
           id: string
           code: string
-          brand_scope: 'kings' | 'msu' | null
+          brand_scope: 'kings' | 'msu' | 'seven' | null
           type: 'percent' | 'fixed' | 'shipping'
           value: number
           usage_limit: number | null
@@ -492,7 +492,7 @@ export type Database = {
         Insert: {
           id?: string
           code: string
-          brand_scope?: 'kings' | 'msu' | null
+          brand_scope?: 'kings' | 'msu' | 'seven' | null
           type: 'percent' | 'fixed' | 'shipping'
           value: number
           usage_limit?: number | null
@@ -504,7 +504,7 @@ export type Database = {
         Update: {
           id?: string
           code?: string
-          brand_scope?: 'kings' | 'msu' | null
+          brand_scope?: 'kings' | 'msu' | 'seven' | null
           type?: 'percent' | 'fixed' | 'shipping'
           value?: number
           usage_limit?: number | null
@@ -517,7 +517,7 @@ export type Database = {
     }
     Enums: {
       user_role: 'client' | 'seller' | 'admin'
-      brand_name: 'kings' | 'msu'
+      brand_name: 'kings' | 'msu' | 'seven'
       product_status: 'active' | 'draft' | 'archived'
       listing_status: 'pending_review' | 'active' | 'sold' | 'rejected'
       listing_condition: 'like_new' | 'good' | 'fair'

@@ -83,14 +83,11 @@ export default function MsuLogin() {
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '16px',
           }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
-              padding: '8px 16px', borderRadius: '8px',
-              fontSize: '1.1rem', fontWeight: 900, color: '#fff',
-              letterSpacing: '2px',
-            }}>
-              MSU
-            </div>
+            <img 
+              src="/logo_msu.png" 
+              alt="Meu Simulador Usado" 
+              style={{ height: '48px', objectFit: 'contain' }} 
+            />
           </div>
           <h1 style={{
             fontSize: '1.8rem', color: '#fff', fontWeight: 800, margin: '0 0 8px 0',

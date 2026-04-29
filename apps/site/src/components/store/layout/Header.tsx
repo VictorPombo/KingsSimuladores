@@ -33,7 +33,7 @@ export function Header() {
               <img 
                 src="/logo_kings.png" 
                 alt="Kings Simuladores" 
-                style={{ height: '55px', display: 'block', objectFit: 'contain', transform: 'scale(1.2)' }}
+                style={{ height: '65px', display: 'block', objectFit: 'contain' }}
               />
             </a>
 
@@ -59,6 +59,9 @@ export function Header() {
               }
             `}} />
             <nav style={{ display: 'flex', gap: '24px', alignItems: 'center', flexShrink: 0 }}>
+              <a href="/seven" style={{ fontSize: '0.85rem', color: '#000', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #facc15, #ca8a04)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(250, 204, 21, 0.3)' }} className="kings-btn-hover">
+                SEVEN SIM RACING
+              </a>
               <a href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #8b5cf6, #d946ef)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(139, 92, 246, 0.3)' }} className="kings-btn-hover">
                 MEU SIMULADOR USADO
               </a>

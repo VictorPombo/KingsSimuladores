@@ -5,8 +5,17 @@ import { RevenueChart } from './components/AdminCharts'
 import { TrendingUp, Clock, MoveRight, ShoppingBag, ShieldCheck, Zap } from 'lucide-react'
 
 
+import { cookies } from 'next/headers'
+
 export default async function AdminDashboard({ searchParams }: { searchParams: { tab?: string } }) {
-  const isMsuTab = searchParams.tab === 'msu'
+  const storeCookie = cookies().get('admin_store')?.value || 'all'
+  // Compatibilidade com tabs antigas se existirem
+  const currentStore = searchParams.tab || storeCookie
+
+  const isMsuTab = currentStore === 'msu'
+  const isSevenTab = currentStore === 'seven'
+  const isKingsTab = currentStore === 'kings'
+  const isAllTab = currentStore === 'all'
   
   let stats = { orders: 0, productsOrListings: 0, users: 0, metric4: 0, revenue: 0 }
   let recentOrders: any[] = []
@@ -48,12 +57,29 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
       }))
 
     } else {
-      // KINGS STORE STATS
+      // KINGS STORE / SEVEN / ALL STATS
+      let ordersQuery = supabase.from('orders').select('id', { count: 'exact', head: true })
+      let productsQuery = supabase.from('products').select('id', { count: 'exact', head: true })
+      let revenueQuery = supabase.from('orders').select('total').eq('status', 'paid')
+      let latestQuery = supabase.from('orders').select('id, total, status, created_at, brand_origin, profiles(full_name)').order('created_at', { ascending: false }).limit(5)
+
+      if (isKingsTab) {
+        ordersQuery = ordersQuery.eq('brand_origin', 'kings')
+        productsQuery = productsQuery.eq('brand_id', 'kings') // Assumindo brand_id é kings
+        revenueQuery = revenueQuery.eq('brand_origin', 'kings')
+        latestQuery = latestQuery.eq('brand_origin', 'kings')
+      } else if (isSevenTab) {
+        ordersQuery = ordersQuery.eq('brand_origin', 'seven')
+        productsQuery = productsQuery.eq('brand_id', 'seven')
+        revenueQuery = revenueQuery.eq('brand_origin', 'seven')
+        latestQuery = latestQuery.eq('brand_origin', 'seven')
+      }
+
       const [ordersRes, productsRes, usersRes, revenueRes] = await Promise.all([
-        supabase.from('orders').select('id', { count: 'exact', head: true }).eq('brand_origin', 'kings'),
-        supabase.from('products').select('id', { count: 'exact', head: true }),
+        ordersQuery,
+        productsQuery,
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('orders').select('total').eq('status', 'paid').eq('brand_origin', 'kings')
+        revenueQuery
       ])
       
       const totalRevenue = revenueRes.data?.reduce((sum, order) => sum + (order.total || 0), 0) || 0
@@ -66,18 +92,14 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
         revenue: totalRevenue,
       }
 
-      const { data: latest } = await supabase
-        .from('orders')
-        .select('id, total, status, created_at, profiles(full_name)')
-        .eq('brand_origin', 'kings')
-        .order('created_at', { ascending: false })
-        .limit(5)
+      const { data: latest } = await latestQuery
         
       if (latest) recentOrders = latest.map(o => ({
         id: o.id,
         total: o.total,
         status: o.status,
         created_at: o.created_at,
+        brand: o.brand_origin,
         client: Array.isArray(o.profiles) ? o.profiles[0]?.full_name : (o.profiles as any)?.full_name || 'Anônimo'
       }))
     }
@@ -152,7 +174,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
 
           <div className="admin-header-flex" style={{ marginBottom: '24px' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', color: '#f8fafc', margin: 0 }}>
-              {isMsuTab ? 'Visão Geral C2C (MSU)' : 'Visão Corporativa (Kings Store)'}
+              {isMsuTab ? 'Visão Geral C2C (MSU)' : isSevenTab ? 'Visão Corporativa (Seven Sim Racing)' : isAllTab ? 'Visão Global de Todas as Lojas' : 'Visão Corporativa (Kings Store)'}
             </h2>
             <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Atualizado em tempo real</div>
           </div>
@@ -222,7 +244,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
           {/* GRÁFICOS E AÇÕES RÁPIDAS (SPLIT VIEW) */}
           <div className="admin-grid-2-1" style={{ marginBottom: '40px' }}>
             <div>
-              <RevenueChart isMsu={isMsuTab} />
+              <RevenueChart currentStore={currentStore} />
             </div>
             
             <div>
@@ -295,7 +317,11 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
                           <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 'bold' }}>
                             {o.client.charAt(0).toUpperCase()}
                           </div>
-                          {o.client}
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            {o.client}
+                            {o.brand === 'seven' && <span style={{ fontSize: '0.65rem', color: '#facc15', fontWeight: 700 }}>SEVEN</span>}
+                            {o.brand === 'kings' && <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700 }}>KINGS</span>}
+                          </div>
                         </div>
                       </td>
                       <td style={{ padding: '16px 24px' }}>

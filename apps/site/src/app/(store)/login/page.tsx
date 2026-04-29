@@ -81,16 +81,13 @@ export default function LoginPage() {
         {/* Logo / Brand */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '16px',
+            display: 'flex', justifyContent: 'center', marginBottom: '16px',
           }}>
-            <div style={{
-              background: 'var(--gradient-primary)',
-              padding: '8px 16px', borderRadius: '8px',
-              fontSize: '1.1rem', fontWeight: 900, color: '#000',
-              letterSpacing: '2px',
-            }}>
-              KINGS
-            </div>
+            <img 
+              src="/logo_kings.png" 
+              alt="Kings Simuladores" 
+              style={{ height: '50px', objectFit: 'contain' }} 
+            />
           </div>
           <h1 style={{
             fontSize: '1.8rem', color: '#fff', fontWeight: 800, margin: '0 0 8px 0',

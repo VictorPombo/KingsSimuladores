@@ -8,7 +8,7 @@ import { createClient } from '@kings/db/client'
 
 type DayRevenue = { name: string; revenue: number }
 
-export function RevenueChart({ isMsu }: { isMsu: boolean }) {
+export function RevenueChart({ currentStore }: { currentStore: string }) {
   const [data, setData] = useState<DayRevenue[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -21,7 +21,7 @@ export function RevenueChart({ isMsu }: { isMsu: boolean }) {
         const isoStart = sevenDaysAgo.toISOString()
 
         let query
-        if (isMsu) {
+        if (currentStore === 'msu') {
           query = supabase
             .from('marketplace_orders')
             .select('total_price, created_at')
@@ -30,9 +30,12 @@ export function RevenueChart({ isMsu }: { isMsu: boolean }) {
           query = supabase
             .from('orders')
             .select('total, created_at')
-            .eq('brand_origin', 'kings')
             .eq('status', 'paid')
             .gte('created_at', isoStart)
+            
+          if (currentStore === 'kings' || currentStore === 'seven') {
+            query = query.eq('brand_origin', currentStore)
+          }
         }
 
         const { data: rows } = await query
@@ -49,7 +52,7 @@ export function RevenueChart({ isMsu }: { isMsu: boolean }) {
         ;(rows || []).forEach((row: any) => {
           const d = new Date(row.created_at)
           const key = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
-          const value = isMsu ? (row.total_price || 0) : (row.total || 0)
+          const value = currentStore === 'msu' ? (row.total_price || 0) : (row.total || 0)
           if (byDay[key] !== undefined) {
             byDay[key] += Number(value)
           }
@@ -66,14 +69,14 @@ export function RevenueChart({ isMsu }: { isMsu: boolean }) {
     }
 
     fetchRevenue()
-  }, [isMsu])
+  }, [currentStore])
 
-  const strokeColor = isMsu ? '#06b6d4' : '#10b981'
+  const strokeColor = currentStore === 'msu' ? '#06b6d4' : currentStore === 'seven' ? '#facc15' : '#10b981'
 
   return (
     <div style={{ width: '100%', height: '350px', marginTop: '16px', background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)' }}>
       <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '24px' }}>
-        {isMsu ? 'GMV Transacionado' : 'Faturamento'} — Últimos 7 Dias
+        {currentStore === 'msu' ? 'GMV Transacionado' : 'Faturamento'} — Últimos 7 Dias
       </h3>
       {loading ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80%', color: '#64748b', fontSize: '0.85rem' }}>

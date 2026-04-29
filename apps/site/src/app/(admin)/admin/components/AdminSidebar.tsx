@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useStoreContext, StoreType } from './StoreContext'
 import { 
   PieChart, 
   ShoppingCart, 
@@ -118,6 +119,7 @@ const MENU_SECTIONS = [
 export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) {
   const pathname = usePathname()
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({})
+  const { currentStore, setCurrentStore } = useStoreContext()
 
   // Expandir automaticamente os menus que contém a rota atual
   useEffect(() => {
@@ -177,6 +179,30 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
               <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>&times;</span>
             </button>
           )}
+        </div>
+        
+        {/* Seletor de Loja (Multi-Tenant) */}
+        <div style={{ marginTop: '12px' }}>
+          <select 
+            value={currentStore}
+            onChange={(e) => setCurrentStore(e.target.value as StoreType)}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              background: '#1f2025',
+              border: '1px solid #334155',
+              borderRadius: '6px',
+              color: '#e2e8f0',
+              fontSize: '0.85rem',
+              outline: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="all">Todas as Lojas (Visão Global)</option>
+            <option value="kings">Kings Simuladores</option>
+            <option value="msu">Meu Simulador Usado (MSU)</option>
+            <option value="seven">Seven Sim Racing</option>
+          </select>
         </div>
       </div>
 
