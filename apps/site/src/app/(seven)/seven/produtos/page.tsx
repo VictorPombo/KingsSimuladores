@@ -8,15 +8,17 @@ interface Props {
   searchParams: {
     categoria?: string
     ordenar?: string
+    marca?: string
   }
 }
 
 export default async function SevenProductsPage({ searchParams }: Props) {
   const supabase = await createServerSupabaseClient()
   const currentCategory = searchParams.categoria
+  const currentMarca = searchParams.marca
   
   // 1. Fetch Brand ID
-  const { data: brand } = await supabase.from('brands').select('id').eq('slug', 'seven').single()
+  const { data: brand } = await supabase.from('brands').select('id').eq('name', 'seven').single()
   
   // 2. Fetch Categories
   let categories: any[] = []
@@ -37,6 +39,9 @@ export default async function SevenProductsPage({ searchParams }: Props) {
     if (targetCat) {
       query = query.eq('category_id', targetCat.id)
     }
+  }
+  if (currentMarca) {
+    query = query.ilike('attributes->>marca', `%${currentMarca}%`)
   }
 
   // Ordenação Simples
@@ -88,11 +93,11 @@ export default async function SevenProductsPage({ searchParams }: Props) {
                 <span style={{ color: '#f8fafc', fontWeight: 800 }}>+</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <Link href="/seven/produtos" style={{ textDecoration: 'none' }}>
+                <Link href={currentMarca ? `/seven/produtos?marca=${currentMarca}` : `/seven/produtos`} style={{ textDecoration: 'none' }}>
                   <FilterCheckbox label="Todas as categorias" checked={!currentCategory} />
                 </Link>
                 {categories.map(cat => (
-                  <Link key={cat.id} href={`/seven/produtos?categoria=${cat.slug}`} style={{ textDecoration: 'none' }}>
+                  <Link key={cat.id} href={currentMarca ? `/seven/produtos?categoria=${cat.slug}&marca=${currentMarca}` : `/seven/produtos?categoria=${cat.slug}`} style={{ textDecoration: 'none' }}>
                     <FilterCheckbox label={cat.name} checked={currentCategory === cat.slug} />
                   </Link>
                 ))}
@@ -122,7 +127,15 @@ export default async function SevenProductsPage({ searchParams }: Props) {
                 <span style={{ color: '#f8fafc', fontWeight: 800 }}>+</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <FilterCheckbox label="SIMAGIC" count={23} checked />
+                <Link href={currentCategory ? `/seven/produtos?categoria=${currentCategory}` : `/seven/produtos`} style={{ textDecoration: 'none' }}>
+                  <FilterCheckbox label="Todas as Marcas" checked={!currentMarca} />
+                </Link>
+                <Link href={currentCategory ? `/seven/produtos?categoria=${currentCategory}&marca=simagic` : `/seven/produtos?marca=simagic`} style={{ textDecoration: 'none' }}>
+                  <FilterCheckbox label="Simagic" checked={currentMarca?.toLowerCase() === 'simagic'} />
+                </Link>
+                <Link href={currentCategory ? `/seven/produtos?categoria=${currentCategory}&marca=thermaltake` : `/seven/produtos?marca=thermaltake`} style={{ textDecoration: 'none' }}>
+                  <FilterCheckbox label="Thermaltake" checked={currentMarca?.toLowerCase() === 'thermaltake'} />
+                </Link>
               </div>
             </div>
 

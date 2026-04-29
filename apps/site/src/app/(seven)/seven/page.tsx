@@ -10,7 +10,7 @@ export default async function SevenHomePage() {
   const supabase = await createServerSupabaseClient()
   
   // Buscar a brand_id da Seven
-  const { data: brand } = await supabase.from('brands').select('id').eq('slug', 'seven').single()
+  const { data: brand } = await supabase.from('brands').select('id').eq('name', 'seven').single()
   
   let products: any[] = []
   
