@@ -74,6 +74,31 @@ const MENU_SECTIONS = [
     ]
   },
   {
+    title: 'SEVEN SIM RACING',
+    color: '#ea580c',
+    items: [
+      { label: 'Visão Geral', icon: PieChart, href: '/admin' },
+      {
+        label: 'Pedidos',
+        icon: ShoppingCart,
+        subItems: [
+          { label: 'Todos os Pedidos', href: '/admin/pedidos' },
+          { label: 'Notas Fiscais', href: '/admin/notas-fiscais' },
+          { label: 'Clientes', href: '/admin/clientes' }
+        ]
+      },
+      {
+        label: 'Catálogo',
+        icon: Package,
+        subItems: [
+          { label: 'Produtos', href: '/admin/produtos' },
+          { label: 'Categorias', href: '/admin/categorias' },
+          { label: 'Marcas', href: '/admin/marcas' }
+        ]
+      }
+    ]
+  },
+  {
     title: 'SISTEMA E INTEGRAÇÕES',
     color: '#94a3b8',
     items: [
@@ -131,15 +156,21 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
             return pathWithoutQuery === pathname && sub.href !== 'javascript:;'
           })
           if (isActive) {
-            setOpenMenus(prev => ({ ...prev, [item.label]: true }))
+            setOpenMenus(prev => ({ ...prev, [`${section.title}-${item.label}`]: true }))
           }
         }
       })
     })
   }, [pathname])
 
-  const toggleMenu = (label: string) => {
-    setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }))
+  const toggleMenu = (key: string) => {
+    setOpenMenus(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const handleLinkClick = (title: string) => {
+    if (title === 'LOJA KINGS B2C') setCurrentStore('kings')
+    else if (title === 'MARKETPLACE MSU') setCurrentStore('msu')
+    else if (title === 'SEVEN SIM RACING') setCurrentStore('seven')
   }
 
   const isMenuPathActive = (href: string) => {
@@ -255,7 +286,8 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
               
               {section.items.map((item: any, idx: number) => {
                 const hasSub = !!item.subItems
-                const isOpen = openMenus[item.label]
+                const menuKey = `${section.title}-${item.label}`
+                const isOpen = openMenus[menuKey]
                 const Icon = item.icon
                 
                 const isRootActive = isMenuPathActive(item.href || '')
@@ -264,7 +296,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                   <div key={idx} style={{ padding: '0 12px', marginBottom: '4px' }}>
                     {hasSub ? (
                       <button
-                        onClick={() => toggleMenu(item.label)}
+                        onClick={() => toggleMenu(menuKey)}
                         className="sidebar-item-hover"
                         style={{
                           width: '100%',
@@ -289,7 +321,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                         {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                       </button>
                     ) : (
-                      <a href={item.href!} style={{ textDecoration: 'none' }}>
+                      <a href={item.href!} onClick={() => handleLinkClick(section.title)} style={{ textDecoration: 'none' }}>
                         <div 
                           className="sidebar-item-hover"
                           style={{
@@ -346,7 +378,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                               {sub.label} <span style={{ opacity: 0.3, fontSize: '0.7rem' }}></span>
                             </a>
                           ) : (
-                            <a href={sub.href} style={{ textDecoration: 'none' }}>
+                            <a href={sub.href} onClick={() => handleLinkClick(section.title)} style={{ textDecoration: 'none' }}>
                               <div
                                 className="sidebar-sub-hover"
                                 style={{
