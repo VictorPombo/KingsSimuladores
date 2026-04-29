@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@kings/db/server'
 import { redirect } from 'next/navigation'
 import { Container } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
+import { OrderStatusBadge } from '@/components/store/account/OrderStatusBadge'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,11 +15,18 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
     redirect('/login')
   }
 
-  // Fetch orders
+  // Buscar profile para obter o ID correto dos pedidos
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('auth_id', user.id)
+    .single()
+
+  // Fetch orders usando profile.id (customer_id nos pedidos é profile.id)
   const { data: orders } = await supabase
     .from('orders')
     .select('*')
-    .eq('customer_id', user.id)
+    .eq('customer_id', profile?.id || user.id)
     .order('created_at', { ascending: false })
 
   // If no DB orders (since we might be mocking the checkout step locally), use a dummy active order
@@ -31,12 +39,6 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
       tracking_code: 'BR123456789XX',
     }
   ]
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('auth_id', user.id)
-    .single()
 
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', color: '#fff' }}>
@@ -73,16 +75,7 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
                     </div>
                     <div>
                       <div style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Status</div>
-                      <div style={{ 
-                        display: 'inline-block',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '1rem',
-                        fontSize: '0.8rem',
-                        background: order.status === 'paid' ? 'rgba(0, 229, 255, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-                        color: order.status === 'paid' ? '#00e5ff' : '#fff'
-                      }}>
-                        {order.status.toUpperCase()}
-                      </div>
+                      <OrderStatusBadge orderId={order.id} initialStatus={order.status} />
                     </div>
                   </div>
                   

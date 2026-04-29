@@ -8,10 +8,11 @@ import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@kings/utils'
 import { createPreference } from '@kings/payments'
 import { UpsellEngine } from '@/components/store/upsell/UpsellEngine'
+import { CouponInput } from '@/components/store/cart/CouponInput'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, totalPrice, clearCart } = useCart()
+  const { items, subtotal, discount, totalPrice, clearCart, coupon } = useCart()
   const [step, setStep] = useState(1) // 1: Info, 2: Entrega, 3: Pagamento
   
   // Form Info
@@ -21,6 +22,8 @@ export default function CheckoutPage() {
   const [cep, setCep] = useState('')
   const [logradouro, setLogradouro] = useState('')
   const [numero, setNumero] = useState('')
+  const [complemento, setComplemento] = useState('')
+  const [referencia, setReferencia] = useState('')
   
   const [fretes, setFretes] = useState<any[]>([])
   const [selectedFrete, setSelectedFrete] = useState<any>(null)
@@ -48,18 +51,14 @@ export default function CheckoutPage() {
     }
   }
 
-  const calcularFretesMock = async () => {
-    const fakeDimensions = [
-      { weight: 25, width: 60, height: 60, length: 60 }
-    ]
-    
+  const calcularFretes = async () => {
     try {
       const res = await fetch('/api/shipping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           toPostalCode: cep,
-          dimensions: fakeDimensions
+          items: items.map(i => ({ id: i.id, quantity: i.quantity }))
         })
       })
       const data = await res.json()
@@ -76,11 +75,14 @@ export default function CheckoutPage() {
     }
   }
 
+  if (items.length === 0 && step === 1) return null
+
+  const valorFrete = selectedFrete ? parseFloat(selectedFrete.price) : 0
+  // totalPrice já vem do CartContext COM o desconto aplicado
+  const totalGeral = totalPrice + valorFrete
+
   const handlePagamentoMock = async () => {
     setIsProcessing(true)
-    
-    // Simulate Supabase order creation via API Route
-    const totalComFrete = totalPrice + (selectedFrete ? parseFloat(selectedFrete.price) : 0)
     
     try {
       const res = await fetch('/api/checkout', {
@@ -89,9 +91,10 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           items,
           customer: { nome, email, cpf },
-          address: { cep, logradouro, numero },
+          address: { cep, logradouro, numero, complemento, referencia },
           shipping: selectedFrete,
-          total: totalComFrete
+          total: totalGeral,
+          coupon_id: coupon ? coupon.id : null
         })
       })
       
@@ -99,17 +102,20 @@ export default function CheckoutPage() {
       
       if (session.ok) {
         clearCart()
-        router.push(`/account?order=${session.orderId}`)
+        if (session.init_point) {
+            window.location.href = session.init_point
+        } else {
+            router.push(`/account?order=${session.orderId}`)
+        }
+      } else {
+        alert('Erro ao iniciar pagamento: ' + (session.error || 'Tente novamente.'))
+        setIsProcessing(false)
       }
     } catch (err) {
       console.error(err)
       setIsProcessing(false)
     }
   }
-
-  if (items.length === 0 && step === 1) return null
-
-  const valorFrete = selectedFrete ? parseFloat(selectedFrete.price) : 0
 
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
@@ -137,8 +143,12 @@ export default function CheckoutPage() {
                   <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 1}} />
                   <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px'}} />
                 </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <input type="text" placeholder="Complemento (opcional)" value={complemento} onChange={e => setComplemento(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="Referência (opcional)" value={referencia} onChange={e => setReferencia(e.target.value)} style={{...inputStyle, flex: 1}} />
+                </div>
                 
-                <Button onClick={calcularFretesMock} style={{ marginTop: '1rem' }}>Continuar para Frete</Button>
+                <Button onClick={calcularFretes} style={{ marginTop: '1rem' }} disabled={cep.length < 8}>Continuar para Frete</Button>
               </div>
             )}
 
@@ -180,21 +190,28 @@ export default function CheckoutPage() {
 
             {step === 3 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>3. Pagamento</h2>
+                <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>3. Pagamento Seguro</h2>
                 
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                  <p style={{ color: '#fff', marginBottom: '1rem', textAlign: 'center' }}>
-                    Escolha a forma de pagamento (Mock Sandbox)
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px dashed rgba(0, 229, 255, 0.3)' }}>
+                  <p style={{ color: '#fff', marginBottom: '16px', textAlign: 'center', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    Pagamento Protegido via Mercado Pago
                   </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <div style={{ padding: '1rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', textAlign: 'center', color: '#00e5ff', cursor: 'pointer' }}>Pix</div>
-                    <div style={{ padding: '1rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', textAlign: 'center', color: '#a1a1aa', cursor: 'not-allowed' }}>Cartão de Crédito</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center', marginBottom: '16px' }}>
+                     <img src="https://img.shields.io/badge/Pix-00B1EA?style=for-the-badge&logo=pix&logoColor=white" alt="Pix" style={{ height: '32px', borderRadius: '4px' }} />
+                     <img src="https://img.shields.io/badge/Mastercard-EB001B?style=for-the-badge&logo=mastercard&logoColor=white" alt="Mastercard" style={{ height: '32px', borderRadius: '4px' }} />
+                     <img src="https://img.shields.io/badge/Visa-1434CB?style=for-the-badge&logo=visa&logoColor=white" alt="Visa" style={{ height: '32px', borderRadius: '4px' }} />
                   </div>
+                  <p style={{ fontSize: '0.85rem', color: '#a1a1aa', textAlign: 'center', lineHeight: 1.5 }}>
+                    Você será redirecionado em ambiente criptografado para o aplicativo/site oficial do <strong>Mercado Pago</strong> para inserir seus dados de Cartão de Crédito ou ler seu QR Code Pix.
+                  </p>
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                   <Button variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
-                  <Button onClick={handlePagamentoMock} style={{ flex: 1 }}>{isProcessing ? 'Processando...' : 'Finalizar Compra Segura'}</Button>
+                  <Button onClick={handlePagamentoMock} style={{ flex: 1, background: '#00B1EA' }} disabled={isProcessing}>
+                    {isProcessing ? 'Abrindo Gatway...' : 'Ir para o Pagamento'}
+                  </Button>
                 </div>
               </div>
             )}
@@ -203,7 +220,7 @@ export default function CheckoutPage() {
 
           {/* Coluna Direita: Resumo */}
           <div style={{ background: 'rgba(10, 14, 26, 0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '1rem', padding: '1.5rem', position: 'sticky', top: '100px' }}>
-            <h2 style={{ fontSize: '1.1rem', color: '#fff', marginBottom: '1rem' }}>Resumo da Vida</h2>
+            <h2 style={{ fontSize: '1.1rem', color: '#fff', marginBottom: '1rem' }}>Resumo da Compra</h2>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
               {items.map(item => (
@@ -225,15 +242,22 @@ export default function CheckoutPage() {
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a1a1aa' }}>
                 <span>Subtotal</span>
-                <span>{formatPrice(totalPrice)}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
+              <CouponInput />
+              {discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#06d6a0' }}>
+                  <span>Desconto ({coupon?.code})</span>
+                  <span>- {formatPrice(discount)}</span>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a1a1aa' }}>
                 <span>Frete</span>
                 <span>{valorFrete > 0 ? formatPrice(valorFrete) : '--'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 700, fontSize: '1.2rem', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <span>Total</span>
-                <span style={{ color: '#00e5ff' }}>{formatPrice(totalPrice + valorFrete)}</span>
+                <span style={{ color: '#00e5ff' }}>{formatPrice(totalGeral)}</span>
               </div>
             </div>
 

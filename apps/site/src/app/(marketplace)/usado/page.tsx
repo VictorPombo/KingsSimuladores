@@ -1,6 +1,7 @@
 import React from 'react'
 import { Container, Button } from '@kings/ui'
 import { ListingCard } from '@/components/marketplace/ListingCard'
+import { ProductCarousel } from '@/components/store/ui/ProductCarousel'
 import { createServerSupabaseClient } from '@kings/db/server'
 
 export const dynamic = 'force-dynamic'
@@ -75,38 +76,23 @@ export default async function Home() {
         </Container>
       </section>
 
-      {/* Destaques */}
-      <section style={{ padding: '5rem 0' }}>
+      {/* Destaques usando o Carrossel Padronizado */}
+      <section style={{ padding: '2rem 0 5rem 0' }}>
         <Container>
-          <div className="msu-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '2rem' }}>
+          <div className="msu-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '2rem', padding: '0 24px' }}>
             <div>
-              <h2 style={{ fontSize: '1.8rem', color: '#fff', fontWeight: 700 }}>Últimos Anúncios</h2>
               <div style={{ color: 'var(--text-muted)' }}>Oportunidades quentes da comunidade</div>
             </div>
-            <a href="#" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Ver Todos →</a>
+            <a href="/usado/produtos" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Ver Todos →</a>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-            {listings?.map(listing => (
-              <ListingCard 
-                key={listing.id}
-                id={listing.id}
-                title={listing.title}
-                price={listing.price}
-                condition={listing.condition}
-                imageUrl={listing.images[0]}
-                location="Brasil"
-                sellerName={(listing as any).profiles?.full_name || 'Piloto Oculto'}
-              />
-            ))}
-            
-            {listings?.length === 0 && (
-              <div style={{ color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 0' }}>
-                Nenhum anúncio disponível no momento. Seja o primeiro a anunciar!
-              </div>
-            )}
-          </div>
-
+          <ProductCarousel title="ÚLTIMOS ANÚNCIOS" prods={listings || []} tenant="msu" />
+          
+          {listings?.length === 0 && (
+            <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '3rem 0' }}>
+              Nenhum anúncio disponível no momento. Seja o primeiro a anunciar!
+            </div>
+          )}
         </Container>
       </section>
 

@@ -13,7 +13,7 @@ export async function validateCouponCode(code: string, brand?: 'kings' | 'msu') 
   const { data: coupon, error } = await supabase
     .from('coupons')
     .select('*')
-    .eq('code', code.toUpperCase())
+    .ilike('code', code)
     .single()
 
   if (error || !coupon) {

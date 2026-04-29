@@ -4,6 +4,8 @@ import { createServerSupabaseClient } from '@kings/db'
 import { formatPrice } from '@kings/utils'
 import { ListingCard } from '@/components/marketplace/ListingCard'
 import { DalesteSticker } from '@/components/store/home/DalesteSticker'
+import { ProductCarousel } from '@/components/store/ui/ProductCarousel'
+import { BannerCarousel } from '@/components/store/ui/BannerCarousel'
 
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 
@@ -93,198 +95,89 @@ export default async function HomePage() {
     console.error(err)
   }
 
-  // Componente interno para economizar arquivos: Carrossel Horizontal
-  const ProductCarousel = ({ title, prods }: { title: string, prods: any[] }) => {
-    if (!prods || prods.length === 0) return null;
-    return (
-      <div style={{ marginBottom: '80px' }}>
-        <style dangerouslySetInnerHTML={{__html: `
-          .hide-scroll::-webkit-scrollbar { display: none; }
-          .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        `}} />
-        {/* Cabeçalho estilo "Site Antigo Line-Divider", mas na identidade Dark/Green/Accent atual */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', gap: '24px' }}>
-          <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to right, transparent, var(--border))' }} />
-          <h2 className="font-display" style={{ 
-            fontSize: '1.25rem', 
-            fontWeight: 700, 
-            letterSpacing: '4px', 
-            textTransform: 'uppercase', 
-            color: 'var(--success)', // Aquele Verde Kings
-            textShadow: '0 0 10px rgba(16, 185, 129, 0.2)', 
-            margin: 0 
-          }}>
-            {title}
-          </h2>
-          <div style={{ height: '1px', flex: 1, maxWidth: '200px', background: 'linear-gradient(to left, transparent, var(--border))' }} />
-        </div>
-        
-        {/* Scroll Horizontal nativo bem perfomático */}
-        <div style={{
-          display: 'flex',
-          gap: '24px',
-          overflowX: 'auto',
-          paddingBottom: '32px', // Espaço para sombra e outline
-          scrollBehavior: 'smooth',
-          scrollSnapType: 'x mandatory',
-        }} className="hide-scroll">
-          {prods.map(product => {
-            const hasDiscount = product.price_compare && product.price_compare > product.price
-            const imgUrl = product.images?.[0] || 'https://placehold.co/400x400/131928/e8ecf4?text=Kings'
-            const brandName = product.attributes?.brand || 'Loja Oficial'
-            
-            return (
-              <div key={product.id} style={{ minWidth: '280px', maxWidth: '280px', scrollSnapAlign: 'start', flexShrink: 0 }}>
-                <Link href={`/produtos/${product.slug}`} style={{ textDecoration: 'none' }}>
-                  <div className="hover:border-[currentColor] hover:-translate-y-1" style={{
-                    color: 'var(--success)',
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    transition: 'border-color 0.2s, transform 0.2s',
-                    cursor: 'pointer',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}>
-                    {/* Imagem (Fundo branco para contrastar o shape dos produtos industriais) */}
-                    <div style={{ background: '#fff', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '220px' }}>
-                      <img src={imgUrl} alt={product.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                    </div>
-                    
-                    {/* Infos do Produto */}
-                    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                      <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                        {brandName}
-                      </div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 'auto', minHeight: '40px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        {product.title}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '16px' }}>
-                        {hasDiscount && (
-                          <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                            {formatPrice(product.price_compare)}
-                          </span>
-                        )}
-                        <span className="font-display" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--success)' }}>
-                          {formatPrice(product.price)}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                        12x de {formatPrice(product.price / 12)} s/ juros
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
-  }
+  // Removido o componente inline ProductCarousel, agora utilizando a versão externa com scroll.
 
   return (
     <div style={{ minHeight: 'calc(100vh - 80px)' }}>
-      {/* FIGURINHA DALESTE (REMOVIDA DAQUI, FOI PARA BAIXO DO HERO NO MOBILE) */}
-
       {/* JSON-LD invisível para o Google */}
       <HomeJsonLd />
 
-      {/* Hero */}
-      <header style={{ position: 'relative', width: '100%', padding: 'clamp(48px, 8vw, 110px) 0 clamp(24px, 4vw, 50px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        
-        {/* GLOW DE FUNDO MAIS AGRESSIVO E BI-COLOR DA KINGS */}
+      {/* HERO BANNER CAROUSEL - Full width, igual Seven */}
+      <BannerCarousel 
+        slides={[
+          { src: '/banners/banner-mbooster.png', alt: 'MOZA M-Booster Active Pedal', href: '/buscar?q=MOZA+mBooster' },
+          { src: '/banners/banner-youtube.png', alt: 'Canal Kings Simuladores no YouTube', href: 'https://www.youtube.com/@kingssimuladores' },
+          { src: '/banners/banner-whatsapp.jpg', alt: 'Fale conosco no WhatsApp', href: 'https://api.whatsapp.com/send/?phone=5511959018725' },
+          { src: '/banners/banner-msu.png', alt: 'Meu Simulador Usado', href: '/usado' },
+        ]}
+      />
+
+      {/* Faixa de Níveis */}
+      <section style={{ position: 'relative', padding: 'clamp(32px, 5vw, 60px) 0', borderBottom: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
         <div style={{
-          position: 'absolute',
-          top: '30%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '90vw',
-          height: '50vw',
-          maxWidth: '900px',
-          maxHeight: '600px',
-          background: 'radial-gradient(ellipse, rgba(0, 229, 255, 0.12) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%)', // Ciano fundindo com Verde 
-          filter: 'blur(80px)',
-          zIndex: 0,
-          pointerEvents: 'none',
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          width: '80vw', height: '300px', maxWidth: '800px',
+          background: 'radial-gradient(ellipse, rgba(0, 229, 255, 0.08) 0%, transparent 70%)',
+          filter: 'blur(60px)', zIndex: 0, pointerEvents: 'none',
         }} />
 
-        {/* CONTEÚDO PRINCIPAL */}
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 16px', maxWidth: '896px', margin: '0 auto' }}>
-          
-          {/* Título Principal */}
-          <h1 className="font-display" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.2rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'clamp(8px, 2vw, 20px)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          <h1 className="font-display" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'clamp(8px, 2vw, 16px)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
             A experiência de pilotar <br/>
-            <span style={{ color: 'var(--success)' }}>
-              começa aqui.
-            </span>
+            <span style={{ color: 'var(--success)' }}>começa aqui.</span>
           </h1>
-          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'var(--text-secondary)', maxWidth: '800px', lineHeight: 1.5, margin: '0 auto clamp(24px, 4vw, 40px)' }}>
+          <p style={{ fontSize: 'clamp(0.9rem, 1.8vw, 1.05rem)', color: 'var(--text-secondary)', maxWidth: '700px', lineHeight: 1.5, margin: '0 auto clamp(20px, 3vw, 32px)' }}>
             Cockpits, volantes, pedais e ecossistemas absolutos das melhores marcas.
             Entrega para todo o Brasil com parcelamento real em até 12x.
           </p>
 
-          {/* Secao Niveis */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginBottom: '40px' }}>
-            <h3 style={{ fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-primary)', marginBottom: '20px', fontWeight: 800, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              QUAL É SEU NÍVEL?
-            </h3>
-            
-            <style dangerouslySetInnerHTML={{__html: `
-              .kings-btn-pump {
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, filter 0.3s ease;
-              }
-              .kings-btn-pump:hover {
-                transform: scale(1.08) translateY(-2px) !important;
-                filter: brightness(1.2);
-              }
-              .hero-btn-grid {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 8px;
-                align-items: stretch;
-                justify-items: stretch;
-              }
-              @media (min-width: 768px) {
-                .hero-btn-grid {
-                  gap: 16px;
-                }
-              }
-              .hero-btn-grid a {
-                display: block;
-                width: 100%;
-              }
-              .hero-btn-grid .kings-btn-pump {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                width: 100%;
-              }
-            `}} />
-            <div className="hero-btn-grid w-full max-w-[800px] px-1 md:px-0">
-              <Link href="/niveis/iniciante" style={{ textDecoration: 'none' }} className="w-full">
-                <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
-                  INICIANTE
-                </div>
-              </Link>
-              <Link href="/niveis/semiprofissional" style={{ textDecoration: 'none' }} className="w-full">
-                <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
-                  SEMIPROFISSIONAL
-                </div>
-              </Link>
+          <style dangerouslySetInnerHTML={{__html: `
+            .kings-btn-pump {
+              transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, filter 0.3s ease;
+            }
+            .kings-btn-pump:hover {
+              transform: scale(1.08) translateY(-2px) !important;
+              filter: brightness(1.2);
+            }
+            .hero-btn-grid {
+              display: grid !important;
+              grid-template-columns: repeat(3, 1fr) !important;
+              gap: 8px;
+              align-items: stretch;
+              justify-items: stretch;
+            }
+            @media (min-width: 768px) {
+              .hero-btn-grid { gap: 16px; }
+            }
+            .hero-btn-grid a { display: block; width: 100%; }
+            .hero-btn-grid .kings-btn-pump {
+              display: flex; align-items: center; justify-content: center; height: 100%; width: 100%;
+            }
+          `}} />
 
-              <Link href="/niveis/profissional" style={{ textDecoration: 'none' }} className="w-full">
-                <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
-                  PROFISSIONAL
-                </div>
-              </Link>
-            </div>
+          <h3 style={{ fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: 800, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            QUAL É SEU NÍVEL?
+          </h3>
+
+          <div className="hero-btn-grid w-full max-w-[800px] px-1 md:px-0">
+            <Link href="/niveis/iniciante" style={{ textDecoration: 'none' }} className="w-full">
+              <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
+                INICIANTE
+              </div>
+            </Link>
+            <Link href="/niveis/semiprofissional" style={{ textDecoration: 'none' }} className="w-full">
+              <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
+                SEMIPROFISSIONAL
+              </div>
+            </Link>
+            <Link href="/niveis/profissional" style={{ textDecoration: 'none' }} className="w-full">
+              <div style={{ padding: '12px clamp(8px, 2vw, 28px)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.4)', background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(16, 185, 129, 0.1))', color: '#fff', fontSize: 'clamp(0.6rem, 2vw, 0.9rem)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(0,229,255,0.1)' }} className="kings-btn-pump hover:bg-[rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] whitespace-nowrap">
+                PROFISSIONAL
+              </div>
+            </Link>
           </div>
 
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '-16px' }}>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '24px' }}>
             <Link href="/produtos" style={{ textDecoration: 'none' }}>
               <button style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border)', padding: '14px 32px', fontSize: '0.9rem', fontWeight: 700, borderRadius: '12px', cursor: 'pointer' }} className="kings-btn-pump hover:border-white hover:text-white">
                 VER CATÁLOGO COMPLETO
@@ -292,31 +185,10 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-      </header>
-
-      {/* FIGURINHA DALESTE (FICA AQUI NO MOBILE!) */}
-      <DalesteSticker />
-
-      {/* BANNER MOZA ACTIVE PEDAL */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: 'clamp(20px, 4vw, 40px) auto 0', padding: '0 16px' }}>
-        <div style={{ 
-          width: '100%', 
-          borderRadius: '16px', 
-          overflow: 'hidden', 
-          border: '1px solid rgba(16, 185, 129, 0.2)',
-          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.5)',
-          background: '#0a0a0a'
-        }}>
-          {/* Banner Único: YouTube com Link */}
-          <a href="https://www.youtube.com/@kingssimuladores" target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '100%' }}>
-            <img 
-              src="https://cdn.awsli.com.br/1920x1920/1940/1940182/banner/dkp-2-eapfpa40uj.png" 
-              alt="Canal Kings Simuladores no YouTube" 
-              style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} 
-            />
-          </a>
-        </div>
       </section>
+
+      {/* FIGURINHA DALESTE */}
+      <DalesteSticker />
 
       {/* SECTION TRIPLA DE PRODUTOS */}
       {(lancamentos?.length > 0 || msuListings?.length > 0 || maisVendidos?.length > 0 || destaques?.length > 0) && (
@@ -325,6 +197,9 @@ export default async function HomePage() {
             <ProductCarousel title="LANÇAMENTOS" prods={lancamentos} />
             <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
             <ProductCarousel title="DESTAQUES" prods={destaques} />
+            {msuListings?.length > 0 && (
+              <ProductCarousel title="OPORTUNIDADES P2P" prods={msuListings} tenant="msu" />
+            )}
             
           </Container>
         </section>

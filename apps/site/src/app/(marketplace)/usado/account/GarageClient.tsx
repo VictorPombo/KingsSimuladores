@@ -85,24 +85,29 @@ export function GarageClient({
     <>
       <style dangerouslySetInnerHTML={{__html: `
         .garage-tab {
-          display: flex;
+          display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 12px 20px;
-          background: transparent;
-          border: none;
-          border-bottom: 2px solid transparent;
-          color: var(--text-muted);
-          font-size: 0.88rem;
-          font-weight: 600;
+          padding: 10px 20px;
+          background: rgba(15,18,30,0.7);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 100px;
+          color: #a1a1aa;
+          font-size: 0.85rem;
+          font-weight: 500;
           cursor: pointer;
           transition: all 0.2s ease;
           white-space: nowrap;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .garage-tab:hover { color: var(--text-primary); }
+        .garage-tab:hover { color: #fff; border-color: rgba(255,255,255,0.15); }
         .garage-tab.active {
-          color: #FF6B35;
-          border-bottom-color: #FF6B35;
+          color: #8b5cf6;
+          background: rgba(139, 92, 246, 0.08);
+          border-color: rgba(139, 92, 246, 0.2);
+          font-weight: 700;
+          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
         }
         .garage-card {
           transition: border-color 0.2s ease;
@@ -120,9 +125,10 @@ export function GarageClient({
       {/* Tabs */}
       <div style={{
         display: 'flex',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        gap: '12px',
         marginBottom: '32px',
         overflowX: 'auto',
+        paddingBottom: '8px'
       }}>
         {tabs.map(tab => (
           <button
@@ -135,7 +141,7 @@ export function GarageClient({
             {tab.count > 0 && (
               <span style={{
                 background: activeTab === tab.id ? 'rgba(255,107,53,0.15)' : 'rgba(255,255,255,0.06)',
-                color: activeTab === tab.id ? '#FF6B35' : 'var(--text-muted)',
+                color: activeTab === tab.id ? '#8b5cf6' : 'var(--text-muted)',
                 fontSize: '0.7rem',
                 fontWeight: 800,
                 padding: '2px 8px',
@@ -152,13 +158,14 @@ export function GarageClient({
       {activeTab === 'listings' && (
         <div>
           {listings.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-              <Package size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
-              <p style={{ fontSize: '1rem', margin: '0 0 16px' }}>Você ainda não anunciou nenhum equipamento.</p>
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)', background: 'rgba(15, 18, 30, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' }}>
+              <Package size={48} strokeWidth={1.5} style={{ marginBottom: '16px', opacity: 0.6, color: '#a1a1aa' }} />
+              <p style={{ fontSize: '1rem', margin: '0 0 16px', color: '#e4e4e7' }}>Você ainda não anunciou nenhum equipamento.</p>
               <Link href="/usado/vender" style={{
                 display: 'inline-block', padding: '12px 28px', borderRadius: '10px',
-                background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)', color: '#fff',
+                background: 'linear-gradient(135deg, #8b5cf6, #d946ef)', color: '#fff',
                 textDecoration: 'none', fontWeight: 700, fontSize: '0.9rem',
+                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
               }}>
                 + Anunciar Grátis
               </Link>
@@ -203,9 +210,9 @@ export function GarageClient({
       {activeTab === 'sales' && (
         <div>
           {orders.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-              <ShoppingBag size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
-              <p style={{ fontSize: '1rem', margin: 0 }}>Nenhuma venda realizada ainda.</p>
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)', background: 'rgba(15, 18, 30, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' }}>
+              <ShoppingBag size={48} strokeWidth={1.5} style={{ marginBottom: '16px', opacity: 0.6, color: '#a1a1aa' }} />
+              <p style={{ fontSize: '1rem', margin: 0, color: '#e4e4e7' }}>Nenhuma venda realizada ainda.</p>
               <p style={{ fontSize: '0.85rem', marginTop: '8px' }}>Quando alguém comprar um anúncio seu, a transação aparecerá aqui.</p>
             </div>
           ) : (
@@ -271,7 +278,7 @@ export function GarageClient({
                         display: 'inline-flex', alignItems: 'center', gap: '6px',
                         padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem',
                         fontWeight: 600, background: 'rgba(255,107,53,0.1)',
-                        border: '1px solid rgba(255,107,53,0.2)', color: '#FF6B35',
+                        border: '1px solid rgba(255,107,53,0.2)', color: '#8b5cf6',
                         textDecoration: 'none', transition: 'background 0.2s',
                       }}>
                         <FileText size={14} />
@@ -299,7 +306,7 @@ export function GarageClient({
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
             <div style={{
               width: '56px', height: '56px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
+              background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '1.4rem', fontWeight: 800, color: '#fff',
             }}>
@@ -380,7 +387,7 @@ function ListingRow({ listing }: { listing: Listing }) {
           <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {listing.title}
           </h4>
-          <div style={{ fontSize: '1rem', fontWeight: 800, color: '#FF6B35' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: '#8b5cf6' }}>
             R$ {listing.price?.toFixed(2)}
           </div>
         </div>

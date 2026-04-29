@@ -94,7 +94,7 @@ export default async function BrandPage({ params }: { params: { slug: string } }
           
           {products.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px', background: 'var(--bg-subtle)', borderRadius: 'var(--radius)' }}>
-              <p style={{ color: 'var(--text-muted)' }}>No momento, ainda não etiquetamos nenhum equipamento para "{params.slug}".</p>
+              <p style={{ color: 'var(--text-muted)' }}>No momento, ainda não etiquetamos nenhum equipamento para &quot;{params.slug}&quot;.</p>
             </div>
           ) : (
             <div className="kings-catalog-grid">

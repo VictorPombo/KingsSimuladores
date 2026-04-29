@@ -2,240 +2,208 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
+import { Gamepad2, Settings, Armchair, Monitor, Tv, Footprints, Target, Package, Search, SlidersHorizontal, X } from 'lucide-react'
+
+const CATEGORIES = [
+  { id: 'acessorios', label: 'Acessórios', icon: Gamepad2 },
+  { id: 'bases', label: 'Bases / DD', icon: Settings },
+  { id: 'cockpits', label: 'Cockpits', icon: Armchair },
+  { id: 'computadores', label: 'Computadores', icon: Monitor },
+  { id: 'monitores', label: 'Monitores', icon: Tv },
+  { id: 'pedais', label: 'Pedais', icon: Footprints },
+  { id: 'volantes', label: 'Volantes', icon: Target },
+  { id: 'outros', label: 'Outros', icon: Package },
+]
 
 const CONDITIONS = [
-  { id: 'like_new', label: 'Como Novo' },
+  { id: 'novo', label: 'Novo (Lacrado)' },
+  { id: 'like_new', label: 'Seminovo' },
   { id: 'good', label: 'Bom' },
-  { id: 'fair', label: 'Justo' },
+  { id: 'fair', label: 'Aceitável' },
 ]
+
+const SORT_OPTIONS = [
+  { id: 'newest', label: 'Mais Recentes' },
+  { id: 'price_asc', label: 'Menor Preço' },
+  { id: 'price_desc', label: 'Maior Preço' },
+  { id: 'featured', label: 'Destaques' },
+]
+
+const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
 export function MsuCatalogFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '')
 
   const currentCondition = searchParams.get('condition')
-  const activeCount = (currentCondition ? 1 : 0) + (searchParams.get('q') ? 1 : 0)
+  const currentCategory = searchParams.get('category')
+  const currentState = searchParams.get('state')
+  const currentSort = searchParams.get('sort') || 'newest'
+  const currentHasBox = searchParams.get('hasBox')
 
-  const toggleCondition = useCallback(
-    (value: string) => {
-      const current = new URLSearchParams(Array.from(searchParams.entries()))
-      if (current.get('condition') === value) {
-        current.delete('condition')
-      } else {
-        current.set('condition', value)
-      }
-      router.push(`/usado/produtos?${current.toString()}`, { scroll: false })
-    },
-    [router, searchParams]
-  )
+  const activeCount = [
+    searchParams.get('q'),
+    currentCondition,
+    currentCategory,
+    currentState,
+    currentHasBox,
+    searchParams.get('minPrice'),
+    searchParams.get('maxPrice'),
+  ].filter(Boolean).length
 
-  const handleSearch = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault()
-      const current = new URLSearchParams(Array.from(searchParams.entries()))
-      if (searchTerm.trim()) {
-        current.set('q', searchTerm.trim())
-      } else {
-        current.delete('q')
-      }
-      router.push(`/usado/produtos?${current.toString()}`, { scroll: false })
-    },
-    [router, searchParams, searchTerm]
-  )
+  const applyFilter = useCallback((key: string, value: string | null) => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()))
+    if (value === null || current.get(key) === value) {
+      current.delete(key)
+    } else {
+      current.set(key, value)
+    }
+    router.push(`/usado/produtos?${current.toString()}`, { scroll: false })
+  }, [router, searchParams])
+
+  const handleSearch = useCallback((e: React.FormEvent) => {
+    e.preventDefault()
+    applyFilter('q', searchTerm.trim() || null)
+  }, [applyFilter, searchTerm])
 
   const clearAll = useCallback(() => {
     setSearchTerm('')
     router.push('/usado/produtos', { scroll: false })
   }, [router])
 
+  const chipBase: React.CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', gap: '6px',
+    padding: '8px 16px', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 500,
+    cursor: 'pointer', transition: 'all 0.2s', border: '1px solid rgba(255,255,255,0.08)',
+    background: 'rgba(15,18,30,0.7)', color: '#a1a1aa', whiteSpace: 'nowrap' as const,
+    backdropFilter: 'blur(12px)', boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+  }
+
+  const chipActive: React.CSSProperties = {
+    ...chipBase,
+    background: 'var(--accent-dim)', borderColor: 'var(--accent-glow)', color: 'var(--accent)', fontWeight: 600,
+    boxShadow: '0 4px 12px var(--accent-glow)'
+  }
+
+  const selectStyle: React.CSSProperties = {
+    background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
+    color: '#fff', padding: '8px 12px', borderRadius: '8px', fontSize: '0.85rem', outline: 'none',
+  }
+
   return (
-    <>
-      <style dangerouslySetInnerHTML={{__html: `
-        .msu-filter-bar {
-          margin-bottom: 24px;
-        }
-        .msu-filter-chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 14px;
-          border-radius: 20px;
-          font-size: 0.82rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          border: 1px solid transparent;
-          background: transparent;
-          color: var(--text-secondary);
-          white-space: nowrap;
-        }
-        .msu-filter-chip:hover {
-          background: rgba(255,255,255,0.06);
-          color: var(--text-primary);
-        }
-        .msu-filter-chip.active {
-          background: rgba(255, 107, 53, 0.12);
-          border-color: rgba(255, 107, 53, 0.35);
-          color: #FF6B35;
-          font-weight: 600;
-        }
-        .msu-filter-panel {
-          overflow: hidden;
-          transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.3s ease;
-        }
-        @media (max-width: 768px) {
-          .msu-filter-sections {
-            flex-direction: column !important;
-            gap: 16px !important;
-          }
-        }
-      `}} />
+    <div style={{ marginBottom: '24px' }}>
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} style={{
+        display: 'flex', gap: '8px', marginBottom: '16px',
+        background: 'rgba(15,18,30,0.6)', border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '12px', padding: '8px', backdropFilter: 'blur(12px)',
+      }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#52525b' }} />
+          <input
+            type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Buscar por marca, modelo ou descrição..."
+            style={{ width: '100%', background: 'transparent', border: 'none', color: '#fff', padding: '10px 12px 10px 36px', fontSize: '0.95rem', outline: 'none' }}
+          />
+        </div>
+        <button type="submit" style={{
+          background: 'var(--accent)', color: '#000', border: 'none', padding: '10px 24px',
+          borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+        }}>Buscar</button>
+      </form>
 
-      <div className="msu-filter-bar">
-        <div style={{
-          background: 'rgba(15, 18, 30, 0.6)',
-          backdropFilter: 'blur(12px)',
-          borderRadius: 'var(--radius)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          overflow: 'hidden',
-          display: 'inline-block',
-        }}>
-          {/* Toggle Button */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '12px 20px',
-            gap: '16px',
-          }}>
-            <button
-              onClick={() => setIsOpen(prev => !prev)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--text-primary)',
-                padding: 0,
-              }}
-            >
-              <SlidersHorizontal size={16} color="#FF6B35" />
-              <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>
-                Filtros
-              </span>
-              {activeCount > 0 && (
-                <span style={{
-                  background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
-                  color: '#fff',
-                  fontSize: '0.6rem',
-                  fontWeight: 800,
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  {activeCount}
-                </span>
-              )}
-              <ChevronDown size={14} color="var(--text-muted)" style={{
-                transition: 'transform 0.3s ease',
-                transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              }} />
+      {/* Category Chips */}
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+        {CATEGORIES.map(cat => {
+          const Icon = cat.icon;
+          return (
+            <button key={cat.id} onClick={() => applyFilter('category', cat.id)}
+              style={currentCategory === cat.id ? chipActive : chipBase}>
+              <Icon size={16} strokeWidth={2.5} /> {cat.label}
             </button>
+          )
+        })}
+      </div>
 
-            {activeCount > 0 && (
-              <button
-                onClick={clearAll}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--text-muted)',
-                  fontSize: '0.78rem',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  transition: 'color 0.2s',
-                }}
-              >
-                <X size={12} />
-                Limpar
-              </button>
-            )}
+      {/* Collapsible Advanced Filters */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: isOpen ? '12px' : '0' }}>
+        <button onClick={() => setIsOpen(p => !p)} style={{
+          display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
+          border: 'none', cursor: 'pointer', color: '#71717a', fontSize: '0.8rem', fontWeight: 600, padding: 0,
+        }}>
+          <SlidersHorizontal size={14} /> Filtros Avançados
+          {activeCount > 0 && (
+            <span style={{ background: 'var(--accent)', color: '#000', fontSize: '0.6rem', fontWeight: 800, width: '18px', height: '18px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              {activeCount}
+            </span>
+          )}
+        </button>
+        {activeCount > 0 && (
+          <button onClick={clearAll} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#52525b', fontSize: '0.75rem' }}>
+            <X size={12} /> Limpar tudo
+          </button>
+        )}
+      </div>
+
+      {isOpen && (
+        <div style={{
+          display: 'flex', gap: '16px', flexWrap: 'wrap', padding: '16px',
+          background: 'rgba(15,18,30,0.5)', border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: '12px', alignItems: 'end',
+        }}>
+          {/* UF */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Estado</label>
+            <select value={currentState || ''} onChange={e => applyFilter('state', e.target.value || null)} style={selectStyle}>
+              <option value="">Todos</option>
+              {UF_LIST.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+            </select>
           </div>
 
-          {/* Expandable Panel */}
-          <div
-            className="msu-filter-panel"
-            style={{
-              maxHeight: isOpen ? '300px' : '0px',
-              opacity: isOpen ? 1 : 0,
-              padding: isOpen ? '0 20px 20px' : '0 20px 0',
-              borderTop: isOpen ? '1px solid rgba(255,255,255,0.06)' : 'none',
-            }}
-          >
-            <div className="msu-filter-sections" style={{ display: 'flex', gap: '32px', paddingTop: '16px', alignItems: 'flex-end' }}>
-              {/* Busca */}
-              <div style={{ flex: 1, minWidth: '200px' }}>
-                <h4 style={{
-                  fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '10px',
-                  textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700,
-                }}>Buscar</h4>
-                <form onSubmit={handleSearch} style={{ display: 'flex', gap: '8px' }}>
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    placeholder="Ex: Volante, Pedal..."
-                    style={{
-                      flex: 1, background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                      padding: '8px 14px', borderRadius: '8px', fontSize: '0.85rem',
-                      outline: 'none',
-                    }}
-                  />
-                  <button type="submit" style={{
-                    background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
-                    color: '#fff', border: 'none', padding: '8px 16px',
-                    borderRadius: '8px', fontWeight: 700, fontSize: '0.8rem',
-                    cursor: 'pointer', whiteSpace: 'nowrap',
-                  }}>
-                    Buscar
-                  </button>
-                </form>
-              </div>
+          {/* Condição */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Condição</label>
+            <select value={currentCondition || ''} onChange={e => applyFilter('condition', e.target.value || null)} style={selectStyle}>
+              <option value="">Todas</option>
+              {CONDITIONS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+            </select>
+          </div>
 
-              {/* Estado */}
-              <div>
-                <h4 style={{
-                  fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '10px',
-                  textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700,
-                }}>Estado</h4>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {CONDITIONS.map(cond => (
-                    <button
-                      key={cond.id}
-                      className={`msu-filter-chip ${currentCondition === cond.id ? 'active' : ''}`}
-                      onClick={() => toggleCondition(cond.id)}
-                    >
-                      {cond.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+          {/* Tem Caixa */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Caixa Original</label>
+            <select value={currentHasBox || ''} onChange={e => applyFilter('hasBox', e.target.value || null)} style={selectStyle}>
+              <option value="">Tanto faz</option>
+              <option value="true">Sim</option>
+              <option value="false">Não</option>
+            </select>
+          </div>
+
+          {/* Preço Min */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Preço Mín.</label>
+            <input type="number" placeholder="R$ 0" defaultValue={searchParams.get('minPrice') || ''} onBlur={e => applyFilter('minPrice', e.target.value || null)}
+              style={{ ...selectStyle, width: '100px' }} />
+          </div>
+
+          {/* Preço Max */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Preço Máx.</label>
+            <input type="number" placeholder="Sem limite" defaultValue={searchParams.get('maxPrice') || ''} onBlur={e => applyFilter('maxPrice', e.target.value || null)}
+              style={{ ...selectStyle, width: '100px' }} />
+          </div>
+
+          {/* Ordenação */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Ordenar</label>
+            <select value={currentSort} onChange={e => applyFilter('sort', e.target.value)} style={selectStyle}>
+              {SORT_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+            </select>
           </div>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   )
 }

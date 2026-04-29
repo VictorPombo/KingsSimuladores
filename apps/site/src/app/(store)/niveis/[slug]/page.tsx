@@ -64,7 +64,42 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
   return (
     <div style={{ padding: '40px 0', minHeight: 'calc(100vh - 80px)' }}>
       <Container>
-        
+
+        {/* ← Voltar + Tabs de Nível */}
+        <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, transition: 'color 0.2s' }}>
+            <span style={{ fontSize: '1.1rem' }}>←</span> Voltar para Home
+          </Link>
+
+          {/* Floating Level Tabs */}
+          <div style={{
+            display: 'flex', gap: '8px', padding: '6px',
+            background: 'rgba(15,18,30,0.6)', backdropFilter: 'blur(12px)',
+            borderRadius: '14px', border: '1px solid rgba(255,255,255,0.06)',
+            width: 'fit-content',
+          }}>
+            {Object.entries(NIVEIS_DATA).map(([slug, d]) => {
+              const isActive = slug === params.slug
+              return (
+                <Link key={slug} href={`/niveis/${slug}`} style={{
+                  textDecoration: 'none',
+                  padding: '8px 20px',
+                  borderRadius: '10px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  transition: 'all 0.2s',
+                  color: isActive ? '#000' : 'var(--text-secondary)',
+                  background: isActive ? d.color : 'transparent',
+                  border: isActive ? 'none' : '1px solid transparent',
+                }}>
+                  {slug === 'semiprofissional' ? 'Semi-Pro' : slug.charAt(0).toUpperCase() + slug.slice(1)}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
         {/* Banner Hero estilo NÍVEIS */}
         <div style={{ 
           marginBottom: '48px', 

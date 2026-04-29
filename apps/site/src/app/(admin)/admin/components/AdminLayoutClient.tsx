@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { AdminSidebar } from './AdminSidebar'
 import { Menu, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import { StoreProvider } from './StoreContext'
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
@@ -110,6 +111,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="admin-main-grid">
+        <StoreProvider>
         {/* Overlay do Mobile */}
         <div 
           className={`admin-overlay ${isMobileOpen ? 'open' : ''}`} 
@@ -125,6 +127,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         <main className="admin-main-content">
           {children}
         </main>
+        </StoreProvider>
       </div>
     </div>
   )

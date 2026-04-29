@@ -3,7 +3,9 @@ import { Container, Button } from '@kings/ui'
 import { createServerSupabaseClient } from '@kings/db/server'
 import { formatPrice } from '@kings/utils'
 import { notFound } from 'next/navigation'
-import { MessageCircle, ShieldCheck } from 'lucide-react'
+import { MessageCircle, ShieldCheck, Package, AlertTriangle, MapPin } from 'lucide-react'
+import { NegotiateButton } from '@/components/marketplace/NegotiateButton'
+import { SellerReputation } from '@/components/marketplace/SellerReputation'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,11 +60,10 @@ export default async function ListingDetailPage({ params }: Props) {
 
   const sellerName = (listing as any).profiles?.full_name || 'Piloto Vendedor'
   
-  // Mensagem pré-formatada para Zap do vendedor (MVP Negociação)
-  const itemName = encodeURIComponent(listing.title)
-  const itemPrice = encodeURIComponent(formatPrice(listing.price))
-  const zapMessage = `Olá ${sellerName}, vi seu anúncio no MSU (Meu Simulador Usado):\n\n*${itemName}* por ${itemPrice}\n\nAinda está disponível? Aceita proposta?`
-  const whatsappUrl = `https://wa.me/?text=${zapMessage}` // Adicionaremos o fone real se houver dps. Para o MVP redireciona p/ WhatsApp intent.
+  // WhatsApp OFICIAL da plataforma (MSU-02: nunca expor telefone do vendedor)
+  const MSU_OFFICIAL_PHONE = '5511999999999' // TODO: substituir pelo número real da plataforma
+  const zapMessage = encodeURIComponent(`Olá! Tenho interesse no anúncio:\n\n*${listing.title}* por ${formatPrice(listing.price)}\nID: ${listing.id.split('-')[0]}\n\nGostaria de negociar com segurança pela plataforma.`)
+  const whatsappUrl = `https://wa.me/${MSU_OFFICIAL_PHONE}?text=${zapMessage}`
 
   return (
     <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
@@ -89,7 +90,44 @@ export default async function ListingDetailPage({ params }: Props) {
             <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
               {listing.description}
             </div>
-            
+
+            {/* Specs Section */}
+            <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {listing.brand && (
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Marca</div>
+                  <div style={{ color: '#fff', fontWeight: 600 }}>{listing.brand}</div>
+                </div>
+              )}
+              {listing.model && (
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Modelo</div>
+                  <div style={{ color: '#fff', fontWeight: 600 }}>{listing.model}</div>
+                </div>
+              )}
+              {listing.city && listing.state && (
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <MapPin size={18} color="#71717a" />
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Localização</div>
+                    <div style={{ color: '#fff', fontWeight: 600 }}>{listing.city} - {listing.state}</div>
+                  </div>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                {listing.has_original_box && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '10px 14px', borderRadius: '12px', background: 'rgba(6, 214, 160, 0.1)', border: '1px solid rgba(6, 214, 160, 0.2)', color: '#06d6a0', fontWeight: 600 }}>
+                    <Package size={16} /> Caixa original
+                  </span>
+                )}
+                {listing.has_usage_marks && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '10px 14px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#f59e0b', fontWeight: 600 }}>
+                    <AlertTriangle size={16} /> Marcas de uso
+                  </span>
+                )}
+              </div>
+            </div>
+
             <div className="msu-shield" style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(0,229,255,0.05)', borderRadius: '1rem', border: '1px solid rgba(0,229,255,0.2)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                <ShieldCheck size={32} color="var(--accent)" />
                <div>
@@ -113,23 +151,23 @@ export default async function ListingDetailPage({ params }: Props) {
                   Comprar Agora
                 </Button>
                 
-                <a href={whatsappUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-                  <Button variant="secondary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '1.25rem', fontSize: '1.1rem', fontWeight: 600, border: '1px solid #25D366', color: '#25D366' }}>
-                    <MessageCircle size={20} /> Fazer Oferta
-                  </Button>
+                <NegotiateButton
+                  listingId={listing.id}
+                  listingTitle={listing.title}
+                  listingPrice={listing.price}
+                  sellerId={listing.seller_id}
+                  sellerName={sellerName}
+                />
+
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#25D366', textDecoration: 'underline' }}>Ou fale pelo WhatsApp oficial</span>
                 </a>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: '#52525b', textAlign: 'center', lineHeight: 1.4 }}>
+                  Toda negociação é intermediada pela equipe do Meu Simulador Usado.
+                </p>
               </div>
 
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '0.5rem' }}>
-                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Vendedor</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ width: '40px', height: '40px', background: 'var(--bg-secondary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>👤</div>
-                  <div>
-                    <div style={{ color: '#fff', fontWeight: 600 }}>{sellerName}</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Membro confiável (C2C)</div>
-                  </div>
-                </div>
-              </div>
+              <SellerReputation sellerId={listing.seller_id} sellerName={sellerName} />
 
             </div>
           </div>

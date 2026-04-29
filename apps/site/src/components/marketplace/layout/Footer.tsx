@@ -1,5 +1,6 @@
 import React from 'react'
 import { Container } from '@kings/ui'
+import Link from 'next/link'
 
 export function Footer() {
   return (
@@ -18,9 +19,10 @@ export function Footer() {
             <div>
               <h4 style={{ color: '#fff', fontWeight: 600, marginBottom: '1rem' }}>Comunidade</h4>
               <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem' }}>
-                <li>Como Vender</li>
-                <li>Dicas de Segurança</li>
-                <li>Regras de Moderação</li>
+                <li><Link href="/usado/ajuda#como-funciona" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Como Funciona</Link></li>
+                <li><Link href="/usado/ajuda#como-vender" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Como Vender</Link></li>
+                <li><Link href="/usado/ajuda#seguranca" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Dicas de Segurança</Link></li>
+                <li><Link href="/usado/ajuda#regras" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Regras de Moderação</Link></li>
               </ul>
             </div>
           </div>

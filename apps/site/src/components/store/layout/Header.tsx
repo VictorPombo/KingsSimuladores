@@ -31,9 +31,9 @@ export function Header() {
           >
             <a href="/" style={{ textDecoration: 'none', marginLeft: '24px', flexShrink: 0 }}>
               <img 
-                src="https://cdn.awsli.com.br/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png" 
+                src="/logo_kings.png" 
                 alt="Kings Simuladores" 
-                style={{ height: '75px', display: 'block', objectFit: 'contain' }}
+                style={{ height: '65px', display: 'block', objectFit: 'contain' }}
               />
             </a>
 
@@ -59,7 +59,10 @@ export function Header() {
               }
             `}} />
             <nav style={{ display: 'flex', gap: '24px', alignItems: 'center', flexShrink: 0 }}>
-              <a href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #FF6B35, #FF3B5C)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(255, 107, 53, 0.3)' }} className="kings-btn-hover">
+              <a href="/seven" style={{ fontSize: '0.85rem', color: '#000', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #facc15, #ca8a04)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(250, 204, 21, 0.3)' }} className="kings-btn-hover">
+                SEVEN SIM RACING
+              </a>
+              <a href="/usado" style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 800, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(to right, #8b5cf6, #d946ef)', borderRadius: '6px', border: 'none', boxShadow: '0 4px 10px rgba(139, 92, 246, 0.3)' }} className="kings-btn-hover">
                 MEU SIMULADOR USADO
               </a>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
@@ -67,9 +70,11 @@ export function Header() {
                 <CartIcon />
               </div>
               <div className="kings-btn-hover">
-                <Button variant="secondary" size="sm">
-                  Entrar
-                </Button>
+                <a href="/login" style={{ textDecoration: 'none' }}>
+                  <Button variant="secondary" size="sm">
+                    Entrar
+                  </Button>
+                </a>
               </div>
             </nav>
           </Container>
@@ -98,16 +103,18 @@ export function Header() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px' }}>
               <a href="/" style={{ flexShrink: 0 }}>
                 <img 
-                  src="https://cdn.awsli.com.br/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png" 
+                  src="/logo_kings.png" 
                   alt="Kings Simuladores" 
-                  style={{ height: '48px', display: 'block', objectFit: 'contain' }}
+                  style={{ height: '40px', display: 'block', objectFit: 'contain', transform: 'scale(1.2)' }}
                 />
               </a>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <CartIcon />
-                <Button variant="secondary" size="sm" style={{ padding: '0 12px', fontSize: '0.75rem', borderRadius: '16px' }}>
-                  User
-                </Button>
+                <a href="/login" style={{ textDecoration: 'none' }}>
+                  <Button variant="secondary" size="sm" style={{ padding: '0 12px', fontSize: '0.75rem', borderRadius: '16px' }}>
+                    User
+                  </Button>
+                </a>
               </div>
             </div>
 

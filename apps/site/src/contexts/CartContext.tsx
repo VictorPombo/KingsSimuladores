@@ -53,6 +53,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items])
 
   const addItem = (newItem: CartItem) => {
+    // 1. Bloqueio de Carrinho Misto
+    if (items.length > 0) {
+      const currentBrand = items[0].brand;
+      if (currentBrand !== newItem.brand) {
+        const confirmClear = window.confirm('Seu carrinho possui itens de outra loja. Deseja limpar o carrinho e adicionar este item?');
+        if (confirmClear) {
+          setItems([newItem]);
+          setIsOpen(true);
+        }
+        return; // Early return se cancelou ou se já limpou e adicionou
+      }
+    }
+
+    // 2. Fluxo Normal (mesma loja ou carrinho vazio)
     setItems(current => {
       const existingInfo = current.find(item => item.id === newItem.id)
       if (existingInfo) {

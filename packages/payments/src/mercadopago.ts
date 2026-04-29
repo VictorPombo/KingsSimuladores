@@ -2,14 +2,37 @@
  * Mercado Pago API Wrapper (Checkout & Split Payments)
  * Handles cart checkout and Marketplace sub-ledger splitting.
  */
-export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number) {
+export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number, storeContext?: 'kings' | 'msu' | 'seven') {
   // Em Produção, você usará o token de vendedor (Oauth) para criar a preferência na conta dele,
   // mas aplicando a 'marketplace_fee' (nossa comissão) pra conta da Kings.
-  const token = process.env.MP_ACCESS_TOKEN
+  
+  // Seleção dinâmica do Token baseada no contexto da loja
+  let token = process.env.MP_ACCESS_TOKEN; // Fallback antigo
+  if (storeContext === 'seven') {
+    token = process.env.MP_ACCESS_TOKEN_SEVEN || token;
+  } else if (storeContext === 'kings' || storeContext === 'msu') {
+    token = process.env.MP_ACCESS_TOKEN_KINGS || token;
+  }
+
+  // Normalizar array para o padrão do MP
+  const mpItems = items.map((i: any) => ({
+    id: i.id || 'item',
+    title: i.title || 'Produto Kings',
+    quantity: Number(i.quantity) || 1,
+    unit_price: Number(i.price || i.unit_price) || 0,
+    currency_id: 'BRL'
+  }))
+
   const payload: any = {
-    items,
+    items: mpItems,
     payer: customer,
-    external_reference: orderId || 'mock'
+    external_reference: orderId || 'mock',
+    back_urls: {
+      success: `${process.env.NEXT_PUBLIC_URL_KINGS}/account?success=true`,
+      pending: `${process.env.NEXT_PUBLIC_URL_KINGS}/account?pending=true`,
+      failure: `${process.env.NEXT_PUBLIC_URL_KINGS}/checkout?error=payment_failed`
+    },
+    auto_return: 'approved'
   }
 
   // Bloco de Split Payment (Retenção Contábil na Fonte)

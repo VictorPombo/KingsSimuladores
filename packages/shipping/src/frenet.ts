@@ -56,16 +56,17 @@ export async function calculateShipping(fromPostalCode: string, toPostalCode: st
   if (token && !token.includes('preencher')) {
     try {
       const payload = {
-        from: { postal_code: fromPostalCode.replace(/\D/g, '') },
-        to: { postal_code: toPostalCode.replace(/\D/g, '') },
-        products: dimensions.map((d, index) => ({
-          id: (index + 1).toString(),
-          weight: d.weight,
-          width: d.width || 11, // Frenet requires min 11cm
-          height: d.height || 2, // min 2cm
-          length: d.length || 16, // min 16cm
-          insurance_value: d.insurance_value || 0,
-          quantity: d.quantity || 1
+        SellerCEP: fromPostalCode.replace(/\D/g, ''),
+        RecipientCEP: toPostalCode.replace(/\D/g, ''),
+        ShipmentInvoiceValue: dimensions.reduce((acc, d) => acc + (d.insurance_value || 0), 0),
+        ShippingItemArray: dimensions.map((d, index) => ({
+            Weight: d.weight,
+            Length: d.length || 16,
+            Height: d.height || 2,
+            Width: d.width || 11,
+            Quantity: d.quantity || 1,
+            SKU: (index + 1).toString(),
+            Category: "Simulador"
         }))
       }
 
@@ -81,19 +82,20 @@ export async function calculateShipping(fromPostalCode: string, toPostalCode: st
       })
 
       if (res.ok) {
-        const data = await res.json()
+        const json = await res.json()
+        const data = json.ShippingQuoteArray || []
         
         // Filter out errors, map to standard shape, then REMOVE blocked services (PAC)
         const validOptions = data
-          .filter((opt: any) => !opt.error && opt.price)
-          .filter((opt: any) => !isBlocked(opt.name || ''))
+          .filter((opt: any) => !opt.Error && opt.ShippingPrice)
+          .filter((opt: any) => !isBlocked(opt.ServiceDescription || ''))
           .map((opt: any) => ({
-            id: opt.id,
-            name: opt.name,
-            company: opt.company?.name || opt.company,
-            price: opt.price,
-            custom_delivery_time: opt.custom_delivery_time || opt.delivery_time,
-            logo: opt.company?.picture || null
+            id: opt.ServiceCode,
+            name: opt.ServiceDescription,
+            company: opt.Carrier || opt.ServiceDescription?.split(' ')[0],
+            price: opt.ShippingPrice,
+            custom_delivery_time: opt.DeliveryTime,
+            logo: null
           }))
           .sort((a: ShippingOption, b: ShippingOption) => parseFloat(a.price) - parseFloat(b.price))
 

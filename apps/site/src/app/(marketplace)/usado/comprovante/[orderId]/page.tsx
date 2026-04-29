@@ -96,7 +96,7 @@ export default async function ComprovantePage({ params }: { params: { orderId: s
         }}>
           {/* Header do comprovante */}
           <div style={{
-            background: 'linear-gradient(135deg, #FF6B35, #FF3B5C)',
+            background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
             padding: '32px',
             textAlign: 'center',
           }}>

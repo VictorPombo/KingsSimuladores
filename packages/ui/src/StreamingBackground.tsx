@@ -14,13 +14,16 @@ import { usePathname } from 'next/navigation'
 export function StreamingBackground() {
   const pathname = usePathname()
   const isMsu = pathname?.startsWith('/usado')
+  const isSeven = pathname?.startsWith('/seven')
+  
+  const theme = isSeven ? 'seven' : isMsu ? 'msu' : 'kings'
 
   return (
     <>
       <div
         aria-hidden="true"
         className="streaming-bg-root"
-        data-theme={isMsu ? 'msu' : 'kings'}
+        data-theme={theme}
       >
         {/* ─── Ambient Glow: horizonte ─── */}
         <div className="streaming-bg-glow-horizon" />
@@ -54,8 +57,13 @@ const STREAMING_CSS = `
   }
 
   .streaming-bg-root[data-theme="msu"] {
-    --sb-accent: 255, 107, 53;     /* Orange */
-    --sb-secondary: 255, 59, 92;   /* Red */
+    --sb-accent: 139, 92, 246;     /* Purple */
+    --sb-secondary: 217, 70, 239;  /* Pink */
+  }
+
+  .streaming-bg-root[data-theme="seven"] {
+    --sb-accent: 249, 115, 22;     /* Orange (Simagic) */
+    --sb-secondary: 234, 88, 12;   /* Dark Orange/Red */
   }
 
   /* ─── Container ─── */
