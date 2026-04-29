@@ -1,10 +1,30 @@
 import { Button, Container } from '@kings/ui'
 import { ArrowRight, Star, ShieldCheck, Cpu, ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { HeroCarousel } from './HeroCarousel'
 import { ProductCarousel } from '@/components/store/ui/ProductCarousel'
+import { createServerSupabaseClient } from '@kings/db/server'
 
-export default function SevenHomePage() {
+export default async function SevenHomePage() {
+  const supabase = await createServerSupabaseClient()
+  
+  // Buscar a brand_id da Seven
+  const { data: brand } = await supabase.from('brands').select('id').eq('slug', 'seven').single()
+  
+  let products: any[] = []
+  
+  if (brand) {
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .eq('brand_id', brand.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(8)
+      
+    if (data) products = data
+  }
   return (
     <>
       {/* Hero Section Banner Animado */}
@@ -40,22 +60,22 @@ export default function SevenHomePage() {
       <section style={{ paddingTop: '100px', paddingBottom: '100px', overflow: 'hidden' }}>
         <Container>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-20px', position: 'relative', zIndex: 10, padding: '0 24px' }}>
-            <a href="#" className="font-display hover:underline" style={{ color: '#f97316', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '1px' }}>
+            <Link href="/seven/produtos" className="font-display hover:underline" style={{ color: '#f97316', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '1px' }}>
               VER CATÁLOGO COMPLETO <ArrowRight size={16} />
-            </a>
+            </Link>
           </div>
 
-          <ProductCarousel 
-            title="Lançamentos Simagic" 
-            prods={[
-              { id: 'simagic-alpha-mini', title: 'Base Simagic Alpha Mini (10Nm)', price: 5990.00, price_compare: 6490.00, images: ['https://placehold.co/400x400/141416/f97316?text=Simagic+Alpha'], attributes: { brand: 'Simagic' }, slug: 'base-simagic-alpha-mini' },
-              { id: 'simagic-gt-neo', title: 'Volante Simagic GT Neo', price: 3890.00, images: ['https://placehold.co/400x400/141416/f97316?text=GT+Neo'], attributes: { brand: 'Simagic' }, slug: 'volante-simagic-gt-neo' },
-              { id: 'simagic-p1000', title: 'Pedais P1000 Invertidos', price: 4790.00, images: ['https://placehold.co/400x400/141416/f97316?text=P1000'], attributes: { brand: 'Simagic' }, slug: 'pedais-p1000' },
-              { id: 'simagic-fx-pro', title: 'Volante Simagic FX Pro', price: 6590.00, images: ['https://placehold.co/400x400/141416/f97316?text=FX+Pro'], attributes: { brand: 'Simagic' }, slug: 'volante-fx-pro' },
-              { id: 'simagic-alpha-u', title: 'Base Simagic Alpha Ultimate (23Nm)', price: 9990.00, images: ['https://placehold.co/400x400/141416/f97316?text=Alpha+U'], attributes: { brand: 'Simagic' }, slug: 'base-alpha-u' }
-            ]} 
-            tenant="seven" 
-          />
+          {products.length > 0 ? (
+            <ProductCarousel 
+              title="Lançamentos Simagic" 
+              prods={products} 
+              tenant="seven" 
+            />
+          ) : (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8' }}>
+              <p>Os produtos da nova coleção estão sendo preparados...</p>
+            </div>
+          )}
         </Container>
       </section>
     </>

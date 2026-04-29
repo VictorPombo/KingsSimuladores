@@ -2,17 +2,33 @@
  * Mercado Pago API Wrapper (Checkout & Split Payments)
  * Handles cart checkout and Marketplace sub-ledger splitting.
  */
+
+const ACCESS_TOKENS: Record<string, string | undefined> = {
+  kings: process.env.MP_ACCESS_TOKEN_KINGS || process.env.MP_ACCESS_TOKEN,
+  usado: process.env.MP_ACCESS_TOKEN_MSU,
+  seven: process.env.MP_ACCESS_TOKEN_SEVEN,
+}
+
+const PUBLIC_KEYS: Record<string, string | undefined> = {
+  kings: process.env.MP_PUBLIC_KEY_KINGS || process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
+  usado: process.env.MP_PUBLIC_KEY_MSU,
+  seven: process.env.NEXT_PUBLIC_MP_PUBLIC_KEY_SEVEN || process.env.MP_PUBLIC_KEY_SEVEN,
+}
+
+export function getMPAccessToken(storeSlug: string): string {
+  return ACCESS_TOKENS[storeSlug] ?? process.env.MP_ACCESS_TOKEN ?? ''
+}
+
+export function getMPPublicKey(storeSlug: string): string {
+  return PUBLIC_KEYS[storeSlug] ?? process.env.NEXT_PUBLIC_MP_PUBLIC_KEY ?? ''
+}
+
 export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number, storeContext?: 'kings' | 'msu' | 'seven') {
   // Em Produção, você usará o token de vendedor (Oauth) para criar a preferência na conta dele,
   // mas aplicando a 'marketplace_fee' (nossa comissão) pra conta da Kings.
   
   // Seleção dinâmica do Token baseada no contexto da loja
-  let token = process.env.MP_ACCESS_TOKEN; // Fallback antigo
-  if (storeContext === 'seven') {
-    token = process.env.MP_ACCESS_TOKEN_SEVEN || token;
-  } else if (storeContext === 'kings' || storeContext === 'msu') {
-    token = process.env.MP_ACCESS_TOKEN_KINGS || token;
-  }
+  const token = storeContext ? getMPAccessToken(storeContext) : process.env.MP_ACCESS_TOKEN;
 
   // Normalizar array para o padrão do MP
   const mpItems = items.map((i: any) => ({
@@ -92,8 +108,9 @@ export async function capturePayment(paymentId: string) {
  * Validates a Payment intent via Mercado Pago API (Double-Check)
  * Returns the exact context safely to prevent fraud.
  */
-export async function verifyPaymentStatus(paymentId: string) {
-  const token = process.env.MP_ACCESS_TOKEN
+export async function verifyPaymentStatus(paymentId: string, storeContext?: string) {
+  // Try to use the correct token for the context, otherwise fallback to default
+  const token = storeContext ? getMPAccessToken(storeContext) : process.env.MP_ACCESS_TOKEN
   
   if (token) {
     try {

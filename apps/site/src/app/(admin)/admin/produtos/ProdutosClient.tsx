@@ -71,13 +71,32 @@ export function ProdutosClient({ products }: { products: Product[] }) {
 
   // ── Shared badge render ──
   const renderBrandBadge = (brand: string) => {
-    const isKings = brand === 'Kings Simuladores'
+    const isKings = brand === 'Kings Simuladores' || brand === 'kings'
+    const isSeven = brand === 'Seven Sim Racing' || brand === 'seven'
+    
+    let color = '#f59e0b' // MSU
+    let label = 'MSU'
+    let bg = '#f59e0b15'
+    let border = '#f59e0b25'
+
+    if (isKings) {
+      color = '#3b82f6'
+      label = 'KINGS'
+      bg = '#3b82f615'
+      border = '#3b82f625'
+    } else if (isSeven) {
+      color = '#ea580c'
+      label = 'SEVEN'
+      bg = '#ea580c15'
+      border = '#ea580c25'
+    }
+
     return (
       <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
-        background: isKings ? '#3b82f615' : '#f59e0b15',
-        color: isKings ? '#3b82f6' : '#f59e0b',
-        border: `1px solid ${isKings ? '#3b82f625' : '#f59e0b25'}`
-      }}>{isKings ? 'KINGS' : 'MSU'}</span>
+        background: bg,
+        color: color,
+        border: `1px solid ${border}`
+      }}>{label}</span>
     )
   }
 
@@ -252,7 +271,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>Listar Produtos</h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Inventário completo Kings e MSU</p>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Inventário completo Kings, MSU e Seven</p>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={exportCSV} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid #3f424d', borderRadius: '8px', padding: '10px 16px', color: '#cbd5e1', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer' }}>
@@ -315,7 +334,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
             <AlertCircle color="#ef4444" size={32} style={{ marginBottom: '16px' }} />
             <h3 style={{ margin: '0 0 8px 0', color: '#fff', fontSize: '1.2rem' }}>Deseja remover este produto?</h3>
             <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '24px', lineHeight: '1.5' }}>
-              Esta ação enviará o produto para a lixeira (arquivado) e ele não aparecerá mais no catálogo KINGS ou MSU. Tem certeza absoluta?
+              Esta ação enviará o produto para a lixeira (arquivado) e ele não aparecerá mais no catálogo KINGS, MSU ou SEVEN. Tem certeza absoluta?
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button

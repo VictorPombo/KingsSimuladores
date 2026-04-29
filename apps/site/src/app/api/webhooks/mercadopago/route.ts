@@ -22,7 +22,8 @@ export async function POST(req: Request) {
       if (!paymentId) return NextResponse.json({ ok: true }) // ignoring without ID
       
       // 1. Double-Check com o Mercado Pago usando nosso pacote seguro
-      const paymentData = await verifyPaymentStatus(paymentId)
+      const storeContext = searchParams.get('store') || undefined
+      const paymentData = await verifyPaymentStatus(paymentId, storeContext)
       
       if (paymentData.status === 'approved' && paymentData.external_reference) {
         const orderId = paymentData.external_reference
@@ -101,28 +102,61 @@ export async function POST(req: Request) {
           shipping: order.shipping_address
         }
 
-        // Emitir e guardar a NF-e via ERP
-        const nfeRes = await pushOrderToOlist(orderPayload, order.brand_origin)
-        
-        await supabase.from('invoices').insert({
-          id: nfeRes.id,
-          order_id: order.id,
-          cnpj_emitente: nfeRes.cnpj_emitente,
-          nfe_number: nfeRes.nfe_number,
-          nfe_key: nfeRes.nfe_key,
-          status: nfeRes.status,
-          xml_url: nfeRes.xml_url,
-          pdf_url: nfeRes.pdf_url
-        })
-        
-        console.log(`[Webhook MP] NF-e do Pedido ${orderId} enfileirada e salva no banco.`)
+        // Emitir e guardar a NF-e via ERP (Não-bloqueante para não dar Timeout no MP)
+        let nfeRes: any = null;
+
+        if (order.brand_origin === 'seven') {
+          void pushOrderToOlist(orderPayload, order.brand_origin)
+            .then(async (res) => {
+              if (res && res.id) {
+                const adminSupabase = createAdminClient()
+                await adminSupabase.from('invoices').insert({
+                  id: res.id,
+                  order_id: order.id,
+                  cnpj_emitente: res.cnpj_emitente || '',
+                  nfe_number: res.nfe_number || '',
+                  nfe_key: res.nfe_key || '',
+                  status: res.status,
+                  xml_url: res.xml_url || '',
+                  pdf_url: res.pdf_url || ''
+                })
+                // Atualizar ERP ID no pedido
+                if (res.tiny_id) {
+                  await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
+                }
+                console.log(`[Webhook MP] NF-e do Pedido ${orderId} enfileirada assincronamente.`)
+              }
+            })
+            .catch(err => console.error('[Olist Async Error]', err))
+        } else {
+          // Mantém síncrono para Kings (comportamento legado)
+          nfeRes = await pushOrderToOlist(orderPayload, order.brand_origin)
+          
+          if (nfeRes) {
+             await supabase.from('invoices').insert({
+              id: nfeRes.id,
+              order_id: order.id,
+              cnpj_emitente: nfeRes.cnpj_emitente,
+              nfe_number: nfeRes.nfe_number,
+              nfe_key: nfeRes.nfe_key,
+              status: nfeRes.status,
+              xml_url: nfeRes.xml_url,
+              pdf_url: nfeRes.pdf_url
+            })
+            console.log(`[Webhook MP] NF-e do Pedido ${orderId} salva no banco (Kings/MSU).`)
+          }
+        }
         
         // 5. Notificação via Chatwoot (WhatsApp)
         const clienteNome = profile?.full_name?.split(' ')[0] || 'Cliente'
         const clientePhone = profile?.phone
         
         if (clientePhone) {
-          const wppText = `🏎️ Fala *${clienteNome}*, tudo acelerando por aí?\n\nPassando para confirmar que o pagamento do seu pedido (*#${orderId.split('-')[0]}*) foi aprovado com sucesso! ✅\n\nAqui está a sua Nota Fiscal Eletrônica:\n📄 ${nfeRes.pdf_url}\n\nEntraremos em contato novamente assim que sua encomenda for despachada. Grande abraço da equipe KingsHub!`
+          let wppText = `🏎️ Fala *${clienteNome}*, tudo acelerando por aí?\n\nPassando para confirmar que o pagamento do seu pedido (*#${orderId.split('-')[0]}*) foi aprovado com sucesso! ✅\n\n`
+          if (nfeRes?.pdf_url) {
+            wppText += `Aqui está a sua Nota Fiscal Eletrônica:\n📄 ${nfeRes.pdf_url}\n\n`
+          }
+          wppText += `Entraremos em contato novamente assim que sua encomenda for despachada. Grande abraço da equipe KingsHub!`
           
           await sendWhatsappMessage({
             phone: clientePhone,

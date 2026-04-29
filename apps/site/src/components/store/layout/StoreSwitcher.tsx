@@ -1,0 +1,48 @@
+import Link from 'next/link'
+
+interface StoreSwitcherProps {
+  store: 'kings' | 'seven' | 'msu';
+}
+
+export function StoreSwitcher({ store }: StoreSwitcherProps) {
+  let label = '';
+  let href = '';
+  const themeClass = `theme-${store}`;
+
+  if (store === 'kings') {
+    label = 'KINGS SIMULADORES';
+    href = '/';
+  } else if (store === 'seven') {
+    label = 'SEVEN SIM RACING';
+    href = '/seven';
+  } else if (store === 'msu') {
+    label = 'MEU SIMULADOR USADO';
+    href = '/usado';
+  }
+
+  return (
+    <Link 
+      href={href} 
+      className={`${themeClass} hover:scale-105`}
+      style={{
+        fontSize: '0.80rem',
+        color: '#fff',
+        fontWeight: 800,
+        padding: '6px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--gradient-primary)',
+        boxShadow: '0 4px 10px var(--accent-glow)',
+        borderRadius: '6px',
+        textDecoration: 'none',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        border: 'none',
+      }}
+    >
+      {label}
+    </Link>
+  )
+}
