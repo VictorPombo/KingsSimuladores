@@ -76,6 +76,7 @@ const MENU_SECTIONS = [
   {
     title: 'SEVEN SIM RACING',
     color: '#ea580c',
+    logoUrl: '/logo-seven.svg',
     items: [
       { label: 'Visão Geral', icon: PieChart, href: '/admin' },
       {
