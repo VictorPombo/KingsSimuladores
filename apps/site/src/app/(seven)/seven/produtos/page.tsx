@@ -4,6 +4,8 @@ import Link from 'next/link'
 
 import { createServerSupabaseClient } from '@kings/db/server'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   searchParams: {
     categoria?: string
