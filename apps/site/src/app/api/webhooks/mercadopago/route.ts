@@ -31,6 +31,13 @@ export async function POST(req: Request) {
         // Usamos o Admin Client (Service Role) pois recebemos a requisição de fora da sessão do cliente
         const supabase = createAdminClient()
         
+        // 1.5 Proteção contra Webhook Duplicado
+        const { data: existingOrder } = await supabase.from('orders').select('status').eq('id', orderId).single()
+        if (existingOrder?.status === 'paid') {
+           console.log(`[Webhook MP] Pedido ${orderId} já processado anteriormente. Ignorando webhook duplicado.`)
+           return NextResponse.json({ received: true })
+        }
+        
         // 2. Atualizar o Status do Pedido
         const { data: order, error: orderErr } = await supabase
           .from('orders')
