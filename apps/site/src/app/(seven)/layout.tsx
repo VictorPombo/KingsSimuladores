@@ -168,6 +168,15 @@ export default async function SevenLayout({
               <SearchBar variant="seven" />
             </div>
 
+            <div style={{ display: 'flex', gap: '8px', padding: '0 16px', justifyContent: 'space-between' }}>
+              <div style={{ flex: 1 }}>
+                <StoreSwitcher store="kings" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <StoreSwitcher store="msu" />
+              </div>
+            </div>
+
             <nav style={{ display: 'flex', alignItems: 'center', padding: '0 16px', overflowX: 'auto' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                 <Link href="/seven/produtos?marca=simagic" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>

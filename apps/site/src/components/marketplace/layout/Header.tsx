@@ -111,6 +111,15 @@ export async function Header() {
               <SearchBar variant="msu" />
             </div>
 
+            <div style={{ display: 'flex', gap: '8px', padding: '0 16px', justifyContent: 'space-between' }}>
+              <div style={{ flex: 1 }}>
+                <StoreSwitcher store="kings" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <StoreSwitcher store="seven" />
+              </div>
+            </div>
+
             <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', overflowX: 'auto' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                 <Link href="/usado/produtos" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
