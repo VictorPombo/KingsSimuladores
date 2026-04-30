@@ -58,6 +58,64 @@ export default async function SevenHomePage() {
         </div>
       </div>
 
+      <section style={{ 
+        paddingTop: '60px', 
+        paddingBottom: '20px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        textAlign: 'center',
+        background: 'radial-gradient(ellipse at top, rgba(234, 88, 12, 0.05), transparent 70%)',
+      }}>
+        <style dangerouslySetInnerHTML={{__html: `
+          .seven-btn-pump {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          }
+          .seven-btn-pump:hover {
+            transform: scale(1.08) translateY(-2px) !important;
+            filter: brightness(1.2);
+          }
+          .seven-hero-btn-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 6px;
+            align-items: stretch;
+            justify-items: stretch;
+          }
+          @media (min-width: 768px) {
+            .seven-hero-btn-grid { 
+              gap: 16px; 
+            }
+          }
+          .seven-hero-btn-grid a { display: block; width: 100%; }
+          .seven-hero-btn-grid .seven-btn-pump {
+            display: flex; align-items: center; justify-content: center; height: 100%; width: 100%;
+          }
+        `}} />
+
+        <h3 style={{ fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: 800, background: 'linear-gradient(to right, #ea580c, #dc2626)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          QUAL É SEU NÍVEL?
+        </h3>
+
+        <div className="seven-hero-btn-grid w-full max-w-[800px] px-1 md:px-0">
+          <Link href="/seven/niveis/iniciante" style={{ textDecoration: 'none' }} className="w-full">
+            <div style={{ padding: '8px 2px', borderRadius: '12px', border: '1px solid rgba(234, 88, 12, 0.4)', background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(220, 38, 38, 0.1))', color: '#fff', fontSize: 'clamp(8px, 2.2vw, 14px)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(234, 88, 12, 0.1)', textAlign: 'center' }} className="seven-btn-pump hover:bg-[rgba(234,88,12,0.3)] hover:shadow-[0_0_20px_rgba(234,88,12,0.4)] whitespace-nowrap">
+              INICIANTE
+            </div>
+          </Link>
+          <Link href="/seven/niveis/semiprofissional" style={{ textDecoration: 'none' }} className="w-full">
+            <div style={{ padding: '8px 2px', borderRadius: '12px', border: '1px solid rgba(234, 88, 12, 0.4)', background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(220, 38, 38, 0.1))', color: '#fff', fontSize: 'clamp(8px, 2.2vw, 14px)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(234, 88, 12, 0.1)', textAlign: 'center' }} className="seven-btn-pump hover:bg-[rgba(234,88,12,0.3)] hover:shadow-[0_0_20px_rgba(234,88,12,0.4)] whitespace-nowrap">
+              SEMIPROFISSIONAL
+            </div>
+          </Link>
+          <Link href="/seven/niveis/profissional" style={{ textDecoration: 'none' }} className="w-full">
+            <div style={{ padding: '8px 2px', borderRadius: '12px', border: '1px solid rgba(234, 88, 12, 0.4)', background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(220, 38, 38, 0.1))', color: '#fff', fontSize: 'clamp(8px, 2.2vw, 14px)', fontWeight: 800, cursor: 'pointer', boxShadow: '0 0 10px rgba(234, 88, 12, 0.1)', textAlign: 'center' }} className="seven-btn-pump hover:bg-[rgba(234,88,12,0.3)] hover:shadow-[0_0_20px_rgba(234,88,12,0.4)] whitespace-nowrap">
+              PROFISSIONAL
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* Featured Products */}
       <section style={{ paddingTop: '100px', paddingBottom: '100px', overflow: 'hidden' }}>
         <Container>
