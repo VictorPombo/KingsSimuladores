@@ -158,6 +158,7 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
                   }
                 `}} />
               </div>
+            </div>
           </div>
         </div>
 
