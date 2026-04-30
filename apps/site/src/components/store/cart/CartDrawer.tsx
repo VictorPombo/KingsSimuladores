@@ -110,8 +110,13 @@ export function CartDrawer() {
                 </div>
               )}
               
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                <span>Frete:</span>
+                <span style={{ fontStyle: 'italic' }}>Calculado no checkout</span>
+              </div>
+              
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
-                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Total:</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Subtotal:</span>
                 <span className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent)' }}>{formatPrice(totalPrice)}</span>
               </div>
             </div>
