@@ -158,21 +158,6 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
                   }
                 `}} />
               </div>
-            </div>
-            
-            {/* Vídeo do Nível */}
-            <div style={{ 
-              width: '100%', 
-              aspectRatio: '16/9', 
-              background: '#000', 
-              borderRadius: '12px',
-              border: `1px solid ${data.color}30`,
-              boxShadow: `0 0 30px rgba(0,0,0,0.5)`,
-              overflow: 'hidden',
-              position: 'relative'
-            }}>
-              <LevelVideo src={data.video} />
-            </div>
           </div>
         </div>
 
