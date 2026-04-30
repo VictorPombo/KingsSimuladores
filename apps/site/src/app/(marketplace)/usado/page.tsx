@@ -4,6 +4,8 @@ import { ListingCard } from '@/components/marketplace/ListingCard'
 import { ProductCarousel } from '@/components/store/ui/ProductCarousel'
 import { createServerSupabaseClient } from '@kings/db/server'
 
+import { BannerCarousel } from '@/components/store/ui/BannerCarousel'
+
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
@@ -75,6 +77,13 @@ export default async function Home() {
           </form>
         </Container>
       </section>
+
+      {/* MSU Banner Carousel */}
+      <BannerCarousel 
+        slides={[
+          { src: '/Banner_00MSU.jpeg', alt: 'Meu Simulador Usado', href: '/usado/produtos' }
+        ]}
+      />
 
       {/* Destaques usando o Carrossel Padronizado */}
       <section style={{ padding: '2rem 0 5rem 0' }}>

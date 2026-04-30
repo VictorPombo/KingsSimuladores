@@ -108,6 +108,7 @@ export default async function HomePage() {
       {/* HERO BANNER CAROUSEL - Full width, igual Seven */}
       <BannerCarousel 
         slides={[
+          { src: '/Banner_00Kings.jpeg', alt: 'Kings Simuladores', href: '/produtos' },
           { src: '/banners/banner-mbooster.png', alt: 'MOZA M-Booster Active Pedal', href: '/buscar?q=MOZA+mBooster' },
           { src: '/banners/banner-youtube.png', alt: 'Canal Kings Simuladores no YouTube', href: 'https://www.youtube.com/@kingssimuladores' },
           { src: '/banners/banner-msu.png', alt: 'Meu Simulador Usado', href: '/usado' },
