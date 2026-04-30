@@ -144,13 +144,16 @@ export default async function HomePage() {
             }
             .hero-btn-grid {
               display: grid !important;
-              grid-template-columns: repeat(3, 1fr) !important;
-              gap: 8px;
+              grid-template-columns: 1fr !important;
+              gap: 12px;
               align-items: stretch;
               justify-items: stretch;
             }
             @media (min-width: 768px) {
-              .hero-btn-grid { gap: 16px; }
+              .hero-btn-grid { 
+                grid-template-columns: repeat(3, 1fr) !important; 
+                gap: 16px; 
+              }
             }
             .hero-btn-grid a { display: block; width: 100%; }
             .hero-btn-grid .kings-btn-pump {
