@@ -109,7 +109,7 @@ export default async function HomePage() {
       <BannerCarousel 
         slides={[
           { src: '/Banner_00Kings.jpeg', alt: 'Kings Simuladores', href: '/produtos' },
-          { src: '/banners/banner-mbooster.png', alt: 'MOZA M-Booster Active Pedal', href: '/buscar?q=MOZA+mBooster' },
+          { src: '/banners/banner-mbooster.png', alt: 'MOZA M-Booster Active Pedal', href: '/produtos?brand=moza' },
           { src: '/banners/banner-youtube.png', alt: 'Canal Kings Simuladores no YouTube', href: 'https://www.youtube.com/@kingssimuladores' },
         ]}
       />
@@ -151,6 +151,21 @@ export default async function HomePage() {
             @media (min-width: 768px) {
               .hero-btn-grid { 
                 gap: 16px; 
+              }
+              .hero-btn-grid .kings-btn-pump {
+                padding: 14px 16px !important;
+                font-size: 14px !important;
+              }
+            }
+            @media (min-width: 1440px) {
+              .hero-btn-grid {
+                gap: 24px;
+                max-width: 900px !important;
+              }
+              .hero-btn-grid .kings-btn-pump {
+                padding: 18px 24px !important;
+                font-size: 16px !important;
+                border-radius: 14px !important;
               }
             }
             .hero-btn-grid a { display: block; width: 100%; }

@@ -1,11 +1,24 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: string, prods: any[], tenant?: 'kings' | 'msu' | 'seven' }) {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [hasOverflow, setHasOverflow] = useState(false)
+
+  const checkOverflow = useCallback(() => {
+    if (scrollRef.current) {
+      setHasOverflow(scrollRef.current.scrollWidth > scrollRef.current.clientWidth + 2)
+    }
+  }, [])
+
+  useEffect(() => {
+    checkOverflow()
+    window.addEventListener('resize', checkOverflow)
+    return () => window.removeEventListener('resize', checkOverflow)
+  }, [checkOverflow, prods.length])
 
   if (!prods || prods.length === 0) return null
 
@@ -63,6 +76,12 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
         @media (min-width: 1024px) {
           .carousel-item { min-width: calc((100% - 72px) / 4); max-width: calc((100% - 72px) / 4); }
         }
+        @media (min-width: 1440px) {
+          .carousel-item { min-width: calc((100% - 120px) / 5); max-width: calc((100% - 120px) / 5); }
+        }
+        @media (min-width: 1800px) {
+          .carousel-item { min-width: calc((100% - 150px) / 6); max-width: calc((100% - 150px) / 6); }
+        }
       `}} />
       
       {/* Cabeçalho */}
@@ -85,29 +104,31 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
       {/* Container Relativo para as Setas */}
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
         
-        {/* Seta Esquerda */}
-        <button 
-          onClick={scrollLeft}
-          className="carousel-arrow"
-          style={{
-            position: 'absolute',
-            left: '-20px',
-            zIndex: 10,
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            background: 'var(--bg-card)',
-            border: `1px solid ${themeColor}`,
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: `0 4px 12px ${themeRgba}`,
-            color: themeColor,
-            transition: 'transform 0.2s',
-          }}
-        >
-          <ChevronLeft size={24} />
-        </button>
+        {/* Seta Esquerda - só aparece se há overflow */}
+        {hasOverflow && (
+          <button 
+            onClick={scrollLeft}
+            className="carousel-arrow"
+            style={{
+              position: 'absolute',
+              left: '-20px',
+              zIndex: 10,
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'var(--bg-card)',
+              border: `1px solid ${themeColor}`,
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: `0 4px 12px ${themeRgba}`,
+              color: themeColor,
+              transition: 'transform 0.2s',
+            }}
+          >
+            <ChevronLeft size={24} />
+          </button>
+        )}
 
         {/* Scroll Container */}
         <div 
@@ -131,7 +152,11 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
               : (product.attributes?.brand || 'Loja Oficial')
             const price = product.price
             const title = product.title
-            const url = tenant === 'msu' ? `/usado/anuncio/${product.id}` : `/produtos/${product.slug}`
+            const url = tenant === 'msu' 
+              ? `/usado/anuncio/${product.id}` 
+              : tenant === 'seven' 
+                ? `/seven/produtos/${product.slug}` 
+                : `/produtos/${product.slug}`
             
             return (
               <div key={product.id} className="carousel-item" style={{ 
@@ -202,29 +227,31 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
           })}
         </div>
 
-        {/* Seta Direita */}
-        <button 
-          onClick={scrollRight}
-          className="carousel-arrow"
-          style={{
-            position: 'absolute',
-            right: '-20px',
-            zIndex: 10,
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            background: 'var(--bg-card)',
-            border: `1px solid ${themeColor}`,
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: `0 4px 12px ${themeRgba}`,
-            color: themeColor,
-            transition: 'transform 0.2s',
-          }}
-        >
-          <ChevronRight size={24} />
-        </button>
+        {/* Seta Direita - só aparece se há overflow */}
+        {hasOverflow && (
+          <button 
+            onClick={scrollRight}
+            className="carousel-arrow"
+            style={{
+              position: 'absolute',
+              right: '-20px',
+              zIndex: 10,
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'var(--bg-card)',
+              border: `1px solid ${themeColor}`,
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: `0 4px 12px ${themeRgba}`,
+              color: themeColor,
+              transition: 'transform 0.2s',
+            }}
+          >
+            <ChevronRight size={24} />
+          </button>
+        )}
 
       </div>
     </div>

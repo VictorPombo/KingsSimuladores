@@ -44,8 +44,8 @@ export default async function SevenLayout({
         `}
       </Script>
       <CartProvider>
-        <CartDrawer />
         <div className="theme-seven" style={{ minHeight: '100vh', color: '#f8fafc', position: 'relative', fontFamily: 'var(--font-sans)', zIndex: 1 }}>
+        <CartDrawer />
       {/* Background Effect */}
       <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(249,115,22,0.05) 0%, rgba(0,0,0,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
       
@@ -121,7 +121,7 @@ export default async function SevenLayout({
           <div style={{ background: 'rgba(9, 10, 15, 0.95)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px', overflowX: 'auto' }}>
               <nav style={{ display: 'flex', alignItems: 'center', height: '38px', whiteSpace: 'nowrap' }}>
-                <ProfileDropdown />
+                <Link href="/seven/produtos" className="font-display hover:text-[#fff]" style={{ color: '#f8fafc', fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s', marginRight: '32px' }}>Todos Produtos</Link>
                 <div style={{ display: 'flex', gap: '32px' }}>
                   <Link href="/seven/produtos?marca=simagic" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simagic</Link>
                   <Link href="/seven/produtos?categoria=bases" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Base</Link>
@@ -177,8 +177,8 @@ export default async function SevenLayout({
               </div>
             </div>
 
-            <nav style={{ display: 'flex', alignItems: 'center', padding: '0 16px', overflowX: 'auto' }}>
-              <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }}>
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'center' }}>
                 <Link href="/seven/produtos?marca=simagic" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                   Simagic
                 </Link>
@@ -202,117 +202,135 @@ export default async function SevenLayout({
       </main>
 
       <footer style={{ background: '#0a0e17', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '80px', position: 'relative', zIndex: 10 }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '40px', padding: '60px 24px' }}>
+        <style dangerouslySetInnerHTML={{__html: `
+          .seven-footer-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px 16px;
+            padding: 32px 16px;
+            max-width: 1920px;
+            margin: 0 auto;
+          }
+          .seven-footer-grid > div:first-child { grid-column: 1 / -1; }
+          .seven-footer-grid h3 { font-size: 0.75rem !important; margin-bottom: 12px !important; }
+          .seven-footer-grid a, .seven-footer-grid span, .seven-footer-grid div { font-size: 0.78rem !important; }
+          @media (min-width: 768px) {
+            .seven-footer-grid {
+              grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+              gap: 40px;
+              padding: 60px 24px;
+            }
+            .seven-footer-grid > div:first-child { grid-column: auto; }
+            .seven-footer-grid h3 { font-size: 1rem !important; margin-bottom: 20px !important; }
+            .seven-footer-grid a, .seven-footer-grid span, .seven-footer-grid div { font-size: 0.85rem !important; }
+          }
+        `}} />
+        <div className="seven-footer-grid">
           
           {/* Coluna 1: Contato e Logo */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <img src="/logo-seven.svg" alt="Seven Sim Racing" style={{ height: '48px', objectFit: 'contain', alignSelf: 'flex-start' }} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#94a3b8', fontSize: '0.85rem' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid #ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c' }}>
-                  <Phone size={14} />
-                </div>
-                (11) 91549-7709
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <img src="/logo-seven.svg" alt="Seven Sim Racing" style={{ height: '40px', objectFit: 'contain', alignSelf: 'flex-start' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8' }}>
+                <Phone size={14} color="#ea580c" style={{ flexShrink: 0 }} />
+                <span>(11) 91549-7709</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#94a3b8', fontSize: '0.85rem' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid #ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c' }}>
-                  <Mail size={14} />
-                </div>
-                contato@sevensimracing.com.br
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8' }}>
+                <Mail size={14} color="#ea580c" style={{ flexShrink: 0 }} />
+                <span>contato@sevensimracing.com.br</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#94a3b8', fontSize: '0.85rem' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid #ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c' }}>
-                  <Clock size={14} />
-                </div>
-                <div>Horários de Funcionamento<br/><strong style={{color: '#f8fafc'}}>Das 09:00 As 17:00</strong></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8' }}>
+                <Clock size={14} color="#ea580c" style={{ flexShrink: 0 }} />
+                <span>09:00 - 17:00</span>
               </div>
             </div>
           </div>
 
           {/* Coluna 2: Institucional */}
           <div>
-            <h3 style={{ color: '#ea580c', fontWeight: 800, fontSize: '1rem', marginBottom: '20px' }}>Institucional</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {['Empresa (Quem Somos)', 'Como comprar', 'Segurança (Política de Privacidade)', 'Envio', 'Pagamento', 'Tempo de Garantia', 'Fale Conosco', 'Trocas e devoluções (Completa)'].map(link => (
-                <a key={link} href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }} className="hover:text-[#ea580c]">{link}</a>
+            <h3 style={{ color: '#ea580c', fontWeight: 800 }}>Institucional</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {['Quem Somos', 'Como comprar', 'Privacidade', 'Envio', 'Pagamento', 'Garantia', 'Fale Conosco', 'Trocas'].map(link => (
+                <a key={link} href="#" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} className="hover:text-[#ea580c]">{link}</a>
               ))}
             </div>
           </div>
 
           {/* Coluna 3: Painel e Redes */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <h3 style={{ color: '#ea580c', fontWeight: 800, fontSize: '1rem', marginBottom: '20px' }}>Painel</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h3 style={{ color: '#ea580c', fontWeight: 800 }}>Painel</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {['Meus Pedidos', 'Meus Dados', 'Contato'].map(link => (
-                  <a key={link} href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }} className="hover:text-[#ea580c]">{link}</a>
+                  <a key={link} href="#" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} className="hover:text-[#ea580c]">{link}</a>
                 ))}
               </div>
             </div>
-            <div>
-              <h3 style={{ color: '#ea580c', fontWeight: 800, fontSize: '1rem', marginBottom: '20px' }}>Nossas Redes</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }} className="hover:text-[#ea580c]">
-                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                  </div> 
-                  sevensimracing
-                </a>
-                <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }} className="hover:text-[#ea580c]">
-                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                  </div> 
-                  sevensimracing
-                </a>
-                <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }} className="hover:text-[#ea580c]">
-                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 15.68a6.34 6.34 0 0 0 6.27 6.36 6.34 6.34 0 0 0 6.25-6.36V10.5a7.39 7.39 0 0 0 5 1.61V8.66a5.55 5.55 0 0 1-2.93-1.97z"/></svg>
-                  </div> 
-                  sevensimracing
-                </a>
-              </div>
-            </div>
+
           </div>
 
           {/* Coluna 4: Pagamento e Segurança */}
           <div>
-            <h3 style={{ color: '#ea580c', fontWeight: 800, fontSize: '1rem', marginBottom: '20px' }}>Pagamento</h3>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '40px' }}>
-              <div style={{ padding: '6px', background: '#fff', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00b1ea' }}>
-                <QrCode size={20} />
+            <h3 style={{ color: '#ea580c', fontWeight: 800 }}>Pagamento</h3>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+              <div style={{ padding: '4px', background: '#fff', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00b1ea' }}>
+                <QrCode size={18} />
               </div>
-              <div style={{ padding: '6px', background: '#fff', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00b1ea' }}>
-                <CreditCard size={20} />
+              <div style={{ padding: '4px', background: '#fff', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00b1ea' }}>
+                <CreditCard size={18} />
               </div>
-              <div style={{ padding: '6px', background: '#fff', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }}>
-                <Barcode size={20} />
+              <div style={{ padding: '4px', background: '#fff', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }}>
+                <Barcode size={18} />
               </div>
             </div>
             
-            <h3 style={{ color: '#ea580c', fontWeight: 800, fontSize: '1rem', marginBottom: '20px' }}>Segurança</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f8fafc', fontSize: '0.85rem', fontWeight: 800 }}>
-                <ShieldCheck size={20} color="#10b981" /> Google Safe Browsing
+            <h3 style={{ color: '#ea580c', fontWeight: 800 }}>Segurança</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f8fafc', fontWeight: 800 }}>
+                <ShieldCheck size={16} color="#10b981" /> Google Safe Browsing
               </div>
-              <div style={{ background: '#000', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px', width: 'fit-content' }}>
-                <ShieldCheck size={24} color="#ea580c" />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '1px' }}>LOJA PROTEGIDA</span>
-                </div>
+              <div style={{ background: '#000', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px', width: 'fit-content' }}>
+                <ShieldCheck size={18} color="#ea580c" />
+                <span style={{ color: '#94a3b8', fontWeight: 800, letterSpacing: '1px' }}>LOJA PROTEGIDA</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Faixa Laranja Base */}
-        <div style={{ background: '#ea580c', padding: '16px 24px', textAlign: 'center' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-            <p style={{ color: '#fff', fontSize: '0.85rem', margin: 0, fontWeight: 600 }}>
-              Todos os direitos reservados a Seven Sim Racing 61.219.783/0001-93
+        <style dangerouslySetInnerHTML={{__html: `
+          .seven-footer-bottom {
+            background: #ea580c;
+            padding: 16px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+          }
+          @media (min-width: 768px) {
+            .seven-footer-bottom {
+              flex-direction: row;
+              justify-content: space-between;
+              text-align: left;
+              padding: 16px 40px;
+            }
+          }
+        `}} />
+        <div className="seven-footer-bottom">
+          <div>
+            <p style={{ color: '#fff', fontSize: '0.78rem', margin: 0, fontWeight: 600 }}>
+              Seven Sim Racing 61.219.783/0001-93
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.75rem', margin: 0, fontWeight: 800, letterSpacing: '1px' }}>
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.7rem', margin: '4px 0 0', fontWeight: 800, letterSpacing: '1px' }}>
               POWERED BY KINGSHUB
             </p>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <a href="#" style={{ color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>Facebook</a>
+            <a href="#" style={{ color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>Instagram</a>
+            <a href="#" style={{ color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>TikTok</a>
           </div>
         </div>
       </footer>

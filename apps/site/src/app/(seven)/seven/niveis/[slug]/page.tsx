@@ -85,18 +85,19 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
               return (
                 <Link key={slug} href={`/seven/niveis/${slug}`} style={{
                   textDecoration: 'none',
-                  padding: '8px 20px',
+                  padding: '8px clamp(6px, 1.5vw, 20px)',
                   borderRadius: '10px',
-                  fontSize: '0.82rem',
+                  fontSize: 'clamp(0.65rem, 2.8vw, 0.82rem)',
                   fontWeight: 700,
                   textTransform: 'uppercase',
-                  letterSpacing: '1px',
+                  letterSpacing: '0.5px',
+                  whiteSpace: 'nowrap',
                   transition: 'all 0.2s',
                   color: isActive ? '#000' : 'var(--text-secondary)',
                   background: isActive ? d.color : 'transparent',
                   border: isActive ? 'none' : '1px solid transparent',
                 }}>
-                  {slug === 'semiprofissional' ? 'Semi-Pro' : slug.charAt(0).toUpperCase() + slug.slice(1)}
+                  {slug.charAt(0).toUpperCase() + slug.slice(1)}
                 </Link>
               )
             })}

@@ -14,19 +14,50 @@ export default async function SevenHomePage() {
   // Buscar a brand_id da Seven
   const { data: brand } = await supabase.from('brands').select('id').eq('name', 'seven').single()
   
-  let products: any[] = []
+  let lancamentos: any[] = []
+  let maisVendidos: any[] = []
+  let destaques: any[] = []
   
   if (brand) {
-    const { data } = await supabase
+    // 1. Lançamentos - 6 mais recentes
+    const { data: dataLanc } = await supabase
       .from('products')
       .select('*')
       .eq('brand_id', brand.id)
       .eq('status', 'active')
       .order('created_at', { ascending: false })
-      .limit(8)
+      .limit(6)
       
-    if (data) products = data
+    if (dataLanc) lancamentos = dataLanc
+    const lancIds = lancamentos.map(p => p.id)
+
+    // 2. Mais Vendidos - 6 por preço desc (excluindo lançamentos)
+    const { data: dataMV } = await supabase
+      .from('products')
+      .select('*')
+      .eq('brand_id', brand.id)
+      .eq('status', 'active')
+      .not('id', 'in', `(${lancIds.join(',')})`)
+      .order('price', { ascending: false })
+      .limit(6)
+      
+    if (dataMV) maisVendidos = dataMV
+    const mvIds = maisVendidos.map(p => p.id)
+
+    // 3. Destaques - 6 restantes por preço asc (excluindo anteriores)
+    const allExcluded = [...lancIds, ...mvIds]
+    const { data: dataDest } = await supabase
+      .from('products')
+      .select('*')
+      .eq('brand_id', brand.id)
+      .eq('status', 'active')
+      .not('id', 'in', `(${allExcluded.join(',')})`)
+      .order('price', { ascending: true })
+      .limit(6)
+      
+    if (dataDest) destaques = dataDest
   }
+
   return (
     <>
       {/* Hero Section Banner Animado */}
@@ -41,7 +72,6 @@ export default async function SevenHomePage() {
               100% { transform: translateX(-50%); }
             }
           `}} />
-          {/* O conteúdo é duplicado para criar o efeito infinito contínuo */}
           {[1, 2].map((_, i) => (
             <div key={i} style={{ display: 'flex', gap: '60px', paddingRight: '60px', flexShrink: 0, alignItems: 'center' }}>
               <span className="font-display" style={{ color: '#f8fafc', fontSize: '1rem', fontWeight: 700, letterSpacing: '1px' }}>
@@ -116,28 +146,28 @@ export default async function SevenHomePage() {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section style={{ paddingTop: '100px', paddingBottom: '100px', overflow: 'hidden' }}>
-        <Container>
-          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px', position: 'relative', zIndex: 10, padding: '0 24px' }}>
-            <Link href="/seven/produtos" className="font-display hover:underline" style={{ color: '#f97316', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '1px', fontSize: 'clamp(12px, 3vw, 16px)' }}>
-              VER CATÁLOGO COMPLETO <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          {products.length > 0 ? (
-            <ProductCarousel 
-              title="Lançamentos Simagic" 
-              prods={products} 
-              tenant="seven" 
-            />
-          ) : (
-            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8' }}>
-              <p>Os produtos da nova coleção estão sendo preparados...</p>
+      {/* Vitrines de Produtos Seven */}
+      {(lancamentos.length > 0 || maisVendidos.length > 0 || destaques.length > 0) && (
+        <section style={{ paddingTop: '80px', paddingBottom: '80px', overflow: 'hidden' }}>
+          <Container>
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px', position: 'relative', zIndex: 10, padding: '0 24px' }}>
+              <Link href="/seven/produtos" className="font-display hover:underline" style={{ color: '#f97316', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '1px', fontSize: 'clamp(12px, 3vw, 16px)' }}>
+                VER CATÁLOGO COMPLETO <ArrowRight size={16} />
+              </Link>
             </div>
-          )}
-        </Container>
-      </section>
+
+            {lancamentos.length > 0 && (
+              <ProductCarousel title="LANÇAMENTOS" prods={lancamentos} tenant="seven" />
+            )}
+            {maisVendidos.length > 0 && (
+              <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} tenant="seven" />
+            )}
+            {destaques.length > 0 && (
+              <ProductCarousel title="DESTAQUES" prods={destaques} tenant="seven" />
+            )}
+          </Container>
+        </section>
+      )}
     </>
   )
 }

@@ -209,7 +209,7 @@ export function Spinner({ size = 20 }: { size?: number }) {
 /* ═══════════ Container ═══════════ */
 export function Container({
   children,
-  maxWidth = '1400px',
+  maxWidth = '1920px',
   style,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & { maxWidth?: string }) {
@@ -218,7 +218,7 @@ export function Container({
       style={{
         maxWidth,
         margin: '0 auto',
-        padding: '0 24px',
+        padding: '0 clamp(16px, 2vw, 40px)',
         width: '100%',
         ...style,
       }}

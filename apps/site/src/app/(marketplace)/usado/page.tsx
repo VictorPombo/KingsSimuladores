@@ -24,7 +24,7 @@ export default async function Home() {
     .limit(8)
 
   return (
-    <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '80px' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh' }}>
       <style dangerouslySetInnerHTML={{__html: `
         .hero-title { font-size: 3.5rem; }
         .hero-desc { font-size: 1.2rem; }
@@ -39,6 +39,13 @@ export default async function Home() {
           .msu-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px; }
         }
       `}} />
+
+      {/* MSU Banner Carousel - Logo após o header */}
+      <BannerCarousel 
+        slides={[
+          { src: '/Banner_00MSU.jpeg', alt: 'Meu Simulador Usado', href: '/usado/produtos' }
+        ]}
+      />
 
       {/* Hero Section */}
       <section style={{ 
@@ -78,13 +85,6 @@ export default async function Home() {
         </Container>
       </section>
 
-      {/* MSU Banner Carousel */}
-      <BannerCarousel 
-        slides={[
-          { src: '/Banner_00MSU.jpeg', alt: 'Meu Simulador Usado', href: '/usado/produtos' }
-        ]}
-      />
-
       {/* Destaques usando o Carrossel Padronizado */}
       <section style={{ padding: '2rem 0 5rem 0' }}>
         <Container>
@@ -98,8 +98,8 @@ export default async function Home() {
           <ProductCarousel title="ÚLTIMOS ANÚNCIOS" prods={listings || []} tenant="msu" />
           
           {listings?.length === 0 && (
-            <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '3rem 0' }}>
-              Nenhum anúncio disponível no momento. Seja o primeiro a anunciar!
+            <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '3rem 0', fontSize: '1.2rem', fontStyle: 'italic' }}>
+              Aguardando anúncios...
             </div>
           )}
         </Container>

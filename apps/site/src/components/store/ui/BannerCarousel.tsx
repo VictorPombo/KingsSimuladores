@@ -25,60 +25,53 @@ export function BannerCarousel({ slides, accentColor = '#10b981' }: { slides: Ba
   const isExternal = (href: string) => href.startsWith('http')
 
   return (
-    <section style={{ width: '100%', overflow: 'hidden', position: 'relative', backgroundColor: '#090a0f' }}>
-      {/* Container com aspect-ratio fixo = ZERO layout shift */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '2.87 / 1' }}>
+    <section style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)', overflow: 'hidden', position: 'relative', backgroundColor: '#090a0f', padding: 0, margin: 0 }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        .banner-container { aspect-ratio: 2.2 / 1; width: 100%; }
+        .banner-container img { object-fit: fill !important; object-position: center !important; }
+        @media (min-width: 768px) { .banner-container { aspect-ratio: 2.87 / 1; } }
+        @media (min-width: 1440px) { .banner-container { aspect-ratio: 3.5 / 1; } }
+        @media (min-width: 1800px) { .banner-container { aspect-ratio: 4 / 1; } }
+      `}} />
+      {/* Container edge-to-edge */}
+      <div className="banner-container" style={{ position: 'relative', width: '100%' }}>
         {slides.map((slide, i) => {
-          const imgEl = (
-            <img
+          return (
+            <div 
               key={slide.src}
-              src={slide.src}
-              alt={slide.alt}
               style={{
                 position: 'absolute',
                 inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center',
-                display: 'block',
                 opacity: current === i ? 1 : 0,
                 transition: 'opacity 0.8s ease-in-out',
+                pointerEvents: current === i ? 'auto' : 'none',
+                zIndex: current === i ? 2 : 1,
               }}
-            />
-          )
-
-          if (isExternal(slide.href)) {
-            return (
-              <a
-                key={slide.src}
-                href={slide.href}
-                target="_blank"
-                rel="noopener noreferrer"
+            >
+              {/* Main Banner Image (stretched to fit exactly) */}
+              <img
+                src={slide.src}
+                alt={slide.alt}
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  zIndex: current === i ? 2 : 1,
-                  pointerEvents: current === i ? 'auto' : 'none',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'fill',
+                  objectPosition: 'center',
+                  display: 'block',
+                  zIndex: 1,
                 }}
-              >
-                {imgEl}
-              </a>
-            )
-          }
-          return (
-            <Link
-              key={slide.src}
-              href={slide.href}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                zIndex: current === i ? 2 : 1,
-                pointerEvents: current === i ? 'auto' : 'none',
-              }}
-            >
-              {imgEl}
-            </Link>
+              />
+              
+              {/* Overlay Link */}
+              <a
+                href={slide.href}
+                target={slide.href.startsWith('http') ? '_blank' : '_self'}
+                rel={slide.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                style={{ position: 'absolute', inset: 0, zIndex: 2 }}
+              />
+            </div>
           )
         })}
       </div>

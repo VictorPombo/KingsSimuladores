@@ -87,9 +87,7 @@ export default async function ProductsPage({
             <h1 className="font-display" style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>CATÁLOGO</h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>Mostrando {products.length} produtos encontrados</p>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Badge variant="success">LIVE DATA</Badge>
-          </div>
+
         </div>
 
         {/* Filter Bar (horizontal, collapsible, sticky) */}

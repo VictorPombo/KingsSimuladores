@@ -27,8 +27,36 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid var(--border)', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          &copy; {new Date().getFullYear()} Meu Simulador Usado by KingsHub. Todos os direitos reservados.
+        <style dangerouslySetInnerHTML={{__html: `
+          .msu-footer-bottom {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+          }
+          @media (min-width: 768px) {
+            .msu-footer-bottom {
+              flex-direction: row;
+              justify-content: space-between;
+              text-align: left;
+            }
+          }
+        `}} />
+        <div className="msu-footer-bottom">
+          <div>
+            &copy; {new Date().getFullYear()} Meu Simulador Usado by KingsHub. Todos os direitos reservados.
+          </div>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <a href="https://instagram.com/kingssimuladores" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '1.1rem', textDecoration: 'none' }}>Instagram</a>
+            <a href="https://facebook.com/kingssimuladores" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '1.1rem', textDecoration: 'none' }}>Facebook</a>
+            <a href="https://www.youtube.com/@kingssimuladores" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '1.1rem', textDecoration: 'none' }}>YouTube</a>
+          </div>
         </div>
       </Container>
     </footer>

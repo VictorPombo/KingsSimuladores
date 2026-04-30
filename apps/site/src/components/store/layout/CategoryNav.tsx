@@ -26,20 +26,20 @@ const MENU_ITEMS = [
     label: "THRUSTMASTER",
     href: "/marcas/thrustmaster",
     subItems: [
-      { label: "BASES TM", href: "/categorias/base" },
-      { label: "KIT COMPLETO TM", href: "/categorias/kit-completo" },
-      { label: "PEDALEIRA TM", href: "/categorias/pedais" },
-      { label: "VOLANTES", href: "/categorias/volantes" }
+      { label: "BASES TM", href: "/produtos?brand=thrustmaster&category=base" },
+      { label: "KIT COMPLETO TM", href: "/produtos?brand=thrustmaster&category=kit-completo" },
+      { label: "PEDALEIRA TM", href: "/produtos?brand=thrustmaster&category=pedais" },
+      { label: "VOLANTES", href: "/produtos?brand=thrustmaster&category=volantes" }
     ]
   },
   {
     label: "MOZA RACING",
     href: "/marcas/moza",
     subItems: [
-      { label: "BASES - APENAS BASES", href: "/categorias/base" },
-      { label: "KIT COMPLETO", href: "/categorias/kit-completo" },
-      { label: "PEDAIS", href: "/categorias/pedais" },
-      { label: "VOLANTES", href: "/categorias/volantes" }
+      { label: "BASES - APENAS BASES", href: "/produtos?brand=moza&category=base" },
+      { label: "KIT COMPLETO", href: "/produtos?brand=moza&category=kit-completo" },
+      { label: "PEDAIS", href: "/produtos?brand=moza&category=pedais" },
+      { label: "VOLANTES", href: "/produtos?brand=moza&category=volantes" }
     ]
   },
   {

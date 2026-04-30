@@ -1,194 +1,224 @@
-import { Container } from '@kings/ui'
-import { ChevronRight, Star, ShoppingCart, CheckSquare, Square } from 'lucide-react'
-import Link from 'next/link'
-
+import { Container, Badge } from '@kings/ui'
 import { createServerSupabaseClient } from '@kings/db/server'
+import Link from 'next/link'
+import { Suspense } from 'react'
+
+import { SevenCatalogFilters } from './SevenCatalogFilters'
 
 export const dynamic = 'force-dynamic'
 
-interface Props {
-  searchParams: {
-    categoria?: string
-    ordenar?: string
-    marca?: string
-  }
+function formatPrice(value: number) {
+  return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
 }
 
-export default async function SevenProductsPage({ searchParams }: Props) {
-  const supabase = await createServerSupabaseClient()
-  const currentCategory = searchParams.categoria
-  const currentMarca = searchParams.marca
+export default async function SevenProductsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
+  let products: any[] = []
   
-  // 1. Fetch Brand ID
-  const { data: brand } = await supabase.from('brands').select('id').eq('name', 'seven').single()
+  const category = typeof searchParams.categoria === 'string' ? searchParams.categoria : null
+  const marca = typeof searchParams.marca === 'string' ? searchParams.marca : null
+  const q = typeof searchParams.q === 'string' ? searchParams.q : null
   
-  // 2. Fetch Categories
-  let categories: any[] = []
-  if (brand) {
-    const { data: cats } = await supabase.from('categories').select('id, name, slug').eq('brand_scope', 'seven')
-    if (cats) categories = cats
-  }
-
-  // 3. Fetch Products
-  let query = supabase
-    .from('products')
-    .select('id, title, price, slug, images, category_id, stock')
-    .eq('brand_id', brand?.id)
-    .eq('status', 'active')
-
-  if (currentCategory) {
-    const targetCat = categories.find(c => c.slug === currentCategory)
-    if (targetCat) {
-      query = query.eq('category_id', targetCat.id)
+  try {
+    const supabase = await createServerSupabaseClient()
+    
+    // Buscar brand_id da Seven
+    const { data: sevenBrand } = await supabase.from('brands').select('id').eq('name', 'seven').single()
+    
+    if (!sevenBrand) throw new Error('Seven brand not found')
+    
+    let query = supabase
+      .from('products')
+      .select('id, title, slug, price, price_compare, images, attributes, stock')
+      .eq('brand_id', sevenBrand.id)
+      .eq('status', 'active')
+      
+    if (q) {
+      query = query.ilike('title', `%${q}%`)
     }
-  }
-  if (currentMarca) {
-    query = query.ilike('attributes->>marca', `%${currentMarca}%`)
+
+    if (category) {
+      const term = category.toLowerCase()
+      
+      if (term === 'pedal' || term === 'pedais') {
+        query = query.or('title.ilike.%pedal%,title.ilike.%pedais%')
+      } else if (term === 'volante' || term === 'volantes') {
+        query = query.or('title.ilike.%volante%,title.ilike.%arco%,title.ilike.%cambio%')
+      } else if (term === 'bases' || term === 'base') {
+        query = query.or('title.ilike.%base%,title.ilike.%motor%')
+      } else if (term === 'cockpit' || term === 'cockpits') {
+        query = query.or('title.ilike.%cockpit%,title.ilike.%simulador%,title.ilike.%racing%')
+      } else if (term === 'acessorios') {
+        query = query.or('title.ilike.%suporte%,title.ilike.%fonte%,title.ilike.%tapete%,title.ilike.%monitor%,title.ilike.%freio%,title.ilike.%acessor%,title.ilike.%embreagem%')
+      } else {
+        const rootTerm = term.endsWith('s') ? term.slice(0, -1) : term
+        query = query.ilike('title', `%${rootTerm}%`)
+      }
+    }
+    
+    if (marca) {
+      query = query.ilike('attributes->>marca', `%${marca}%`)
+    }
+
+    const { data } = await query.order('created_at', { ascending: false })
+    products = data || []
+    
+  } catch (err) {
+    console.error("Erro buscando produtos Seven:", err)
   }
 
-  // Ordenação Simples
-  if (searchParams.ordenar === 'menor-preco') query = query.order('price', { ascending: true })
-  else if (searchParams.ordenar === 'maior-preco') query = query.order('price', { ascending: false })
-  else query = query.order('created_at', { ascending: false })
-
-  const { data: products } = await query
-  const displayProducts = products || []
   return (
-    <div style={{ padding: '40px 0', minHeight: 'calc(100vh - 100px)' }}>
+    <div style={{ padding: '40px 0', minHeight: 'calc(100vh - 80px)' }}>
       <Container>
-        
-        {/* Top Header & Breadcrumbs */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '40px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '0.85rem', marginBottom: '16px' }}>
-            <Link href="/seven" className="hover:text-[#f8fafc]" style={{ textDecoration: 'none', color: 'inherit' }}>Home</Link>
-            <ChevronRight size={14} />
-            <span style={{ color: '#f8fafc' }}>Simagic</span>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
+          <div>
+            <h1 className="font-display" style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>CATÁLOGO SEVEN</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>Mostrando {products.length} produtos encontrados</p>
           </div>
-          
-          <h1 className="font-display" style={{ fontSize: '3rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '2px', textTransform: 'uppercase', margin: 0 }}>
-            SIMAGIC
-          </h1>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '24px' }}>
-            <span style={{ color: '#f8fafc', fontWeight: 700, fontSize: '0.9rem' }}>Ordenar por:</span>
-            <select style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(249,115,22,0.5)', color: '#f8fafc', padding: '8px 16px', borderRadius: '8px', fontSize: '0.9rem', outline: 'none', cursor: 'pointer' }}>
-              <option>Destaque</option>
-              <option>Menor Preço</option>
-              <option>Maior Preço</option>
-            </select>
-          </div>
+
         </div>
 
-        {/* Layout: Sidebar + Grid */}
-        <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+        {/* Filter Bar */}
+        <Suspense fallback={<div style={{ padding: '12px 20px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', marginBottom: '24px' }}>Carregando filtros...</div>}>
+          <SevenCatalogFilters />
+        </Suspense>
+
+        {/* Product Grid - mesmo estilo da Kings */}
+        <style dangerouslySetInnerHTML={{__html: `
+          .seven-product-card {
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+          }
+          .seven-product-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(249, 115, 22, 0.35) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(249, 115, 22, 0.1);
+          }
+          .seven-product-card:hover .seven-card-img {
+            transform: scale(1.04);
+          }
+          .seven-card-img {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .seven-catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+          }
           
-          {/* Sidebar de Filtros */}
-          <aside style={{ width: '260px', flexShrink: 0, display: 'none', '@media(min-width: 768px)': { display: 'block' } } as any}>
-            <div style={{ borderBottom: '2px solid #1e293b', paddingBottom: '12px', marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', textTransform: 'uppercase', letterSpacing: '1px' }}>FILTRAR MAIS</h3>
-            </div>
-            
-            {/* Categorias */}
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px', marginBottom: '16px' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>Categorias</h4>
-                <span style={{ color: '#f8fafc', fontWeight: 800 }}>+</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <Link href={currentMarca ? `/seven/produtos?marca=${currentMarca}` : `/seven/produtos`} style={{ textDecoration: 'none' }}>
-                  <FilterCheckbox label="Todas as categorias" checked={!currentCategory} />
-                </Link>
-                {categories.map(cat => (
-                  <Link key={cat.id} href={currentMarca ? `/seven/produtos?categoria=${cat.slug}&marca=${currentMarca}` : `/seven/produtos?categoria=${cat.slug}`} style={{ textDecoration: 'none' }}>
-                    <FilterCheckbox label={cat.name} checked={currentCategory === cat.slug} />
-                  </Link>
-                ))}
-              </div>
-            </div>
+          .seven-card-img-container {
+            background: #fff; display: flex; align-items: center; justify-content: center; height: 200px; flex-shrink: 0; overflow: hidden; position: relative;
+          }
+          .seven-card-info {
+            padding: 16px 18px 18px; display: flex; flex-direction: column; flex-grow: 1;
+          }
+          .seven-card-brand {
+            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;
+          }
+          .seven-card-title {
+            font-size: 0.88rem; font-weight: 600; color: var(--text-primary); line-height: 1.35; margin-bottom: auto; min-height: 38px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+          }
+          .seven-card-price-container {
+             margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 12px;
+          }
+          .seven-card-price {
+            font-size: 1.15rem; font-weight: 800; color: #f97316;
+          }
+          .seven-card-installments {
+            font-size: 0.72rem; color: var(--text-secondary); margin-top: 3px;
+          }
 
-            {/* Preço */}
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px', marginBottom: '16px' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>Preço</h4>
-                <span style={{ color: '#f8fafc', fontWeight: 800 }}>+</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <FilterCheckbox label="Até R$ 1.662,89" />
-                <FilterCheckbox label="De R$ 1.662,90 à R$ 3.029,89" />
-                <FilterCheckbox label="De R$ 3.029,90 à R$ 4.396,89" />
-                <FilterCheckbox label="De R$ 4.396,90 à R$ 5.763,89" />
-                <FilterCheckbox label="De R$ 5.763,90 à R$ 7.130,89" />
-                <FilterCheckbox label="Acima de R$ 8.500,00" />
-              </div>
-            </div>
+          @media (max-width: 1200px) {
+            .seven-catalog-grid {
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }
+          @media (max-width: 768px) {
+            .seven-catalog-grid {
+              grid-template-columns: repeat(2, 1fr);
+              gap: 12px;
+            }
+          }
+          @media (max-width: 480px) {
+            .seven-catalog-grid {
+              grid-template-columns: repeat(2, 1fr);
+              gap: 8px;
+            }
+            .seven-card-img-container { height: 130px; }
+            .seven-card-info { padding: 10px; }
+            .seven-card-brand { font-size: 0.55rem; margin-bottom: 4px; }
+            .seven-card-title { font-size: 0.75rem; min-height: 32px; line-height: 1.2; }
+            .seven-card-price-container { margin-top: 10px; padding-top: 8px; }
+            .seven-card-price { font-size: 0.95rem; }
+            .seven-card-installments { font-size: 0.6rem; }
+            .seven-card-img { max-width: 90% !important; max-height: 90% !important; }
+          }
+        `}} />
 
-            {/* Marcas */}
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px', marginBottom: '16px' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>Marcas</h4>
-                <span style={{ color: '#f8fafc', fontWeight: 800 }}>+</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <Link href={currentCategory ? `/seven/produtos?categoria=${currentCategory}` : `/seven/produtos`} style={{ textDecoration: 'none' }}>
-                  <FilterCheckbox label="Todas as Marcas" checked={!currentMarca} />
-                </Link>
-                <Link href={currentCategory ? `/seven/produtos?categoria=${currentCategory}&marca=simagic` : `/seven/produtos?marca=simagic`} style={{ textDecoration: 'none' }}>
-                  <FilterCheckbox label="Simagic" checked={currentMarca?.toLowerCase() === 'simagic'} />
-                </Link>
-                <Link href={currentCategory ? `/seven/produtos?categoria=${currentCategory}&marca=thermaltake` : `/seven/produtos?marca=thermaltake`} style={{ textDecoration: 'none' }}>
-                  <FilterCheckbox label="Thermaltake" checked={currentMarca?.toLowerCase() === 'thermaltake'} />
-                </Link>
-              </div>
-            </div>
-
-            {/* Filtrar Botão */}
-            <button style={{ width: '100%', background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)', color: '#fff', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(234,88,12,0.3)' }} className="hover:scale-[1.02] transition-transform">
-              FILTRAR
-            </button>
-          </aside>
-
-          {/* Grade de Produtos */}
-          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
-            {displayProducts.length === 0 ? (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px', color: '#94a3b8' }}>
-                Nenhum produto encontrado.
-              </div>
-            ) : displayProducts.map(product => {
-              const mainImage = product.images?.[0] || 'https://placehold.co/400x400/141416/f97316?text=Sem+Foto'
-              const pricePix = product.price * 0.9 // Simulando 10% pix
+        {products.length === 0 ? (
+          <div style={{ padding: '64px 40px', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--bg-card)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🔍</div>
+            Nenhum produto encontrado com esses filtros.
+          </div>
+        ) : (
+          <div className="seven-catalog-grid">
+            {products.map(product => {
+              const hasDiscount = product.price_compare && product.price_compare > product.price
+              const imgUrl = product.images?.[0] || 'https://placehold.co/400x400/131928/f97316?text=Seven'
+              const brandName = product.attributes?.brand || 'Seven Sim Racing'
+              
               return (
                 <Link key={product.id} href={`/seven/produtos/${product.slug}`} style={{ textDecoration: 'none' }}>
-                  <div style={{ background: 'rgba(20,20,22,0.6)', backdropFilter: 'blur(12px)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'transform 0.3s, box-shadow 0.3s', height: '100%' }} className="hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(249,115,22,0.15)] group">
+                  <div className="seven-product-card" style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                  }}>
                     {/* Imagem */}
-                    <div style={{ height: '220px', background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0) 70%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-                      <img src={mainImage} alt={product.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    <div className="seven-card-img-container">
+                      {hasDiscount && (
+                        <div style={{
+                          position: 'absolute', top: '10px', left: '10px', zIndex: 2,
+                          background: 'linear-gradient(135deg, #ea580c, #c2410c)',
+                          color: '#fff', fontSize: '0.65rem', fontWeight: 800,
+                          padding: '3px 8px', borderRadius: '4px',
+                          letterSpacing: '0.5px',
+                        }}>
+                          OFERTA
+                        </div>
+                      )}
+                      <img className="seven-card-img" src={imgUrl} alt={product.title} style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain' }} />
                     </div>
                     
-                    {/* Infos */}
-                    <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '38px' }}>
-                        {product.title}
-                      </h3>
-                      
-                      {/* Estrelas */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#f97316', marginBottom: '16px' }}>
-                        <Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" />
+                    {/* Info */}
+                    <div className="seven-card-info">
+                      <div className="seven-card-brand">
+                        {brandName}
                       </div>
-                      
-                      {/* Preços */}
-                      <div style={{ marginTop: 'auto' }}>
-                        <div style={{ color: '#94a3b8', fontSize: '1rem', textDecoration: 'none' }}>
-                          R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      <div className="seven-card-title">
+                        {product.title}
+                      </div>
+                      <div className="seven-card-price-container">
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+                          {hasDiscount && (
+                            <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                              {formatPrice(product.price_compare)}
+                            </span>
+                          )}
+                          <span className="font-display seven-card-price">
+                            {formatPrice(product.price)}
+                          </span>
                         </div>
-                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px' }}>
-                          ou <strong>10x de R$ {(product.price / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <div style={{ color: '#22c55e', fontWeight: 900, fontSize: '1.4rem' }}>
-                            <span style={{ fontSize: '1rem', marginRight: '2px' }}>R$</span>
-                            {pricePix.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </div>
-                          <span style={{ color: '#22c55e', fontSize: '0.7rem', fontWeight: 600 }}>no pix</span>
+                        <div className="seven-card-installments">
+                          12x de {formatPrice(product.price / 12)} sem juros
                         </div>
                       </div>
                     </div>
@@ -197,27 +227,8 @@ export default async function SevenProductsPage({ searchParams }: Props) {
               )
             })}
           </div>
-
-        </div>
+        )}
       </Container>
-    </div>
-  )
-}
-
-function FilterCheckbox({ label, count, checked = false }: { label: string, count?: number, checked?: boolean }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} className="group">
-      {checked ? (
-        <CheckSquare size={16} color="#ea580c" />
-      ) : (
-        <Square size={16} color="#64748b" className="group-hover:text-[#94a3b8]" />
-      )}
-      <span style={{ color: checked ? '#f8fafc' : '#94a3b8', fontSize: '0.85rem', fontWeight: checked ? 600 : 400, flex: 1 }} className="group-hover:text-[#f8fafc]">
-        {label}
-      </span>
-      {count !== undefined && (
-        <span style={{ color: '#64748b', fontSize: '0.75rem' }}>({count})</span>
-      )}
     </div>
   )
 }

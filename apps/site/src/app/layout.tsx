@@ -36,6 +36,11 @@ export const metadata: Metadata = {
     title: 'KingsHub',
     statusBarStyle: 'black-translucent',
   },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
 }
 
 import { StreamingBackground } from '@kings/ui'
