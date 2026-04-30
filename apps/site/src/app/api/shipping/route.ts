@@ -13,30 +13,32 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: 'Itens ou dimensões ausentes.' }, { status: 400 })
     }
 
-    const supabase = await createServerSupabaseClient()
-
-    // 1. Puxa Dados Verdadeiros do Banco
-    const productIds = items.map((i: any) => i.id)
-    const { data: dbProducts } = await supabase
-      .from('products')
-      .select('id, weight_kg, dimensions_cm, price')
-      .in('id', productIds)
-
-    // Se for MSU, puxamos do marketplace_listings (caso não venham em products)
-    const missingIds = productIds.filter((id: string) => !dbProducts?.some((p: any) => p.id === id) && !id.startsWith('mock-'))
-    let dbListings: any[] | null = null
-    if (missingIds.length > 0) {
-       const { data } = await supabase
-         .from('marketplace_listings')
-         .select('id, price') // Simuladores usados podem não ter dimensões guardadas separadamente dependendo do setup, usaremos callback base.
-         .in('id', missingIds)
-       dbListings = data
-    }
-
-    // 2. Mapeamento Cego (Ignorando tudo que veio do Front exceto a Quantity)
+    // Usar dimensões diretas (ShippingSimulator na página de produto)
+    // ou buscar do banco via items (Checkout)
     let dimensions = rawDimensions || []
-    
+
     if (items && items.length > 0) {
+      const supabase = await createServerSupabaseClient()
+
+      // 1. Puxa Dados Verdadeiros do Banco
+      const productIds = items.map((i: any) => i.id)
+      const { data: dbProducts } = await supabase
+        .from('products')
+        .select('id, weight_kg, dimensions_cm, price')
+        .in('id', productIds)
+
+      // Se for MSU, puxamos do marketplace_listings (caso não venham em products)
+      const missingIds = productIds.filter((id: string) => !dbProducts?.some((p: any) => p.id === id) && !id.startsWith('mock-'))
+      let dbListings: any[] | null = null
+      if (missingIds.length > 0) {
+         const { data } = await supabase
+           .from('marketplace_listings')
+           .select('id, price')
+           .in('id', missingIds)
+         dbListings = data
+      }
+
+      // 2. Mapeamento Cego (Ignorando tudo que veio do Front exceto a Quantity)
       dimensions = items.map((clientItem: any) => {
          const dbProd = dbProducts?.find((p: any) => p.id === clientItem.id)
          const dbList = dbListings?.find((p: any) => p.id === clientItem.id)
