@@ -20,27 +20,27 @@ async function getProduct(slug: string) {
     .select('*, brands!inner(slug)')
     .eq('slug', slug)
     .eq('status', 'active')
-    .eq('brands.slug', 'kings')
+    .eq('brands.slug', 'seven')
     .single()
   return data
 }
 
 // ── SEO: Meta tags dinâmicas ──
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const product = await getProduct(params.id)
-  if (!product) return { title: 'Produto não encontrado | Kings Simuladores' }
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const product = await getProduct(params.slug)
+  if (!product) return { title: 'Produto não encontrado | Seven Sim Racing' }
 
   const price = product.price_compare && product.price_compare > product.price
     ? product.price : product.price
 
   return {
-    title: `${product.title} | Kings Simuladores`,
+    title: `${product.title} | Seven Sim Racing`,
     description: `${product.title} por ${formatPrice(price)} em até 12x sem juros. ${(product.description || '').slice(0, 150)}`,
     openGraph: {
       title: product.title,
       description: product.description || product.title,
-      url: `${BASE_URL}/produtos/${product.slug}`,
-      siteName: 'Kings Simuladores',
+      url: `${BASE_URL}/seven/produtos/${product.slug}`,
+      siteName: 'Seven Sim Racing',
       images: product.images?.[0] ? [{ url: product.images[0], width: 800, height: 800, alt: product.title }] : [],
       type: 'website',
     },
@@ -70,8 +70,8 @@ function ProductJsonLd({ product }: { product: any }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 }
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  let product = await getProduct(params.id)
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  let product = await getProduct(params.slug)
   if (!product) notFound()
 
   // Injetar lógicas de preços baseados no grupo
@@ -87,7 +87,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
   const imageUrl = product.images?.[0] || 'https://placehold.co/800x800/131928/e8ecf4?text=Kings'
 
   return (
-    <div style={{ padding: '60px 0', minHeight: 'calc(100vh - 80px)' }}>
+    <div style={{ padding: '60px 0', minHeight: 'calc(100vh - 80px)', background: '#0a0e1a' }}>
       <ProductJsonLd product={product} />
       <Container>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1fr) minmax(300px, 500px)', gap: '60px', alignItems: 'start' }}>
@@ -118,33 +118,32 @@ export default async function ProductPage({ params }: { params: { id: string } }
             <div style={{ padding: '24px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '24px' }}>
               <div style={{ marginBottom: '8px' }}>
                 {hasDiscount && (
-                  <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '1rem' }}>
+                  <span style={{ textDecoration: 'line-through', color: '#64748b', fontSize: '1rem' }}>
                     {formatPrice(originalPrice)}
                   </span>
                 )}
-                <div className="font-display" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--success)' }}>
+                <div className="font-display" style={{ fontSize: '2rem', fontWeight: 800, color: '#f97316' }}>
                   {formatPrice(finalPrice)}
                 </div>
               </div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
                 Em até <strong>12x sem juros de {formatPrice(installmentValue)}</strong> no cartão de crédito.
-              </div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                10% de desconto via Pix.
               </div>
             </div>
 
             <ShippingSimulator dimensions={[{ weight: 25, width: 60, height: 60, length: 60 }]} />
 
-            <AddToCartButton 
-              product={{
-                id: product.id,
-                title: product.title,
-                price: finalPrice,
-                imageUrl,
-                brand: brandName,
-              }} 
-            />
+            <div style={{ marginTop: '24px' }}>
+              <AddToCartButton 
+                product={{
+                  id: product.id,
+                  title: product.title,
+                  price: finalPrice,
+                  imageUrl,
+                  brand: brandName,
+                }} 
+              />
+            </div>
             {product.stock <= 0 && (
               <a href={`/usado/produtos?q=${encodeURIComponent(product.title)}`} style={{ display: 'block', marginTop: '16px', textDecoration: 'none' }}>
                 <div style={{ background: 'rgba(6, 182, 212, 0.1)', border: '1px solid #06b6d4', color: '#06b6d4', padding: '16px', borderRadius: 'var(--radius)', textAlign: 'center', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>

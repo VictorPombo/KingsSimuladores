@@ -4,10 +4,13 @@ import { createServerSupabaseClient } from '@kings/db/server'
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const { toPostalCode, items } = await request.json()
+    const { toPostalCode, items, dimensions: rawDimensions } = await request.json()
 
-    if (!toPostalCode || !items || items.length === 0) {
-      return NextResponse.json({ error: 'CEP ou itens ausentes.' }, { status: 400 })
+    if (!toPostalCode) {
+      return NextResponse.json({ error: 'CEP ausente.' }, { status: 400 })
+    }
+    if ((!items || items.length === 0) && (!rawDimensions || rawDimensions.length === 0)) {
+      return NextResponse.json({ error: 'Itens ou dimensões ausentes.' }, { status: 400 })
     }
 
     const supabase = await createServerSupabaseClient()
@@ -31,23 +34,27 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     // 2. Mapeamento Cego (Ignorando tudo que veio do Front exceto a Quantity)
-    const dimensions = items.map((clientItem: any) => {
-       const dbProd = dbProducts?.find((p: any) => p.id === clientItem.id)
-       const dbList = dbListings?.find((p: any) => p.id === clientItem.id)
-       
-       const w = Number(dbProd?.weight_kg || 15) // simulador pesado padrão
-       const dims = dbProd?.dimensions_cm || { width: 50, height: 50, length: 50 }
-       const price = Number(dbProd?.price || dbList?.price || 1)
-       
-       return {
-         weight: w,
-         width: dims.width || 50,
-         height: dims.height || 50,
-         length: dims.length || 50,
-         quantity: clientItem.quantity || 1,
-         insurance_value: price * (clientItem.quantity || 1)
-       }
-    })
+    let dimensions = rawDimensions || []
+    
+    if (items && items.length > 0) {
+      dimensions = items.map((clientItem: any) => {
+         const dbProd = dbProducts?.find((p: any) => p.id === clientItem.id)
+         const dbList = dbListings?.find((p: any) => p.id === clientItem.id)
+         
+         const w = Number(dbProd?.weight_kg || 15) // simulador pesado padrão
+         const dims = dbProd?.dimensions_cm || { width: 50, height: 50, length: 50 }
+         const price = Number(dbProd?.price || dbList?.price || 1)
+         
+         return {
+           weight: w,
+           width: dims.width || 50,
+           height: dims.height || 50,
+           length: dims.length || 50,
+           quantity: clientItem.quantity || 1,
+           insurance_value: price * (clientItem.quantity || 1)
+         }
+      })
+    }
 
     // O CEP de origem padrão da KingsHub: 01001-000 (Sé, São Paulo)
     const fromPostalCode = process.env.ORIGIN_CEP || '01001000'
