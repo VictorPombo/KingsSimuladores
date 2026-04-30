@@ -119,7 +119,7 @@ export default async function SevenHomePage() {
       {/* Featured Products */}
       <section style={{ paddingTop: '100px', paddingBottom: '100px', overflow: 'hidden' }}>
         <Container>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px', position: 'relative', zIndex: 10, padding: '0 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px', position: 'relative', zIndex: 10, padding: '0 24px' }}>
             <Link href="/seven/produtos" className="font-display hover:underline" style={{ color: '#f97316', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '1px', fontSize: 'clamp(12px, 3vw, 16px)' }}>
               VER CATÁLOGO COMPLETO <ArrowRight size={16} />
             </Link>
