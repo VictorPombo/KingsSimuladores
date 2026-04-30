@@ -63,8 +63,9 @@ export default async function CategoryShowcasePage({ params }: { params: { slug:
     
     let query = supabase
       .from('products')
-      .select('id, title, slug, price, price_compare, images, attributes, stock')
+      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(slug)')
       .eq('status', 'active')
+      .eq('brands.slug', 'kings')
       
     if (params.slug === 'base') query = query.or('title.ilike.%base%,title.ilike.%motor%')
     else if (params.slug === 'volantes') query = query.or('title.ilike.%volante%,title.ilike.%arco%')

@@ -35,14 +35,15 @@ export default async function BrandPage({ params }: { params: { slug: string } }
   
   try {
     const supabase = await createServerSupabaseClient()
-    const result = await supabase
+    const { data: result } = await supabase
       .from('products')
-      .select('id, title, slug, price, price_compare, images, attributes, stock')
+      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(slug)')
       .eq('status', 'active')
-      .or(`title.ilike.%${params.slug}%,attributes->>brand.ilike.%${params.slug}%`)
+      .eq('brands.slug', 'kings')
+      .ilike('attributes->>brand', `%${params.slug}%`)
       .order('created_at', { ascending: false })
     
-    products = result.data || []
+    products = result || []
   } catch (err) {
     console.error("Erro buscando produtos de marca:", err)
   }

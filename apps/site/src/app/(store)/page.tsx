@@ -55,8 +55,9 @@ export default async function HomePage() {
     // 1. Lançamentos (Os 6 mais recentes do banco)
     const { data: dataLanc } = await supabase
       .from('products')
-      .select('id, title, slug, price, price_compare, images, attributes, stock')
+      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(slug)')
       .eq('status', 'active')
+      .eq('brands.slug', 'kings')
       .gt('stock', 0)
       .order('created_at', { ascending: false })
       .limit(6)
@@ -65,8 +66,9 @@ export default async function HomePage() {
     // 2. Mais Vendidos (Normalmente Kits, Moza R5, R9, Thrustmaster)
     const { data: dataVend } = await supabase
       .from('products')
-      .select('id, title, slug, price, price_compare, images, attributes, stock')
+      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(slug)')
       .eq('status', 'active')
+      .eq('brands.slug', 'kings')
       .or('title.ilike.%kit%,title.ilike.%r5%,title.ilike.%v3%,title.ilike.%thrustmaster%')
       .limit(6)
     
@@ -75,8 +77,9 @@ export default async function HomePage() {
     // 3. Destaques (Cockpits, Thermaltake, Consultoria, Pedais Elite)
     const { data: dataDest } = await supabase
       .from('products')
-      .select('id, title, slug, price, price_compare, images, attributes, stock')
+      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(slug)')
       .eq('status', 'active')
+      .eq('brands.slug', 'kings')
       .or('title.ilike.%thermaltake%,title.ilike.%consultoria%,title.ilike.%cockpit%,title.ilike.%pedal%')
       .limit(6)
       
