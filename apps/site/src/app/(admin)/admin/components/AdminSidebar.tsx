@@ -17,7 +17,8 @@ import {
   Tag,
   Users,
   FileText,
-  Bell
+  Bell,
+  ChevronsUpDown
 } from 'lucide-react'
 
 // Estrutura separada por ecossistema de forma limpa
@@ -214,20 +215,24 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
         </div>
         
         {/* Seletor de Loja (Multi-Tenant) */}
-        <div style={{ marginTop: '12px' }}>
+        <div style={{ marginTop: '16px', position: 'relative' }}>
           <select 
             value={currentStore}
             onChange={(e) => setCurrentStore(e.target.value as StoreType)}
             style={{
               width: '100%',
-              padding: '8px 12px',
-              background: '#1f2025',
-              border: '1px solid #334155',
-              borderRadius: '6px',
-              color: '#e2e8f0',
+              padding: '10px 36px 10px 14px',
+              background: 'linear-gradient(180deg, #24262d 0%, #1f2025 100%)',
+              border: '1px solid #3f424d',
+              borderRadius: '8px',
+              color: '#fff',
               fontSize: '0.85rem',
+              fontWeight: 600,
               outline: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}
           >
             <option value="all">Todas as Lojas (Visão Global)</option>
@@ -235,6 +240,9 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
             <option value="msu">Meu Simulador Usado (MSU)</option>
             <option value="seven">Seven Sim Racing</option>
           </select>
+          <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+            <ChevronsUpDown size={14} />
+          </div>
         </div>
       </div>
 

@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Package, DollarSign, Archive, Settings, Loader2, CheckCircle, AlertTriangle, Grid3X3, Trash2, UploadCloud, X, ImageIcon, Image as LucideImage } from 'lucide-react'
+import { ArrowLeft, Package, DollarSign, Archive, Settings, Loader2, CheckCircle, AlertTriangle, Grid3X3, Trash2, UploadCloud, X, ImageIcon, Image as LucideImage, Zap } from 'lucide-react'
 import { getBrands, getCategories, createProduct, getVariationGrids } from './actions'
+import { ProductSmartImporter } from '../components/ProductSmartImporter'
 import imageCompression from 'browser-image-compression'
 import { createClient } from '@supabase/supabase-js'
 
@@ -20,6 +21,7 @@ export default function CriarProdutoPage() {
   const [variationGrids, setVariationGrids] = useState<any[]>([])
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [mostrarImportador, setMostrarImportador] = useState(false)
 
   // Variáveis da Grade
   const [hasVariations, setHasVariations] = useState(false)
@@ -142,13 +144,65 @@ export default function CriarProdutoPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '28px' }}>
-        <a href="/admin/produtos" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', border: '1px solid #3f424d', borderRadius: '8px', padding: '8px 14px', color: '#cbd5e1', textDecoration: 'none' }}><ArrowLeft size={16} /></a>
-        <div>
-          <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Produtos /</div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>Criar produto</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <a href="/admin/produtos" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', border: '1px solid #3f424d', borderRadius: '8px', padding: '8px 14px', color: '#cbd5e1', textDecoration: 'none' }}><ArrowLeft size={16} /></a>
+          <div>
+            <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Produtos /</div>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>Criar produto</h1>
+          </div>
         </div>
+        <button 
+          onClick={() => setMostrarImportador(!mostrarImportador)}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid #3b82f6', borderRadius: '8px', padding: '8px 16px', color: '#60a5fa', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
+        >
+          <Zap size={16} />
+          Importação com IA
+        </button>
       </div>
+
+      {mostrarImportador && (
+        <div style={{ marginBottom: '28px' }}>
+          <ProductSmartImporter 
+             onImportComplete={(dadosExtraidos) => {
+                console.log("JSON perfeito entregue pela IA:", dadosExtraidos)
+                
+                if (dadosExtraidos.produto?.titulo) setTitle(dadosExtraidos.produto.titulo);
+                if (dadosExtraidos.produto?.modelo) setSku(dadosExtraidos.produto.modelo);
+                
+                // Regra de Ouro: Só preenche o preço de venda automaticamente se for Real (BRL)
+                if (dadosExtraidos.produto?.preco_referencia && dadosExtraidos.produto?.moeda === 'BRL') {
+                   setPrice(dadosExtraidos.produto.preco_referencia);
+                }
+                
+                if (dadosExtraidos.produto?.marca) {
+                  const matchBrand = brands.find(b => b.name.toLowerCase() === dadosExtraidos.produto.marca.toLowerCase());
+                  if (matchBrand) setBrandId(matchBrand.id);
+                }
+                
+                let combinedDescription = "";
+                if (dadosExtraidos.descricoes?.descricao_completa) {
+                  combinedDescription += dadosExtraidos.descricoes.descricao_completa + "\n\n";
+                }
+                if (dadosExtraidos.especificacoes && dadosExtraidos.especificacoes.length > 0) {
+                   combinedDescription += "<h3>Especificações Técnicas</h3>\n<ul>\n";
+                   dadosExtraidos.especificacoes.forEach((g: any) => {
+                     g.itens?.forEach((i: any) => {
+                       combinedDescription += `<li><strong>${i.nome}:</strong> ${i.valor}</li>\n`;
+                     });
+                   });
+                   combinedDescription += "</ul>\n";
+                }
+                if (combinedDescription) setDescription(combinedDescription);
+
+                if (dadosExtraidos.seo?.slug_sugerido) setSlug(dadosExtraidos.seo.slug_sugerido);
+
+                setMostrarImportador(false);
+             }}
+             onCancel={() => setMostrarImportador(false)} 
+          />
+        </div>
+      )}
 
       {/* Info geral */}
       <div style={sectionStyle}>

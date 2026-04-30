@@ -26,3 +26,4 @@ build/
 .next/
 .turbo/
 supabase/.temp/
+apps/site/public/*.MOV.bak
