@@ -37,9 +37,9 @@ export default async function BrandPage({ params }: { params: { slug: string } }
     const supabase = await createServerSupabaseClient()
     const { data: result } = await supabase
       .from('products')
-      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(slug)')
+      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(name)')
       .eq('status', 'active')
-      .eq('brands.slug', 'kings')
+      .eq('brands.name', 'kings')
       .ilike('attributes->>brand', `%${params.slug}%`)
       .order('created_at', { ascending: false })
     

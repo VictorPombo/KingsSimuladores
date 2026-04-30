@@ -17,10 +17,10 @@ async function getProduct(slug: string) {
   const supabase = await createServerSupabaseClient()
   const { data } = await supabase
     .from('products')
-    .select('*, brands!inner(slug)')
+    .select('*, brands!inner(name)')
     .eq('slug', slug)
     .eq('status', 'active')
-    .eq('brands.slug', 'seven')
+    .eq('brands.name', 'seven')
     .single()
   return data
 }

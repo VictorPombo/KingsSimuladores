@@ -24,9 +24,9 @@ export default async function ProductsPage({
     const supabase = await createServerSupabaseClient()
     let query = supabase
       .from('products')
-      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(slug)')
+      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(name)')
       .eq('status', 'active')
-      .eq('brands.slug', 'kings')
+      .eq('brands.name', 'kings')
       
     if (q) {
       // Busca ampla pelo termo da barra de pesquisa

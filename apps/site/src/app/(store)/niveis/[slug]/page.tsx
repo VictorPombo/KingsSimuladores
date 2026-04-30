@@ -43,9 +43,9 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
     
     let query = supabase
       .from('products')
-      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(slug)')
+      .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(name)')
       .eq('status', 'active')
-      .eq('brands.slug', 'kings')
+      .eq('brands.name', 'kings')
       
     // Lógica Dinâmica de Keywords baseada no Level
     if (params.slug === 'iniciante') {
