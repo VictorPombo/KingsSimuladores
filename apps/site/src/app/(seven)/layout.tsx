@@ -197,11 +197,11 @@ export default async function SevenLayout({
         </header>
       </div>
 
-      <main style={{ position: 'relative', zIndex: 10 }}>
+      <main style={{ position: 'relative' }}>
         {children}
       </main>
 
-      <footer style={{ background: '#0a0e17', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '80px', position: 'relative', zIndex: 10 }}>
+      <footer style={{ background: '#0a0e17', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '80px', position: 'relative' }}>
         <style dangerouslySetInnerHTML={{__html: `
           .seven-footer-grid {
             display: grid;
