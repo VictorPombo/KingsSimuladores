@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useStoreContext, StoreType } from './StoreContext'
 import { 
   PieChart, 
@@ -28,7 +28,7 @@ const MENU_SECTIONS = [
     color: '#25d366',
     logoUrl: '/logo_kings.png',
     items: [
-      { label: 'Visão Geral', icon: PieChart, href: '/admin' },
+      { label: 'Visão Geral', icon: PieChart, href: '/admin?tab=kings' },
       {
         label: 'Pedidos',
         icon: ShoppingCart,
@@ -56,6 +56,8 @@ const MENU_SECTIONS = [
     color: '#06b6d4',
     logoUrl: '/logo_msu.png',
     items: [
+      { label: 'Chat & Negociações', icon: PieChart, href: '/admin/msu-chat' },
+      { label: 'Pagamentos & Cofre', icon: PieChart, href: '/admin/msu-pagamentos' },
       {
         label: 'Anúncios',
         icon: Tag,
@@ -79,7 +81,7 @@ const MENU_SECTIONS = [
     color: '#ea580c',
     logoUrl: '/logo-seven.svg',
     items: [
-      { label: 'Visão Geral', icon: PieChart, href: '/admin' },
+      { label: 'Visão Geral', icon: PieChart, href: '/admin?tab=seven' },
       {
         label: 'Pedidos',
         icon: ShoppingCart,
@@ -145,8 +147,17 @@ const MENU_SECTIONS = [
 
 export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({})
   const { currentStore, setCurrentStore } = useStoreContext()
+
+  // Sincronizar dropdown com a tab da URL
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab === 'kings' || tab === 'msu' || tab === 'seven' || tab === 'all') {
+      setCurrentStore(tab)
+    }
+  }, [searchParams, setCurrentStore])
 
   // Expandir automaticamente os menus que contém a rota atual
   useEffect(() => {
@@ -176,6 +187,11 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
   }
 
   const isMenuPathActive = (href: string) => {
+    const [hrefPath, hrefQuery] = href.split('?')
+    if (hrefQuery) {
+      const hrefTab = new URLSearchParams(hrefQuery).get('tab')
+      return pathname === hrefPath && searchParams.get('tab') === hrefTab
+    }
     return pathname === href && href !== 'javascript:;'
   }
 

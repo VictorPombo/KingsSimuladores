@@ -194,6 +194,7 @@ export type Database = {
           commission_rate: number
           shipping_options: Json
           category_id: string | null
+          is_boosted: boolean
           created_at: string
           updated_at: string
         }
@@ -210,6 +211,7 @@ export type Database = {
           commission_rate?: number
           shipping_options?: Json
           category_id?: string | null
+          is_boosted?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -226,8 +228,64 @@ export type Database = {
           commission_rate?: number
           shipping_options?: Json
           category_id?: string | null
+          is_boosted?: boolean
           created_at?: string
           updated_at?: string
+        }
+      }
+      marketplace_chats: {
+        Row: {
+          id: string
+          listing_id: string
+          buyer_id: string
+          seller_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          buyer_id: string
+          seller_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          listing_id?: string
+          buyer_id?: string
+          seller_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      marketplace_messages: {
+        Row: {
+          id: string
+          chat_id: string
+          sender_id: string | null
+          content: string
+          is_blocked: boolean
+          block_reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          chat_id: string
+          sender_id?: string | null
+          content: string
+          is_blocked?: boolean
+          block_reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          chat_id?: string
+          sender_id?: string | null
+          content?: string
+          is_blocked?: boolean
+          block_reason?: string | null
+          created_at?: string
         }
       }
       orders: {

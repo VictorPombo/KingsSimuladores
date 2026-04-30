@@ -42,12 +42,16 @@ export function MsuCatalogFilters() {
   const currentState = searchParams.get('state')
   const currentSort = searchParams.get('sort') || 'newest'
   const currentHasBox = searchParams.get('hasBox')
+  const currentBrand = searchParams.get('brand')
+  const currentCity = searchParams.get('city')
 
   const activeCount = [
     searchParams.get('q'),
     currentCondition,
     currentCategory,
     currentState,
+    currentCity,
+    currentBrand,
     currentHasBox,
     searchParams.get('minPrice'),
     searchParams.get('maxPrice'),
@@ -160,6 +164,20 @@ export function MsuCatalogFilters() {
               <option value="">Todos</option>
               {UF_LIST.map(uf => <option key={uf} value={uf}>{uf}</option>)}
             </select>
+          </div>
+
+          {/* Cidade */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Cidade</label>
+            <input type="text" placeholder="Ex: São Paulo" defaultValue={currentCity || ''} onBlur={e => applyFilter('city', e.target.value || null)}
+              style={{ ...selectStyle, width: '130px' }} />
+          </div>
+
+          {/* Marca */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Marca</label>
+            <input type="text" placeholder="Ex: Fanatec" defaultValue={currentBrand || ''} onBlur={e => applyFilter('brand', e.target.value || null)}
+              style={{ ...selectStyle, width: '130px' }} />
           </div>
 
           {/* Condição */}

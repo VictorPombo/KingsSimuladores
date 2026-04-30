@@ -20,6 +20,7 @@ export default async function Home() {
       )
     `)
     .eq('status', 'active')
+    .order('is_boosted', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(8)
 

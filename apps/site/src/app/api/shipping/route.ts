@@ -1,71 +1,100 @@
 import { NextResponse } from 'next/server'
-import { calculateShipping } from '@kings/shipping'
-import { createServerSupabaseClient } from '@kings/db/server'
 
-export async function POST(request: Request): Promise<NextResponse> {
+// Token e URL do Sandbox / Produção do Melhor Envio
+const ME_API_URL = process.env.MELHOR_ENVIO_API_URL || 'https://sandbox.melhorenvio.com.br'
+const ME_TOKEN = process.env.MELHOR_ENVIO_TOKEN || ''
+
+export async function POST(req: Request) {
   try {
-    const { toPostalCode, items, dimensions: rawDimensions } = await request.json()
+    const { originZip, destinationZip, weight, width, height, length, price } = await req.json()
 
-    if (!toPostalCode) {
-      return NextResponse.json({ error: 'CEP ausente.' }, { status: 400 })
-    }
-    if ((!items || items.length === 0) && (!rawDimensions || rawDimensions.length === 0)) {
-      return NextResponse.json({ error: 'Itens ou dimensões ausentes.' }, { status: 400 })
+    if (!originZip || !destinationZip) {
+      return NextResponse.json({ error: 'CEP de origem e destino são obrigatórios' }, { status: 400 })
     }
 
-    // Usar dimensões diretas (ShippingSimulator na página de produto)
-    // ou buscar do banco via items (Checkout)
-    let dimensions = rawDimensions || []
-
-    if (items && items.length > 0) {
-      const supabase = await createServerSupabaseClient()
-
-      // 1. Puxa Dados Verdadeiros do Banco
-      const productIds = items.map((i: any) => i.id)
-      const { data: dbProducts } = await supabase
-        .from('products')
-        .select('id, weight_kg, dimensions_cm, price')
-        .in('id', productIds)
-
-      // Se for MSU, puxamos do marketplace_listings (caso não venham em products)
-      const missingIds = productIds.filter((id: string) => !dbProducts?.some((p: any) => p.id === id) && !id.startsWith('mock-'))
-      let dbListings: any[] | null = null
-      if (missingIds.length > 0) {
-         const { data } = await supabase
-           .from('marketplace_listings')
-           .select('id, price')
-           .in('id', missingIds)
-         dbListings = data
-      }
-
-      // 2. Mapeamento Cego (Ignorando tudo que veio do Front exceto a Quantity)
-      dimensions = items.map((clientItem: any) => {
-         const dbProd = dbProducts?.find((p: any) => p.id === clientItem.id)
-         const dbList = dbListings?.find((p: any) => p.id === clientItem.id)
-         
-         const w = Number(dbProd?.weight_kg || 15) // simulador pesado padrão
-         const dims = dbProd?.dimensions_cm || { width: 50, height: 50, length: 50 }
-         const price = Number(dbProd?.price || dbList?.price || 1)
-         
-         return {
-           weight: w,
-           width: dims.width || 50,
-           height: dims.height || 50,
-           length: dims.length || 50,
-           quantity: clientItem.quantity || 1,
-           insurance_value: price * (clientItem.quantity || 1)
-         }
-      })
+    // Estrutura exigida pela API v2 de cálculo de frete do Melhor Envio
+    const payload = {
+      from: { postal_code: originZip.replace(/\D/g, '') },
+      to: { postal_code: destinationZip.replace(/\D/g, '') },
+      products: [
+        {
+          id: '1',
+          width: width || 20,
+          height: height || 20,
+          length: length || 20,
+          weight: weight || 1,
+          insurance_value: price || 0,
+          quantity: 1
+        }
+      ]
     }
 
-    // O CEP de origem padrão da KingsHub: 01001-000 (Sé, São Paulo)
-    const fromPostalCode = process.env.ORIGIN_CEP || '01001000'
+    // Se não tiver token configurado, retorna uma simulação
+    if (!ME_TOKEN) {
+      console.warn('[SHIPPING] Token do Melhor Envio não encontrado. Retornando cotação simulada.')
+      
+      // Atraso simulado
+      await new Promise(r => setTimeout(r, 600))
+      
+      return NextResponse.json([
+        {
+          id: 2,
+          name: 'SEDEX (com seguro)',
+          price: (35 + (weight || 1) * 3).toFixed(2),
+          currency: 'R$',
+          delivery_time: 3,
+          company: { name: 'Correios', picture: 'https://melhorenvio.com.br/images/shipping-companies/correios.png' }
+        },
+        {
+          id: 99,
+          name: 'Retirar pessoalmente',
+          price: '0.00',
+          currency: 'R$',
+          delivery_time: 0,
+          company: { name: 'Retirada', picture: '' }
+        }
+      ])
+    }
 
-    const options = await calculateShipping(fromPostalCode, toPostalCode, dimensions)
+    // Chamada real para o Melhor Envio
+    const response = await fetch(`${ME_API_URL}/api/v2/me/shipment/calculate`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ME_TOKEN}`,
+        'User-Agent': 'KingsHub App (contato@kingssimuladores.com.br)'
+      },
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('[SHIPPING] Erro na API do Melhor Envio:', errorText)
+      return NextResponse.json({ error: 'Falha ao cotar frete' }, { status: response.status })
+    }
+
+    const data = await response.json()
     
-    return NextResponse.json({ options })
-  } catch (error) {
-    console.error('[API Shipping Error]', error)
-    return NextResponse.json({ error: 'Erro ao calcular frete' }, { status: 500 })
+    // Filtrar apenas serviços que não retornaram erro (tem price > 0)
+    let validServices = data.filter((s: any) => !s.error && s.price)
+    
+    // Deixar apenas SEDEX
+    validServices = validServices.filter((s: any) => s.name.toUpperCase().includes('SEDEX'))
+    
+    // Adicionar Retirar em Mãos
+    validServices.push({
+      id: 99,
+      name: 'Retirar pessoalmente',
+      price: '0.00',
+      currency: 'R$',
+      delivery_time: 0,
+      company: { name: 'Retirada', picture: '' }
+    })
+    
+    return NextResponse.json(validServices)
+  } catch (error: any) {
+    console.error('[SHIPPING] Erro interno:', error)
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

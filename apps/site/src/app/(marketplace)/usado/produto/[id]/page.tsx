@@ -65,8 +65,33 @@ export default async function ListingDetailPage({ params }: Props) {
   const zapMessage = encodeURIComponent(`Olá! Tenho interesse no anúncio:\n\n*${listing.title}* por ${formatPrice(listing.price)}\nID: ${listing.id.split('-')[0]}\n\nGostaria de negociar com segurança pela plataforma.`)
   const whatsappUrl = `https://wa.me/${MSU_OFFICIAL_PHONE}?text=${zapMessage}`
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: listing.title,
+    image: listing.images,
+    description: listing.description,
+    brand: {
+      '@type': 'Brand',
+      name: listing.brand || 'Marca não informada',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `https://meusimuladorusado.com.br/usado/produto/${listing.id}`,
+      priceCurrency: 'BRL',
+      price: listing.price,
+      itemCondition: listing.condition === 'novo' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
+      availability: listing.status === 'active' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Person',
+        name: sellerName,
+      },
+    },
+  }
+
   return (
     <div className="msu-product-page-wrapper">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Container>
         <div className="msu-detail-grid">
           

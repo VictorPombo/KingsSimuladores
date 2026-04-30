@@ -41,33 +41,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [coupon, setCoupon] = useState<CouponState | null>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
   
   useEffect(() => {
     const saved = localStorage.getItem('@kings/cart')
     if (saved) {
       try { setItems(JSON.parse(saved)) } catch (e) {}
     }
+    setIsLoaded(true)
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('@kings/cart', JSON.stringify(items))
-  }, [items])
+    if (isLoaded) {
+      localStorage.setItem('@kings/cart', JSON.stringify(items))
+    }
+  }, [items, isLoaded])
 
   const addItem = (newItem: CartItem) => {
-    // 1. Bloqueio de Carrinho Misto (agora por Loja de Origem, não mais por Marca do Produto)
-    if (items.length > 0) {
-      const currentStore = items[0].storeOrigin || 'kings';
-      if (currentStore !== newItem.storeOrigin) {
-        const confirmClear = window.confirm('Seu carrinho possui itens de outra loja. Deseja limpar o carrinho e adicionar este item?');
-        if (confirmClear) {
-          setItems([newItem]);
-          setIsOpen(true);
-        }
-        return; // Early return se cancelou ou se já limpou e adicionou
-      }
-    }
-
-    // 2. Fluxo Normal (mesma loja ou carrinho vazio)
+    // 1. Fluxo Unificado: Permite itens de diferentes marcas/lojas juntas
     setItems(current => {
       const existingInfo = current.find(item => item.id === newItem.id)
       if (existingInfo) {

@@ -12,7 +12,7 @@ import { CouponInput } from '@/components/store/cart/CouponInput'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, discount, totalPrice, clearCart, coupon } = useCart()
+  const { items, subtotal, discount, totalPrice, clearCart, coupon, removeItem } = useCart()
   const [step, setStep] = useState(1) // 1: Info, 2: Entrega, 3: Pagamento
   
   // Form Info
@@ -22,6 +22,8 @@ export default function CheckoutPage() {
   const [cep, setCep] = useState('')
   const [logradouro, setLogradouro] = useState('')
   const [numero, setNumero] = useState('')
+  const [bairro, setBairro] = useState('')
+  const [cidade, setCidade] = useState('')
   const [complemento, setComplemento] = useState('')
   const [referencia, setReferencia] = useState('')
   
@@ -29,6 +31,7 @@ export default function CheckoutPage() {
   const [selectedFrete, setSelectedFrete] = useState<any>(null)
   
   const [isProcessing, setIsProcessing] = useState(false)
+  const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
 
   // Redirect to home if empty cart
   useEffect(() => {
@@ -43,7 +46,9 @@ export default function CheckoutPage() {
         const res = await fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, '')}/json/`)
         const data = await res.json()
         if (!data.erro) {
-          setLogradouro(`${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`)
+          setLogradouro(data.logradouro || '')
+          setBairro(data.bairro || '')
+          setCidade(`${data.localidade || ''} / ${data.uf || ''}`)
         }
       } catch (err) {
         // ignore
@@ -81,31 +86,59 @@ export default function CheckoutPage() {
   // totalPrice já vem do CartContext COM o desconto aplicado
   const totalGeral = totalPrice + valorFrete
 
-  const handlePagamentoMock = async () => {
+  // Agrupar itens por loja
+  const groups = items.reduce((acc, item) => {
+    const brand = item.brand || 'kings'
+    const store = brand.toLowerCase().includes('seven') ? 'seven' : (brand.toLowerCase().includes('msu') ? 'msu' : 'kings')
+    if (!acc[store]) acc[store] = []
+    acc[store].push(item)
+    return acc
+  }, {} as Record<string, typeof items>)
+
+  const storeNames = Object.keys(groups)
+
+
+  const handleMultistepPayment = async () => {
     setIsProcessing(true)
+    const currentStore = storeNames[currentStoreIdx]
+    const storeGroupItems = groups[currentStore]
     
+    // Simplificação: apenas cobra o frete e aplica desconto no PRIMEIRO pagamento
+    const storeShipping = currentStoreIdx === 0 ? selectedFrete : null
+    const shippingPrice = currentStoreIdx === 0 ? valorFrete : 0
+    
+    const storeSubtotal = storeGroupItems.reduce((acc, i) => acc + (i.price * i.quantity), 0)
+    const storeDiscount = currentStoreIdx === 0 ? discount : 0
+    const storeTotal = storeSubtotal + shippingPrice - storeDiscount
+
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items,
+          items: storeGroupItems,
           customer: { nome, email, cpf },
-          address: { cep, logradouro, numero, complemento, referencia },
-          shipping: selectedFrete,
-          total: totalGeral,
-          coupon_id: coupon ? coupon.id : null
+          address: { cep, logradouro, numero, bairro, cidade, complemento, referencia },
+          shipping: storeShipping,
+          total: storeTotal,
+          coupon_id: currentStoreIdx === 0 && coupon ? coupon.id : null
         })
       })
       
       const session = await res.json()
       
       if (session.ok) {
-        clearCart()
         if (session.init_point) {
-            window.location.href = session.init_point
+            // Abre o Mercado Pago em uma nova guia para ele pagar a primeira loja e não perder a tela
+            window.open(session.init_point, '_blank')
+        } 
+        
+        if (currentStoreIdx < storeNames.length - 1) {
+            setCurrentStoreIdx(currentStoreIdx + 1)
+            setIsProcessing(false)
         } else {
-            router.push(`/account?order=${session.orderId}`)
+            // Concluiu todos!
+            router.push(`/account`)
         }
       } else {
         alert('Erro ao iniciar pagamento: ' + (session.error || 'Tente novamente.'))
@@ -116,6 +149,7 @@ export default function CheckoutPage() {
       setIsProcessing(false)
     }
   }
+
 
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
@@ -132,16 +166,27 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>1. Seus Dados</h2>
                 <div className="kings-checkout-form-grid">
-                  <input type="text" placeholder="Nome Completo" value={nome} onChange={e => setNome(e.target.value)} style={inputStyle} />
-                  <input type="text" placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} style={inputStyle} />
+                  <input type="text" placeholder="Nome Completo" value={nome} onChange={e => setNome(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} style={{...inputStyle, flex: 1}} />
                 </div>
                 <input type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
                 
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff', marginTop: '1rem' }}>Endereço de Entrega</h2>
                 <div className="kings-checkout-form-row">
-                  <input type="text" placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} onBlur={preencherCep} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
-                  <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="CEP" value={cep} onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '')
+                    setCep(val)
+                    if (val.length === 8) {
+                      // Trigger fill automatically
+                      preencherCep()
+                    }
+                  }} onBlur={preencherCep} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
+                  <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 2}} />
                   <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px', flexShrink: 0}} className="checkout-number-input" />
+                </div>
+                <div className="kings-checkout-form-row">
+                  <input type="text" placeholder="Bairro" value={bairro} onChange={e => setBairro(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="Cidade / UF" value={cidade} onChange={e => setCidade(e.target.value)} style={{...inputStyle, flex: 1}} />
                 </div>
                 <div className="kings-checkout-form-row">
                   <input type="text" placeholder="Complemento (opcional)" value={complemento} onChange={e => setComplemento(e.target.value)} style={{...inputStyle, flex: 1}} />
@@ -181,7 +226,7 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <div className="btn-row">
                   <Button variant="secondary" onClick={() => setStep(1)}>Voltar</Button>
                   <Button onClick={() => setStep(3)} style={{ flex: 1 }}>Continuar para Pagamento</Button>
                 </div>
@@ -207,10 +252,10 @@ export default function CheckoutPage() {
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <div className="btn-row">
                   <Button variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
-                  <Button onClick={handlePagamentoMock} style={{ flex: 1, background: '#00B1EA' }} disabled={isProcessing}>
-                    {isProcessing ? 'Abrindo Gatway...' : 'Ir para o Pagamento'}
+                  <Button onClick={handleMultistepPayment} style={{ flex: 1, background: storeNames[currentStoreIdx] === 'seven' ? '#ea580c' : '#00B1EA' }} disabled={isProcessing}>
+                    {isProcessing ? 'Abrindo Gatway...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento')}
                   </Button>
                 </div>
               </div>

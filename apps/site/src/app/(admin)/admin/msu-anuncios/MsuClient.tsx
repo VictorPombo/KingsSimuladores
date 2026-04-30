@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useState, useTransition } from 'react'
-import { Tag, Eye, EyeOff, Trash2, Edit3, Image as ImageIcon, ShoppingBag, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
-import { toggleListingStatus, archiveListing } from './actions'
+import { Tag, Eye, EyeOff, Trash2, Edit3, Image as ImageIcon, ShoppingBag, Clock, CheckCircle, XCircle, AlertCircle, Rocket } from 'lucide-react'
+import { toggleListingStatus, archiveListing, toggleBoost } from './actions'
 
 type Listing = {
   id: string; title: string; price: number; status: string
   images: string[]; created_at: string; condition?: string
-  seller_id?: string
+  seller_id?: string; is_boosted?: boolean
 }
 
 export function MsuClient({ initialListings }: { initialListings: Listing[] }) {
@@ -27,6 +27,10 @@ export function MsuClient({ initialListings }: { initialListings: Listing[] }) {
     if (confirm('Tem certeza que deseja remover este anúncio? Ele será ocultado de todas as vitrines.')) {
       startTransition(async () => { await archiveListing(id) })
     }
+  }
+
+  const handleBoost = (id: string, currentBoost: boolean) => {
+    startTransition(async () => { await toggleBoost(id, currentBoost) })
   }
 
   const getStatusBadge = (status: string) => {
@@ -149,7 +153,10 @@ export function MsuClient({ initialListings }: { initialListings: Listing[] }) {
                         )}
                       </div>
                       <div>
-                        <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 600 }}>{listing.title}</div>
+                        <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {listing.title}
+                          {listing.is_boosted && <span title="Impulsionado" style={{ display: 'flex' }}><Rocket size={14} color="#f59e0b" /></span>}
+                        </div>
                         <div style={{ color: '#64748b', fontSize: '0.7rem', fontFamily: 'monospace', marginTop: '2px' }}>ID: {listing.id.split('-')[0]}</div>
                       </div>
                     </div>
@@ -176,6 +183,11 @@ export function MsuClient({ initialListings }: { initialListings: Listing[] }) {
                   {/* Ações */}
                   <td style={{ padding: '14px 20px' }}>
                     <div style={{ display: 'flex', gap: '6px' }}>
+                      <button onClick={() => handleBoost(listing.id, !!listing.is_boosted)}
+                        title={listing.is_boosted ? 'Remover Destaque' : 'Destacar'}
+                        style={{ background: listing.is_boosted ? '#f59e0b15' : 'transparent', border: `1px solid ${listing.is_boosted ? '#f59e0b30' : '#3f424d'}`, color: listing.is_boosted ? '#f59e0b' : '#94a3b8', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Rocket size={14} />
+                      </button>
                       <button onClick={() => handleToggle(listing.id, listing.status)}
                         title={listing.status === 'active' ? 'Pausar' : 'Reativar'}
                         style={{ background: listing.status === 'active' ? '#f59e0b15' : '#10b98115', border: `1px solid ${listing.status === 'active' ? '#f59e0b30' : '#10b98130'}`, color: listing.status === 'active' ? '#f59e0b' : '#10b981', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

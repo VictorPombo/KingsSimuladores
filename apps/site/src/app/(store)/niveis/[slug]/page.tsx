@@ -77,8 +77,15 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
             display: 'flex', gap: '8px', padding: '6px',
             background: 'rgba(15,18,30,0.6)', backdropFilter: 'blur(12px)',
             borderRadius: '14px', border: '1px solid rgba(255,255,255,0.06)',
-            width: 'fit-content',
+            width: '100%',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none', // Oculta a barra no Firefox
           }}>
+            <style dangerouslySetInnerHTML={{__html: `
+              /* Oculta scrollbar no Chrome/Safari */
+              div::-webkit-scrollbar { display: none; }
+            `}} />
             {Object.entries(NIVEIS_DATA).map(([slug, d]) => {
               const isActive = slug === params.slug
               return (
@@ -95,6 +102,7 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
                   color: isActive ? '#000' : 'var(--text-secondary)',
                   background: isActive ? d.color : 'transparent',
                   border: isActive ? 'none' : '1px solid transparent',
+                  whiteSpace: 'nowrap'
                 }}>
                   {slug.charAt(0).toUpperCase() + slug.slice(1)}
                 </Link>
