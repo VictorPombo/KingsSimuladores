@@ -48,12 +48,13 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
       .eq('brands.name', 'seven')
       
     // Lógica Dinâmica de Keywords baseada no Level para Seven/Simagic
+    // Baseado no inventário atual de itens Simagic no banco
     if (params.slug === 'iniciante') {
-      query = query.or('title.ilike.%Alpha Mini%,title.ilike.%GTC%')
+      query = query.or('title.ilike.%Alpha Mini%,title.ilike.%Alpha EVO Sport%,title.ilike.%P500%,title.ilike.%T-LOC%,title.ilike.%P-330R%,title.ilike.%P-325C%')
     } else if (params.slug === 'semiprofissional') {
-      query = query.or('title.ilike.%Alpha%,title.ilike.%P1000%,title.ilike.%FX%,title.ilike.%GT1%,title.ilike.%GT4%')
+      query = query.or('title.ilike.%Alpha EVO Pro%,title.ilike.%Alpha (%,title.ilike.%P1000%,title.ilike.%NEO X%,title.ilike.%Q1S%,title.ilike.%TB-1%,title.ilike.%FX-C%')
     } else if (params.slug === 'profissional') {
-      query = query.or('title.ilike.%Alpha U%,title.ilike.%P2000%,title.ilike.%GT Pro%,title.ilike.%Neo%')
+      query = query.or('title.ilike.%Alpha U%,title.ilike.%P2000%,title.ilike.%FX Pro%,title.ilike.%GT Pro%,title.ilike.%HPR%')
     }
 
     const result = await query.order('created_at', { ascending: false })
