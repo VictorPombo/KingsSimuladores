@@ -203,7 +203,7 @@ export default async function HomePage() {
             <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
             <ProductCarousel title="DESTAQUES" prods={destaques} />
             {msuListings?.length > 0 && (
-              <ProductCarousel title="OPORTUNIDADES P2P" prods={msuListings} tenant="msu" />
+              <ProductCarousel title="OPORTUNIDADE MEU SIMULADOR USADO" prods={msuListings} tenant="msu" />
             )}
             
           </Container>
