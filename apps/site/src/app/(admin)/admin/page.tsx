@@ -63,16 +63,17 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
       let revenueQuery = supabase.from('orders').select('total').eq('status', 'paid')
       let latestQuery = supabase.from('orders').select('id, total, status, created_at, brand_origin, profiles(full_name)').order('created_at', { ascending: false }).limit(5)
 
-      if (isKingsTab) {
-        ordersQuery = ordersQuery.eq('brand_origin', 'kings')
-        productsQuery = productsQuery.eq('brand_id', 'kings') // Assumindo brand_id é kings
-        revenueQuery = revenueQuery.eq('brand_origin', 'kings')
-        latestQuery = latestQuery.eq('brand_origin', 'kings')
-      } else if (isSevenTab) {
-        ordersQuery = ordersQuery.eq('brand_origin', 'seven')
-        productsQuery = productsQuery.eq('brand_id', 'seven')
-        revenueQuery = revenueQuery.eq('brand_origin', 'seven')
-        latestQuery = latestQuery.eq('brand_origin', 'seven')
+      if (isKingsTab || isSevenTab) {
+        const brandName = isKingsTab ? 'kings' : 'seven'
+        ordersQuery = ordersQuery.eq('brand_origin', brandName)
+        revenueQuery = revenueQuery.eq('brand_origin', brandName)
+        latestQuery = latestQuery.eq('brand_origin', brandName)
+        
+        // Fetch real UUID for products table brand_id
+        const { data: brand } = await supabase.from('brands').select('id').eq('name', brandName).single()
+        if (brand) {
+          productsQuery = productsQuery.eq('brand_id', brand.id)
+        }
       }
 
       const [ordersRes, productsRes, usersRes, revenueRes] = await Promise.all([
