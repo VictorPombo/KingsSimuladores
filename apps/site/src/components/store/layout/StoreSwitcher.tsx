@@ -25,13 +25,15 @@ export function StoreSwitcher({ store }: StoreSwitcherProps) {
       href={href} 
       className={`${themeClass} hover:scale-105`}
       style={{
-        fontSize: '0.80rem',
+        fontSize: 'clamp(10px, 2.5vw, 12px)',
         color: '#fff',
         fontWeight: 800,
-        padding: '6px 12px',
+        padding: '8px 4px',
+        width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        textAlign: 'center',
         background: 'var(--gradient-primary)',
         boxShadow: '0 4px 10px var(--accent-glow)',
         borderRadius: '6px',

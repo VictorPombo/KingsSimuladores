@@ -197,53 +197,6 @@ export function MobileCategoryNav() {
           scrollSnapType: 'x mandatory'
         }}
       >
-        {/* Chip persistente removido a pedido do usuário, mantendo o original via MENU_ITEMS */}
-        <Link 
-          href="/seven"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '5px 12px',
-            background: 'linear-gradient(to right, #ef4444, #b91c1c)',
-            border: 'none',
-            borderRadius: '16px',
-            color: '#fff',
-            textDecoration: 'none',
-            fontWeight: 800,
-            fontSize: '11px',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-            scrollSnapAlign: 'start',
-            flexShrink: 0,
-            boxShadow: '0 4px 10px rgba(239, 68, 68, 0.3)'
-          }}
-        >
-          SEVEN
-        </Link>
-        <Link 
-          href="/usado"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '5px 12px',
-            background: 'linear-gradient(to right, #8b5cf6, #d946ef)',
-            border: 'none',
-            borderRadius: '16px',
-            color: '#fff',
-            textDecoration: 'none',
-            fontWeight: 800,
-            fontSize: '11px',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-            scrollSnapAlign: 'start',
-            flexShrink: 0,
-            boxShadow: '0 4px 10px rgba(139, 92, 246, 0.3)'
-          }}
-        >
-          MSU
-        </Link>
         {MENU_ITEMS.map((item, idx) => {
           const isConsultoria = item.label === 'CONSULTORIA';
           return (

@@ -109,6 +109,15 @@ export async function Header() {
               <SearchBar />
             </div>
 
+            <div style={{ display: 'flex', gap: '8px', padding: '0 16px', justifyContent: 'space-between' }}>
+              <div style={{ flex: 1 }}>
+                <StoreSwitcher store="seven" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <StoreSwitcher store="msu" />
+              </div>
+            </div>
+
             <MobileCategoryNav />
           </div>
         </header>
