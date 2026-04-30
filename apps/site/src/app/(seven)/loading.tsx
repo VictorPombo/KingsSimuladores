@@ -74,7 +74,7 @@ export default function Loading() {
         gap: '24px',
       }}>
         <img
-          src="/logoKingsHub.jpg"
+          src="/logoKingsHub.jpeg"
           alt="KingsHub"
           className="splash-logo"
           style={{
