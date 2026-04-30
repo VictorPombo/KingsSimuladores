@@ -110,7 +110,6 @@ export default async function HomePage() {
         slides={[
           { src: '/banners/banner-mbooster.png', alt: 'MOZA M-Booster Active Pedal', href: '/buscar?q=MOZA+mBooster' },
           { src: '/banners/banner-youtube.png', alt: 'Canal Kings Simuladores no YouTube', href: 'https://www.youtube.com/@kingssimuladores' },
-          { src: '/banners/banner-whatsapp.jpg', alt: 'Fale conosco no WhatsApp', href: 'https://api.whatsapp.com/send/?phone=5511959018725' },
           { src: '/banners/banner-msu.png', alt: 'Meu Simulador Usado', href: '/usado' },
         ]}
       />

@@ -9,9 +9,42 @@ export function Footer() {
         background: 'transparent',
         color: 'var(--text-muted)',
       }}
+      id="site-footer"
     >
+      <style dangerouslySetInnerHTML={{ __html: `
+        .footer-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 32px;
+          margin-bottom: 32px;
+        }
+        @media (min-width: 768px) {
+          .footer-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          }
+        }
+        .footer-bottom {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+          margin-top: 24px;
+          padding-top: 24px;
+          border-top: 1px solid var(--border);
+          font-size: 0.78rem;
+        }
+        @media (min-width: 768px) {
+          .footer-bottom {
+            flex-direction: row;
+            flex-wrap: wrap-reverse;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+          }
+        }
+      ` }} />
       <Container>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '32px', marginBottom: '32px' }}>
+        <div className="footer-grid">
           <div>
             <img 
               src="https://cdn.awsli.com.br/1940/1940182/logo/logo_novo_kings_-removebg-preview-1-ireduuhg5i.png" 
@@ -77,7 +110,7 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap-reverse', alignItems: 'center', justifyContent: 'space-between', gap: '24px', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)', fontSize: '0.78rem' }}>
+        <div className="footer-bottom">
           <div>
             Kings Simuladores © {new Date().getFullYear()} — Todos os direitos reservados.
           </div>

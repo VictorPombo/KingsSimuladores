@@ -1,8 +1,30 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 export function WhatsappFloat() {
+  const [hideButton, setHideButton] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const footer = document.getElementById('site-footer')
+      if (!footer) return
+
+      const footerRect = footer.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+      // Hide when the footer is visible on screen (button would overlap)
+      const footerVisible = footerRect.top < windowHeight - 20
+      setHideButton(footerVisible)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll() // Check on mount
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  if (hideButton) return null
+
   return (
     <a
       href="https://wa.me/5511959018725?text=Fale%20com%20a%20Kings%20Simuladores"
@@ -13,7 +35,7 @@ export function WhatsappFloat() {
         position: 'fixed',
         bottom: '24px',
         right: '24px',
-        zIndex: 999999, /* Força visibilidade máxima global */
+        zIndex: 999999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
