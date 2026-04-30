@@ -10,7 +10,7 @@ export function Footer() {
       padding: '4rem 0'
     }}>
       <Container>
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
           <div>
             <div style={{ fontWeight: 700, color: '#fff', fontSize: '1.2rem', marginBottom: '1rem' }}>Meu Simulador Usado</div>
             <p style={{ maxWidth: '300px', fontSize: '0.9rem', lineHeight: 1.6 }}>O marketplace oficial da KingsHub para você desapegar e fazer um upgrade no seu setup.</p>

@@ -66,17 +66,7 @@ export default async function ListingDetailPage({ params }: Props) {
   const whatsappUrl = `https://wa.me/${MSU_OFFICIAL_PHONE}?text=${zapMessage}`
 
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
-      <style dangerouslySetInnerHTML={{__html: `
-        .msu-detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 3rem; align-items: start; }
-        .msu-price-box { position: sticky; top: 100px; }
-        .msu-shield { flex-direction: row; }
-        @media (max-width: 992px) {
-          .msu-detail-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-          .msu-price-box { position: relative !important; top: 0 !important; }
-          .msu-shield { flex-direction: column !important; text-align: center; }
-        }
-      `}} />
+    <div className="msu-product-page-wrapper">
       <Container>
         <div className="msu-detail-grid">
           

@@ -2,90 +2,73 @@
 
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@kings/utils'
+import { useState, useEffect } from 'react'
 
 /**
  * Motor de Recomendação Inteligente — Kings Simuladores
- * 
- * Regras de Cross-sell baseadas em categorias complementares:
- * - Volante → Cockpit, Pedais
- * - Cockpit → Volante, Pedais, Câmbio
- * - Pedais → Volante, Câmbio
- * - Câmbio → Cockpit, Pedais
- * - Base/DD → Volante ARO, Cockpit
- * 
- * Em produção, isso pode ser substituído por queries do Supabase
- * com base em orders_items que frequentemente aparecem juntos.
+ * Busca sugestões reais do banco de dados via /api/upsell
  */
 
-// Catálogo de sugestões (mock) — será trocado por consulta real ao banco
-const SUGGESTION_CATALOG = [
-  { id: 'up-1', title: 'Cockpit SXT V2', price: 2199.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Cockpit', brand: 'XTREME RACING', category: 'cockpit' },
-  { id: 'up-2', title: 'Volante Fanatec DD Pro', price: 7999.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Volante', brand: 'FANATEC', category: 'volante' },
-  { id: 'up-3', title: 'Pedais Load Cell V3', price: 3499.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Pedais', brand: 'FANATEC', category: 'pedais' },
-  { id: 'up-4', title: 'Câmbio H-Shifter TH8A', price: 1899.90, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Cambio', brand: 'THRUSTMASTER', category: 'cambio' },
-  { id: 'up-5', title: 'Suporte de Monitor Triplo', price: 899.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Suporte', brand: 'XTREME RACING', category: 'acessorio' },
-  { id: 'up-6', title: 'Base Moza R9 Direct Drive', price: 5499.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Base+DD', brand: 'MOZA RACING', category: 'base' },
-]
-
-// Grafo de complementaridade: se tem X no carrinho, sugere Y
-const CROSS_SELL_RULES: Record<string, string[]> = {
-  volante: ['cockpit', 'pedais', 'acessorio'],
-  cockpit: ['volante', 'pedais', 'cambio'],
-  pedais: ['volante', 'cambio', 'cockpit'],
-  cambio: ['cockpit', 'pedais', 'acessorio'],
-  base: ['cockpit', 'pedais', 'cambio'],
-  acessorio: ['cockpit', 'volante'],
-}
-
-function detectCategory(title: string): string {
-  const t = title.toLowerCase()
-  if (t.includes('cockpit') || t.includes('suporte')) return 'cockpit'
-  if (t.includes('volante') || t.includes('aro')) return 'volante'
-  if (t.includes('pedal') || t.includes('load cell')) return 'pedais'
-  if (t.includes('câmbio') || t.includes('shifter')) return 'cambio'
-  if (t.includes('base') || t.includes('direct drive') || t.includes('dd')) return 'base'
-  return 'acessorio'
+interface Suggestion {
+  id: string
+  title: string
+  slug: string
+  price: number
+  imageUrl: string
+  brand: string
+  category: string
 }
 
 interface UpsellEngineProps {
-  /** Formato compacto para o CartDrawer, expandido para o Checkout */
   variant?: 'compact' | 'full'
-  /** Limite de sugestões */
   maxItems?: number
 }
 
 export function UpsellEngine({ variant = 'compact', maxItems = 2 }: UpsellEngineProps) {
-  const { items, addItem, setIsOpen } = useCart()
+  const { items, addItem } = useCart()
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [loading, setLoading] = useState(false)
 
-  if (items.length === 0) return null
+  useEffect(() => {
+    if (items.length === 0) {
+      setSuggestions([])
+      return
+    }
 
-  // 1. Detectar categorias no carrinho
-  const cartCategories = items.map(item => detectCategory(item.title))
-  const cartIds = new Set(items.map(i => i.id))
+    const fetchSuggestions = async () => {
+      setLoading(true)
+      try {
+        const res = await fetch('/api/upsell', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cartItems: items.map(i => ({ id: i.id, title: i.title })),
+            limit: maxItems,
+          })
+        })
+        const data = await res.json()
+        setSuggestions(data.suggestions || [])
+      } catch {
+        setSuggestions([])
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  // 2. Calcular quais categorias devemos sugerir
-  const suggestedCategories = new Set<string>()
-  cartCategories.forEach(cat => {
-    const rules = CROSS_SELL_RULES[cat] || []
-    rules.forEach(r => {
-      if (!cartCategories.includes(r)) suggestedCategories.add(r)
-    })
-  })
+    fetchSuggestions()
+  }, [items.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 3. Filtrar catálogo: não sugerir o que já está no carrinho
-  const suggestions = SUGGESTION_CATALOG
-    .filter(p => suggestedCategories.has(p.category) && !cartIds.has(p.id))
-    .slice(0, maxItems)
+  if (items.length === 0 || suggestions.length === 0) return null
+  if (loading) return null
 
-  if (suggestions.length === 0) return null
-
-  const handleAdd = (product: typeof SUGGESTION_CATALOG[0]) => {
+  const handleAdd = (product: Suggestion) => {
     addItem({
       id: product.id,
       title: product.title,
       price: product.price,
       imageUrl: product.imageUrl,
       brand: product.brand,
+      storeOrigin: 'kings',
       quantity: 1,
     })
   }
@@ -196,11 +179,6 @@ export function UpsellEngine({ variant = 'compact', maxItems = 2 }: UpsellEngine
         scrollSnapType: 'x mandatory',
         WebkitOverflowScrolling: 'touch',
       }}>
-        <style dangerouslySetInnerHTML={{__html: `
-          .upsell-scroll::-webkit-scrollbar { height: 4px; }
-          .upsell-scroll::-webkit-scrollbar-track { background: transparent; }
-          .upsell-scroll::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius: 2px; }
-        `}} />
         {suggestions.map(product => (
           <div
             key={product.id}

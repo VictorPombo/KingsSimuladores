@@ -4,7 +4,6 @@ import { CategoryNav, MobileCategoryNav } from './CategoryNav'
 import { SearchBar } from './SearchBar'
 import { AuthAction } from './AuthAction'
 import { StoreSwitcher } from './StoreSwitcher'
-import './responsive.css'
 
 export async function Header() {
   return (

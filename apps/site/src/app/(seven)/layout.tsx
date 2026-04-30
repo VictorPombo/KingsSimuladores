@@ -49,106 +49,144 @@ export default async function SevenLayout({
       {/* Background Effect */}
       <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(249,115,22,0.05) 0%, rgba(0,0,0,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
       
-      {/* Header Premium Seven Sim Racing */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 50, borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column' }}>
-        
-        {/* Top Bar - Produtos Originais */}
-        <div style={{ background: '#050505', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px', maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
-            
-            {/* Removed Voltar à Kings button to standardize in Main Bar */}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-              <ChevronLeft size={16} color="#94a3b8" style={{ cursor: 'pointer' }} />
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', gap: '6px' }}>
-                <span style={{ color: '#ea580c' }}>ENTREGA GARANTIDA</span>
-                <span style={{ color: '#94a3b8' }}>Para todo Brasil</span>
-              </div>
-              <ChevronRight size={16} color="#94a3b8" style={{ cursor: 'pointer' }} />
-            </div>
-            
-          </div>
-        </div>
-
-        <style dangerouslySetInnerHTML={{__html: `
-          .seven-search { display: none; }
-          .seven-switcher { display: none; }
-          .seven-divider { display: none; }
-          .seven-panel-text { display: none; }
-          .seven-main-bar { padding: 8px 12px; }
-          @media (min-width: 768px) {
-            .seven-search { display: block; }
-            .seven-switcher { display: flex; }
-            .seven-divider { display: block; }
-            .seven-panel-text { display: flex; }
-            .seven-main-bar { padding: 10px 20px; }
-          }
-        `}} />
-
-        {/* Main Bar - Pesquisa e Ações */}
-        <div className="seven-main-bar" style={{ 
-          position: 'relative',
-          background: '#090a0f',
-          backgroundImage: 'radial-gradient(ellipse at top, rgba(234,88,12,0.1) 0%, rgba(9,10,15,1) 100%)',
-        }}>
-          {/* Overlay Removido para garantir cor sólida e limpa */}
+      {/* --- DESKTOP HEADER --- */}
+      <div className="desktop-header-seven">
+        <header style={{ position: 'sticky', top: 0, zIndex: 50, borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column' }}>
           
-          <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1440px', margin: '0 auto' }}>
-            
-            {/* Logo */}
-            <div style={{ flexShrink: 0 }}>
-              <Link href="/seven" style={{ textDecoration: 'none', display: 'block', marginLeft: '16px' }}>
-                <img src="/logo-seven.svg" alt="Seven Sim Racing" style={{ height: '50px', display: 'block', objectFit: 'contain' }} />
-              </Link>
+          {/* Top Bar - Produtos Originais */}
+          <div style={{ background: '#050505', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px', maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                <ChevronLeft size={16} color="#94a3b8" style={{ cursor: 'pointer' }} />
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', gap: '6px' }}>
+                  <span style={{ color: '#ea580c' }}>ENTREGA GARANTIDA</span>
+                  <span style={{ color: '#94a3b8' }}>Para todo Brasil</span>
+                </div>
+                <ChevronRight size={16} color="#94a3b8" style={{ cursor: 'pointer' }} />
+              </div>
             </div>
+          </div>
 
-            {/* Search Bar - Centralizada */}
-            <div className="seven-search" style={{ flex: 1, maxWidth: '600px', margin: '0 24px' }}>
-              <SearchBar variant="seven" />
-            </div>
+          <style dangerouslySetInnerHTML={{__html: `
+            .seven-search { display: none; }
+            .seven-switcher { display: none; }
+            .seven-divider { display: none; }
+            .seven-panel-text { display: none; }
+            .seven-main-bar { padding: 8px 12px; }
+            @media (min-width: 768px) {
+              .seven-search { display: block; }
+              .seven-switcher { display: flex; }
+              .seven-divider { display: block; }
+              .seven-panel-text { display: flex; }
+              .seven-main-bar { padding: 10px 20px; }
+            }
+          `}} />
 
-            {/* Actions - Store Switcher, Usuário e Carrinho */}
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          {/* Main Bar - Pesquisa e Ações */}
+          <div className="seven-main-bar" style={{ 
+            position: 'relative',
+            background: '#090a0f',
+            backgroundImage: 'radial-gradient(ellipse at top, rgba(234,88,12,0.1) 0%, rgba(9,10,15,1) 100%)',
+          }}>
+            <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1440px', margin: '0 auto' }}>
               
-              {/* Store Switcher Buttons */}
-              <div className="seven-switcher" style={{ gap: '24px', alignItems: 'center' }}>
-                <StoreSwitcher store="kings" />
-                <StoreSwitcher store="msu" />
+              {/* Logo */}
+              <div style={{ flexShrink: 0 }}>
+                <Link href="/seven" style={{ textDecoration: 'none', display: 'block', marginLeft: '16px' }}>
+                  <img src="/logo-seven.svg" alt="Seven Sim Racing" style={{ height: '50px', display: 'block', objectFit: 'contain' }} />
+                </Link>
               </div>
 
-              <div className="seven-divider" style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
-              
-              <AuthAction store="seven" />
-              
-              <div className="seven-btn-hover cursor-pointer">
+              {/* Search Bar - Centralizada */}
+              <div className="seven-search" style={{ flex: 1, maxWidth: '600px', margin: '0 24px' }}>
+                <SearchBar variant="seven" />
+              </div>
+
+              {/* Actions - Store Switcher, Usuário e Carrinho */}
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <div className="seven-switcher" style={{ gap: '24px', alignItems: 'center' }}>
+                  <StoreSwitcher store="kings" />
+                  <StoreSwitcher store="msu" />
+                </div>
+                <div className="seven-divider" style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
+                <AuthAction store="seven" />
+                <div className="seven-btn-hover cursor-pointer">
+                  <CartIcon variant="seven" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary Navigation */}
+          <div style={{ background: 'rgba(9, 10, 15, 0.95)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px', overflowX: 'auto' }}>
+              <nav style={{ display: 'flex', alignItems: 'center', height: '38px', whiteSpace: 'nowrap' }}>
+                <ProfileDropdown />
+                <div style={{ display: 'flex', gap: '32px' }}>
+                  <Link href="/seven/produtos?marca=simagic" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simagic</Link>
+                  <Link href="/seven/produtos?categoria=bases" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Base</Link>
+                  <Link href="/seven/produtos?categoria=pedais" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Pedal</Link>
+                  <Link href="/seven/produtos?categoria=volantes" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Volante</Link>
+                  <Link href="/seven/produtos?categoria=acessorios" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Acessórios e Periféricos</Link>
+                  <Link href="/seven/produtos?categoria=cockpits" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simuladores/Cockpits</Link>
+                  <Link href="/seven/produtos?marca=simagic&tipo=kit" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Kits Simagic</Link>
+                </div>
+              </nav>
+            </div>
+          </div>
+        </header>
+      </div>
+
+      {/* --- MOBILE HEADER --- */}
+      <div className="mobile-header-seven">
+        <header style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          background: 'rgba(9, 10, 15, 0.98)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          paddingTop: '12px',
+          paddingBottom: '12px',
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px' }}>
+              <Link href="/seven" style={{ flexShrink: 0 }}>
+                <img 
+                  src="/logo-seven.svg" 
+                  alt="Seven Sim Racing" 
+                  style={{ height: '32px', display: 'block', objectFit: 'contain' }}
+                />
+              </Link>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <AuthAction store="seven" mobile={true} />
                 <CartIcon variant="seven" />
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Secondary Navigation */}
-        <div style={{ background: 'rgba(9, 10, 15, 0.95)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px', overflowX: 'auto' }}>
-            <nav style={{ display: 'flex', alignItems: 'center', height: '38px', whiteSpace: 'nowrap' }}>
-              
-              {/* Dropdown Qual o Seu Perfil? */}
-              <ProfileDropdown />
+            <div style={{ padding: '0 16px' }}>
+              <SearchBar variant="seven" />
+            </div>
 
-              {/* Links Horizontais */}
-              <div style={{ display: 'flex', gap: '32px' }}>
-                <Link href="/seven/produtos?marca=simagic" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simagic</Link>
-                <Link href="/seven/produtos?categoria=bases" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Base</Link>
-                <Link href="/seven/produtos?categoria=pedais" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Pedal</Link>
-                <Link href="/seven/produtos?categoria=volantes" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Volante</Link>
-                <Link href="/seven/produtos?categoria=acessorios" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Acessórios e Periféricos</Link>
-                <Link href="/seven/produtos?categoria=cockpits" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Simuladores/Cockpits</Link>
-                <Link href="/seven/produtos?marca=simagic&tipo=kit" className="font-display hover:text-[#fff]" style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', transition: 'color 0.2s' }}>Kits Simagic</Link>
+            <nav style={{ display: 'flex', alignItems: 'center', padding: '0 16px', overflowX: 'auto' }}>
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <Link href="/seven/produtos?marca=simagic" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                  Simagic
+                </Link>
+                <Link href="/seven/produtos?categoria=bases" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                  Bases
+                </Link>
+                <Link href="/seven/produtos?categoria=volantes" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                  Volantes
+                </Link>
+                <Link href="/seven/produtos?categoria=pedais" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                  Pedais
+                </Link>
               </div>
             </nav>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       <main style={{ position: 'relative', zIndex: 10 }}>
         {children}

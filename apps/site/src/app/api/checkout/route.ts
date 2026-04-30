@@ -27,14 +27,14 @@ export async function POST(req: Request) {
     }
 
     // 2.5. Deduce and Validate Store Context
-    const firstBrand = items[0].brand || 'kings'
-    const isMixed = items.some((item: any) => (item.brand || 'kings') !== firstBrand)
+    const firstStore = items[0].storeOrigin || 'kings'
+    const isMixed = items.some((item: any) => (item.storeOrigin || 'kings') !== firstStore)
     
     if (isMixed) {
       return NextResponse.json({ error: 'Mixed cart is not allowed' }, { status: 400 })
     }
 
-    const storeContext = firstBrand === 'seven' ? 'seven' : (firstBrand === 'msu' ? 'msu' : 'kings')
+    const storeContext = firstStore === 'seven' ? 'seven' : (firstStore === 'msu' ? 'msu' : 'kings')
 
     // 3. Native Order Creation in Database FIRST to get an ID
     const orderData = {

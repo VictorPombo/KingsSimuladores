@@ -8,6 +8,7 @@ export interface CartItem {
   price: number
   imageUrl: string
   brand: string
+  storeOrigin: 'kings' | 'msu' | 'seven'
   quantity: number
 }
 
@@ -53,10 +54,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items])
 
   const addItem = (newItem: CartItem) => {
-    // 1. Bloqueio de Carrinho Misto
+    // 1. Bloqueio de Carrinho Misto (agora por Loja de Origem, não mais por Marca do Produto)
     if (items.length > 0) {
-      const currentBrand = items[0].brand;
-      if (currentBrand !== newItem.brand) {
+      const currentStore = items[0].storeOrigin || 'kings';
+      if (currentStore !== newItem.storeOrigin) {
         const confirmClear = window.confirm('Seu carrinho possui itens de outra loja. Deseja limpar o carrinho e adicionar este item?');
         if (confirmClear) {
           setItems([newItem]);

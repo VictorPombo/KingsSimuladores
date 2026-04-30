@@ -1,6 +1,13 @@
 import React from 'react'
 import { Container } from '@kings/ui'
 import Link from 'next/link'
+import { 
+  RefreshCw, Package, Shield, Scale, 
+  Ban, Lock, Video, CheckCircle, 
+  AlertTriangle, MessageCircle, Phone,
+  UserPlus, FileText, MapPin, Image, Ruler, 
+  Send, Users, Wallet
+} from 'lucide-react'
 
 export const metadata = {
   title: 'Ajuda | Meu Simulador Usado',
@@ -12,6 +19,7 @@ export default function AjudaPage() {
     marginBottom: '48px', padding: '32px',
     background: 'rgba(15,18,30,0.5)', borderRadius: '16px',
     border: '1px solid rgba(255,255,255,0.06)',
+    scrollMarginTop: '120px',
   }
   const h2Style: React.CSSProperties = {
     fontSize: '1.4rem', fontWeight: 800, color: '#fff', marginBottom: '20px',
@@ -21,6 +29,17 @@ export default function AjudaPage() {
     padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.04)',
     color: '#a1a1aa', fontSize: '0.95rem', lineHeight: 1.7,
   }
+
+  const stepIcons = [
+    <UserPlus size={18} key="s1" />,
+    <Package size={18} key="s2" />,
+    <FileText size={18} key="s3" />,
+    <Image size={18} key="s4" />,
+    <Ruler size={18} key="s5" />,
+    <Send size={18} key="s6" />,
+    <Users size={18} key="s7" />,
+    <Wallet size={18} key="s8" />,
+  ]
 
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', paddingBottom: '80px' }}>
@@ -34,7 +53,9 @@ export default function AjudaPage() {
 
         {/* COMO FUNCIONA */}
         <section id="como-funciona" style={sectionStyle}>
-          <h2 style={h2Style}>🔄 Como Funciona</h2>
+          <h2 style={h2Style}>
+            <RefreshCw size={22} color="#00e5ff" /> Como Funciona
+          </h2>
           <p style={{ color: '#a1a1aa', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '20px' }}>
             Nossa plataforma é intermediadora de confiança para garantir segurança para vendedor e comprador.
           </p>
@@ -68,8 +89,10 @@ export default function AjudaPage() {
 
         {/* COMO VENDER */}
         <section id="como-vender" style={sectionStyle}>
-          <h2 style={h2Style}>📦 Como Vender</h2>
-          <ol style={{ padding: '0 0 0 20px', margin: 0 }}>
+          <h2 style={h2Style}>
+            <Package size={22} color="#8b5cf6" /> Como Vender
+          </h2>
+          <ol style={{ padding: 0, margin: 0, listStyle: 'none' }}>
             {[
               'Crie sua conta e complete seu perfil',
               'Clique em "Anunciar Produto"',
@@ -80,9 +103,19 @@ export default function AjudaPage() {
               'Ao vender, acompanhe o processo pelo grupo WhatsApp da plataforma',
               'Receba o pagamento após confirmação do comprador (máximo 24h após entrega)',
             ].map((step, i) => (
-              <li key={i} style={{ ...liStyle, display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <span style={{ color: '#00e5ff', fontWeight: 800, minWidth: '24px' }}>{i + 1}.</span>
-                {step}
+              <li key={i} style={{ ...liStyle, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
+                  background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)',
+                  color: '#8b5cf6',
+                }}>
+                  {stepIcons[i]}
+                </span>
+                <span>
+                  <span style={{ color: '#8b5cf6', fontWeight: 800, marginRight: '6px' }}>{i + 1}.</span>
+                  {step}
+                </span>
               </li>
             ))}
           </ol>
@@ -90,23 +123,31 @@ export default function AjudaPage() {
 
         {/* DICAS DE SEGURANÇA */}
         <section id="seguranca" style={{ ...sectionStyle, borderColor: 'rgba(239,68,68,0.15)' }}>
-          <h2 style={h2Style}>🛡️ Dicas de Segurança</h2>
+          <h2 style={h2Style}>
+            <Shield size={22} color="#ef4444" /> Dicas de Segurança
+          </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
             {[
-              { text: 'NUNCA combine pagamento fora da plataforma', icon: '🚫' },
-              { text: 'NUNCA passe seus dados bancários a compradores', icon: '🔒' },
-              { text: 'SEMPRE exija o vídeo de unboxing ao comprar', icon: '📹' },
-              { text: 'SEMPRE use o escrow da plataforma', icon: '✅' },
-              { text: 'Se receber proposta suspeita, reporte ao admin', icon: '⚠️' },
-              { text: 'Toda negociação deve passar pela plataforma', icon: '💬' },
-              { text: 'Em caso de problema, contate o suporte pelo WhatsApp oficial', icon: '📞' },
+              { text: 'NUNCA combine pagamento fora da plataforma', icon: <Ban size={18} color="#ef4444" /> },
+              { text: 'NUNCA passe seus dados bancários a compradores', icon: <Lock size={18} color="#f59e0b" /> },
+              { text: 'SEMPRE exija o vídeo de unboxing ao comprar', icon: <Video size={18} color="#06b6d4" /> },
+              { text: 'SEMPRE use o escrow da plataforma', icon: <CheckCircle size={18} color="#10b981" /> },
+              { text: 'Se receber proposta suspeita, reporte ao admin', icon: <AlertTriangle size={18} color="#f59e0b" /> },
+              { text: 'Toda negociação deve passar pela plataforma', icon: <MessageCircle size={18} color="#71717a" /> },
+              { text: 'Em caso de problema, contate o suporte pelo WhatsApp oficial', icon: <Phone size={18} color="#10b981" /> },
             ].map((tip, i) => (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 padding: '14px 16px', background: 'rgba(239,68,68,0.03)',
                 borderRadius: '10px', border: '1px solid rgba(239,68,68,0.08)',
               }}>
-                <span style={{ fontSize: '1.2rem' }}>{tip.icon}</span>
+                <span style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+                }}>
+                  {tip.icon}
+                </span>
                 <span style={{ color: '#a1a1aa', fontSize: '0.9rem' }}>{tip.text}</span>
               </div>
             ))}
@@ -115,7 +156,9 @@ export default function AjudaPage() {
 
         {/* REGRAS DE MODERAÇÃO */}
         <section id="regras" style={sectionStyle}>
-          <h2 style={h2Style}>⚖️ Regras de Moderação</h2>
+          <h2 style={h2Style}>
+            <Scale size={22} color="#f59e0b" /> Regras de Moderação
+          </h2>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
             {[
               'Proibido anunciar produtos roubados ou furtados',

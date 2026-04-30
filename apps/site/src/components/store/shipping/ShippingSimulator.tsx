@@ -56,7 +56,7 @@ export function ShippingSimulator({ dimensions }: ShippingSimulatorProps) {
 
   return (
     <div style={{ marginBottom: '32px' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="shipping-input-group">
         <input 
           type="text" 
           placeholder="Seu CEP" 

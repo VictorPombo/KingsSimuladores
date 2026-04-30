@@ -38,11 +38,11 @@ export function CartDrawer() {
         }}
       />
       <div 
+        className="cart-drawer-container"
         style={{
           position: 'fixed',
           top: 0, right: 0, bottom: 0,
           width: '100%',
-          maxWidth: '400px',
           background: 'var(--bg-primary)',
           borderLeft: '1px solid var(--border)',
           zIndex: 1000,
@@ -137,6 +137,11 @@ export function CartDrawer() {
         @keyframes slideIn {
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
+        }
+        @media (max-width: 600px) {
+          .cart-drawer-container {
+            max-width: 100% !important;
+          }
         }
       `}} />
       {showUpsellPopup && (

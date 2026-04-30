@@ -9,37 +9,20 @@ import { X, Zap, Truck } from 'lucide-react'
  * Popup de Upsell que aparece quando o carrinho tem exatamente 1 item
  * e o usuário clica em "Finalizar Compra".
  * 
+ * Busca sugestão REAL do banco via /api/upsell.
  * Aparece apenas 1 vez por sessão (sessionStorage).
  */
 
-// Mesmas regras do UpsellEngine
-const CROSS_SELL_RULES: Record<string, string[]> = {
-  volante: ['cockpit', 'pedais'],
-  cockpit: ['volante', 'pedais'],
-  pedais: ['volante', 'cambio'],
-  cambio: ['cockpit', 'pedais'],
-  base: ['volante', 'cockpit'],
-  acessorio: ['cockpit', 'volante'],
-}
-
-const SUGGESTION_CATALOG = [
-  { id: 'up-1', title: 'Cockpit SXT V2', price: 2199.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Cockpit', brand: 'XTREME RACING', category: 'cockpit' },
-  { id: 'up-2', title: 'Volante Fanatec DD Pro', price: 7999.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Volante', brand: 'FANATEC', category: 'volante' },
-  { id: 'up-3', title: 'Pedais Load Cell V3', price: 3499.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Pedais', brand: 'FANATEC', category: 'pedais' },
-  { id: 'up-4', title: 'Câmbio H-Shifter TH8A', price: 1899.90, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Cambio', brand: 'THRUSTMASTER', category: 'cambio' },
-  { id: 'up-6', title: 'Base Moza R9 Direct Drive', price: 5499.00, imageUrl: 'https://placehold.co/200x200/131928/e8ecf4?text=Base+DD', brand: 'MOZA RACING', category: 'base' },
-]
-
 const UPSELL_DISCOUNT = 100 // R$ de desconto no combo
 
-function detectCategory(title: string): string {
-  const t = title.toLowerCase()
-  if (t.includes('cockpit') || t.includes('suporte')) return 'cockpit'
-  if (t.includes('volante') || t.includes('aro')) return 'volante'
-  if (t.includes('pedal') || t.includes('load cell')) return 'pedais'
-  if (t.includes('câmbio') || t.includes('shifter')) return 'cambio'
-  if (t.includes('base') || t.includes('direct drive') || t.includes('dd')) return 'base'
-  return 'acessorio'
+interface Suggestion {
+  id: string
+  title: string
+  slug: string
+  price: number
+  imageUrl: string
+  brand: string
+  category: string
 }
 
 interface UpsellPopupProps {
@@ -49,36 +32,48 @@ interface UpsellPopupProps {
 
 export function UpsellPopup({ onClose, onProceed }: UpsellPopupProps) {
   const { items, addItem } = useCart()
+  const [suggestion, setSuggestion] = useState<Suggestion | null>(null)
+  const [loading, setLoading] = useState(true)
   const [visible, setVisible] = useState(true)
 
-  // Find a suggestion
-  const cartCategory = items.length === 1 ? detectCategory(items[0].title) : null
-  const complementCategories = cartCategory ? (CROSS_SELL_RULES[cartCategory] || []) : []
-  const cartIds = new Set(items.map(i => i.id))
-  const suggestion = SUGGESTION_CATALOG.find(
-    p => complementCategories.includes(p.category) && !cartIds.has(p.id)
-  )
-
-  // No suggestion or already shown this session? Skip
+  // Check session and fetch suggestion
   useEffect(() => {
     if (sessionStorage.getItem('kings_upsell_shown')) {
       setVisible(false)
       onProceed()
-    } else {
-      sessionStorage.setItem('kings_upsell_shown', '1')
+      return
     }
+    sessionStorage.setItem('kings_upsell_shown', '1')
+
+    const fetchSuggestion = async () => {
+      try {
+        const res = await fetch('/api/upsell', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cartItems: items.map(i => ({ id: i.id, title: i.title })),
+            limit: 1,
+          })
+        })
+        const data = await res.json()
+        if (data.suggestions && data.suggestions.length > 0) {
+          setSuggestion(data.suggestions[0])
+        } else {
+          // No suggestion found, proceed immediately
+          onProceed()
+        }
+      } catch {
+        onProceed()
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSuggestion()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // If no suggestion found, proceed immediately
-  useEffect(() => {
-    if (!suggestion && visible) {
-      onProceed()
-    }
-  }, [suggestion, visible]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (!visible || !suggestion) {
-    return null
-  }
+  if (!visible || loading) return null
+  if (!suggestion) return null
 
   const handleAdd = () => {
     addItem({
@@ -87,6 +82,7 @@ export function UpsellPopup({ onClose, onProceed }: UpsellPopupProps) {
       price: suggestion.price - UPSELL_DISCOUNT,
       imageUrl: suggestion.imageUrl,
       brand: suggestion.brand,
+      storeOrigin: 'kings',
       quantity: 1,
     })
     onProceed()

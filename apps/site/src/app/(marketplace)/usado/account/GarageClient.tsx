@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Package, ShoppingBag, User, ExternalLink, Clock, CheckCircle, XCircle, AlertCircle, FileText, Truck } from 'lucide-react'
+import { Package, ShoppingBag, User, ExternalLink, Clock, CheckCircle, XCircle, AlertCircle, FileText, Truck, Lock, Eye, EyeOff } from 'lucide-react'
+import { createBrowserClient } from '@supabase/ssr'
 
 type Listing = {
   id: string
@@ -295,50 +296,212 @@ export function GarageClient({
 
       {/* Tab: Perfil */}
       {activeTab === 'profile' && (
-        <div style={{
-          background: 'rgba(15, 18, 30, 0.6)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '16px',
-          padding: '32px',
-          maxWidth: '500px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-            <div style={{
-              width: '56px', height: '56px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.4rem', fontWeight: 800, color: '#fff',
-            }}>
-              {(profile.full_name || profile.email)?.[0]?.toUpperCase() || 'P'}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '500px' }}>
+          {/* Info Card */}
+          <div style={{
+            background: 'rgba(15, 18, 30, 0.6)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '16px',
+            padding: '32px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.4rem', fontWeight: 800, color: '#fff',
+              }}>
+                {(profile.full_name || profile.email)?.[0]?.toUpperCase() || 'P'}
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>
+                  {profile.full_name || 'Piloto'}
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>{profile.email}</p>
+              </div>
             </div>
-            <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>
-                {profile.full_name || 'Piloto'}
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>{profile.email}</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Anúncios criados</span>
+                <span style={{ color: '#fff', fontWeight: 700 }}>{listings.length}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Vendas realizadas</span>
+                <span style={{ color: '#fff', fontWeight: 700 }}>{orders.length}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Membro desde</span>
+                <span style={{ color: '#fff', fontWeight: 700 }}>
+                  {profile.created_at ? new Date(profile.created_at).toLocaleDateString('pt-BR') : '—'}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Anúncios criados</span>
-              <span style={{ color: '#fff', fontWeight: 700 }}>{listings.length}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Vendas realizadas</span>
-              <span style={{ color: '#fff', fontWeight: 700 }}>{orders.length}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Membro desde</span>
-              <span style={{ color: '#fff', fontWeight: 700 }}>
-                {profile.created_at ? new Date(profile.created_at).toLocaleDateString('pt-BR') : '—'}
-              </span>
-            </div>
-          </div>
+          {/* Password Change Card */}
+          <PasswordChangeForm />
         </div>
       )}
     </>
+  )
+}
+
+// Sub-component: Password Change Form
+function PasswordChangeForm() {
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showNew, setShowNew] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErrorMsg('')
+
+    if (newPassword.length < 6) {
+      setErrorMsg('A senha deve ter no mínimo 6 caracteres.')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setErrorMsg('As senhas não coincidem.')
+      return
+    }
+
+    setStatus('loading')
+
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+
+      if (error) {
+        setErrorMsg(error.message)
+        setStatus('error')
+      } else {
+        setStatus('success')
+        setNewPassword('')
+        setConfirmPassword('')
+        setTimeout(() => setStatus('idle'), 4000)
+      }
+    } catch {
+      setErrorMsg('Erro inesperado. Tente novamente.')
+      setStatus('error')
+    }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 40px 12px 14px',
+    background: 'rgba(0,0,0,0.3)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '10px',
+    color: '#fff',
+    fontSize: '0.9rem',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+  }
+
+  return (
+    <div style={{
+      background: 'rgba(15, 18, 30, 0.6)',
+      backdropFilter: 'blur(12px)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: '16px',
+      padding: '32px',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+        <Lock size={18} color="#8b5cf6" />
+        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', margin: 0 }}>
+          Alterar Senha
+        </h3>
+      </div>
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px', display: 'block' }}>
+            Nova senha
+          </label>
+          <div style={{ position: 'relative' }}>
+            <input
+              type={showNew ? 'text' : 'password'}
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+              style={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => setShowNew(!showNew)}
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#71717a', padding: 0 }}
+            >
+              {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px', display: 'block' }}>
+            Confirmar nova senha
+          </label>
+          <div style={{ position: 'relative' }}>
+            <input
+              type={showConfirm ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              placeholder="Repita a senha"
+              style={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#71717a', padding: 0 }}
+            >
+              {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+
+        {errorMsg && (
+          <div style={{ fontSize: '0.82rem', color: '#ef4444', background: 'rgba(239,68,68,0.08)', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
+            {errorMsg}
+          </div>
+        )}
+
+        {status === 'success' && (
+          <div style={{ fontSize: '0.82rem', color: '#10b981', background: 'rgba(16,185,129,0.08)', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <CheckCircle size={14} /> Senha alterada com sucesso!
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={status === 'loading' || !newPassword || !confirmPassword}
+          style={{
+            width: '100%',
+            padding: '12px',
+            borderRadius: '10px',
+            border: 'none',
+            background: status === 'loading' ? 'rgba(139,92,246,0.3)' : 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+            color: '#fff',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+            transition: 'opacity 0.2s',
+            opacity: (!newPassword || !confirmPassword) ? 0.5 : 1,
+          }}
+        >
+          {status === 'loading' ? 'Alterando...' : 'Salvar Nova Senha'}
+        </button>
+      </form>
+    </div>
   )
 }
 

@@ -122,7 +122,7 @@ export default function CheckoutPage() {
 
       
       <Container style={{ position: 'relative', zIndex: 1, paddingBottom: '100px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem', alignItems: 'start' }}>
+        <div className="kings-checkout-grid">
           
           {/* Coluna Esquerda: Fluxo */}
           <div style={{ background: 'rgba(10, 14, 26, 0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '1rem', padding: '2rem' }}>
@@ -131,19 +131,19 @@ export default function CheckoutPage() {
             {step === 1 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>1. Seus Dados</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="kings-checkout-form-grid">
                   <input type="text" placeholder="Nome Completo" value={nome} onChange={e => setNome(e.target.value)} style={inputStyle} />
                   <input type="text" placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} style={inputStyle} />
                 </div>
                 <input type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
                 
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff', marginTop: '1rem' }}>Endereço de Entrega</h2>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <input type="text" placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} onBlur={preencherCep} style={{...inputStyle, width: '150px'}} />
+                <div className="kings-checkout-form-row">
+                  <input type="text" placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} onBlur={preencherCep} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
                   <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 1}} />
-                  <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px'}} />
+                  <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px', flexShrink: 0}} className="checkout-number-input" />
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="kings-checkout-form-row">
                   <input type="text" placeholder="Complemento (opcional)" value={complemento} onChange={e => setComplemento(e.target.value)} style={{...inputStyle, flex: 1}} />
                   <input type="text" placeholder="Referência (opcional)" value={referencia} onChange={e => setReferencia(e.target.value)} style={{...inputStyle, flex: 1}} />
                 </div>

@@ -87,10 +87,10 @@ export default async function ProductPage({ params }: { params: { id: string } }
   const imageUrl = product.images?.[0] || 'https://placehold.co/800x800/131928/e8ecf4?text=Kings'
 
   return (
-    <div style={{ padding: '60px 0', minHeight: 'calc(100vh - 80px)' }}>
+    <div className="kings-product-page-wrapper">
       <ProductJsonLd product={product} />
       <Container>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1fr) minmax(300px, 500px)', gap: '60px', alignItems: 'start' }}>
+        <div className="kings-product-grid">
           
           {/* Foto */}
           <div style={{ background: '#fff', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)' }}>
@@ -105,10 +105,10 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 {product.stock <= 0 && <Badge variant="warning">Esgotado</Badge>}
                 {discountPct > 0 && <Badge variant="success">-{discountPct}%</Badge>}
               </div>
-              <h1 className="font-display" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.1 }}>
+              <h1 className="font-display kings-product-title">
                 {product.title}
               </h1>
-              {product.description && (
+              {product.description && !product.description.startsWith('Produto importado da Tray') && (
                 <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6 }}>
                   {product.description.slice(0, 300)}{product.description.length > 300 ? '...' : ''}
                 </p>
@@ -136,15 +136,16 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
             <ShippingSimulator dimensions={[{ weight: 25, width: 60, height: 60, length: 60 }]} />
 
-            <AddToCartButton 
-              product={{
-                id: product.id,
-                title: product.title,
-                price: finalPrice,
-                imageUrl,
-                brand: brandName,
-              }} 
-            />
+              <AddToCartButton 
+                product={{
+                  id: product.id,
+                  title: product.title,
+                  price: finalPrice,
+                  imageUrl,
+                  brand: brandName,
+                  storeOrigin: 'kings'
+                }} 
+              />
             {product.stock <= 0 && (
               <a href={`/usado/produtos?q=${encodeURIComponent(product.title)}`} style={{ display: 'block', marginTop: '16px', textDecoration: 'none' }}>
                 <div style={{ background: 'rgba(6, 182, 212, 0.1)', border: '1px solid #06b6d4', color: '#06b6d4', padding: '16px', borderRadius: 'var(--radius)', textAlign: 'center', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>

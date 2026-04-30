@@ -64,7 +64,7 @@ function ProductJsonLd({ product }: { product: any }) {
       priceCurrency: 'BRL',
       price: Number(product.price).toFixed(2),
       availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      seller: { '@type': 'Organization', name: 'Kings Simuladores' },
+      seller: { '@type': 'Organization', name: 'Seven Sim Racing' },
     },
   }
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
@@ -83,14 +83,14 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const finalPrice = product.price
   const discountPct = hasDiscount ? Math.round((1 - finalPrice / originalPrice) * 100) : 0
   const installmentValue = finalPrice / 12
-  const brandName = product.attributes?.brand || 'Kings Simuladores'
+  const brandName = product.attributes?.brand || 'Seven Sim Racing'
   const imageUrl = product.images?.[0] || 'https://placehold.co/800x800/131928/e8ecf4?text=Kings'
 
   return (
-    <div style={{ padding: '60px 0', minHeight: 'calc(100vh - 80px)', background: '#0a0e1a' }}>
+    <div className="kings-product-page-wrapper" style={{ background: '#0a0e1a' }}>
       <ProductJsonLd product={product} />
       <Container>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1fr) minmax(300px, 500px)', gap: '60px', alignItems: 'start' }}>
+        <div className="kings-product-grid">
           
           {/* Foto */}
           <div style={{ background: '#fff', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)' }}>
@@ -105,10 +105,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
                 {product.stock <= 0 && <Badge variant="warning">Esgotado</Badge>}
                 {discountPct > 0 && <Badge variant="success">-{discountPct}%</Badge>}
               </div>
-              <h1 className="font-display" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.1 }}>
+              <h1 className="font-display kings-product-title">
                 {product.title}
               </h1>
-              {product.description && (
+              {product.description && !product.description.startsWith('Produto importado da Tray') && (
                 <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6 }}>
                   {product.description.slice(0, 300)}{product.description.length > 300 ? '...' : ''}
                 </p>
@@ -141,6 +141,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
                   price: finalPrice,
                   imageUrl,
                   brand: brandName,
+                  storeOrigin: 'seven'
                 }} 
               />
             </div>

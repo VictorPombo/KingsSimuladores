@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import '@kings/ui/globals.css'
-
+import '@/components/store/layout/responsive.css'
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -29,7 +29,12 @@ export const metadata: Metadata = {
   icons: {
     icon: 'https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png',
     shortcut: 'https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png',
-    apple: 'https://cdn.awsli.com.br/1940/1940182/favicon/design_sem_nome-removebg-preview-1-ankxhcnbfi.png',
+    apple: '/apple-icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'KingsHub',
+    statusBarStyle: 'black-translucent',
   },
 }
 
