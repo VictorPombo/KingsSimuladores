@@ -196,15 +196,12 @@ export default async function HomePage() {
       <DalesteSticker />
 
       {/* SECTION TRIPLA DE PRODUTOS */}
-      {(lancamentos?.length > 0 || msuListings?.length > 0 || maisVendidos?.length > 0 || destaques?.length > 0) && (
+      {(lancamentos?.length > 0 || maisVendidos?.length > 0 || destaques?.length > 0) && (
         <section id="vitrines" style={{ padding: 'clamp(32px, 8vw, 80px) 0', overflow: 'hidden' }}>
           <Container>
             <ProductCarousel title="LANÇAMENTOS" prods={lancamentos} />
             <ProductCarousel title="MAIS VENDIDOS" prods={maisVendidos} />
             <ProductCarousel title="DESTAQUES" prods={destaques} />
-            {msuListings?.length > 0 && (
-              <ProductCarousel title="OPORTUNIDADE MEU SIMULADOR USADO" prods={msuListings} tenant="msu" />
-            )}
             
           </Container>
         </section>
