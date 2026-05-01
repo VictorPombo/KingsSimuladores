@@ -153,6 +153,16 @@ export default async function ProductPage({ params }: { params: { slug: string }
             )}
           </div>
         </div>
+
+        {/* Full Description Section */}
+        {product.description && !product.description.startsWith('Produto importado da Tray') && (
+          <div style={{ marginTop: '48px', padding: '32px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+            <h2 className="font-display" style={{ fontSize: '1.5rem', marginBottom: '24px', color: '#fff' }}>Descrição do Produto</h2>
+            <div style={{ color: '#94a3b8', lineHeight: 1.8, fontSize: '1.05rem', whiteSpace: 'pre-wrap' }}>
+              {product.description}
+            </div>
+          </div>
+        )}
       </Container>
     </div>
   )
