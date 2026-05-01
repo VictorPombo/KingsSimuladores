@@ -99,7 +99,7 @@ ESTRUTURA ESPERADA DO JSON:
   "avaliacoes": [
     {
       "reviewer_name": "Nome do Cliente",
-      "rating": "Nota do cliente como número (ex: 5, 4.5)",
+      "rating": "Nota do cliente como número (ex: 5, 4.5). EXPORTE APENAS AVALIAÇÕES COM 4 OU 5 ESTRELAS.",
       "comment": "Comentário do cliente TRADUZIDO para Português (PT-BR)",
       "created_at": "Data da avaliação ou null se não houver"
     }
@@ -113,11 +113,11 @@ ESTRUTURA ESPERADA DO JSON:
 }
 
 REGRAS VITAIS:
-1. ALUCINAÇÃO ZERO: Se uma informação (como preço, garantia ou avaliações) não existir, retorne null ou um array vazio []. NUNCA invente dados de avaliações, apenas traduza as que existirem.
+1. ALUCINAÇÃO ZERO: Se uma informação (como preço, garantia ou avaliações) não existir, retorne null ou um array vazio []. NUNCA invente dados de avaliações, apenas traduza as que existirem. EXTRAIA APENAS AVALIAÇÕES DE 4 E 5 ESTRELAS. IGNORE qualquer review inferior a 4.
 2. FOCO NO PRODUTO: Ignore textos de menus de navegação e rodapés, MAS CAPTURE as avaliações (reviews) dos clientes na página.
 3. CÂMBIO EM TEMPO REAL: Preços devem ser números (float). Se o preço original for estrangeiro, CONVERTA AUTOMATICAMENTE para Reais (BRL). ${exchangeRatesText}
 4. IDIOMA E TRADUÇÃO: Traduza APENAS os textos descritivos (títulos, descrições, ficha técnica, comentários de avaliação, tags) para o Português do Brasil (pt-BR). NÃO altere ou traduza modelos (SKU).
-5. IMAGENS NA DESCRIÇÃO (MUITO IMPORTANTE): A 'descricao_completa' não deve ser apenas texto! Ela deve ser um HTML rico que intercala os parágrafos traduzidos com as tags <img> originais. Exemplo: <h2>...</h2><p>...</p><img src="url_original_do_banner" />.
+5. IMAGENS NA DESCRIÇÃO (MUITO IMPORTANTE): A 'descricao_completa' não deve ser apenas texto! Ela deve ser um HTML rico que intercala os parágrafos traduzidos com as tags <img> originais. Toda tag de imagem DEVE ter o estilo 'style="max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0;"' para garantir a responsividade. Exemplo: <h2>...</h2><p>...</p><img src="url_original_do_banner" style="max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0;" />.
 6. IMAGENS REAIS: É estritamente proibido extrair URLs de ícones (svg, png de interface), logos, ilustrações vetorizadas ou ferramentas isoladas. Extraia APENAS fotos reais de alta qualidade do produto.`
 
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {

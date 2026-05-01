@@ -136,7 +136,7 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
                 </ul>
               </div>
             )}
-            <DataBlock label="Descrição Completa (HTML)" value={<div dangerouslySetInnerHTML={{ __html: extractedData.descricoes?.descricao_completa || '' }} />} />
+            <DataBlock label="Descrição Completa (HTML)" value={<div dangerouslySetInnerHTML={{ __html: `<style>.ai-preview-img img { max-width: 100%; height: auto; border-radius: 8px; }</style><div class="ai-preview-img">${extractedData.descricoes?.descricao_completa || ''}</div>` }} />} />
           </div>
         );
       case 'especificacoes':

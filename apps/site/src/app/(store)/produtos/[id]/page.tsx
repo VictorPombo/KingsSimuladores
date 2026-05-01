@@ -108,8 +108,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 {product.title}
               </h1>
               {product.description && !product.description.startsWith('Produto importado da Tray') && (
-                <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6 }}>
-                  {product.description.slice(0, 300)}{product.description.length > 300 ? '...' : ''}
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                  {product.description.replace(/<[^>]+>/g, '').slice(0, 180)}{product.description.replace(/<[^>]+>/g, '').length > 180 ? '...' : ''}
                 </p>
               )}
             </div>
@@ -155,13 +155,37 @@ export default async function ProductPage({ params }: { params: { id: string } }
           </div>
         </div>
 
-        {/* Full Description Section */}
+        {/* Full Description Section (Premium HTML Rendering) */}
         {product.description && !product.description.startsWith('Produto importado da Tray') && (
-          <div style={{ marginTop: '48px', padding: '32px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-            <h2 className="font-display" style={{ fontSize: '1.5rem', marginBottom: '24px', color: 'var(--text)' }}>Descrição do Produto</h2>
-            <div style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.05rem', whiteSpace: 'pre-wrap' }}>
-              {product.description}
-            </div>
+          <div style={{ marginTop: '64px', padding: '0', background: 'transparent' }}>
+            {/<[a-z][\s\S]*>/i.test(product.description) ? (
+              <div 
+                className="kings-rich-description"
+                style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.1rem' }}
+                dangerouslySetInnerHTML={{ 
+                  __html: `<style>
+                    .kings-rich-description { max-width: 100%; overflow: hidden; font-family: var(--font-sans); }
+                    .kings-rich-description img { max-width: 100%; height: auto; border-radius: 16px; margin: 32px auto; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+                    .kings-rich-description h2 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-top: 64px; margin-bottom: 24px; text-align: center; letter-spacing: -0.5px; }
+                    .kings-rich-description h3 { font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-top: 48px; margin-bottom: 16px; text-align: center; }
+                    .kings-rich-description p { margin-bottom: 24px; text-align: center; max-width: 900px; margin-left: auto; margin-right: auto; color: #cbd5e1; }
+                    .kings-rich-description ul { max-width: 900px; margin: 0 auto 32px auto; padding-left: 20px; color: #cbd5e1; display: flex; flex-direction: column; gap: 8px; }
+                    .kings-rich-description li { margin-bottom: 8px; }
+                    @media (max-width: 768px) {
+                      .kings-rich-description h2 { font-size: 1.8rem; }
+                      .kings-rich-description p, .kings-rich-description ul { text-align: left; padding: 0 16px; }
+                    }
+                  </style>` + product.description 
+                }}
+              />
+            ) : (
+              <div style={{ padding: '32px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                <h2 className="font-display" style={{ fontSize: '1.5rem', marginBottom: '24px', color: 'var(--text)' }}>Descrição do Produto</h2>
+                <div style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.05rem', whiteSpace: 'pre-wrap' }}>
+                  {product.description}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Container>
