@@ -20,6 +20,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.awsli.com.br',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.tcdn.com.br',
+      },
     ],
   },
 
