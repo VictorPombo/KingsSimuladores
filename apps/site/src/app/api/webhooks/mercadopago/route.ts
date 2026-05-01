@@ -60,10 +60,12 @@ export async function POST(req: Request) {
         }
 
         // 3. Buscar os itens do pedido para Controle de Estoque
-        const { data: items } = await supabase
+        const { data: items, error: itemsErr } = await supabase
           .from('order_items')
-          .select('product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, stock_quantity)')
+          .select('product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, stock, sku)')
           .eq('order_id', orderId)
+          
+        if (itemsErr) console.error('[Webhook MP] Erro ao buscar order_items:', itemsErr);
           
         if (items) {
           for (const item of items) {
@@ -71,15 +73,15 @@ export async function POST(req: Request) {
             // Em caso de Kings ou Seven (produtos nativos)
             if ((origin === 'kings' || origin === 'seven') && item.product_id) {
               const product = item.product as any
-              if (product && typeof product.stock_quantity === 'number') {
-                  const newStock = Math.max(0, product.stock_quantity - item.quantity)
-                  await supabase.from('products').update({ stock_quantity: newStock }).eq('id', item.product_id)
+              if (product && typeof product.stock === 'number') {
+                  const newStock = Math.max(0, product.stock - item.quantity)
+                  await supabase.from('products').update({ stock: newStock }).eq('id', item.product_id)
               } else {
                  // fallback if relationship failed
-                 const { data: p } = await supabase.from('products').select('stock_quantity').eq('id', item.product_id).single()
+                 const { data: p } = await supabase.from('products').select('stock').eq('id', item.product_id).single()
                  if (p) {
-                   const newStock = Math.max(0, p.stock_quantity - item.quantity)
-                   await supabase.from('products').update({ stock_quantity: newStock }).eq('id', item.product_id)
+                   const newStock = Math.max(0, p.stock - item.quantity)
+                   await supabase.from('products').update({ stock: newStock }).eq('id', item.product_id)
                  }
               }
             }
@@ -138,26 +140,27 @@ export async function POST(req: Request) {
               email: profile?.email
             },
             shipping: order.shipping_address,
+            shipping_cost: shippingVal,
             items: storeItems.map(i => ({
-               product_id: i.product_id,
-               title: i.product?.title || 'Produto Genérico',
+               product_id: i.product?.sku || i.product_id, // Send SKU to ERP if available!
+               title: i.product?.title || 'Item',
                quantity: i.quantity,
                unit_price: i.unit_price
             }))
           }
 
           if (store === 'seven') {
-            void pushOrderToOlist(orderPayload, store)
+            void pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
               .then(async (res) => {
                 if (res && res.status !== 'error') {
                   await adminSupabase.from('invoices').insert({
                     order_id: order.id,
                     store_origin: store,
                     erp_id: res.tiny_id || res.id || '',
-                    cnpj_emitente: res.cnpj_emitente || '',
-                    nfe_number: res.nfe_number || '',
-                    nfe_key: res.nfe_key || '',
-                    status: res.status,
+                    cnpj_emitente: '',
+                    nfe_number: '',
+                    nfe_key: '',
+                    status: 'issued',
                     xml_url: res.xml_url || '',
                     pdf_url: res.pdf_url || ''
                   })
@@ -168,7 +171,11 @@ export async function POST(req: Request) {
               .catch(err => console.error('[Olist Async Error]', err))
           } else {
             // Kings ou MSU mantêm síncrono
-            const res = await pushOrderToOlist(orderPayload, store)
+            console.log('============= DEBUG WEBHOOK =============')
+            console.log('API KEY IN NEXTJS:', process.env.OLIST_API_KEY_KINGS)
+            console.log('Store:', store)
+            console.log('OrderPayload:', JSON.stringify(orderPayload, null, 2))
+            const res = await pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
             if (res && res.status !== 'error') {
                if (!nfeResFirst) nfeResFirst = res; // salva o link pra usar no wpp
                await adminSupabase.from('invoices').insert({
@@ -178,7 +185,7 @@ export async function POST(req: Request) {
                 cnpj_emitente: res.cnpj_emitente || '',
                 nfe_number: res.nfe_number || '',
                 nfe_key: res.nfe_key || '',
-                status: res.status,
+                status: 'issued',
                 xml_url: res.xml_url || '',
                 pdf_url: res.pdf_url || ''
               })

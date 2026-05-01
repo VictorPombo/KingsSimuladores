@@ -3,8 +3,6 @@
 import React, { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Package, Image as ImageIcon, AlertCircle, Check, X, UploadCloud } from 'lucide-react'
-import imageCompression from 'browser-image-compression'
-import { createClient } from '@supabase/supabase-js'
 import { updateProduct } from './actions'
 
 type ProductData = {
@@ -12,6 +10,7 @@ type ProductData = {
   stock: number; status: string; weight_kg: number | null; dimensions_cm: {width: number, height: number, length: number} | null; images: string[]; description: string | null
   ncm: string | null; ean: string | null; cnpj_emitente: string | null; created_at: string; updated_at: string
   brand_name: string; category_name: string | null; fabricante: string | null; attributes?: Record<string, any>
+  cost_price: number | null
 }
 
 const inputStyle: React.CSSProperties = {
@@ -33,6 +32,21 @@ export function EditProductForm({ product }: { product: ProductData }) {
     (product.images || []).map(url => ({ type: 'existing', url }))
   )
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Ref for Drag and Drop Reordering
+  const dragItem = useRef<number | null>(null)
+  const dragOverItem = useRef<number | null>(null)
+  
+  const handleSort = () => {
+    if (dragItem.current === null || dragOverItem.current === null) return;
+    const _images = [...images];
+    const draggedItemContent = _images.splice(dragItem.current, 1)[0];
+    _images.splice(dragOverItem.current, 0, draggedItemContent);
+    
+    dragItem.current = null;
+    dragOverItem.current = null;
+    setImages(_images);
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -58,21 +72,25 @@ export function EditProductForm({ product }: { product: ProductData }) {
     startTransition(async () => {
       try {
         const finalUrls: string[] = []
-        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
         for (const img of images) {
           if (img.type === 'existing') {
             finalUrls.push(img.url)
           } else {
-            const options = { maxSizeMB: 1, maxWidthOrHeight: 1080, useWebWorker: true, fileType: 'image/webp' as any }
-            const compressedFile = await imageCompression(img.file, options)
-            const fileName = `catalog/${Date.now()}-${Math.random().toString(36).substring(7)}.webp`
+            // Upload via server-side API (uses service role key, bypasses RLS)
+            const uploadForm = new FormData()
+            uploadForm.append('file', img.file)
             
-            const { error: uploadErr } = await supabase.storage.from('produtos').upload(fileName, compressedFile, { cacheControl: '3600' })
-            if (uploadErr) throw new Error("Erro no upload da imagem.")
+            const res = await fetch('/api/admin/upload-image', {
+              method: 'POST',
+              body: uploadForm
+            })
+            const result = await res.json()
             
-            const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(fileName)
-            finalUrls.push(publicUrl)
+            if (!res.ok || result.error) {
+              throw new Error(result.error || 'Erro no upload da imagem.')
+            }
+            finalUrls.push(result.url)
           }
         }
         form.set('images', JSON.stringify(finalUrls))
@@ -179,9 +197,20 @@ export function EditProductForm({ product }: { product: ProductData }) {
               <input type="file" accept="image/*" multiple ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px' }}>
                 {images.map((img, i) => (
-                  <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', border: '1px solid #3f424d' }}>
-                    <img src={img.type === 'existing' ? img.url : img.preview} alt={`Imagem ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <button type="button" onClick={() => removeImage(i)} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
+                  <div 
+                    key={i} 
+                    draggable
+                    onDragStart={(e) => { dragItem.current = i; e.currentTarget.style.opacity = '0.5' }}
+                    onDragEnter={(e) => { dragOverItem.current = i; e.currentTarget.style.transform = 'scale(1.05)' }}
+                    onDragLeave={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
+                    onDragEnd={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)'; handleSort(); }}
+                    onDragOver={(e) => e.preventDefault()}
+                    style={{ position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', border: i === 0 ? '2px solid #8b5cf6' : '1px solid #3f424d', cursor: 'grab', transition: 'all 0.2s' }}
+                    title={i === 0 ? "Foto Principal" : "Arraste para reordenar"}
+                  >
+                    {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(139,92,246,0.9)', color: '#fff', fontSize: '0.6rem', textAlign: 'center', padding: '2px 0', fontWeight: 'bold', zIndex: 10 }}>PRINCIPAL</div>}
+                    <img src={img.type === 'existing' ? img.url : img.preview} alt={`Imagem ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
+                    <button type="button" onClick={() => removeImage(i)} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', zIndex: 10 }}>
                       <X size={12} />
                     </button>
                   </div>
@@ -202,14 +231,19 @@ export function EditProductForm({ product }: { product: ProductData }) {
               <h3 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: '16px' }}>💰 Preços & Estoque</h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label style={labelStyle}>Preço (R$) *</label>
+                    <label style={labelStyle}>Preço de Custo (R$)</label>
+                    <input name="cost_price" type="number" step="0.01" defaultValue={product.cost_price || ''} style={{ ...inputStyle, background: 'rgba(239, 68, 68, 0.05)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                      onFocus={e => e.currentTarget.style.borderColor = '#ef4444'} onBlur={e => e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'} title="Visível apenas para Administradores" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Preço de Venda (R$) *</label>
                     <input name="price" type="number" step="0.01" defaultValue={product.price} required style={inputStyle}
                       onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Preço Comparativo (R$)</label>
+                    <label style={labelStyle}>Preço Promocional (De)</label>
                     <input name="price_compare" type="number" step="0.01" defaultValue={product.price_compare || ''} style={inputStyle}
                       onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
                   </div>

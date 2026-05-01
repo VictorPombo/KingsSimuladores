@@ -10,6 +10,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const title = formData.get('title') as string
   const price = parseFloat(formData.get('price') as string)
   const priceCompare = formData.get('price_compare') ? parseFloat(formData.get('price_compare') as string) : null
+  const costPrice = formData.get('cost_price') ? parseFloat(formData.get('cost_price') as string) : null
   const stock = parseInt(formData.get('stock') as string, 10)
   const sku = (formData.get('sku') as string) || null
   const status = formData.get('status') as string
@@ -57,6 +58,7 @@ export async function updateProduct(id: string, formData: FormData) {
   updatePayload.attributes = {
     ...existingAttrs,
     ...(fabricante ? { marca: fabricante } : {}),
+    ...(costPrice !== null && !isNaN(costPrice) ? { cost_price: costPrice } : { cost_price: null }),
     out_of_stock_behavior: outOfStockBehavior
   }
 

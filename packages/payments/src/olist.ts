@@ -20,7 +20,9 @@ export interface OlistOrderInput {
     zip: string
     city: string
     state: string
+    [key: string]: any
   }
+  shipping_cost?: number
   items?: Array<{
     product_id: string
     title: string
@@ -29,11 +31,10 @@ export interface OlistOrderInput {
   }>
 }
 
-export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_origin: string) => {
-  const token = brand_origin === 'seven' 
-    ? process.env.OLIST_API_KEY_SEVEN 
-    : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN)
+export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_origin: string, injectedToken?: string) => {
+  const token = injectedToken || (brand_origin === 'seven' ? process.env.OLIST_API_KEY_SEVEN : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN))
   
+  console.log('Resolving token:', token)
   if (token && !token.includes('preencher')) {
     try {
       console.log(`[Tiny ERP] Injetando Pedido ${orderPayload.id} (Empresa: ${brand_origin})...`)
@@ -45,16 +46,23 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
             nome: orderPayload.customer.name || 'Cliente Avulso',
             cpf_cnpj: orderPayload.customer.cpf_cnpj || '00000000000',
             email: orderPayload.customer.email || '',
-            fone: orderPayload.customer.phone || ''
+            fone: orderPayload.customer.phone || '',
+            endereco: orderPayload.shipping.street || orderPayload.shipping.logradouro || '',
+            numero: orderPayload.shipping.number || orderPayload.shipping.numero || '',
+            complemento: orderPayload.shipping.complement || orderPayload.shipping.complemento || '',
+            bairro: orderPayload.shipping.neighborhood || orderPayload.shipping.bairro || '',
+            cep: (orderPayload.shipping.zip || orderPayload.shipping.cep || '00000000').replace(/\D/g, ''),
+            cidade: orderPayload.shipping.city || (orderPayload.shipping.cidade ? orderPayload.shipping.cidade.split('/')[0].trim() : ''),
+            uf: orderPayload.shipping.state || (orderPayload.shipping.cidade && orderPayload.shipping.cidade.includes('/') ? orderPayload.shipping.cidade.split('/')[1].trim() : '')
           },
           endereco_entrega: {
-            endereco: orderPayload.shipping.street,
-            numero: orderPayload.shipping.number,
-            complemento: orderPayload.shipping.complement || '',
-            bairro: orderPayload.shipping.neighborhood,
-            cep: orderPayload.shipping.zip.replace(/\\D/g, ''),
-            cidade: orderPayload.shipping.city,
-            uf: orderPayload.shipping.state
+            endereco: orderPayload.shipping.street || orderPayload.shipping.logradouro || '',
+            numero: orderPayload.shipping.number || orderPayload.shipping.numero || '',
+            complemento: orderPayload.shipping.complement || orderPayload.shipping.complemento || '',
+            bairro: orderPayload.shipping.neighborhood || orderPayload.shipping.bairro || '',
+            cep: (orderPayload.shipping.zip || orderPayload.shipping.cep || '00000000').replace(/\\D/g, ''),
+            cidade: orderPayload.shipping.city || (orderPayload.shipping.cidade ? orderPayload.shipping.cidade.split('/')[0].trim() : ''),
+            uf: orderPayload.shipping.state || (orderPayload.shipping.cidade && orderPayload.shipping.cidade.includes('/') ? orderPayload.shipping.cidade.split('/')[1].trim() : '')
           },
           itens: (orderPayload.items || []).map(item => ({
             item: {
@@ -64,7 +72,7 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
               valor_unitario: item.unit_price
             }
           })),
-          valor_frete: 0,
+          valor_frete: orderPayload.shipping_cost || 0,
           valor_desconto: 0,
           forma_pagamento: 'Pix',
           situacao: 'Aprovado'
@@ -87,13 +95,18 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
       if (res.ok) {
         const data = await res.json()
         if (data.retorno && data.retorno.status === 'OK') {
+          // Tiny ERP retorna objeto se for 1 registro, ou array se forem vários.
+          const registroObj = Array.isArray(data.retorno.registros) 
+            ? data.retorno.registros[0]?.registro 
+            : data.retorno.registros?.registro;
+            
           return { 
-            id: data.retorno.registros?.[0]?.registro?.id || `tiny_${orderPayload.id}`,
-            tiny_id: data.retorno.registros?.[0]?.registro?.id,
+            id: registroObj?.id || `tiny_${orderPayload.id}`,
+            tiny_id: registroObj?.id,
             status: 'synced',
           }
         } else {
-           console.error('[Tiny ERP] Retorno da API com erro de validação:', data.retorno.erros)
+           console.error('[Tiny ERP] Retorno da API completo:', JSON.stringify(data, null, 2))
         }
       }
     } catch (e) {
@@ -102,7 +115,7 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
   }
 
   // ============== FALLBACK (MOCK) =================
-  console.log(`[Olist MOCK] Pedido ${orderPayload.id} "recebido" pelo ERP MOCK.`)
+  console.log('THIS IS THE REAL OLIST FILE EXECUTING!'); console.log(`[Olist MOCK] Pedido ${orderPayload.id} "recebido" pelo ERP MOCK.`)
   
   return {
     id: `mock_erp_id_${Math.floor(Math.random() * 8888)}`,

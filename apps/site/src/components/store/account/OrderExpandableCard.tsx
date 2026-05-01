@@ -12,7 +12,32 @@ export function OrderExpandableCard({ order }: { order: any }) {
   const [isPaying, setIsPaying] = useState(false)
   const [items, setItems] = useState<any[]>([])
   const [invoices, setInvoices] = useState<any[]>([])
+  const [syncingInvoiceId, setSyncingInvoiceId] = useState<string | null>(null)
   
+  const handleSyncInvoice = async (orderId: string, invoiceId: string) => {
+    setSyncingInvoiceId(invoiceId)
+    try {
+      const res = await fetch('/api/invoices/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+      const data = await res.json()
+      if (data.pdf_url) {
+        // Atualiza a URL na lista de invoices local
+        setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, pdf_url: data.pdf_url } : inv))
+        // Abre o link
+        window.open(data.pdf_url, '_blank')
+      } else {
+        alert(data.message || data.error || 'Erro ao sincronizar NF.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao comunicar com a API de NFe.')
+    } finally {
+      setSyncingInvoiceId(null)
+    }
+  }
   const orderNumber = order.id.split('-')[0].toUpperCase()
 
   const handleExpand = async () => {
@@ -240,18 +265,32 @@ export function OrderExpandableCard({ order }: { order: any }) {
             {/* Ações Inferiores */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               {invoices.length > 0 ? (
-                invoices.map((inv, idx) => (
-                  <a 
-                    key={idx}
-                    href={inv.pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="action-btn" 
-                    style={{ textDecoration: 'none', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', padding: '10px 16px', borderRadius: '0.5rem', color: '#e2e8f0', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
-                  >
-                    Nota Fiscal ({inv.store_origin === 'seven' ? 'Seven' : (inv.store_origin === 'msu' ? 'MSU' : 'Kings')})
-                  </a>
-                ))
+                invoices.map((inv, idx) => {
+                  const isSyncing = syncingInvoiceId === inv.id
+                  return inv.pdf_url ? (
+                    <a 
+                      key={idx}
+                      href={inv.pdf_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="action-btn" 
+                      style={{ textDecoration: 'none', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', padding: '10px 16px', borderRadius: '0.5rem', color: '#e2e8f0', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                    >
+                      Nota Fiscal ({inv.store_origin === 'seven' ? 'Seven' : (inv.store_origin === 'msu' ? 'MSU' : 'Kings')})
+                    </a>
+                  ) : (
+                    <button 
+                      key={idx}
+                      onClick={() => handleSyncInvoice(order.id, inv.id)}
+                      disabled={isSyncing}
+                      className="action-btn" 
+                      style={{ background: 'transparent', border: '1px solid rgba(59, 130, 246, 0.4)', padding: '10px 16px', borderRadius: '0.5rem', color: '#3b82f6', cursor: isSyncing ? 'not-allowed' : 'pointer', fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s' }}
+                      title="Clique para verificar se o ERP já emitiu o PDF da sua Nota Fiscal."
+                    >
+                      {isSyncing ? 'Buscando na Sefaz/ERP...' : `Puxar Nota Fiscal (${inv.store_origin === 'seven' ? 'Seven' : (inv.store_origin === 'msu' ? 'MSU' : 'Kings')})`}
+                    </button>
+                  )
+                })
               ) : (
                 order.status === 'paid' && (
                   <button className="action-btn" disabled style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 16px', borderRadius: '0.5rem', color: '#64748b', cursor: 'not-allowed', fontSize: '0.85rem', fontWeight: 600 }}>

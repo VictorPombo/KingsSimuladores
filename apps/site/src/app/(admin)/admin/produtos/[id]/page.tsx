@@ -32,7 +32,8 @@ export default async function EditProductPage({ params }: { params: { id: string
     brand_name: (product as any).brands?.display_name || (product as any).brands?.name || 'Desconhecida',
     category_name: (product as any).categories?.name || null,
     fabricante: product.attributes?.marca || null,
-    attributes: product.attributes || {}
+    attributes: product.attributes || {},
+    cost_price: product.attributes?.cost_price || null
   }
 
   return (

@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Search, FileText, Download, CheckCircle, Clock, XCircle, AlertTriangle, ExternalLink } from 'lucide-react'
+import { Search, FileText, Download, CheckCircle, Clock, XCircle, AlertTriangle, ExternalLink, RefreshCw } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type Invoice = {
   id: string
@@ -27,8 +28,48 @@ const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = 
 }
 
 export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
+  const [isSyncing, setIsSyncing] = useState(false)
+
+  const syncSelected = async () => {
+    if (selectedInvoices.length === 0) return
+    setIsSyncing(true)
+
+    let successCount = 0
+    let pendingCount = 0
+    let errorCount = 0
+
+    for (const invId of selectedInvoices) {
+      const inv = invoices.find(i => i.id === invId)
+      if (!inv) continue
+
+      try {
+        const res = await fetch('/api/invoices/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: inv.order_id })
+        })
+        const data = await res.json()
+        if (data.pdf_url) successCount++
+        else if (data.pending) pendingCount++
+        else errorCount++
+      } catch (err) {
+        errorCount++
+      }
+      
+      // Delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
+
+    setIsSyncing(false)
+    alert(`Sincronização concluída:\n- ${successCount} NFs emitidas com sucesso\n- ${pendingCount} ainda na fila do ERP\n- ${errorCount} erros`)
+    
+    setSelectedInvoices([])
+    router.refresh()
+  }
 
   const filtered = invoices.filter(inv => {
     const matchSearch = (inv.nfe_number || '').includes(searchTerm) ||
@@ -73,6 +114,26 @@ export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
           <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Gestão de notas fiscais geradas para os pedidos</p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={syncSelected} 
+              disabled={selectedInvoices.length === 0 || isSyncing}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: selectedInvoices.length > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.05)', 
+                border: `1px solid ${selectedInvoices.length > 0 ? '#10b98130' : 'rgba(255,255,255,0.1)'}`, 
+                borderRadius: '8px', padding: '10px 16px',
+                color: selectedInvoices.length > 0 ? '#10b981' : '#64748b', 
+                fontWeight: 600, fontSize: '0.85rem', 
+                cursor: selectedInvoices.length > 0 && !isSyncing ? 'pointer' : 'not-allowed', 
+                transition: 'all 0.2s',
+                opacity: isSyncing ? 0.7 : 1
+              }}
+              onMouseEnter={(e: any) => selectedInvoices.length > 0 && !isSyncing && (e.currentTarget.style.background = 'rgba(16, 185, 129, 0.2)')}
+              onMouseLeave={(e: any) => selectedInvoices.length > 0 && !isSyncing && (e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)')}
+            >
+                <RefreshCw size={16} className={isSyncing ? 'animate-spin' : ''} /> 
+                {isSyncing ? 'Sincronizando...' : `Sincronizar ERP (${selectedInvoices.length})`}
+            </button>
             <button onClick={downloadXMLsLote} style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
                 background: 'rgba(59, 130, 246, 0.1)', border: '1px solid #3b82f630', borderRadius: '8px', padding: '10px 16px',
@@ -123,6 +184,17 @@ export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
             <thead>
               <tr>
+                <th style={{ padding: '12px 16px', width: '40px', background: '#1f2025' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={filtered.length > 0 && selectedInvoices.length === filtered.length}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedInvoices(filtered.map(i => i.id))
+                      else setSelectedInvoices([])
+                    }}
+                    style={{ cursor: 'pointer', accentColor: '#10b981' }}
+                  />
+                </th>
                 {['Nota Fiscal', 'Pedido', 'Cliente', 'CNPJ Emitente', 'Valor Pedido', 'Status', 'Emissão', 'Ações'].map(h => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#1f2025', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
@@ -130,17 +202,29 @@ export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={8} style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
+                <tr><td colSpan={9} style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
                   <FileText size={24} style={{ margin: '0 auto 8px', display: 'block', opacity: 0.4 }} />
                   {invoices.length === 0 ? 'Nenhuma nota fiscal registrada ainda.' : 'Nenhum resultado encontrado.'}
                 </td></tr>
               ) : filtered.map(inv => {
                 const sc = STATUS_MAP[inv.status] || STATUS_MAP.pending
                 const StatusIcon = sc.icon
+                const isSelected = selectedInvoices.includes(inv.id)
                 return (
-                  <tr key={inv.id} style={{ borderBottom: '1px solid #3f424d', transition: 'background 0.15s' }}
-                    onMouseEnter={(e: any) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                    onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}>
+                  <tr key={inv.id} style={{ borderBottom: '1px solid #3f424d', transition: 'background 0.15s', background: isSelected ? 'rgba(16, 185, 129, 0.05)' : 'transparent' }}
+                    onMouseEnter={(e: any) => !isSelected && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+                    onMouseLeave={(e: any) => !isSelected && (e.currentTarget.style.background = 'transparent')}>
+                    <td style={{ padding: '14px 16px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={isSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedInvoices(prev => [...prev, inv.id])
+                          else setSelectedInvoices(prev => prev.filter(id => id !== inv.id))
+                        }}
+                        style={{ cursor: 'pointer', accentColor: '#10b981' }}
+                      />
+                    </td>
                     <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontSize: '0.85rem', color: '#e2e8f0' }}>
                       {inv.nfe_number || <span style={{ color: '#64748b', fontStyle: 'italic' }}>Pendente</span>}
                     </td>
