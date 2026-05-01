@@ -15,6 +15,20 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     setIsMobileOpen(false)
   }, [pathname])
 
+  const isLoginPage = pathname === '/admin/login'
+  const isUnauthorizedPage = pathname === '/admin/unauthorized'
+  const isAuthPage = isLoginPage || isUnauthorizedPage
+
+  if (isAuthPage) {
+    return (
+      <div className="admin-layout" style={{ display: 'flex', minHeight: '100vh', background: '#1e1e1e', flexDirection: 'column' }}>
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {children}
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="admin-layout" style={{ display: 'flex', minHeight: '100vh', background: '#1e1e1e', flexDirection: 'column' }}>
       <style dangerouslySetInnerHTML={{__html: `
