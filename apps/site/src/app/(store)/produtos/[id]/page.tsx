@@ -108,8 +108,17 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 {product.title}
               </h1>
               {product.description && !product.description.startsWith('Produto importado da Tray') && (
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                  {product.description.replace(/<[^>]+>/g, '').slice(0, 180)}{product.description.replace(/<[^>]+>/g, '').length > 180 ? '...' : ''}
+                <p style={{ 
+                  color: 'var(--text-secondary)', 
+                  fontSize: '0.95rem', 
+                  lineHeight: 1.6,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {product.description.replace(/<[^>]+>/g, '')}
                 </p>
               )}
             </div>
