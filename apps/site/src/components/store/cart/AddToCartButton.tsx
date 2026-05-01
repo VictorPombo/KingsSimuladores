@@ -18,7 +18,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
       const currentOrigin = items[0].storeOrigin;
       if (currentOrigin !== product.storeOrigin) {
         const storeNameMap: Record<string, string> = { kings: 'Kings Simuladores', seven: 'Seven Sim Racing', msu: 'Meu Simulador Usado' };
-        const confirmed = window.confirm(`Seu carrinho atual tem produtos da ${storeNameMap[currentOrigin]}.\n\nComo os pagamentos são processados em contas separadas, você não pode misturar produtos de lojas diferentes.\n\nDeseja limpar o carrinho e adicionar este novo produto?`);
+        const confirmed = window.confirm(`Seu carrinho atual já possui itens da ${storeNameMap[currentOrigin]}.\n\nPara prosseguir, você precisa finalizar os pedidos separadamente.\nDeseja limpar o carrinho atual e adicionar este novo produto?`);
         if (confirmed) {
           clearCart();
         } else {
