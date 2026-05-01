@@ -49,15 +49,7 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
     .eq('customer_id', profile?.id || user.id)
     .order('created_at', { ascending: false })
 
-  const displayOrders = orders && orders.length > 0 ? orders : [
-    {
-      id: searchParams.order || 'mock-order-id-123',
-      created_at: new Date().toISOString(),
-      status: 'paid',
-      total: 3950.00,
-      tracking_code: 'BR123456789XX',
-    }
-  ]
+  const displayOrders = orders || []
 
   const userName = (profile as any)?.full_name || 'Piloto Kings'
   const userInitials = userName.substring(0, 2).toUpperCase()
@@ -255,9 +247,20 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
 
                 {/* Pedidos List */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
-                  {displayOrders.map((order: any) => (
-                    <OrderExpandableCard key={order.id} order={order} />
-                  ))}
+                  {displayOrders.length === 0 ? (
+                    <div className="card-panel" style={{ textAlign: 'center', padding: '4rem 2rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                      <Package size={48} color="#64748b" style={{ margin: '0 auto 1rem' }} />
+                      <h3 style={{ fontSize: '1.2rem', color: '#e2e8f0', margin: '0 0 0.5rem 0' }}>Nenhum pedido encontrado</h3>
+                      <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Aguardando o seu primeiro pedido! Quando você realizar uma compra, ela aparecerá aqui.</p>
+                      <Link href="/" className="action-btn kings-btn-primary" style={{ background: '#00e5ff', color: '#0a0e1a', padding: '10px 24px', borderRadius: '0.5rem', textDecoration: 'none', fontWeight: 700, display: 'inline-block' }}>
+                        Explorar Produtos
+                      </Link>
+                    </div>
+                  ) : (
+                    displayOrders.map((order: any) => (
+                      <OrderExpandableCard key={order.id} order={order} />
+                    ))
+                  )}
                 </div>
               </>
             )}
