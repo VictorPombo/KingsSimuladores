@@ -26,13 +26,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Cart empty' }, { status: 400 })
     }
 
-    // 2.5. Deduce and Validate Store Context
+    // Permite itens misturados livremente. A lógica define o storeContext com base no primeiro item.
     const firstStore = items[0].storeOrigin || 'kings'
-    const isMixed = items.some((item: any) => (item.storeOrigin || 'kings') !== firstStore)
-    
-    if (isMixed) {
-      return NextResponse.json({ error: 'Mixed cart is not allowed' }, { status: 400 })
-    }
 
     const storeContext = firstStore === 'seven' ? 'seven' : (firstStore === 'msu' ? 'msu' : 'kings')
 

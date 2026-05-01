@@ -33,11 +33,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     // Buscar os itens do pedido
     const { data: orderItems, error: itemsErr } = await supabase
       .from('order_items')
-      .select('*, product:product_id(title, image_url)')
+      .select('*, product:product_id(title)')
       .eq('order_id', orderId)
 
     if (itemsErr || !orderItems || orderItems.length === 0) {
-      return NextResponse.json({ error: 'Itens do pedido não encontrados no banco. RLS bloqueou ou não foram gravados.' }, { status: 404 })
+      return NextResponse.json({ 
+        error: `Erro ao buscar itens: ${itemsErr?.message || 'Array vazio'}. Verifique os logs do servidor.` 
+      }, { status: 404 })
     }
 
     // Recriar o payload de items para o Mercado Pago com os itens reais
