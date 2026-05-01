@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Package, ShoppingBag, User, ExternalLink, Clock, CheckCircle, XCircle, AlertCircle, FileText, Truck, Lock, Eye, EyeOff, MessageCircle, MessageSquare } from 'lucide-react'
+import { Package, ShoppingBag, User, ExternalLink, Clock, CheckCircle, XCircle, AlertCircle, FileText, Truck, Lock, Eye, EyeOff, MessageCircle, MessageSquare, LogOut } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import { ChatModal } from '@/components/marketplace/ChatModal'
 
@@ -79,7 +79,7 @@ export function GarageClient({
   React.useEffect(() => {
     if (activeTab === 'messages') {
       setLoadingChats(true)
-      fetch('/api/messages/conversations')
+      fetch('/api/messages/conversations', { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           if (data.conversations) setConversations(data.conversations)
@@ -88,6 +88,15 @@ export function GarageClient({
         .catch(() => setLoadingChats(false))
     }
   }, [activeTab])
+
+  const handleLogout = async () => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    await supabase.auth.signOut()
+    window.location.href = '/' // ou /login dependendo da rota
+  }
 
   const activeListings = listings.filter(l => l.status === 'active' || l.status === 'pending_review')
   const soldListings = listings.filter(l => l.status === 'sold')
@@ -171,6 +180,17 @@ export function GarageClient({
             )}
           </button>
         ))}
+
+        {/* Separador para empurrar o Sair para a direita */}
+        <div style={{ flex: 1, minWidth: '20px' }}></div>
+        
+        <button 
+          className="garage-tab" 
+          onClick={handleLogout}
+          style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)', marginLeft: 'auto' }}
+        >
+          <LogOut size={16} /> Sair
+        </button>
       </div>
 
       {/* Tab: Meus Anúncios */}

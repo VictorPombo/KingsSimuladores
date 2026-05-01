@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Send, ShieldCheck } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { X, Send, ShieldCheck, ExternalLink } from 'lucide-react'
 import { createClient } from '@kings/db/client'
 
 interface ChatModalProps {
@@ -27,7 +28,12 @@ export function ChatModal({ listingId, listingTitle, listingPrice, partnerId, pa
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     let channel: any;
@@ -81,8 +87,15 @@ export function ChatModal({ listingId, listingTitle, listingPrice, partnerId, pa
         // Only add if realtime hasn't already added it
         setMessages(prev => prev.find(m => m.id === data.message.id) ? prev : [...prev, data.message])
         setNewMsg('')
+      } else {
+        const errData = await res.json()
+        console.error('Failed to send:', errData)
+        alert('Erro ao enviar: ' + (errData.error || 'Desconhecido'))
       }
-    } catch {}
+    } catch (err) {
+      console.error('Catch error:', err)
+      alert('Erro ao conectar com o servidor.')
+    }
     setSending(false)
   }
 
@@ -90,8 +103,10 @@ export function ChatModal({ listingId, listingTitle, listingPrice, partnerId, pa
     try { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) } catch { return '' }
   }
 
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)' }}>
+  if (!mounted) return null
+
+  return createPortal(
+    <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)' }}>
       <div style={{ width: '100%', maxWidth: '520px', height: '85vh', maxHeight: '700px', background: 'linear-gradient(180deg, rgba(15,20,35,0.99) 0%, rgba(8,12,24,1) 100%)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '1.5rem', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 80px rgba(0,0,0,0.6)' }}>
 
         {/* Header */}
@@ -100,8 +115,11 @@ export function ChatModal({ listingId, listingTitle, listingPrice, partnerId, pa
             <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#06b6d4', fontWeight: 700, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <ShieldCheck size={12} /> Negociação Segura
             </div>
-            <div style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem' }}>{listingTitle}</div>
-            <div style={{ color: '#71717a', fontSize: '0.8rem' }}>com {sellerName}</div>
+            <a href={`/usado/produto/${listingId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {listingTitle}
+              <ExternalLink size={14} color="#06b6d4" />
+            </a>
+            <div style={{ color: '#71717a', fontSize: '0.8rem' }}>com {partnerName}</div>
           </div>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#71717a' }}>
             <X size={18} />
@@ -121,7 +139,7 @@ export function ChatModal({ listingId, listingTitle, listingPrice, partnerId, pa
           )}
 
           {messages.map(msg => {
-            const isMine = msg.sender_id === currentUserId
+            const isMine = msg.sender_id !== partnerId
             return (
               <div key={msg.id} style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start' }}>
                 <div style={{
@@ -162,6 +180,7 @@ export function ChatModal({ listingId, listingTitle, listingPrice, partnerId, pa
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

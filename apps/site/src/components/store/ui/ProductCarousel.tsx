@@ -154,7 +154,7 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
             const price = product.price
             const title = product.title
             const url = tenant === 'msu' 
-              ? `/usado/anuncio/${product.id}` 
+              ? `/usado/produto/${product.id}` 
               : tenant === 'seven' 
                 ? `/seven/produtos/${product.slug}` 
                 : `/produtos/${product.slug}`

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@kings/db/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: Request) {
   try {
     const supabase = await createServerSupabaseClient()
@@ -10,8 +12,16 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Usar Admin Client para bypass de RLS quebrado na leitura
+    const { createAdminClient } = await import('@kings/db/server')
+    const adminSupabase = createAdminClient()
+
     // Buscar todas as mensagens onde o usuário logado é envolvido
-    const { data: messages, error } = await supabase
+    // IMPORTANTE: precisamos usar o profile.id porque contas antigas têm profile.id diferente do auth.users.id
+    const { data: profile } = await adminSupabase.from('profiles').select('id').eq('auth_id', user.id).single()
+    const profileId = profile?.id || user.id
+
+    const { data: messages, error } = await adminSupabase
       .from('listing_messages')
       .select(`
         *,
@@ -19,7 +29,7 @@ export async function GET(req: Request) {
         receiver:profiles!receiver_id(full_name),
         listing:marketplace_listings(title, images)
       `)
-      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .or(`sender_id.eq.${profileId},receiver_id.eq.${profileId}`)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -30,7 +40,7 @@ export async function GET(req: Request) {
     const conversations = new Map()
 
     messages?.forEach((msg: any) => {
-      const isSender = msg.sender_id === user.id
+      const isSender = msg.sender_id === profileId
       const partnerId = isSender ? msg.receiver_id : msg.sender_id
       const partnerName = isSender ? msg.receiver?.full_name : msg.sender?.full_name
       
