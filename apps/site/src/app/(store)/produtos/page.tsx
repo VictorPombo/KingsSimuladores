@@ -7,7 +7,7 @@ import { applySegmentedPrices } from '@/lib/pricing'
 
 import { CatalogFilters } from './CatalogFilters'
 
-export const revalidate = 0 // Muda provisoriamente para 0 (dinâmico) para filtros funcionarem localmente e em prod sem atraso
+export const revalidate = 60
 
 export default async function ProductsPage({
   searchParams,

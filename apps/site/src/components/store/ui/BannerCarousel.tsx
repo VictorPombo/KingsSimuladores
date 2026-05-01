@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface BannerSlide {
   src: string
@@ -49,18 +50,15 @@ export function BannerCarousel({ slides, accentColor = '#10b981' }: { slides: Ba
               }}
             >
               {/* Main Banner Image (stretched to fit exactly) */}
-              <img
+              <Image
                 src={slide.src}
                 alt={slide.alt}
+                fill
+                priority={i === 0}
+                sizes="100vw"
                 style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
                   objectFit: 'fill',
                   objectPosition: 'center',
-                  display: 'block',
-                  zIndex: 1,
                 }}
               />
               

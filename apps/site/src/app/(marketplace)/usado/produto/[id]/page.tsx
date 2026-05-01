@@ -7,7 +7,7 @@ import { MessageCircle, ShieldCheck, Package, AlertTriangle, MapPin } from 'luci
 import { NegotiateButton } from '@/components/marketplace/NegotiateButton'
 import { SellerReputation } from '@/components/marketplace/SellerReputation'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 type Props = {
   params: { id: string }

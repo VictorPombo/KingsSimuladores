@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: string, prods: any[], tenant?: 'kings' | 'msu' | 'seven' }) {
@@ -180,7 +181,9 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
                   onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
                   >
                     <div style={{ background: '#fff', padding: '24px', position: 'relative' }}>
-                      <img src={imgUrl} alt={title} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain' }} />
+                      <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
+                        <Image src={imgUrl} alt={title} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw" style={{ objectFit: 'contain' }} />
+                      </div>
                       {hasDiscount && tenant !== 'msu' && (
                         <div style={{
                           position: 'absolute', top: '12px', left: '12px',

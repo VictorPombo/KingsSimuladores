@@ -6,7 +6,7 @@ import { HeroCarousel } from './HeroCarousel'
 import { ProductCarousel } from '@/components/store/ui/ProductCarousel'
 import { createServerSupabaseClient } from '@kings/db/server'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default async function SevenHomePage() {
   const supabase = await createServerSupabaseClient()
