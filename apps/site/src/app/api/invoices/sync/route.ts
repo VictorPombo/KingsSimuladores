@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createAdminClient } from '@kings/db'
 
 export async function POST(req: Request) {
   try {
@@ -8,12 +8,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
     }
 
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const supabase = createAdminClient()
 
     // 1. Fetch the invoice record
     const { data: invoice } = await supabase
@@ -103,15 +98,8 @@ export async function POST(req: Request) {
 
     // 4. Update DB
     console.log('[API Sync] Atualizando DB com pdfUrl:', pdfUrl)
-    
-    // Import and use service role client to bypass RLS, ensuring Admin and Cron jobs can update
-    const { createClient } = require('@supabase/supabase-js')
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
 
-    const { error: updateError } = await supabaseAdmin.from('invoices').update({
+    const { error: updateError } = await supabase.from('invoices').update({
         pdf_url: pdfUrl,
         status: 'issued'
     }).eq('id', invoice.id)

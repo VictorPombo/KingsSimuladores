@@ -65,7 +65,7 @@ export function NotasFiscaisClient({ invoices }: { invoices: Invoice[] }) {
     }
 
     setIsSyncing(false)
-    alert(`Sincronização concluída:\n- ${successCount} NFs emitidas com sucesso\n- ${pendingCount} ainda na fila do ERP\n- ${errorCount} erros`)
+    alert(`Sincronização concluída:\n- ${successCount} NFs emitidas com sucesso\n- ${pendingCount} ainda na fila do ERP\n- ${errorCount} com falha de comunicação`)
     
     setSelectedInvoices([])
     router.refresh()
