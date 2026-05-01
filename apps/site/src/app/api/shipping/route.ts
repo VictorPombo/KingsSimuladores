@@ -1,82 +1,95 @@
 import { NextResponse } from 'next/server'
-import { calculateShipping } from '@kings/shipping'
 
-/**
- * API de Cálculo de Frete — PRODUÇÃO
- * Usa Frenet como gateway único de transportadoras.
- * CEP de origem vem de DEFAULT_ORIGIN_ZIP (env) ou do body da request.
- */
-
+const FRENET_TOKEN = process.env.FRENET_TOKEN || ''
 const DEFAULT_ORIGIN = process.env.DEFAULT_ORIGIN_ZIP || '12929608'
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    
-    // Suporta os dois formatos de chamada do frontend
-    const toPostalCode = body.destinationZip || body.toPostalCode
-    const fromPostalCode = body.originZip || DEFAULT_ORIGIN
+    const { destinationZip, originZip, items, toPostalCode, dimensions } = await req.json()
+    const destZip = destinationZip || toPostalCode
 
-    if (!toPostalCode) {
+    if (!destZip) {
       return NextResponse.json({ error: 'CEP de destino é obrigatório' }, { status: 400 })
     }
 
-    const cleanCep = toPostalCode.replace(/\D/g, '')
-    if (cleanCep.length !== 8) {
-      return NextResponse.json({ error: 'CEP de destino inválido' }, { status: 400 })
+    const payload = {
+      SellerCEP: originZip || DEFAULT_ORIGIN,
+      RecipientCEP: destZip.replace(/\D/g, ''),
+      ShipmentInvoiceValue: 100, // could calculate from items, but optional
+      ShippingItemArray: [] as any[]
     }
 
-    // Montar dimensões a partir dos itens (ou usar padrão para simuladores)
-    const dimensions = body.dimensions || [{
-      weight: body.items 
-        ? body.items.reduce((acc: number, item: any) => acc + (item.quantity || 1) * 15, 0)  // ~15kg por item padrão
-        : 15,
-      width: 60,
-      height: 50,
-      length: 80,
-      quantity: 1,
-      insurance_value: body.items
-        ? body.items.reduce((acc: number, item: any) => acc + (item.price || 0) * (item.quantity || 1), 0)
-        : 0
-    }]
-
-    const shippingOptions = await calculateShipping(fromPostalCode, cleanCep, dimensions)
-
-    if (!shippingOptions || shippingOptions.length === 0) {
-      return NextResponse.json({ 
-        error: 'Não foi possível calcular o frete para este CEP. Verifique o CEP e tente novamente.',
-        options: [] 
-      }, { status: 200 })
+    if (items && items.length > 0) {
+      payload.ShippingItemArray = items.map((item: any) => ({
+        Height: 20,
+        Length: 20,
+        Width: 20,
+        Weight: 2, 
+        Quantity: item.quantity
+      }))
+    } else if (dimensions && dimensions.length > 0) {
+      payload.ShippingItemArray = dimensions.map((dim: any) => ({
+        Height: dim.height || 20,
+        Length: dim.length || 20,
+        Width: dim.width || 20,
+        Weight: dim.weight || 2,
+        Quantity: 1
+      }))
+    } else {
+      payload.ShippingItemArray = [{ Height: 20, Length: 20, Width: 20, Weight: 2, Quantity: 1 }]
     }
 
-    // Adicionar opção "Retirada no local"
-    const optionsWithPickup = [
-      ...shippingOptions.map(opt => ({
-        id: opt.id,
-        name: `${opt.company} ${opt.name}`,
-        company: opt.company,
-        price: opt.price,
-        currency: 'R$',
-        delivery_time: opt.custom_delivery_time,
-        custom_delivery_time: opt.custom_delivery_time,
-      })),
-      {
-        id: 'pickup',
-        name: 'Retirada no Local',
-        company: 'Kings Simuladores',
-        price: '0.00',
-        currency: 'R$',
-        delivery_time: 0,
-        custom_delivery_time: 0,
-      }
-    ]
+    const response = await fetch("https://api.frenet.com.br/shipping/quote", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'token': FRENET_TOKEN
+      },
+      body: JSON.stringify(payload)
+    })
 
-    return NextResponse.json({ options: optionsWithPickup })
+    if (!response.ok) {
+      console.error('[Frenet] Erro na API:', await response.text())
+      return NextResponse.json({ error: 'Falha ao cotar frete no Frenet.' }, { status: response.status })
+    }
+
+    const data = await response.json()
+    
+    let formattedOptions = []
+
+    if (data.ShippingSevicesArray && Array.isArray(data.ShippingSevicesArray)) {
+      const validServices = data.ShippingSevicesArray.filter((s: any) => !s.Error && s.ServiceDescription.toUpperCase().includes('SEDEX'))
+      
+      formattedOptions = validServices.map((s: any) => ({
+        id: s.ServiceCode,
+        name: s.ServiceDescription,
+        price: s.ShippingPrice,
+        currency: 'R$',
+        custom_delivery_time: s.DeliveryTime, // added to match ShippingSimulator expectation
+        delivery_time: s.DeliveryTime,
+        company: { name: s.Carrier, picture: '' }
+      }))
+
+      // Ordenar do mais barato pro mais caro
+      formattedOptions.sort((a: any, b: any) => parseFloat(a.price) - parseFloat(b.price))
+    }
+
+    // Sempre adicionar Retirada no Local
+    formattedOptions.push({
+      id: 'pickup',
+      name: 'Retirada no Local',
+      company: { name: 'Kings Simuladores', picture: '' },
+      price: '0.00',
+      currency: 'R$',
+      custom_delivery_time: 0,
+      delivery_time: 0,
+    })
+
+    return NextResponse.json({ options: formattedOptions })
 
   } catch (error: any) {
-    console.error('[Shipping API] Erro:', error.message || error)
-    return NextResponse.json({ 
-      error: 'Não foi possível calcular o frete. Tente novamente em instantes.' 
-    }, { status: 500 })
+    console.error('[Frenet] Erro interno:', error)
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

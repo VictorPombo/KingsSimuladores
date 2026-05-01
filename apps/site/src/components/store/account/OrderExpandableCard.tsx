@@ -9,6 +9,7 @@ import { OrderStatusBadge } from './OrderStatusBadge'
 export function OrderExpandableCard({ order }: { order: any }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isPaying, setIsPaying] = useState(false)
   const [items, setItems] = useState<any[]>([])
   
   const orderNumber = order.id.split('-')[0].toUpperCase()
@@ -38,6 +39,26 @@ export function OrderExpandableCard({ order }: { order: any }) {
     }
     
     setIsLoading(false)
+  }
+
+  const handlePayNow = async () => {
+    setIsPaying(true)
+    try {
+      const res = await fetch(`/api/orders/${order.id}/pay`, {
+        method: 'POST'
+      })
+      const data = await res.json()
+      
+      if (data.ok && data.init_point) {
+        window.location.href = data.init_point
+      } else {
+        alert(data.error || 'Erro ao gerar link de pagamento.')
+        setIsPaying(false)
+      }
+    } catch (err) {
+      alert('Erro de comunicação.')
+      setIsPaying(false)
+    }
   }
 
   // Lógica da Timeline de Rastreio (Simulada pelo status do banco)
@@ -213,7 +234,7 @@ export function OrderExpandableCard({ order }: { order: any }) {
             </div>
             
             {/* Ações Inferiores */}
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button className="action-btn" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', padding: '10px 16px', borderRadius: '0.5rem', color: '#e2e8f0', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
                 Nota Fiscal
               </button>
@@ -226,6 +247,21 @@ export function OrderExpandableCard({ order }: { order: any }) {
               >
                 Falar com Suporte
               </a>
+
+              {order.status === 'pending' && (
+                <button 
+                  onClick={handlePayNow}
+                  disabled={isPaying}
+                  className="action-btn kings-btn-primary" 
+                  style={{ 
+                    background: '#00e5ff', color: '#0a0e1a', border: 'none', padding: '10px 24px', 
+                    borderRadius: '0.5rem', cursor: isPaying ? 'not-allowed' : 'pointer', fontSize: '0.85rem', fontWeight: 700,
+                    opacity: isPaying ? 0.7 : 1
+                  }}
+                >
+                  {isPaying ? 'Gerando Link...' : 'Pagar Agora'}
+                </button>
+              )}
             </div>
 
           </div>

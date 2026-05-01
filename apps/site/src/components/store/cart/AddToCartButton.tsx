@@ -9,10 +9,12 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ product }: AddToCartButtonProps) {
-  const { addItem } = useCart()
+  const { items, addItem, clearCart } = useCart()
   const [loading, setLoading] = useState(false)
 
   const handleAdd = () => {
+    // Validação de carrinho misto removida a pedido (agora permite misturar lojas)
+
     setLoading(true)
     setTimeout(() => {
       addItem({ ...product, quantity: 1 })
