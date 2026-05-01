@@ -33,6 +33,36 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
 
+  useEffect(() => {
+    async function loadProfile() {
+      // Lazy load the client only when mounting the component
+      const { createClient } = await import('@kings/db/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        setEmail(user.email || '')
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        
+        if (profile) {
+          if (profile.full_name) setNome(profile.full_name)
+          if (profile.cpf) setCpf(profile.cpf)
+          
+          if (profile.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
+            const defaultAddr = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0]
+            if (defaultAddr.zipCode) setCep(defaultAddr.zipCode.replace(/\D/g, ''))
+            if (defaultAddr.street) setLogradouro(defaultAddr.street)
+            if (defaultAddr.number) setNumero(defaultAddr.number)
+            if (defaultAddr.neighborhood) setBairro(defaultAddr.neighborhood)
+            if (defaultAddr.city && defaultAddr.state) setCidade(`${defaultAddr.city} / ${defaultAddr.state}`)
+            if (defaultAddr.complement) setComplemento(defaultAddr.complement)
+          }
+        }
+      }
+    }
+    loadProfile()
+  }, [])
+
   // Redirect to home if empty cart
   useEffect(() => {
     if (items.length === 0 && step === 1) {
@@ -62,7 +92,8 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          toPostalCode: cep,
+          destinationZip: cep,
+          originZip: '03141030',
           items: items.map(i => ({ id: i.id, quantity: i.quantity }))
         })
       })
@@ -129,7 +160,8 @@ export default function CheckoutPage() {
       
       if (session.ok) {
         if (session.init_point) {
-            // Abre o Mercado Pago em uma nova guia para ele pagar a primeira loja e não perder a tela
+            // Abre o checkout (real do MP ou nosso /mock-payment local) em uma nova guia 
+            // para ele pagar a primeira loja e não perder a tela atual.
             window.open(session.init_point, '_blank')
         } 
         
@@ -138,6 +170,7 @@ export default function CheckoutPage() {
             setIsProcessing(false)
         } else {
             // Concluiu todos!
+            clearCart()
             router.push(`/account`)
         }
       } else {
@@ -216,8 +249,8 @@ export default function CheckoutPage() {
                         background: selectedFrete?.id === f.id ? 'rgba(0, 229, 255, 0.05)' : 'transparent'
                       }}>
                       <div>
-                        <strong style={{ color: '#fff' }}>{f.company} {f.name}</strong>
-                        <div style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>Chega em até {f.custom_delivery_time} dias úteis</div>
+                        <strong style={{ color: '#fff' }}>{f.company?.name || ''} {f.name}</strong>
+                        <div style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>Chega em até {f.delivery_time || f.custom_delivery_time} dias úteis</div>
                       </div>
                       <div style={{ color: '#00e5ff', fontWeight: 600 }}>
                         {formatPrice(parseFloat(f.price))}
@@ -226,7 +259,7 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
-                <div className="btn-row">
+                <div className="kings-btn-row">
                   <Button variant="secondary" onClick={() => setStep(1)}>Voltar</Button>
                   <Button onClick={() => setStep(3)} style={{ flex: 1 }}>Continuar para Pagamento</Button>
                 </div>
@@ -237,25 +270,21 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>3. Pagamento Seguro</h2>
                 
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px dashed rgba(0, 229, 255, 0.3)' }}>
-                  <p style={{ color: '#fff', marginBottom: '16px', textAlign: 'center', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    Pagamento Protegido via Mercado Pago
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center', marginBottom: '16px' }}>
-                     <img src="https://img.shields.io/badge/Pix-00B1EA?style=for-the-badge&logo=pix&logoColor=white" alt="Pix" style={{ height: '32px', borderRadius: '4px' }} />
-                     <img src="https://img.shields.io/badge/Mastercard-EB001B?style=for-the-badge&logo=mastercard&logoColor=white" alt="Mastercard" style={{ height: '32px', borderRadius: '4px' }} />
-                     <img src="https://img.shields.io/badge/Visa-1434CB?style=for-the-badge&logo=visa&logoColor=white" alt="Visa" style={{ height: '32px', borderRadius: '4px' }} />
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid rgba(0, 229, 255, 0.2)', textAlign: 'center' }}>
+                  <div style={{ display: 'inline-block', marginBottom: '16px', background: '#fff', padding: '8px 16px', borderRadius: '8px' }}>
+                    <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.19.1/mercadopago/logo__large.png" alt="Mercado Pago" style={{ height: '32px' }} />
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: '#a1a1aa', textAlign: 'center', lineHeight: 1.5 }}>
-                    Você será redirecionado em ambiente criptografado para o aplicativo/site oficial do <strong>Mercado Pago</strong> para inserir seus dados de Cartão de Crédito ou ler seu QR Code Pix.
+                  <h3 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '8px' }}>Ambiente Seguro</h3>
+                  <p style={{ fontSize: '0.9rem', color: '#a1a1aa', lineHeight: 1.5 }}>
+                    O pagamento é processado pelo <strong>Mercado Pago</strong>.<br/>
+                    Você poderá escolher pagar via <strong>PIX, Boleto ou Cartão de Crédito</strong> na próxima tela.
                   </p>
                 </div>
 
-                <div className="btn-row">
+                <div className="kings-btn-row">
                   <Button variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
                   <Button onClick={handleMultistepPayment} style={{ flex: 1, background: storeNames[currentStoreIdx] === 'seven' ? '#ea580c' : '#00B1EA' }} disabled={isProcessing}>
-                    {isProcessing ? 'Abrindo Gatway...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento')}
+                    {isProcessing ? 'Abrindo Gateway...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento Seguro ➔')}
                   </Button>
                 </div>
               </div>
@@ -323,5 +352,6 @@ const inputStyle = {
   padding: '0.75rem',
   color: '#fff',
   width: '100%',
-  outline: 'none'
+  outline: 'none',
+  boxSizing: 'border-box' as const
 }

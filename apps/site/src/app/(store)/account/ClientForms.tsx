@@ -5,7 +5,7 @@ import { Button } from '@kings/ui'
 import { User, Smartphone, ShieldCheck, Home, Plus } from 'lucide-react'
 import { updateProfile, updatePassword, addAddress, removeAddress } from './actions'
 
-const InputField = ({ label, name, placeholder, type = "text", defaultValue = "", disabled = false }: any) => (
+const InputField = ({ label, name, placeholder, type = "text", defaultValue, value, onChange, disabled = false }: any) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
     <label style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600 }}>{label}</label>
     <input 
@@ -13,6 +13,8 @@ const InputField = ({ label, name, placeholder, type = "text", defaultValue = ""
       type={type} 
       placeholder={placeholder} 
       defaultValue={defaultValue}
+      value={value}
+      onChange={onChange}
       disabled={disabled}
       style={{
         background: disabled ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.3)',
@@ -113,6 +115,37 @@ export function SecurityForm() {
 export function AddressManager({ initialAddresses }: { initialAddresses: any[] }) {
   const [isAdding, setIsAdding] = useState(false)
   const [isPending, startTransition] = useTransition()
+  
+  // State for auto-fill
+  const [addressForm, setAddressForm] = useState({
+    zip_code: '',
+    street: '',
+    neighborhood: '',
+    city: ''
+  })
+
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cepVal = e.target.value
+    setAddressForm(prev => ({ ...prev, zip_code: cepVal }))
+    
+    const cepDigits = cepVal.replace(/\D/g, '')
+    if (cepDigits.length === 8) {
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cepDigits}/json/`)
+        const data = await res.json()
+        if (!data.erro) {
+          setAddressForm(prev => ({
+            ...prev,
+            street: data.logradouro || '',
+            neighborhood: data.bairro || '',
+            city: data.localidade && data.uf ? `${data.localidade} / ${data.uf}` : '',
+          }))
+        }
+      } catch (err) {
+        console.error("Erro ao buscar CEP", err)
+      }
+    }
+  }
 
   const handleAddSubmit = async (formData: FormData) => {
     const addressData = {
@@ -162,16 +195,16 @@ export function AddressManager({ initialAddresses }: { initialAddresses: any[] }
           <h4 style={{ margin: 0, color: '#fff' }}>Adicionar Novo Endereço</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <InputField label="Apelido do Local (Ex: Casa)" name="title" />
-            <InputField label="CEP" name="zip_code" />
+            <InputField label="CEP" name="zip_code" value={addressForm.zip_code} onChange={handleCepChange} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '1rem' }}>
-            <InputField label="Rua" name="street" />
+            <InputField label="Rua" name="street" value={addressForm.street} onChange={(e: any) => setAddressForm({...addressForm, street: e.target.value})} />
             <InputField label="Número" name="number" />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <InputField label="Complemento" name="complement" />
-            <InputField label="Bairro" name="neighborhood" />
-            <InputField label="Cidade / UF" name="city" placeholder="São Paulo / SP" />
+            <InputField label="Bairro" name="neighborhood" value={addressForm.neighborhood} onChange={(e: any) => setAddressForm({...addressForm, neighborhood: e.target.value})} />
+            <InputField label="Cidade / UF" name="city" placeholder="São Paulo / SP" value={addressForm.city} onChange={(e: any) => setAddressForm({...addressForm, city: e.target.value})} />
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '0.9rem', cursor: 'pointer' }}>
             <input type="checkbox" name="is_default" defaultChecked /> Definir como principal

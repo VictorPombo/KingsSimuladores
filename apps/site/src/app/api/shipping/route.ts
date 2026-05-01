@@ -1,100 +1,90 @@
 import { NextResponse } from 'next/server'
 
-// Token e URL do Sandbox / Produção do Melhor Envio
-const ME_API_URL = process.env.MELHOR_ENVIO_API_URL || 'https://sandbox.melhorenvio.com.br'
-const ME_TOKEN = process.env.MELHOR_ENVIO_TOKEN || ''
+// Simulando a configuração do Olist PAX
+const OLIST_PAX_URL = process.env.OLIST_PAX_URL || 'https://api.olist.com/v1/pax/quotes'
+const OLIST_TOKEN = process.env.OLIST_ACCESS_TOKEN || ''
 
 export async function POST(req: Request) {
   try {
-    const { originZip, destinationZip, weight, width, height, length, price } = await req.json()
+    const { destinationZip, originZip, items } = await req.json()
 
-    if (!originZip || !destinationZip) {
-      return NextResponse.json({ error: 'CEP de origem e destino são obrigatórios' }, { status: 400 })
+    if (!destinationZip) {
+      return NextResponse.json({ error: 'CEP de destino é obrigatório' }, { status: 400 })
     }
 
-    // Estrutura exigida pela API v2 de cálculo de frete do Melhor Envio
+    // Calcula o peso total aproximado (mock)
+    const totalWeight = items ? items.reduce((acc: number, item: any) => acc + (item.quantity * 2), 0) : 2
+
+    // Modo Sandbox (sem token real configurado para o Olist)
+    if (!OLIST_TOKEN || OLIST_TOKEN === 'SANDBOX_MODE_ACTIVE') {
+      console.warn('[Olist PAX] Token não encontrado. Retornando cotação SEDEX simulada via Olist.')
+      
+      // Atraso simulado de rede
+      await new Promise(r => setTimeout(r, 600))
+      
+      // O frontend espera `data.options`
+      return NextResponse.json({
+        options: [
+          {
+            id: 'olist_sedex_01',
+            name: 'Olist PAX - Correios SEDEX',
+            price: (35 + totalWeight * 3).toFixed(2),
+            currency: 'R$',
+            delivery_time: 3,
+            company: { name: 'Correios', picture: 'https://rastreamento.correios.com.br/static/rastreamento-internet/imgs/correios-logo.png' }
+          }
+        ]
+      })
+    }
+
+    // Chamada real para o Olist PAX (futuro)
     const payload = {
-      from: { postal_code: originZip.replace(/\D/g, '') },
-      to: { postal_code: destinationZip.replace(/\D/g, '') },
-      products: [
+      origin: { zip_code: originZip || '03141030' },
+      destination: { zip_code: destinationZip.replace(/\D/g, '') },
+      packages: [
         {
-          id: '1',
-          width: width || 20,
-          height: height || 20,
-          length: length || 20,
-          weight: weight || 1,
-          insurance_value: price || 0,
-          quantity: 1
+          width: 20,
+          height: 20,
+          length: 20,
+          weight: totalWeight
         }
       ]
     }
 
-    // Se não tiver token configurado, retorna uma simulação
-    if (!ME_TOKEN) {
-      console.warn('[SHIPPING] Token do Melhor Envio não encontrado. Retornando cotação simulada.')
-      
-      // Atraso simulado
-      await new Promise(r => setTimeout(r, 600))
-      
-      return NextResponse.json([
-        {
-          id: 2,
-          name: 'SEDEX (com seguro)',
-          price: (35 + (weight || 1) * 3).toFixed(2),
-          currency: 'R$',
-          delivery_time: 3,
-          company: { name: 'Correios', picture: 'https://melhorenvio.com.br/images/shipping-companies/correios.png' }
-        },
-        {
-          id: 99,
-          name: 'Retirar pessoalmente',
-          price: '0.00',
-          currency: 'R$',
-          delivery_time: 0,
-          company: { name: 'Retirada', picture: '' }
-        }
-      ])
-    }
-
-    // Chamada real para o Melhor Envio
-    const response = await fetch(`${ME_API_URL}/api/v2/me/shipment/calculate`, {
+    const response = await fetch(OLIST_PAX_URL, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ME_TOKEN}`,
-        'User-Agent': 'KingsHub App (contato@kingssimuladores.com.br)'
+        'Authorization': `Bearer ${OLIST_TOKEN}`,
       },
       body: JSON.stringify(payload)
     })
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('[SHIPPING] Erro na API do Melhor Envio:', errorText)
-      return NextResponse.json({ error: 'Falha ao cotar frete' }, { status: response.status })
+      return NextResponse.json({ error: 'Falha ao cotar frete no Olist' }, { status: response.status })
     }
 
     const data = await response.json()
     
-    // Filtrar apenas serviços que não retornaram erro (tem price > 0)
-    let validServices = data.filter((s: any) => !s.error && s.price)
+    // Supondo que a API do Olist retorna os serviços, filtramos para deixar APENAS SEDEX
+    let validServices = data.quotes || []
+    validServices = validServices.filter((s: any) => s.service_name.toUpperCase().includes('SEDEX'))
     
-    // Deixar apenas SEDEX
-    validServices = validServices.filter((s: any) => s.name.toUpperCase().includes('SEDEX'))
-    
-    // Adicionar Retirar em Mãos
-    validServices.push({
-      id: 99,
-      name: 'Retirar pessoalmente',
-      price: '0.00',
+    // Mapeamos para o formato que o frontend espera
+    const formattedOptions = validServices.map((s: any) => ({
+      id: s.id,
+      name: `Olist PAX - ${s.service_name}`,
+      price: s.price,
       currency: 'R$',
-      delivery_time: 0,
-      company: { name: 'Retirada', picture: '' }
-    })
+      delivery_time: s.delivery_days,
+      company: { name: s.carrier, picture: '' }
+    }))
     
-    return NextResponse.json(validServices)
+    return NextResponse.json({ options: formattedOptions })
+
   } catch (error: any) {
-    console.error('[SHIPPING] Erro interno:', error)
+    console.error('[Olist PAX] Erro interno:', error)
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Container, Button } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
 import { OrderStatusBadge } from '@/components/store/account/OrderStatusBadge'
+import { OrderExpandableCard } from '@/components/store/account/OrderExpandableCard'
 import { 
   Package, 
   MapPin, 
@@ -255,67 +256,7 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
                 {/* Pedidos List */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
                   {displayOrders.map((order: any) => (
-                    <div key={order.id} className="order-card card-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                      
-                      {/* Linha Superior: Info Principal */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.5rem', alignItems: 'center' }}>
-                        <div>
-                          <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                            Pedido
-                          </div>
-                          <div style={{ fontFamily: 'monospace', fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>#{order.id.split('-')[0].toUpperCase()}</div>
-                        </div>
-                        
-                        <div>
-                          <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                            <Clock size={14} /> Data da Compra
-                          </div>
-                          <div style={{ fontWeight: 600, color: '#e2e8f0' }}>{new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
-                        </div>
-                        
-                        <div>
-                          <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                            Total Pago
-                          </div>
-                          <div style={{ color: '#00e5ff', fontWeight: 800, fontSize: '1.1rem' }}>{formatPrice(order.total)}</div>
-                        </div>
-                        
-                        <div>
-                          <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '6px' }}>Status</div>
-                          <OrderStatusBadge orderId={order.id} initialStatus={order.status} />
-                        </div>
-                      </div>
-                      
-                      <hr style={{ border: 0, height: '1px', background: 'rgba(255,255,255,0.08)', margin: 0 }} />
-
-                      {/* Linha Inferior: Rastreio e Ações */}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
-                        
-                        {order.tracking_code ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '0.75rem', border: '1px dashed rgba(255,255,255,0.15)' }}>
-                            <Package size={20} color="#10b981" />
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>Código de Rastreio</div>
-                              <div style={{ fontWeight: 700, letterSpacing: '1px', color: '#fff' }}>{order.tracking_code}</div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 0' }}>
-                            <Clock size={16} /> Preparando envio...
-                          </div>
-                        )}
-                        
-                        <div style={{ display: 'flex', gap: '1rem', marginLeft: 'auto' }}>
-                          <button className="action-btn" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', padding: '10px 16px', borderRadius: '0.5rem', color: '#e2e8f0', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
-                            <FileText size={16} /> Nota Fiscal
-                          </button>
-                          <button className="action-btn" style={{ background: 'rgba(0, 229, 255, 0.1)', border: '1px solid rgba(0, 229, 255, 0.3)', padding: '10px 16px', borderRadius: '0.5rem', color: '#00e5ff', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
-                            <Headset size={16} /> Falar com Suporte
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
+                    <OrderExpandableCard key={order.id} order={order} />
                   ))}
                 </div>
               </>

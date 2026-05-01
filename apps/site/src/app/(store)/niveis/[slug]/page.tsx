@@ -97,7 +97,6 @@ export default async function NiveisShowcasePage({ params }: { params: { slug: s
                   fontWeight: 700,
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
-                  whiteSpace: 'nowrap',
                   transition: 'all 0.2s',
                   color: isActive ? '#000' : 'var(--text-secondary)',
                   background: isActive ? d.color : 'transparent',
