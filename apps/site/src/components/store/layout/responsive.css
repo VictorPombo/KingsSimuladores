@@ -80,7 +80,8 @@
 
 .kings-product-grid {
   display: grid;
-  grid-template-columns: minmax(400px, 1fr) minmax(300px, 500px);
+  grid-template-columns: minmax(300px, 600px) minmax(300px, 500px);
+  justify-content: center;
   gap: 60px;
   align-items: start;
 }
