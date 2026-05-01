@@ -13,6 +13,31 @@ const labelStyle: React.CSSProperties = { display: 'block', color: '#cbd5e1', fo
 const sectionStyle: React.CSSProperties = { background: '#2c2e36', borderRadius: '8px', border: '1px solid #3f424d', padding: '28px', marginBottom: '20px' }
 const sectionTitleStyle: React.CSSProperties = { fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px' }
 
+const RichEditor = ({ value, onChange, onFocus, onBlur }: { value: string, onChange: (val: string) => void, onFocus?: () => void, onBlur?: () => void }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== value && document.activeElement !== editorRef.current) {
+      editorRef.current.innerHTML = value;
+    }
+  }, [value]);
+  return (
+    <div style={{ border: '1px solid #3f424d', borderRadius: '6px', overflow: 'hidden' }}>
+      <div style={{ background: '#1f2025', borderBottom: '1px solid #3f424d', padding: '10px 14px', fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span>✨ Editor Visual</span>
+        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal' }}>(Você pode editar o texto e ver as fotos reais, não verá códigos)</span>
+      </div>
+      <div
+        ref={editorRef}
+        contentEditable
+        onInput={(e) => onChange(e.currentTarget.innerHTML)}
+        onFocus={onFocus}
+        onBlur={(e) => { onChange(e.currentTarget.innerHTML); if (onBlur) onBlur(); }}
+        style={{ background: '#1f2025', color: '#fff', padding: '16px', minHeight: '300px', maxHeight: '600px', overflowY: 'auto', outline: 'none', lineHeight: 1.6 }}
+      />
+    </div>
+  );
+};
+
 export default function CriarProdutoPage() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -297,7 +322,12 @@ export default function CriarProdutoPage() {
         </div>
         <div>
           <label style={labelStyle}>Descrição</label>
-          <textarea placeholder="Descreva o produto..." value={description} onChange={e => setDescription(e.target.value)} style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} onFocus={focusHandler} onBlur={blurHandler} />
+          <RichEditor 
+            value={description} 
+            onChange={setDescription} 
+            onFocus={focusHandler} 
+            onBlur={blurHandler} 
+          />
         </div>
       </div>
 

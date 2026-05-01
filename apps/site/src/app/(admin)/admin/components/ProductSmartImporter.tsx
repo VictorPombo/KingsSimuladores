@@ -59,6 +59,29 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
     }
   };
 
+  const RichEditor = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
+    const editorRef = React.useRef<HTMLDivElement>(null);
+    React.useEffect(() => {
+      if (editorRef.current && editorRef.current.innerHTML !== value && document.activeElement !== editorRef.current) {
+        editorRef.current.innerHTML = value || '';
+      }
+    }, [value]);
+    return (
+      <div style={{ border: '1px solid #3f424d', borderRadius: '6px', overflow: 'hidden', marginBottom: '16px' }}>
+        <div style={{ background: '#1f2025', borderBottom: '1px solid #3f424d', padding: '10px 14px', fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 600 }}>
+          ✨ Editor Visual da Descrição (Sem códigos)
+        </div>
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={(e) => onChange(e.currentTarget.innerHTML)}
+          onBlur={(e) => onChange(e.currentTarget.innerHTML)}
+          style={{ background: '#1f2025', color: '#fff', padding: '16px', minHeight: '300px', maxHeight: '500px', overflowY: 'auto', outline: 'none', lineHeight: 1.6 }}
+        />
+      </div>
+    );
+  };
+
   const updateData = (path: string[], value: any) => {
     setExtractedData((prev: any) => {
       if (!prev) return prev;
@@ -165,17 +188,11 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
               </div>
             )}
             
-            <DataBlock 
-              label="Descrição Completa (HTML)" 
-              value={extractedData.descricoes?.descricao_completa} 
+            <label style={labelStyle}>Descrição Completa (Página de Produto)</label>
+            <RichEditor 
+              value={extractedData.descricoes?.descricao_completa || ''} 
               onChange={(v) => updateData(['descricoes', 'descricao_completa'], v)} 
-              isTextarea 
             />
-            
-            <div style={{ background: '#1f2025', border: '1px solid #3f424d', borderRadius: '8px', padding: '16px' }}>
-              <h4 style={{ color: '#cbd5e1', marginTop: 0, marginBottom: '16px', fontSize: '0.9rem' }}>Pré-visualização da Landing Page</h4>
-              <div dangerouslySetInnerHTML={{ __html: `<style>.ai-preview-img img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 16px auto; }</style><div class="ai-preview-img">${extractedData.descricoes?.descricao_completa || ''}</div>` }} />
-            </div>
           </div>
         );
       case 'especificacoes':
