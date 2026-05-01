@@ -11,6 +11,21 @@ export const revalidate = 60 // Cache de 60 segundos
 
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 
+// ── Extrair primeiro parágrafo para resumo ──
+function getShortDescription(htmlOrText: string) {
+  if (!htmlOrText) return '';
+  // Tentar extrair o primeiro parágrafo de um HTML
+  const pMatch = htmlOrText.match(/<p[^>]*>(.*?)<\/p>/is);
+  if (pMatch && pMatch[1]) {
+    const clean = pMatch[1].replace(/<[^>]+>/g, '').trim();
+    if (clean.length > 20) return clean;
+  }
+  // Fallback: quebrar por quebras de linha duplas
+  const cleanText = htmlOrText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  const sentences = cleanText.split('. ');
+  return sentences.slice(0, 2).join('. ') + (sentences.length > 2 ? '.' : '');
+}
+
 // ── Buscar produto do Supabase ──
 async function getProduct(slug: string) {
   const supabase = await createServerSupabaseClient()
@@ -111,14 +126,9 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 <p style={{ 
                   color: 'var(--text-secondary)', 
                   fontSize: '0.95rem', 
-                  lineHeight: 1.6,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
+                  lineHeight: 1.6
                 }}>
-                  {product.description.replace(/<[^>]+>/g, '')}
+                  {getShortDescription(product.description)}
                 </p>
               )}
             </div>
