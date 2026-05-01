@@ -49,15 +49,7 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
     .eq('customer_id', profile?.id || user.id)
     .order('created_at', { ascending: false })
 
-  const displayOrders = orders && orders.length > 0 ? orders : [
-    {
-      id: searchParams.order || 'mock-order-id-123',
-      created_at: new Date().toISOString(),
-      status: 'paid',
-      total: 3950.00,
-      tracking_code: 'BR123456789XX',
-    }
-  ]
+  const displayOrders = orders || []
 
   const userName = (profile as any)?.full_name || 'Piloto Kings'
   const userInitials = userName.substring(0, 2).toUpperCase()
