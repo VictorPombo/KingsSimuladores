@@ -90,8 +90,8 @@ export async function createPreference(items: any[], customer: any, orderId?: st
   
   return {
     id: `pref_${orderId || 'mock'}_123456`,
-    init_point: 'https://sandbox.mercadopago.com.br/checkout/mock',
-    sandbox_init_point: 'https://sandbox.mercadopago.com.br/checkout/mock',
+    init_point: `/mock-payment?store=${storeContext || 'kings'}`,
+    sandbox_init_point: `/mock-payment?store=${storeContext || 'kings'}`,
   }
 }
 

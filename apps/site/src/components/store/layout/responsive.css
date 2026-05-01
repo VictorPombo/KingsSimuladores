@@ -198,3 +198,20 @@
   }
 }
 
+/* Checkout Button Row */
+.kings-btn-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+@media (max-width: 600px) {
+  .kings-btn-row {
+    flex-direction: column-reverse;
+  }
+  .kings-btn-row > button {
+    width: 100%;
+    flex: none !important;
+  }
+}
+

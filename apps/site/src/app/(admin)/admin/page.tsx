@@ -7,6 +7,8 @@ import { TrendingUp, Clock, MoveRight, ShoppingBag, ShieldCheck, Zap } from 'luc
 
 import { cookies } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboard({ searchParams }: { searchParams: { tab?: string } }) {
   const storeCookie = cookies().get('admin_store')?.value || 'all'
   // Compatibilidade com tabs antigas se existirem
@@ -143,14 +145,14 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
               <div style={{ 
                 padding: '10px 20px', 
                 borderRadius: '8px', 
-                border: !isMsuTab ? '1px solid #10b981' : '1px solid var(--border)',
-                background: !isMsuTab ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)', 
-                color: !isMsuTab ? '#10b981' : 'var(--text-muted)', 
+                border: isKingsTab || isAllTab ? '1px solid #10b981' : '1px solid var(--border)',
+                background: isKingsTab || isAllTab ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)', 
+                color: isKingsTab || isAllTab ? '#10b981' : 'var(--text-muted)', 
                 fontWeight: 800,
                 fontSize: '0.85rem',
                 letterSpacing: '1px',
                 transition: 'all 0.2s',
-                boxShadow: !isMsuTab ? '0 0 15px rgba(16, 185, 129, 0.1)' : 'none'
+                boxShadow: isKingsTab || isAllTab ? '0 0 15px rgba(16, 185, 129, 0.1)' : 'none'
               }}>
                 👑 LOJA KINGS (D2C)
               </div>
@@ -169,6 +171,22 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
                 boxShadow: isMsuTab ? '0 0 15px rgba(6, 182, 212, 0.1)' : 'none'
               }}>
                 ♻️ MSU MARKETPLACE (C2C)
+              </div>
+            </Link>
+            <Link href="/admin?tab=seven" style={{ textDecoration: 'none' }}>
+              <div style={{ 
+                padding: '10px 20px', 
+                borderRadius: '8px', 
+                border: isSevenTab ? '1px solid #ea580c' : '1px solid var(--border)',
+                background: isSevenTab ? 'rgba(234, 88, 12, 0.15)' : 'var(--bg-card)', 
+                color: isSevenTab ? '#ea580c' : 'var(--text-muted)', 
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                letterSpacing: '1px',
+                transition: 'all 0.2s',
+                boxShadow: isSevenTab ? '0 0 15px rgba(234, 88, 12, 0.1)' : 'none'
+              }}>
+                🏁 SEVEN SIM RACING
               </div>
             </Link>
           </div>

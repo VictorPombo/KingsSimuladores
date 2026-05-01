@@ -3,6 +3,7 @@ import React from 'react'
 import Link from 'next/link'
 import { formatPrice } from '@kings/utils'
 import { Package, AlertTriangle } from 'lucide-react'
+import { VerifiedBadge } from './VerifiedBadge'
 
 interface ListingProps {
   id: string
@@ -12,6 +13,7 @@ interface ListingProps {
   condition: string
   location: string
   sellerName: string
+  sellerId?: string
   brand?: string
   model?: string
   hasOriginalBox?: boolean
@@ -19,7 +21,7 @@ interface ListingProps {
   isFeatured?: boolean
 }
 
-export function ListingCard({ id, title, price, imageUrl, condition, location, sellerName, brand, model, hasOriginalBox, hasUsageMarks, isFeatured }: ListingProps) {
+export function ListingCard({ id, title, price, imageUrl, condition, location, sellerName, sellerId, brand, model, hasOriginalBox, hasUsageMarks, isFeatured }: ListingProps) {
   return (
     <Link href={`/usado/produto/${id}`} style={{ textDecoration: 'none' }}>
       <div style={{
@@ -90,7 +92,10 @@ export function ListingCard({ id, title, price, imageUrl, condition, location, s
           )}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>👤 {sellerName}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              👤 {sellerName}
+              {sellerId && <VerifiedBadge sellerId={sellerId} />}
+            </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>📍 {location}</span>
           </div>
         </div>

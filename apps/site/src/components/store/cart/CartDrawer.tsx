@@ -1,7 +1,7 @@
 'use client'
 
 import { useCart } from '@/contexts/CartContext'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
 import { CouponInput } from './CouponInput'
@@ -12,7 +12,22 @@ import { useState } from 'react'
 export function CartDrawer() {
   const { items, isOpen, setIsOpen, updateQuantity, subtotal, discount, totalPrice } = useCart()
   const router = useRouter()
+  const pathname = usePathname()
   const [showUpsellPopup, setShowUpsellPopup] = useState(false)
+
+  const isSeven = pathname?.startsWith('/seven')
+  const isMsu = pathname?.startsWith('/usado')
+  
+  let accentColor = 'var(--accent)'
+  let checkoutBtnStyle: any = { width: '100%' }
+  
+  if (isSeven) {
+    accentColor = '#ea580c'
+    checkoutBtnStyle = { width: '100%', background: 'linear-gradient(135deg, #ea580c, #c2410c)', border: 'none', boxShadow: '0 4px 15px rgba(234, 88, 12, 0.3)', color: '#fff' }
+  } else if (isMsu) {
+    accentColor = '#d946ef'
+    checkoutBtnStyle = { width: '100%', background: 'linear-gradient(135deg, #d946ef, #a21caf)', border: 'none', boxShadow: '0 4px 15px rgba(217, 70, 239, 0.3)', color: '#fff' }
+  }
 
   const handleCheckout = () => {
     if (items.length === 1 && !sessionStorage.getItem('kings_upsell_shown')) {
@@ -117,12 +132,12 @@ export function CartDrawer() {
               
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
                 <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Subtotal:</span>
-                <span className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent)' }}>{formatPrice(totalPrice)}</span>
+                <span className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: accentColor }}>{formatPrice(totalPrice)}</span>
               </div>
             </div>
             <Button 
               size="lg" 
-              style={{ width: '100%' }}
+              style={checkoutBtnStyle}
               onClick={handleCheckout}
             >
               Finalizar Compra

@@ -12,7 +12,7 @@ import { CouponInput } from '@/components/store/cart/CouponInput'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, discount, totalPrice, clearCart, coupon } = useCart()
+  const { items, subtotal, discount, totalPrice, clearCart, coupon, removeItem } = useCart()
   const [step, setStep] = useState(1) // 1: Info, 2: Entrega, 3: Pagamento
   
   // Form Info
@@ -22,6 +22,8 @@ export default function CheckoutPage() {
   const [cep, setCep] = useState('')
   const [logradouro, setLogradouro] = useState('')
   const [numero, setNumero] = useState('')
+  const [bairro, setBairro] = useState('')
+  const [cidade, setCidade] = useState('')
   const [complemento, setComplemento] = useState('')
   const [referencia, setReferencia] = useState('')
   
@@ -29,6 +31,37 @@ export default function CheckoutPage() {
   const [selectedFrete, setSelectedFrete] = useState<any>(null)
   
   const [isProcessing, setIsProcessing] = useState(false)
+  const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
+
+  useEffect(() => {
+    async function loadProfile() {
+      // Lazy load the client only when mounting the component
+      const { createClient } = await import('@kings/db/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        setEmail(user.email || '')
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        
+        if (profile) {
+          if (profile.full_name) setNome(profile.full_name)
+          if (profile.cpf) setCpf(profile.cpf)
+          
+          if (profile.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
+            const defaultAddr = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0]
+            if (defaultAddr.zipCode) setCep(defaultAddr.zipCode.replace(/\D/g, ''))
+            if (defaultAddr.street) setLogradouro(defaultAddr.street)
+            if (defaultAddr.number) setNumero(defaultAddr.number)
+            if (defaultAddr.neighborhood) setBairro(defaultAddr.neighborhood)
+            if (defaultAddr.city && defaultAddr.state) setCidade(`${defaultAddr.city} / ${defaultAddr.state}`)
+            if (defaultAddr.complement) setComplemento(defaultAddr.complement)
+          }
+        }
+      }
+    }
+    loadProfile()
+  }, [])
 
   // Redirect to home if empty cart
   useEffect(() => {
@@ -43,7 +76,9 @@ export default function CheckoutPage() {
         const res = await fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, '')}/json/`)
         const data = await res.json()
         if (!data.erro) {
-          setLogradouro(`${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`)
+          setLogradouro(data.logradouro || '')
+          setBairro(data.bairro || '')
+          setCidade(`${data.localidade || ''} / ${data.uf || ''}`)
         }
       } catch (err) {
         // ignore
@@ -57,7 +92,8 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          toPostalCode: cep,
+          destinationZip: cep,
+          originZip: '03141030',
           items: items.map(i => ({ id: i.id, quantity: i.quantity }))
         })
       })
@@ -81,31 +117,61 @@ export default function CheckoutPage() {
   // totalPrice já vem do CartContext COM o desconto aplicado
   const totalGeral = totalPrice + valorFrete
 
-  const handlePagamentoMock = async () => {
+  // Agrupar itens por loja
+  const groups = items.reduce((acc, item) => {
+    const brand = item.brand || 'kings'
+    const store = brand.toLowerCase().includes('seven') ? 'seven' : (brand.toLowerCase().includes('msu') ? 'msu' : 'kings')
+    if (!acc[store]) acc[store] = []
+    acc[store].push(item)
+    return acc
+  }, {} as Record<string, typeof items>)
+
+  const storeNames = Object.keys(groups)
+
+
+  const handleMultistepPayment = async () => {
     setIsProcessing(true)
+    const currentStore = storeNames[currentStoreIdx]
+    const storeGroupItems = groups[currentStore]
     
+    // Simplificação: apenas cobra o frete e aplica desconto no PRIMEIRO pagamento
+    const storeShipping = currentStoreIdx === 0 ? selectedFrete : null
+    const shippingPrice = currentStoreIdx === 0 ? valorFrete : 0
+    
+    const storeSubtotal = storeGroupItems.reduce((acc, i) => acc + (i.price * i.quantity), 0)
+    const storeDiscount = currentStoreIdx === 0 ? discount : 0
+    const storeTotal = storeSubtotal + shippingPrice - storeDiscount
+
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items,
+          items: storeGroupItems,
           customer: { nome, email, cpf },
-          address: { cep, logradouro, numero, complemento, referencia },
-          shipping: selectedFrete,
-          total: totalGeral,
-          coupon_id: coupon ? coupon.id : null
+          address: { cep, logradouro, numero, bairro, cidade, complemento, referencia },
+          shipping: storeShipping,
+          total: storeTotal,
+          coupon_id: currentStoreIdx === 0 && coupon ? coupon.id : null
         })
       })
       
       const session = await res.json()
       
       if (session.ok) {
-        clearCart()
         if (session.init_point) {
-            window.location.href = session.init_point
+            // Abre o checkout (real do MP ou nosso /mock-payment local) em uma nova guia 
+            // para ele pagar a primeira loja e não perder a tela atual.
+            window.open(session.init_point, '_blank')
+        } 
+        
+        if (currentStoreIdx < storeNames.length - 1) {
+            setCurrentStoreIdx(currentStoreIdx + 1)
+            setIsProcessing(false)
         } else {
-            router.push(`/account?order=${session.orderId}`)
+            // Concluiu todos!
+            clearCart()
+            router.push(`/account`)
         }
       } else {
         alert('Erro ao iniciar pagamento: ' + (session.error || 'Tente novamente.'))
@@ -116,6 +182,7 @@ export default function CheckoutPage() {
       setIsProcessing(false)
     }
   }
+
 
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
@@ -132,16 +199,27 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>1. Seus Dados</h2>
                 <div className="kings-checkout-form-grid">
-                  <input type="text" placeholder="Nome Completo" value={nome} onChange={e => setNome(e.target.value)} style={inputStyle} />
-                  <input type="text" placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} style={inputStyle} />
+                  <input type="text" placeholder="Nome Completo" value={nome} onChange={e => setNome(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} style={{...inputStyle, flex: 1}} />
                 </div>
                 <input type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
                 
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff', marginTop: '1rem' }}>Endereço de Entrega</h2>
                 <div className="kings-checkout-form-row">
-                  <input type="text" placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} onBlur={preencherCep} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
-                  <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="CEP" value={cep} onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '')
+                    setCep(val)
+                    if (val.length === 8) {
+                      // Trigger fill automatically
+                      preencherCep()
+                    }
+                  }} onBlur={preencherCep} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
+                  <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 2}} />
                   <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px', flexShrink: 0}} className="checkout-number-input" />
+                </div>
+                <div className="kings-checkout-form-row">
+                  <input type="text" placeholder="Bairro" value={bairro} onChange={e => setBairro(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="Cidade / UF" value={cidade} onChange={e => setCidade(e.target.value)} style={{...inputStyle, flex: 1}} />
                 </div>
                 <div className="kings-checkout-form-row">
                   <input type="text" placeholder="Complemento (opcional)" value={complemento} onChange={e => setComplemento(e.target.value)} style={{...inputStyle, flex: 1}} />
@@ -171,8 +249,8 @@ export default function CheckoutPage() {
                         background: selectedFrete?.id === f.id ? 'rgba(0, 229, 255, 0.05)' : 'transparent'
                       }}>
                       <div>
-                        <strong style={{ color: '#fff' }}>{f.company} {f.name}</strong>
-                        <div style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>Chega em até {f.custom_delivery_time} dias úteis</div>
+                        <strong style={{ color: '#fff' }}>{f.company?.name || ''} {f.name}</strong>
+                        <div style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>Chega em até {f.delivery_time || f.custom_delivery_time} dias úteis</div>
                       </div>
                       <div style={{ color: '#00e5ff', fontWeight: 600 }}>
                         {formatPrice(parseFloat(f.price))}
@@ -181,7 +259,7 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <div className="kings-btn-row">
                   <Button variant="secondary" onClick={() => setStep(1)}>Voltar</Button>
                   <Button onClick={() => setStep(3)} style={{ flex: 1 }}>Continuar para Pagamento</Button>
                 </div>
@@ -192,25 +270,21 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>3. Pagamento Seguro</h2>
                 
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px dashed rgba(0, 229, 255, 0.3)' }}>
-                  <p style={{ color: '#fff', marginBottom: '16px', textAlign: 'center', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    Pagamento Protegido via Mercado Pago
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center', marginBottom: '16px' }}>
-                     <img src="https://img.shields.io/badge/Pix-00B1EA?style=for-the-badge&logo=pix&logoColor=white" alt="Pix" style={{ height: '32px', borderRadius: '4px' }} />
-                     <img src="https://img.shields.io/badge/Mastercard-EB001B?style=for-the-badge&logo=mastercard&logoColor=white" alt="Mastercard" style={{ height: '32px', borderRadius: '4px' }} />
-                     <img src="https://img.shields.io/badge/Visa-1434CB?style=for-the-badge&logo=visa&logoColor=white" alt="Visa" style={{ height: '32px', borderRadius: '4px' }} />
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid rgba(0, 229, 255, 0.2)', textAlign: 'center' }}>
+                  <div style={{ display: 'inline-block', marginBottom: '16px', background: '#fff', padding: '8px 16px', borderRadius: '8px' }}>
+                    <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.19.1/mercadopago/logo__large.png" alt="Mercado Pago" style={{ height: '32px' }} />
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: '#a1a1aa', textAlign: 'center', lineHeight: 1.5 }}>
-                    Você será redirecionado em ambiente criptografado para o aplicativo/site oficial do <strong>Mercado Pago</strong> para inserir seus dados de Cartão de Crédito ou ler seu QR Code Pix.
+                  <h3 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '8px' }}>Ambiente Seguro</h3>
+                  <p style={{ fontSize: '0.9rem', color: '#a1a1aa', lineHeight: 1.5 }}>
+                    O pagamento é processado pelo <strong>Mercado Pago</strong>.<br/>
+                    Você poderá escolher pagar via <strong>PIX, Boleto ou Cartão de Crédito</strong> na próxima tela.
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <div className="kings-btn-row">
                   <Button variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
-                  <Button onClick={handlePagamentoMock} style={{ flex: 1, background: '#00B1EA' }} disabled={isProcessing}>
-                    {isProcessing ? 'Abrindo Gatway...' : 'Ir para o Pagamento'}
+                  <Button onClick={handleMultistepPayment} style={{ flex: 1, background: storeNames[currentStoreIdx] === 'seven' ? '#ea580c' : '#00B1EA' }} disabled={isProcessing}>
+                    {isProcessing ? 'Abrindo Gateway...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento Seguro ➔')}
                   </Button>
                 </div>
               </div>
@@ -278,5 +352,6 @@ const inputStyle = {
   padding: '0.75rem',
   color: '#fff',
   width: '100%',
-  outline: 'none'
+  outline: 'none',
+  boxSizing: 'border-box' as const
 }

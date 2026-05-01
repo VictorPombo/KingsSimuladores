@@ -1,71 +1,90 @@
 import { NextResponse } from 'next/server'
-import { calculateShipping } from '@kings/shipping'
-import { createServerSupabaseClient } from '@kings/db/server'
 
-export async function POST(request: Request): Promise<NextResponse> {
+// Simulando a configuração do Olist PAX
+const OLIST_PAX_URL = process.env.OLIST_PAX_URL || 'https://api.olist.com/v1/pax/quotes'
+const OLIST_TOKEN = process.env.OLIST_ACCESS_TOKEN || ''
+
+export async function POST(req: Request) {
   try {
-    const { toPostalCode, items, dimensions: rawDimensions } = await request.json()
+    const { destinationZip, originZip, items } = await req.json()
 
-    if (!toPostalCode) {
-      return NextResponse.json({ error: 'CEP ausente.' }, { status: 400 })
-    }
-    if ((!items || items.length === 0) && (!rawDimensions || rawDimensions.length === 0)) {
-      return NextResponse.json({ error: 'Itens ou dimensões ausentes.' }, { status: 400 })
+    if (!destinationZip) {
+      return NextResponse.json({ error: 'CEP de destino é obrigatório' }, { status: 400 })
     }
 
-    // Usar dimensões diretas (ShippingSimulator na página de produto)
-    // ou buscar do banco via items (Checkout)
-    let dimensions = rawDimensions || []
+    // Calcula o peso total aproximado (mock)
+    const totalWeight = items ? items.reduce((acc: number, item: any) => acc + (item.quantity * 2), 0) : 2
 
-    if (items && items.length > 0) {
-      const supabase = await createServerSupabaseClient()
-
-      // 1. Puxa Dados Verdadeiros do Banco
-      const productIds = items.map((i: any) => i.id)
-      const { data: dbProducts } = await supabase
-        .from('products')
-        .select('id, weight_kg, dimensions_cm, price')
-        .in('id', productIds)
-
-      // Se for MSU, puxamos do marketplace_listings (caso não venham em products)
-      const missingIds = productIds.filter((id: string) => !dbProducts?.some((p: any) => p.id === id) && !id.startsWith('mock-'))
-      let dbListings: any[] | null = null
-      if (missingIds.length > 0) {
-         const { data } = await supabase
-           .from('marketplace_listings')
-           .select('id, price')
-           .in('id', missingIds)
-         dbListings = data
-      }
-
-      // 2. Mapeamento Cego (Ignorando tudo que veio do Front exceto a Quantity)
-      dimensions = items.map((clientItem: any) => {
-         const dbProd = dbProducts?.find((p: any) => p.id === clientItem.id)
-         const dbList = dbListings?.find((p: any) => p.id === clientItem.id)
-         
-         const w = Number(dbProd?.weight_kg || 15) // simulador pesado padrão
-         const dims = dbProd?.dimensions_cm || { width: 50, height: 50, length: 50 }
-         const price = Number(dbProd?.price || dbList?.price || 1)
-         
-         return {
-           weight: w,
-           width: dims.width || 50,
-           height: dims.height || 50,
-           length: dims.length || 50,
-           quantity: clientItem.quantity || 1,
-           insurance_value: price * (clientItem.quantity || 1)
-         }
+    // Modo Sandbox (sem token real configurado para o Olist)
+    if (!OLIST_TOKEN || OLIST_TOKEN === 'SANDBOX_MODE_ACTIVE') {
+      console.warn('[Olist PAX] Token não encontrado. Retornando cotação SEDEX simulada via Olist.')
+      
+      // Atraso simulado de rede
+      await new Promise(r => setTimeout(r, 600))
+      
+      // O frontend espera `data.options`
+      return NextResponse.json({
+        options: [
+          {
+            id: 'olist_sedex_01',
+            name: 'Olist PAX - Correios SEDEX',
+            price: (35 + totalWeight * 3).toFixed(2),
+            currency: 'R$',
+            delivery_time: 3,
+            company: { name: 'Correios', picture: 'https://rastreamento.correios.com.br/static/rastreamento-internet/imgs/correios-logo.png' }
+          }
+        ]
       })
     }
 
-    // O CEP de origem padrão da KingsHub: 01001-000 (Sé, São Paulo)
-    const fromPostalCode = process.env.ORIGIN_CEP || '01001000'
+    // Chamada real para o Olist PAX (futuro)
+    const payload = {
+      origin: { zip_code: originZip || '03141030' },
+      destination: { zip_code: destinationZip.replace(/\D/g, '') },
+      packages: [
+        {
+          width: 20,
+          height: 20,
+          length: 20,
+          weight: totalWeight
+        }
+      ]
+    }
 
-    const options = await calculateShipping(fromPostalCode, toPostalCode, dimensions)
+    const response = await fetch(OLIST_PAX_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OLIST_TOKEN}`,
+      },
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      return NextResponse.json({ error: 'Falha ao cotar frete no Olist' }, { status: response.status })
+    }
+
+    const data = await response.json()
     
-    return NextResponse.json({ options })
-  } catch (error) {
-    console.error('[API Shipping Error]', error)
-    return NextResponse.json({ error: 'Erro ao calcular frete' }, { status: 500 })
+    // Supondo que a API do Olist retorna os serviços, filtramos para deixar APENAS SEDEX
+    let validServices = data.quotes || []
+    validServices = validServices.filter((s: any) => s.service_name.toUpperCase().includes('SEDEX'))
+    
+    // Mapeamos para o formato que o frontend espera
+    const formattedOptions = validServices.map((s: any) => ({
+      id: s.id,
+      name: `Olist PAX - ${s.service_name}`,
+      price: s.price,
+      currency: 'R$',
+      delivery_time: s.delivery_days,
+      company: { name: s.carrier, picture: '' }
+    }))
+    
+    return NextResponse.json({ options: formattedOptions })
+
+  } catch (error: any) {
+    console.error('[Olist PAX] Erro interno:', error)
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

@@ -100,7 +100,7 @@ export default function ConsultoriaPage() {
               </div>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', margin: 0 }}>Consultoria de Instalação e Ajuste Fino</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                {['Montagem e configuração do simulador', 'Ajuste de FOV ideal para sua tela', 'Telemetria baseada no seu equipamento', 'Postura e ergonomia para stint longo'].map((item, i) => (
+                {['Todo suporte em compras de equipamentos, melhores lojas etc.', 'Ajuste de FOV ideal para sua tela', 'Telemetria baseada no seu equipamento', 'Postura e ergonomia para stint longo'].map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#a1a1aa' }}>
                     <span style={{ color: '#06d6a0' }}>✦</span> {item}
                   </div>

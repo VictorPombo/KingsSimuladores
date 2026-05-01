@@ -45,3 +45,25 @@ export async function archiveListing(id: string) {
   revalidatePath('/admin/msu-anuncios')
   return { success: true }
 }
+
+/**
+ * Alterna o destaque (boost) de um anúncio
+ */
+export async function toggleBoost(id: string, currentBoostStatus: boolean) {
+  const supabase = createAdminClient()
+  
+  const { error } = await supabase
+    .from('marketplace_listings')
+    .update({ is_boosted: !currentBoostStatus })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error toggling boost:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/msu-anuncios')
+  revalidatePath('/usado')
+  revalidatePath('/usado/produtos')
+  return { success: true }
+}

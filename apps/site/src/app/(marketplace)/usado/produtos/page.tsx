@@ -11,6 +11,8 @@ interface SearchParams {
   condition?: string
   category?: string
   state?: string
+  city?: string
+  brand?: string
   hasBox?: string
   minPrice?: string
   maxPrice?: string
@@ -41,9 +43,17 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Sea
     query = query.eq('condition', searchParams.condition)
   }
 
-  // State filter
+  // State and City filter
   if (searchParams.state) {
     query = query.eq('state', searchParams.state)
+  }
+  if (searchParams.city) {
+    query = query.ilike('city', `%${searchParams.city}%`)
+  }
+
+  // Brand filter
+  if (searchParams.brand) {
+    query = query.ilike('brand', `%${searchParams.brand}%`)
   }
 
   // Has box filter
@@ -61,16 +71,14 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Sea
     query = query.lte('price', parseFloat(searchParams.maxPrice))
   }
 
-  // Sorting (featured always first, then sort criteria)
+  // Sorting (boosted always first, then sort criteria)
   const sort = searchParams.sort || 'newest'
   if (sort === 'price_asc') {
-    query = query.order('is_featured', { ascending: false }).order('price', { ascending: true })
+    query = query.order('is_boosted', { ascending: false, nullsFirst: false }).order('price', { ascending: true })
   } else if (sort === 'price_desc') {
-    query = query.order('is_featured', { ascending: false }).order('price', { ascending: false })
-  } else if (sort === 'featured') {
-    query = query.order('is_featured', { ascending: false }).order('featured_until', { ascending: false, nullsFirst: false })
+    query = query.order('is_boosted', { ascending: false, nullsFirst: false }).order('price', { ascending: false })
   } else {
-    query = query.order('is_featured', { ascending: false }).order('created_at', { ascending: false })
+    query = query.order('is_boosted', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false })
   }
 
   const { data: listingsData, error } = await query
@@ -124,11 +132,12 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Sea
                 imageUrl={listing.images?.[0]}
                 location={listing.city && listing.state ? `${listing.city} - ${listing.state}` : 'Brasil'}
                 sellerName={(listing as any).profiles?.full_name || 'Piloto Vendedor'}
+                sellerId={listing.seller_id}
                 brand={listing.brand}
                 model={listing.model}
                 hasOriginalBox={listing.has_original_box}
                 hasUsageMarks={listing.has_usage_marks}
-                isFeatured={listing.is_featured}
+                isFeatured={listing.is_boosted}
               />
             ))}
           </div>
