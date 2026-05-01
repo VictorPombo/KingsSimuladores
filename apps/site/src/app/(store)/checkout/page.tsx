@@ -30,6 +30,8 @@ export default function CheckoutPage() {
   const [fretes, setFretes] = useState<any[]>([])
   const [selectedFrete, setSelectedFrete] = useState<any>(null)
   
+  const [isRetirada, setIsRetirada] = useState(false)
+  
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
   const [checkoutError, setCheckoutError] = useState('')
@@ -43,22 +45,22 @@ export default function CheckoutPage() {
       
       if (user) {
         setEmail(user.email || '')
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        const { data: profile } = await supabase.from('profiles').select('*').or(`id.eq.${user.id},auth_id.eq.${user.id}`).maybeSingle()
         
         if (profile) {
           if (profile.full_name) setNome(profile.full_name)
-          if (profile.cpf) setCpf(profile.cpf)
+          if (profile.cpf_cnpj) setCpf(profile.cpf_cnpj)
           
           if (profile.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
             const defaultAddr = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0]
-            if (defaultAddr.zipCode) {
-              const cleanCep = defaultAddr.zipCode.replace(/\D/g, '')
+            if (defaultAddr.zip_code) {
+              const cleanCep = defaultAddr.zip_code.replace(/\D/g, '')
               setCep(cleanCep)
             }
             if (defaultAddr.street) setLogradouro(defaultAddr.street)
             if (defaultAddr.number) setNumero(defaultAddr.number)
             if (defaultAddr.neighborhood) setBairro(defaultAddr.neighborhood)
-            if (defaultAddr.city && defaultAddr.state) setCidade(`${defaultAddr.city} / ${defaultAddr.state}`)
+            if (defaultAddr.city) setCidade(defaultAddr.city)
             if (defaultAddr.complement) setComplemento(defaultAddr.complement)
           }
         }
@@ -102,6 +104,22 @@ export default function CheckoutPage() {
   }
 
   const calcularFretes = async (overrideCep?: string) => {
+    if (isRetirada) {
+      const pickupOption = {
+        id: 'pickup',
+        name: 'Retirada no Local',
+        company: { name: 'Kings Simuladores', picture: '' },
+        price: '0.00',
+        currency: 'R$',
+        custom_delivery_time: 0,
+        delivery_time: 0,
+      }
+      setFretes([pickupOption])
+      setSelectedFrete(pickupOption)
+      setStep(2)
+      return
+    }
+
     const targetCep = overrideCep || cep
     if (!targetCep || targetCep.length < 8) return
 
@@ -215,36 +233,53 @@ export default function CheckoutPage() {
                 </div>
                 <input type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
                 
-                <h2 style={{ fontSize: '1.2rem', color: '#00e5ff', marginTop: '1rem' }}>Endereço de Entrega</h2>
-                <div className="kings-checkout-form-row">
-                  <input type="text" placeholder="CEP" value={cep} onChange={e => {
-                    const val = e.target.value.replace(/\D/g, '')
-                    setCep(val)
-                    if (val.length === 8) {
-                      // Trigger fill automatically
-                      preencherCep()
-                    }
-                  }} onBlur={() => preencherCep()} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
-                  <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 2}} />
-                  <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px', flexShrink: 0}} className="checkout-number-input" />
-                </div>
-                <div className="kings-checkout-form-row">
-                  <input type="text" placeholder="Bairro" value={bairro} onChange={e => setBairro(e.target.value)} style={{...inputStyle, flex: 1}} />
-                  <input type="text" placeholder="Cidade / UF" value={cidade} onChange={e => setCidade(e.target.value)} style={{...inputStyle, flex: 1}} />
-                </div>
-                <div className="kings-checkout-form-row">
-                  <input type="text" placeholder="Complemento (opcional)" value={complemento} onChange={e => setComplemento(e.target.value)} style={{...inputStyle, flex: 1}} />
-                  <input type="text" placeholder="Referência (opcional)" value={referencia} onChange={e => setReferencia(e.target.value)} style={{...inputStyle, flex: 1}} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
+                  <h2 style={{ fontSize: '1.2rem', color: '#00e5ff', margin: 0 }}>Endereço de Entrega</h2>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f8fafc', fontSize: '0.9rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: '8px', border: isRetirada ? '1px solid #00e5ff' : '1px solid transparent' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={isRetirada} 
+                      onChange={(e) => setIsRetirada(e.target.checked)} 
+                      style={{ accentColor: '#00e5ff', width: '16px', height: '16px', cursor: 'pointer' }}
+                    />
+                    Quero retirar na loja (São Paulo - SP)
+                  </label>
                 </div>
                 
-                <Button onClick={() => calcularFretes()} style={{ marginTop: '1rem' }} disabled={cep.length < 8}>Continuar para Frete</Button>
+                {!isRetirada && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="kings-checkout-form-row">
+                      <input type="text" placeholder="CEP" value={cep} onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '')
+                        setCep(val)
+                        if (val.length === 8) {
+                          preencherCep(val)
+                        }
+                      }} onBlur={() => preencherCep()} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
+                      <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 2}} />
+                      <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px', flexShrink: 0}} className="checkout-number-input" />
+                    </div>
+                    <div className="kings-checkout-form-row">
+                      <input type="text" placeholder="Bairro" value={bairro} onChange={e => setBairro(e.target.value)} style={{...inputStyle, flex: 1}} />
+                      <input type="text" placeholder="Cidade / UF" value={cidade} onChange={e => setCidade(e.target.value)} style={{...inputStyle, flex: 1}} />
+                    </div>
+                    <div className="kings-checkout-form-row">
+                      <input type="text" placeholder="Complemento (opcional)" value={complemento} onChange={e => setComplemento(e.target.value)} style={{...inputStyle, flex: 1}} />
+                      <input type="text" placeholder="Referência (opcional)" value={referencia} onChange={e => setReferencia(e.target.value)} style={{...inputStyle, flex: 1}} />
+                    </div>
+                  </div>
+                )}
+                
+                <Button onClick={() => calcularFretes()} style={{ marginTop: '1rem' }} disabled={!isRetirada && cep.length < 8}>
+                  {isRetirada ? 'Continuar para Pagamento' : 'Continuar para Frete'}
+                </Button>
               </div>
             )}
 
             {step === 2 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>2. Opções de Entrega</h2>
-                <p style={{ color: '#a1a1aa', fontSize: '0.9rem' }}>Enviando para: {logradouro}, {numero} - {cep}</p>
+                {!isRetirada && <p style={{ color: '#a1a1aa', fontSize: '0.9rem' }}>Enviando para: {logradouro}, {numero} - {cep}</p>}
                 
                 {fretes.length > 0 ? (
                   <>

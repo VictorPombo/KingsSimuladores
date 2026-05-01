@@ -346,7 +346,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                         {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                       </button>
                     ) : (
-                      <a href={item.href!} onClick={() => handleLinkClick(section.title)} style={{ textDecoration: 'none' }}>
+                      <Link href={item.href!} onClick={() => handleLinkClick(section.title)} style={{ textDecoration: 'none' }}>
                         <div 
                           className="sidebar-item-hover"
                           style={{
@@ -365,7 +365,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                           <Icon size={18} strokeWidth={isRootActive ? 2.5 : 2} style={{ color: isRootActive ? section.color : '#94a3b8' }} />
                       <span style={{ fontSize: '0.9rem' }}>{item.label}</span>
                     </div>
-                  </a>
+                  </Link>
                 )}
 
                 {/* SubMenus Rendering */}
@@ -386,8 +386,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                       return (
                         <div key={sIdx}>
                           {isMock ? (
-                            <a 
-                              href={sub.href}
+                            <span 
                               className="sidebar-sub-hover"
                               style={{
                                 display: 'block',
@@ -401,9 +400,9 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                               }}
                             >
                               {sub.label} <span style={{ opacity: 0.3, fontSize: '0.7rem' }}></span>
-                            </a>
+                            </span>
                           ) : (
-                            <a href={sub.href} onClick={() => handleLinkClick(section.title)} style={{ textDecoration: 'none' }}>
+                            <Link href={sub.href} onClick={() => handleLinkClick(section.title)} style={{ textDecoration: 'none' }}>
                               <div
                                 className="sidebar-sub-hover"
                                 style={{
@@ -422,7 +421,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                                   <span style={{ float: 'right', width: '4px', height: '4px', background: section.color, borderRadius: '50%', marginTop: '6px' }} />
                                 )}
                               </div>
-                            </a>
+                            </Link>
                           )}
                         </div>
                       )

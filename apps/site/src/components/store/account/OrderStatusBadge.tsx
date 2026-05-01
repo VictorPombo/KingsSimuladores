@@ -43,9 +43,9 @@ export function OrderStatusBadge({ orderId, initialStatus }: Props) {
   const isPaid = status === 'paid'
 
   const statusMap: Record<string, string> = {
-    pending: 'PROCESSANDO...',
-    paid: 'Pago',
-    shipped: 'Enviado',
+    pending: 'Aguardando Pagamento',
+    paid: 'Preparando Envio',
+    shipped: 'Em Trânsito',
     delivered: 'Entregue',
     canceled: 'Cancelado'
   }

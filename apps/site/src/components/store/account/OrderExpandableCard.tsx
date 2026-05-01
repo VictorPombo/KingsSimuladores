@@ -299,7 +299,7 @@ export function OrderExpandableCard({ order }: { order: any }) {
                 )
               )}
               <a 
-                href={`https://wa.me/5511970603441?text=Olá, preciso de ajuda com o meu pedido %23${orderNumber}`}
+                href={`https://wa.me/5511959018725?text=Olá, preciso de ajuda com o meu pedido %23${orderNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="action-btn" 
