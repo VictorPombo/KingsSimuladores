@@ -2,10 +2,11 @@
 
 import { createServerSupabaseClient } from '@kings/db/server'
 import { redirect } from 'next/navigation'
+import { processExternalImages } from '../utils/imageUtils'
 
 export async function getBrands() {
   const supabase = await createServerSupabaseClient()
-  const { data } = await supabase.from('brands').select('id, name, slug')
+  const { data } = await supabase.from('brands').select('id, name, display_name, cnpj')
   return data || []
 }
 
@@ -29,6 +30,8 @@ export async function createProduct(formData: {
   cnpjEmitente: string
   images?: string[]
   variations?: { sku: string; stock: number; price: number | null; attributes: Record<string, string> }[]
+  fabricante?: string
+  outOfStockBehavior: string
 }) {
   const supabase = await createServerSupabaseClient()
 
@@ -51,12 +54,16 @@ export async function createProduct(formData: {
     brand_id: formData.brandId,
     category_id: formData.categoryId || null,
     status: formData.status,
-    images: formData.images || [],
+    images: formData.images ? await processExternalImages(formData.images) : [],
     weight_kg: formData.weightKg,
     dimensions_cm: { width: formData.width, height: formData.height, length: formData.length },
     ncm: formData.ncm,
     ean: formData.ean,
     cnpj_emitente: formData.cnpjEmitente,
+    attributes: { 
+      ...(formData.fabricante ? { marca: formData.fabricante } : {}),
+      out_of_stock_behavior: formData.outOfStockBehavior
+    },
   }).select('id').single()
 
   if (error) throw new Error(error.message)

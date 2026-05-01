@@ -27,114 +27,27 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
       setErrorMsg('Por favor, insira a URL do produto.');
       return;
     }
-    
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!apiKey) {
-      setErrorMsg('A Chave da API do Google Gemini não foi configurada pelo desenvolvedor (.env).');
-      return;
-    }
 
     try {
       setErrorMsg('');
       setStep('fetching_jina');
       
-      const jinaResponse = await fetch(`https://r.jina.ai/${encodeURIComponent(url)}`, {
-        headers: { 
-          "Accept": "application/json", 
-          "X-Return-Format": "markdown",
-          "X-With-Images": "true" 
-        }
-      });
-      
-      if (!jinaResponse.ok) {
-        throw new Error('Falha ao extrair a página. Verifique se a URL é válida e pública.');
-      }
-      
-      const jinaData = await jinaResponse.json();
-      const markdownContent = jinaData?.data?.content || jinaData?.content || jinaData;
-
-      if (!markdownContent) {
-         throw new Error('Nenhum conteúdo pôde ser extraído da página.');
-      }
-
-      setStep('analyzing_gemini');
-      
-      const promptSystem = `Você é um arquiteto de sistemas e especialista em e-commerce. 
-Analise o conteúdo markdown fornecido (que foi raspado de uma página de produto) e extraia TODAS as informações relevantes.
-Retorne APENAS um JSON válido e estruturado.
-
-ESTRUTURA ESPERADA DO JSON:
-{
-  "produto": {
-    "titulo": "nome completo do produto",
-    "titulo_curto": "nome resumido",
-    "marca": "fabricante/marca do produto ou null",
-    "modelo": "modelo/SKU ou null",
-    "preco_referencia": 0.00,
-    "moeda": "BRL/USD/EUR ou null",
-    "categoria_sugerida": "categoria principal",
-    "tags": ["tag1", "tag2"]
-  },
-  "descricoes": {
-    "descricao_completa": "descrição longa formatada em HTML básico, com parágrafos",
-    "descricao_curta": "resumo de até 160 caracteres",
-    "diferenciais": ["diferencial 1", "diferencial 2"]
-  },
-  "especificacoes": [
-    {
-      "grupo": "nome do grupo (ex: Dimensões, Motor)",
-      "itens": [
-        { "nome": "Torque", "valor": "5Nm" }
-      ]
-    }
-  ],
-  "compatibilidade": {
-    "plataformas": ["PC", "PS5"],
-    "requisitos": "requisitos mínimos ou null"
-  },
-  "imagens": [
-    {
-      "url": "https://...",
-      "descricao_alt": "descrição da imagem"
-    }
-  ],
-  "seo": {
-    "meta_title_sugerido": "título SEO",
-    "meta_description_sugerida": "descrição SEO",
-    "slug_sugerido": "url-amigavel-produto"
-  },
-  "confianca": "alta|media|baixa"
-}
-
-REGRAS VITAIS:
-1. ALUCINAÇÃO ZERO: Se uma informação (como preço ou garantia) não existir, retorne null ou um array vazio []. NUNCA invente dados.
-2. FOCO NO PRODUTO: Ignore textos de menus de navegação, rodapés, ou avaliações de outros produtos.
-3. FORMATAÇÃO E VALORES: Preços devem ser números (float). NUNCA faça conversão de câmbio. Mantenha o valor financeiro e a moeda (USD, EUR, BRL) EXATAMENTE iguais ao do site original.
-4. IDIOMA E TRADUÇÃO: Traduza APENAS os textos descritivos (títulos, descrições, ficha técnica, tags) para o Português do Brasil (pt-BR). NÃO altere ou traduza modelos (SKU) e valores financeiros.
-`;
-
-      const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      const response = await fetch('/api/admin/extract-product', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: markdownContent }] }],
-          systemInstruction: { parts: [{ text: promptSystem }] },
-          generationConfig: {
-             responseMimeType: "application/json"
-          }
-        })
+        body: JSON.stringify({ url })
       });
-
-      if (!geminiResponse.ok) {
-         throw new Error(`Erro na API do Gemini (${geminiResponse.status}): Verifique se sua chave da API é válida.`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erro de servidor (${response.status})`);
       }
-
-      const geminiData = await geminiResponse.json();
-      const jsonText = geminiData.candidates[0]?.content?.parts[0]?.text;
       
-      if (!jsonText) throw new Error("A IA não retornou conteúdo estruturado válido.");
+      const parsedData = await response.json();
       
-      const parsedData = JSON.parse(jsonText);
+      if (!parsedData || !parsedData.produto) {
+        throw new Error("A IA não retornou um conteúdo estruturado válido.");
+      }
       
       setExtractedData(parsedData);
       setStep('review');
@@ -190,6 +103,20 @@ REGRAS VITAIS:
                   {extractedData.produto.tags.map((tag: string, i: number) => (
                     <span key={i} style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', padding: '4px 10px', borderRadius: '16px', fontSize: '0.8rem', border: '1px solid rgba(139, 92, 246, 0.3)' }}>{tag}</span>
                   ))}
+                </div>
+              </div>
+            )}
+            
+            {extractedData.fiscal_e_dimensoes && (
+              <div style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid #3f424d' }}>
+                <h4 style={{ color: '#cbd5e1', margin: '0 0 12px 0', fontSize: '0.85rem', textTransform: 'uppercase' }}>Fiscal e Dimensões</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <DataBlock label="NCM" value={extractedData.fiscal_e_dimensoes.ncm} />
+                  <DataBlock label="EAN (GTIN)" value={extractedData.fiscal_e_dimensoes.ean} />
+                  <DataBlock label="Peso (kg)" value={extractedData.fiscal_e_dimensoes.peso_kg} />
+                  <DataBlock label="Largura (cm)" value={extractedData.fiscal_e_dimensoes.largura_cm} />
+                  <DataBlock label="Altura (cm)" value={extractedData.fiscal_e_dimensoes.altura_cm} />
+                  <DataBlock label="Comprimento (cm)" value={extractedData.fiscal_e_dimensoes.comprimento_cm} />
                 </div>
               </div>
             )}

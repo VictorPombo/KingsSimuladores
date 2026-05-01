@@ -40,10 +40,6 @@ export async function createServerSupabaseClient() {
   })
 }
 
-/**
- * Admin client com service_role key.
- * NUNCA usar no frontend. Apenas em Server Actions / Route Handlers.
- */
 export function createAdminClient() {
   return createClient<any>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,6 +49,11 @@ export function createAdminClient() {
         autoRefreshToken: false,
         persistSession: false,
       },
+      global: {
+        fetch: (url, options) => {
+          return fetch(url, { ...options, cache: 'no-store' })
+        }
+      }
     }
   )
 }

@@ -48,7 +48,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+    <div style={{ minHeight: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }}>
       <Container maxWidth="400px">
         <Card glow>
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>

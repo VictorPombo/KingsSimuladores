@@ -20,6 +20,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [stockFilter, setStockFilter] = useState('all')
+  const [brandFilter, setBrandFilter] = useState('all')
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isMobile, setIsMobile] = useState(false)
@@ -48,8 +49,11 @@ export function ProdutosClient({ products }: { products: Product[] }) {
     const matchStock = stockFilter === 'all' ||
       (stockFilter === 'in_stock' && p.stock > 0) ||
       (stockFilter === 'out_of_stock' && p.stock === 0)
-    return matchSearch && matchStatus && matchStock
+    const matchBrand = brandFilter === 'all' || p.brand_name === brandFilter
+    return matchSearch && matchStatus && matchStock && matchBrand
   })
+
+  const uniqueBrands = Array.from(new Set(products.map(p => p.brand_name))).sort()
 
   const totalProducts = products.length
   const activeProducts = products.filter(p => p.status === 'active').length
@@ -317,6 +321,11 @@ export function ProdutosClient({ products }: { products: Product[] }) {
             <option value="all">Todo Estoque</option>
             <option value="in_stock">Em estoque</option>
             <option value="out_of_stock">Sem estoque</option>
+          </select>
+          <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)}
+            style={{ background: '#1f2025', border: '1px solid #3f424d', borderRadius: '6px', padding: '9px 12px', color: '#fff', fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}>
+            <option value="all">Todas as Marcas</option>
+            {uniqueBrands.map(b => <option key={b} value={b}>{b}</option>)}
           </select>
           <div style={{ marginLeft: 'auto', color: '#64748b', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{filtered.length} produto{filtered.length !== 1 ? 's' : ''}</div>
         </div>

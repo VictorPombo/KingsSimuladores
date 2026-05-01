@@ -22,9 +22,10 @@ interface Suggestion {
 interface UpsellEngineProps {
   variant?: 'compact' | 'full'
   maxItems?: number
+  storeContext?: string
 }
 
-export function UpsellEngine({ variant = 'compact', maxItems = 2 }: UpsellEngineProps) {
+export function UpsellEngine({ variant = 'compact', maxItems = 2, storeContext = 'kings' }: UpsellEngineProps) {
   const { items, addItem } = useCart()
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [loading, setLoading] = useState(false)
@@ -44,6 +45,7 @@ export function UpsellEngine({ variant = 'compact', maxItems = 2 }: UpsellEngine
           body: JSON.stringify({
             cartItems: items.map(i => ({ id: i.id, title: i.title })),
             limit: maxItems,
+            storeContext,
           })
         })
         const data = await res.json()
