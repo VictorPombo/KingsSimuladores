@@ -6,7 +6,7 @@ import { Button, Container } from '@kings/ui'
 
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@kings/utils'
-import { createPreference } from '@kings/payments'
+// createPreference é chamado server-side na /api/checkout, não precisa importar aqui
 import { UpsellEngine } from '@/components/store/upsell/UpsellEngine'
 import { CouponInput } from '@/components/store/cart/CouponInput'
 
@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
+  const [checkoutError, setCheckoutError] = useState('')
 
   useEffect(() => {
     async function loadProfile() {
@@ -93,7 +94,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           destinationZip: cep,
-          originZip: '03141030',
+          originZip: process.env.NEXT_PUBLIC_DEFAULT_ORIGIN_ZIP || '12929608',
           items: items.map(i => ({ id: i.id, quantity: i.quantity }))
         })
       })
@@ -158,27 +159,17 @@ export default function CheckoutPage() {
       
       const session = await res.json()
       
-      if (session.ok) {
-        if (session.init_point) {
-            // Abre o checkout (real do MP ou nosso /mock-payment local) em uma nova guia 
-            // para ele pagar a primeira loja e não perder a tela atual.
-            window.open(session.init_point, '_blank')
-        } 
-        
-        if (currentStoreIdx < storeNames.length - 1) {
-            setCurrentStoreIdx(currentStoreIdx + 1)
-            setIsProcessing(false)
-        } else {
-            // Concluiu todos!
-            clearCart()
-            router.push(`/account`)
-        }
+      if (session.ok && session.init_point) {
+        // Redireciona o cliente para o checkout real do Mercado Pago
+        clearCart()
+        window.location.href = session.init_point
       } else {
-        alert('Erro ao iniciar pagamento: ' + (session.error || 'Tente novamente.'))
+        setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')
         setIsProcessing(false)
       }
     } catch (err) {
       console.error(err)
+      setCheckoutError('Erro de comunicação com o servidor. Verifique sua conexão e tente novamente.')
       setIsProcessing(false)
     }
   }
@@ -281,10 +272,17 @@ export default function CheckoutPage() {
                   </p>
                 </div>
 
+                {checkoutError && (
+                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ color: '#f87171', fontWeight: 600, fontSize: '0.95rem' }}>⚠️ {checkoutError}</div>
+                    <button onClick={() => setCheckoutError('')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem', textAlign: 'left', padding: 0 }}>Fechar</button>
+                  </div>
+                )}
+
                 <div className="kings-btn-row">
                   <Button variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
                   <Button onClick={handleMultistepPayment} style={{ flex: 1, background: storeNames[currentStoreIdx] === 'seven' ? '#ea580c' : '#00B1EA' }} disabled={isProcessing}>
-                    {isProcessing ? 'Abrindo Gateway...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento Seguro ➔')}
+                    {isProcessing ? 'Redirecionando para o Mercado Pago...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento Seguro ➔')}
                   </Button>
                 </div>
               </div>

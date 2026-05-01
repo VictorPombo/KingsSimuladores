@@ -29,16 +29,7 @@ export default async function SevenAccountPage({ searchParams }: { searchParams:
     .eq('customer_id', profile?.id || user.id)
     .order('created_at', { ascending: false })
 
-  // If no DB orders (since we might be mocking the checkout step locally), use a dummy active order
-  const displayOrders = orders && orders.length > 0 ? orders : [
-    {
-      id: searchParams.order || 'mock-order-id-123',
-      created_at: new Date().toISOString(),
-      status: 'paid',
-      total: 3950.00,
-      tracking_code: 'BR123456789XX',
-    }
-  ]
+  const displayOrders = orders || []
 
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', color: '#f8fafc', fontFamily: 'var(--font-sans)' }}>

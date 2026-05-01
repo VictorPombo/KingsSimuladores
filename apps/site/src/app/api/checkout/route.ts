@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     // 5. Insert Order Items natively
     const orderItemsData = items.map((item: any) => ({
       order_id: newOrder.id,
-      product_id: item.id.startsWith('mock-') ? null : item.id, // Handle mock products
+      product_id: item.id,
       quantity: item.quantity,
       unit_price: item.price,
       total_price: item.price * item.quantity,
