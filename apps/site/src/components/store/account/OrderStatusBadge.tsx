@@ -42,6 +42,16 @@ export function OrderStatusBadge({ orderId, initialStatus }: Props) {
 
   const isPaid = status === 'paid'
 
+  const statusMap: Record<string, string> = {
+    pending: 'PROCESSANDO...',
+    paid: 'Pago',
+    shipped: 'Enviado',
+    delivered: 'Entregue',
+    canceled: 'Cancelado'
+  }
+
+  const displayStatus = statusMap[status] || status.toUpperCase()
+
   return (
     <div style={{ 
       display: 'inline-block',
@@ -52,7 +62,7 @@ export function OrderStatusBadge({ orderId, initialStatus }: Props) {
       color: isPaid ? '#00e5ff' : '#fff',
       transition: 'all 0.3s ease'
     }}>
-      {status === 'pending' ? 'PROCESSANDO...' : status.toUpperCase()}
+      {displayStatus}
     </div>
   )
 }
