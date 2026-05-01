@@ -237,13 +237,20 @@ export default function CriarProdutoPage() {
 
                 if (dadosExtraidos.fiscal_e_dimensoes) {
                   const f = dadosExtraidos.fiscal_e_dimensoes;
+                  const parseNum = (v: any) => {
+                    if (!v) return null;
+                    const str = String(v).replace(',', '.');
+                    const match = str.match(/[\d.]+/);
+                    return match ? parseFloat(match[0]) : null;
+                  };
+
                   if (f.ncm) setNcm(String(f.ncm).replace(/\D/g, ''));
                   if (f.ean) setEan(String(f.ean));
                   else setEan('SEM GTIN');
-                  if (f.peso_kg) setWeightKg(Number(f.peso_kg));
-                  if (f.largura_cm) setWidth(Number(f.largura_cm));
-                  if (f.altura_cm) setHeight(Number(f.altura_cm));
-                  if (f.comprimento_cm) setLength(Number(f.comprimento_cm));
+                  if (f.peso_kg) setWeightKg(parseNum(f.peso_kg));
+                  if (f.largura_cm) setWidth(parseNum(f.largura_cm));
+                  if (f.altura_cm) setHeight(parseNum(f.altura_cm));
+                  if (f.comprimento_cm) setLength(parseNum(f.comprimento_cm));
                 }
                 if (dadosExtraidos.avaliacoes && dadosExtraidos.avaliacoes.length > 0) {
                   setExtractedReviews(dadosExtraidos.avaliacoes);
