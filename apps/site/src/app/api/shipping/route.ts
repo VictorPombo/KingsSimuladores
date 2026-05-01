@@ -1,90 +1,83 @@
 import { NextResponse } from 'next/server'
 
-// Simulando a configuração do Olist PAX
-const OLIST_PAX_URL = process.env.OLIST_PAX_URL || 'https://api.olist.com/v1/pax/quotes'
-const OLIST_TOKEN = process.env.OLIST_ACCESS_TOKEN || ''
+const FRENET_TOKEN = process.env.FRENET_TOKEN || ''
 
 export async function POST(req: Request) {
   try {
-    const { destinationZip, originZip, items } = await req.json()
+    const { destinationZip, originZip, items, toPostalCode, dimensions } = await req.json()
+    const destZip = destinationZip || toPostalCode
 
-    if (!destinationZip) {
+    if (!destZip) {
       return NextResponse.json({ error: 'CEP de destino é obrigatório' }, { status: 400 })
     }
 
-    // Calcula o peso total aproximado (mock)
-    const totalWeight = items ? items.reduce((acc: number, item: any) => acc + (item.quantity * 2), 0) : 2
-
-    // Modo Sandbox (sem token real configurado para o Olist)
-    if (!OLIST_TOKEN || OLIST_TOKEN === 'SANDBOX_MODE_ACTIVE') {
-      console.warn('[Olist PAX] Token não encontrado. Retornando cotação SEDEX simulada via Olist.')
-      
-      // Atraso simulado de rede
-      await new Promise(r => setTimeout(r, 600))
-      
-      // O frontend espera `data.options`
-      return NextResponse.json({
-        options: [
-          {
-            id: 'olist_sedex_01',
-            name: 'Olist PAX - Correios SEDEX',
-            price: (35 + totalWeight * 3).toFixed(2),
-            currency: 'R$',
-            delivery_time: 3,
-            company: { name: 'Correios', picture: 'https://rastreamento.correios.com.br/static/rastreamento-internet/imgs/correios-logo.png' }
-          }
-        ]
-      })
-    }
-
-    // Chamada real para o Olist PAX (futuro)
     const payload = {
-      origin: { zip_code: originZip || '03141030' },
-      destination: { zip_code: destinationZip.replace(/\D/g, '') },
-      packages: [
-        {
-          width: 20,
-          height: 20,
-          length: 20,
-          weight: totalWeight
-        }
-      ]
+      SellerCEP: originZip || '03141030',
+      RecipientCEP: destZip.replace(/\D/g, ''),
+      ShipmentInvoiceValue: 100, // could calculate from items, but optional
+      ShippingItemArray: [] as any[]
     }
 
-    const response = await fetch(OLIST_PAX_URL, {
+    if (items && items.length > 0) {
+      payload.ShippingItemArray = items.map((item: any) => ({
+        Height: 20,
+        Length: 20,
+        Width: 20,
+        Weight: 2, 
+        Quantity: item.quantity
+      }))
+    } else if (dimensions && dimensions.length > 0) {
+      payload.ShippingItemArray = dimensions.map((dim: any) => ({
+        Height: dim.height || 20,
+        Length: dim.length || 20,
+        Width: dim.width || 20,
+        Weight: dim.weight || 2,
+        Quantity: 1
+      }))
+    } else {
+      payload.ShippingItemArray = [{ Height: 20, Length: 20, Width: 20, Weight: 2, Quantity: 1 }]
+    }
+
+    const response = await fetch("https://api.frenet.com.br/shipping/quote", {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OLIST_TOKEN}`,
+        'token': FRENET_TOKEN
       },
       body: JSON.stringify(payload)
     })
 
     if (!response.ok) {
-      return NextResponse.json({ error: 'Falha ao cotar frete no Olist' }, { status: response.status })
+      console.error('[Frenet] Erro na API:', await response.text())
+      return NextResponse.json({ error: 'Falha ao cotar frete no Frenet.' }, { status: response.status })
     }
 
     const data = await response.json()
     
-    // Supondo que a API do Olist retorna os serviços, filtramos para deixar APENAS SEDEX
-    let validServices = data.quotes || []
-    validServices = validServices.filter((s: any) => s.service_name.toUpperCase().includes('SEDEX'))
-    
-    // Mapeamos para o formato que o frontend espera
-    const formattedOptions = validServices.map((s: any) => ({
-      id: s.id,
-      name: `Olist PAX - ${s.service_name}`,
-      price: s.price,
-      currency: 'R$',
-      delivery_time: s.delivery_days,
-      company: { name: s.carrier, picture: '' }
-    }))
-    
-    return NextResponse.json({ options: formattedOptions })
+    if (data.ShippingSevicesArray && Array.isArray(data.ShippingSevicesArray)) {
+      const validServices = data.ShippingSevicesArray.filter((s: any) => !s.Error && s.ServiceDescription.toUpperCase().includes('SEDEX'))
+      
+      const formattedOptions = validServices.map((s: any) => ({
+        id: s.ServiceCode,
+        name: s.ServiceDescription,
+        price: s.ShippingPrice,
+        currency: 'R$',
+        custom_delivery_time: s.DeliveryTime, // added to match ShippingSimulator expectation
+        delivery_time: s.DeliveryTime,
+        company: { name: s.Carrier, picture: '' }
+      }))
+
+      // Ordenar do mais barato pro mais caro
+      formattedOptions.sort((a: any, b: any) => parseFloat(a.price) - parseFloat(b.price))
+
+      return NextResponse.json({ options: formattedOptions })
+    }
+
+    return NextResponse.json({ options: [] })
 
   } catch (error: any) {
-    console.error('[Olist PAX] Erro interno:', error)
+    console.error('[Frenet] Erro interno:', error)
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }
