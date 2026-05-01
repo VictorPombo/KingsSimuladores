@@ -31,8 +31,8 @@ export function NegotiateButton({ listingId, listingTitle, listingPrice, sellerI
           listingId={listingId}
           listingTitle={listingTitle}
           listingPrice={listingPrice}
-          sellerId={sellerId}
-          sellerName={sellerName}
+          partnerId={sellerId}
+          partnerName={sellerName}
           onClose={() => setShowChat(false)}
         />
       )}

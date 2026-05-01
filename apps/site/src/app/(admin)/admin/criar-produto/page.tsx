@@ -22,6 +22,8 @@ export default function CriarProdutoPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [mostrarImportador, setMostrarImportador] = useState(false)
+  const [extractedReviews, setExtractedReviews] = useState<any[]>([])
+  const [itemType, setItemType] = useState<'product' | 'service'>('product')
 
   // Variáveis da Grade
   const [hasVariations, setHasVariations] = useState(false)
@@ -90,9 +92,14 @@ export default function CriarProdutoPage() {
   async function handleSubmit() {
     setError(''); setSuccess('')
     
-    // Regra Rígida Omnichannel
-    if (!title || !price || !brandId || !ncm || !ean || !weightKg || !width || !height || !length || !cnpjEmitente) { 
-      setError('Todos os campos fiscais, de envio (dimensões) e básicos são OBRIGATÓRIOS para a integração ao Olist/Hub.')
+    // Regra Rígida Omnichannel vs Serviço
+    if (!title || !price || !brandId || !cnpjEmitente) {
+      setError('Os campos básicos, preço, loja origem e CNPJ são OBRIGATÓRIOS.')
+      return
+    }
+
+    if (itemType === 'product' && (!ncm || !ean || !weightKg || !width || !height || !length)) { 
+      setError('Para Produtos Físicos, todos os campos fiscais (NCM/EAN) e de envio (dimensões) são OBRIGATÓRIOS para a integração ao Olist/Hub.')
       return 
     }
     
@@ -141,13 +148,22 @@ export default function CriarProdutoPage() {
           
         await createProduct({ 
           title, slug, description, price, priceCompare, stock: hasVariations ? 0 : stock, 
-          sku, brandId, categoryId, status, weightKg, width, height, length, ncm, ean, cnpjEmitente,
+          sku, brandId, categoryId, status, 
+          weightKg: itemType === 'service' ? 0 : weightKg, 
+          width: itemType === 'service' ? 0 : width, 
+          height: itemType === 'service' ? 0 : height, 
+          length: itemType === 'service' ? 0 : length, 
+          ncm: itemType === 'service' ? '' : ncm, 
+          ean: itemType === 'service' ? 'SEM GTIN' : ean, 
+          cnpjEmitente,
           images: uploadedUrls,
           variations: payloadVars,
           fabricante,
-          outOfStockBehavior
+          outOfStockBehavior,
+          reviews: extractedReviews,
+          itemType // Vamos passar isso para a action
         })
-        setSuccess('Produto criado e pronto para o Hub Omnichannel!')
+        setSuccess('Produto/Serviço criado com sucesso!')
         setTimeout(() => router.push('/admin/produtos'), 1500)
       } catch (e: any) { setError(e.message) }
     })
@@ -203,16 +219,8 @@ export default function CriarProdutoPage() {
                 
                 let combinedDescription = "";
                 if (dadosExtraidos.descricoes?.descricao_completa) {
-                  // Replace <p> and <br> with newlines, then strip other HTML tags
-                  let cleanDesc = dadosExtraidos.descricoes.descricao_completa
-                    .replace(/<\/?p[^>]*>/gi, '\n\n')
-                    .replace(/<br\s*\/?>/gi, '\n')
-                    .replace(/<[^>]*>?/gm, '');
-                  
-                  // Clean up multiple newlines
-                  cleanDesc = cleanDesc.replace(/\n\s*\n/g, '\n\n').trim();
-                  
-                  combinedDescription += cleanDesc + "\n\n";
+                  // MANTEMOS O HTML INTACTO PARA PRESERVAR AS IMAGENS E O LAYOUT RICO DA IA
+                  combinedDescription += dadosExtraidos.descricoes.descricao_completa + "\n\n<br><br>\n\n";
                 }
                 if (dadosExtraidos.especificacoes && dadosExtraidos.especificacoes.length > 0) {
                    combinedDescription += "ESPECIFICAÇÕES TÉCNICAS\n\n";
@@ -237,6 +245,9 @@ export default function CriarProdutoPage() {
                   if (f.altura_cm) setHeight(Number(f.altura_cm));
                   if (f.comprimento_cm) setLength(Number(f.comprimento_cm));
                 }
+                if (dadosExtraidos.avaliacoes && dadosExtraidos.avaliacoes.length > 0) {
+                  setExtractedReviews(dadosExtraidos.avaliacoes);
+                }
 
                 setMostrarImportador(false);
              }}
@@ -247,7 +258,22 @@ export default function CriarProdutoPage() {
 
       {/* Info geral */}
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}><Package size={20} color="#8b5cf6" /> Informações gerais</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 style={{ ...sectionTitleStyle, margin: 0 }}><Package size={20} color="#8b5cf6" /> Informações gerais</h2>
+          <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '4px', border: '1px solid #3f424d' }}>
+            <button 
+              onClick={() => setItemType('product')}
+              style={{ padding: '6px 14px', borderRadius: '6px', background: itemType === 'product' ? '#8b5cf6' : 'transparent', color: itemType === 'product' ? '#fff' : '#94a3b8', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s' }}>
+              Produto Físico
+            </button>
+            <button 
+              onClick={() => setItemType('service')}
+              style={{ padding: '6px 14px', borderRadius: '6px', background: itemType === 'service' ? '#3b82f6' : 'transparent', color: itemType === 'service' ? '#fff' : '#94a3b8', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s' }}>
+              Serviço / Consultoria
+            </button>
+          </div>
+        </div>
+        
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '16px' }}>
           <div>
             <label style={labelStyle}>Nome do produto *</label>
@@ -478,18 +504,28 @@ export default function CriarProdutoPage() {
 
       {/* Envio e Fiscal (Rigid Validation) */}
       <div style={sectionStyle}>
-        <div style={{...sectionTitleStyle, color: '#f43f5e'}}><Settings size={20} /> Fiscal & Omnichannel (Obrigatórios)</div>
+        <div style={{...sectionTitleStyle, color: itemType === 'product' ? '#f43f5e' : '#3b82f6'}}><Settings size={20} /> Fiscal & Omnichannel {itemType === 'product' ? '(Obrigatórios)' : '(Configurações de Serviço)'}</div>
+        
+        {itemType === 'service' && (
+           <div style={{ padding: '12px 16px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', marginBottom: '16px', color: '#60a5fa', fontSize: '0.85rem' }}>
+             Como este é um Serviço/Consultoria, não será sincronizado com a Olist. O faturamento deverá ser via NFS-e (Código de Serviço/ISS) no ERP e as dimensões de frete serão ocultadas.
+           </div>
+        )}
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-          <div><label style={labelStyle}>NCM *</label><input type="text" placeholder="Ex: 9504.50.00" value={ncm} onChange={e => setNcm(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
-          <div><label style={labelStyle}>EAN (Cód. Barras) *</label><input type="text" placeholder="Sem EAN = digite 'SEM GTIN'" value={ean} onChange={e => setEan(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+          <div><label style={labelStyle}>{itemType === 'product' ? 'NCM *' : 'Código de Serviço (ISS/LC 116) - Opcional'}</label><input type="text" placeholder={itemType === 'product' ? "Ex: 9504.50.00" : "Ex: 14.01"} value={ncm} onChange={e => setNcm(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+          {itemType === 'product' && <div><label style={labelStyle}>EAN (Cód. Barras) *</label><input type="text" placeholder="Sem EAN = digite 'SEM GTIN'" value={ean} onChange={e => setEan(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>}
           <div><label style={labelStyle}>CNPJ Emitente *</label><input type="text" placeholder="00.000.000/0000-00" value={cnpjEmitente} onChange={e => setCnpjEmitente(e.target.value)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
-          <div><label style={labelStyle}>Peso (kg) *</label><input type="number" step="0.001" placeholder="Ex: 5.5" value={weightKg ?? ''} onChange={e => setWeightKg(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
-          <div><label style={labelStyle}>Largura (cm) *</label><input type="number" placeholder="Ex: 30" value={width ?? ''} onChange={e => setWidth(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
-          <div><label style={labelStyle}>Altura (cm) *</label><input type="number" placeholder="Ex: 20" value={height ?? ''} onChange={e => setHeight(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
-          <div><label style={labelStyle}>Comprim. (cm) *</label><input type="number" placeholder="Ex: 40" value={length ?? ''} onChange={e => setLength(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
-        </div>
+        
+        {itemType === 'product' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+            <div><label style={labelStyle}>Peso (kg) *</label><input type="number" step="0.001" placeholder="Ex: 5.5" value={weightKg ?? ''} onChange={e => setWeightKg(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+            <div><label style={labelStyle}>Largura (cm) *</label><input type="number" placeholder="Ex: 30" value={width ?? ''} onChange={e => setWidth(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+            <div><label style={labelStyle}>Altura (cm) *</label><input type="number" placeholder="Ex: 20" value={height ?? ''} onChange={e => setHeight(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+            <div><label style={labelStyle}>Comprim. (cm) *</label><input type="number" placeholder="Ex: 40" value={length ?? ''} onChange={e => setLength(e.target.value ? Number(e.target.value) : null)} style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} /></div>
+          </div>
+        )}
       </div>
 
       {error && <div style={{ padding: '12px 16px', background: '#ef444418', border: '1px solid #ef444430', borderRadius: '8px', marginBottom: '16px', color: '#ef4444', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}><AlertTriangle size={16} /> {error}</div>}

@@ -7,6 +7,8 @@ import { MessageCircle, ShieldCheck, Package, AlertTriangle, MapPin } from 'luci
 import { NegotiateButton } from '@/components/marketplace/NegotiateButton'
 import { SellerReputation } from '@/components/marketplace/SellerReputation'
 
+import { BuyNowButton } from '@/components/marketplace/BuyNowButton'
+
 export const revalidate = 300
 
 type Props = {
@@ -162,9 +164,13 @@ export default async function ListingDetailPage({ params }: Props) {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-                <Button style={{ width: '100%', background: 'var(--accent)', color: '#000', padding: '1.25rem', fontSize: '1.1rem', fontWeight: 800 }}>
-                  Comprar Agora
-                </Button>
+                <BuyNowButton 
+                  listingId={listing.id}
+                  listingTitle={listing.title}
+                  listingPrice={listing.price}
+                  imageUrl={listing.images[0]}
+                  sellerId={listing.seller_id}
+                />
                 
                 <NegotiateButton
                   listingId={listing.id}
@@ -173,10 +179,7 @@ export default async function ListingDetailPage({ params }: Props) {
                   sellerId={listing.seller_id}
                   sellerName={sellerName}
                 />
-
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.78rem', color: '#25D366', textDecoration: 'underline' }}>Ou fale pelo WhatsApp oficial</span>
-                </a>
+                
                 <p style={{ margin: 0, fontSize: '0.75rem', color: '#52525b', textAlign: 'center', lineHeight: 1.4 }}>
                   Toda negociação é intermediada pela equipe do Meu Simulador Usado.
                 </p>

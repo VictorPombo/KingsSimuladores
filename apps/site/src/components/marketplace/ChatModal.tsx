@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { X, Send, ShieldCheck } from 'lucide-react'
-import { createBrowserClient } from '@supabase/ssr'
+import { createClient } from '@kings/db/client'
 
 interface ChatModalProps {
   listingId: string
   listingTitle: string
   listingPrice: number
-  sellerId: string
-  sellerName: string
+  partnerId: string
+  partnerName: string
   onClose: () => void
 }
 
@@ -21,7 +21,7 @@ interface Message {
   sender?: { full_name: string }
 }
 
-export function ChatModal({ listingId, listingTitle, listingPrice, sellerId, sellerName, onClose }: ChatModalProps) {
+export function ChatModal({ listingId, listingTitle, listingPrice, partnerId, partnerName, onClose }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMsg, setNewMsg] = useState('')
   const [loading, setLoading] = useState(true)
@@ -30,11 +30,10 @@ export function ChatModal({ listingId, listingTitle, listingPrice, sellerId, sel
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let channel: any;
+    
     const init = async () => {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) setCurrentUserId(session.user.id)
 
@@ -46,9 +45,9 @@ export function ChatModal({ listingId, listingTitle, listingPrice, sellerId, sel
       }
       setLoading(false)
 
-      // Realtime subscription
-      const channel = supabase
-        .channel(`listing-${listingId}`)
+      // Realtime subscription (unique channel name prevents React 18 Strict Mode collisions)
+      channel = supabase
+        .channel(`listing-${listingId}-${Date.now()}`)
         .on('postgres_changes', {
           event: 'INSERT',
           schema: 'public',
@@ -58,10 +57,10 @@ export function ChatModal({ listingId, listingTitle, listingPrice, sellerId, sel
           setMessages(prev => [...prev, payload.new as Message])
         })
         .subscribe()
-
-      return () => { supabase.removeChannel(channel) }
     }
     init()
+    
+    return () => { if (channel) channel.unsubscribe() }
   }, [listingId])
 
   useEffect(() => {
@@ -75,7 +74,7 @@ export function ChatModal({ listingId, listingTitle, listingPrice, sellerId, sel
       const res = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ listing_id: listingId, receiver_id: sellerId, message: newMsg })
+        body: JSON.stringify({ listing_id: listingId, receiver_id: partnerId, message: newMsg })
       })
       if (res.ok) {
         const data = await res.json()

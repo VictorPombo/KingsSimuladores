@@ -2,8 +2,27 @@
 
 import React, { useState, useTransition } from 'react'
 import { Button } from '@kings/ui'
-import { User, Smartphone, ShieldCheck, Home, Plus } from 'lucide-react'
+import { User, Smartphone, ShieldCheck, Home, Plus, LogOut } from 'lucide-react'
 import { updateProfile, updatePassword, addAddress, removeAddress } from './actions'
+import { createClient } from '@kings/db/client'
+import { useRouter } from 'next/navigation'
+
+export function LogoutButton() {
+  const router = useRouter()
+  
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
+
+  return (
+    <button onClick={handleLogout} className="nav-item" style={{ width: '100%', background: 'transparent', border: '1px solid transparent', textAlign: 'left', color: '#f87171', cursor: 'pointer', padding: '12px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.95rem', fontWeight: 600 }}>
+      <LogOut size={18} /> Sair da Conta
+    </button>
+  )
+}
 
 const InputField = ({ label, name, placeholder, type = "text", defaultValue, value, onChange, disabled = false }: any) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

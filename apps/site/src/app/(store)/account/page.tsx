@@ -23,7 +23,7 @@ import {
   Home,
   CreditCard
 } from 'lucide-react'
-import { ProfileForm, AddressManager, SecurityForm } from './ClientForms'
+import { ProfileForm, AddressManager, SecurityForm, LogoutButton } from './ClientForms'
 
 export const dynamic = 'force-dynamic'
 
@@ -188,9 +188,7 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
 
             {/* Ações Rápidas */}
             <div className="card-panel" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column' }}>
-               <button className="nav-item" style={{ width: '100%', background: 'transparent', border: '1px solid transparent', textAlign: 'left', color: '#f87171' }}>
-                 <LogOut size={18} /> Sair da Conta
-               </button>
+               <LogoutButton />
             </div>
             
           </aside>

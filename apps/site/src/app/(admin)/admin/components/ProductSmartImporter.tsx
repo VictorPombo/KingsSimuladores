@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import { Search, Loader2, Check, AlertCircle, RefreshCw, Layers, Image as ImageIcon, FileText, Settings, Type, Key } from 'lucide-react';
+import { Search, Loader2, Check, AlertCircle, RefreshCw, Layers, Image as ImageIcon, FileText, Settings, Type, Key, Star } from 'lucide-react';
 
 interface ImporterProps {
   onImportComplete: (productData: any) => void;
@@ -190,6 +190,32 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
             <DataBlock label="Slug" value={extractedData.seo?.slug_sugerido} />
           </div>
         );
+      case 'avaliacoes':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {extractedData.avaliacoes && extractedData.avaliacoes.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                {extractedData.avaliacoes.map((av: any, i: number) => (
+                  <div key={i} style={{ background: '#1f2025', border: '1px solid #3f424d', borderRadius: '8px', padding: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <strong style={{ color: '#fff', fontSize: '0.95rem' }}>{av.reviewer_name}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b' }}>
+                        <Star size={14} fill="currentColor" />
+                        <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{av.rating}</span>
+                      </div>
+                    </div>
+                    {av.created_at && <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>{av.created_at}</div>}
+                    <div style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                      "{av.comment}"
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ color: '#64748b', fontStyle: 'italic' }}>Nenhuma avaliação encontrada nesta página.</div>
+            )}
+          </div>
+        );
       default:
         return null;
     }
@@ -283,6 +309,7 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
               <button style={tabStyle(activeTab === 'especificacoes')} onClick={() => setActiveTab('especificacoes')}><Settings size={16} /> Ficha Técnica</button>
               <button style={tabStyle(activeTab === 'midia')} onClick={() => setActiveTab('midia')}><ImageIcon size={16} /> Imagens</button>
               <button style={tabStyle(activeTab === 'seo')} onClick={() => setActiveTab('seo')}><Search size={16} /> SEO</button>
+              <button style={tabStyle(activeTab === 'avaliacoes')} onClick={() => setActiveTab('avaliacoes')}><Star size={16} /> Avaliações</button>
             </div>
 
             <div style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '8px' }}>
