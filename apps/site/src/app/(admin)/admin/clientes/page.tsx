@@ -39,7 +39,6 @@ export default async function AdminClientesPage() {
   let profilesQuery = supabase
     .from('profiles')
     .select('id, full_name, email, phone, cpf_cnpj, addresses, created_at')
-    .neq('role', 'admin')
     .order('created_at', { ascending: false })
 
   if (storeCookie === 'kings' || storeCookie === 'seven') {
