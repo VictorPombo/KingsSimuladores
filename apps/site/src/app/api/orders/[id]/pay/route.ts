@@ -36,25 +36,17 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       .select('*, product:product_id(title, image_url)')
       .eq('order_id', orderId)
 
-    let mpItems: any[] = [];
-
-    if (!itemsErr && orderItems && orderItems.length > 0) {
-      mpItems = orderItems.map((item: any) => ({
-        id: item.product_id || item.id,
-        title: item.product?.title || 'Produto Kings',
-        quantity: item.quantity,
-        price: item.unit_price, // Compatibilidade com a createPreference
-      }))
-    } else {
-      // Fallback: se os itens não existem ou RLS bloqueou, 
-      // garante a geração do link com o valor total do pedido.
-      mpItems = [{
-        id: orderId,
-        title: `Pedido #${orderId.split('-')[0].toUpperCase()}`,
-        quantity: 1,
-        price: order.total,
-      }]
+    if (itemsErr || !orderItems || orderItems.length === 0) {
+      return NextResponse.json({ error: 'Itens do pedido não encontrados no banco. RLS bloqueou ou não foram gravados.' }, { status: 404 })
     }
+
+    // Recriar o payload de items para o Mercado Pago com os itens reais
+    const mpItems = orderItems.map((item: any) => ({
+      id: item.product_id || item.id,
+      title: item.product?.title || 'Produto Kings',
+      quantity: item.quantity,
+      price: item.unit_price, // Compatibilidade com a createPreference
+    }))
 
     // Obter dados do cliente
     const customer = {
