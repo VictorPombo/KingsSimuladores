@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     }
 
     // 4. Mercado Pago Preference Creation with External Reference
-    const preference = await createPreference(items, customer, newOrder.id, undefined, storeContext)
+    const preference = await createPreference(items, customer, newOrder.id, undefined, storeContext, orderData.shipping_cost)
 
     // 4.5. Update Order with Preference ID
     if (preference.id) {

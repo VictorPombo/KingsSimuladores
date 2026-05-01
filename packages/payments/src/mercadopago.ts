@@ -23,7 +23,7 @@ export function getMPPublicKey(storeSlug: string): string {
   return PUBLIC_KEYS[storeSlug] ?? process.env.NEXT_PUBLIC_MP_PUBLIC_KEY ?? ''
 }
 
-export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number, storeContext?: 'kings' | 'msu' | 'seven') {
+export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number, storeContext?: 'kings' | 'msu' | 'seven', shippingCost?: number) {
   // Em Produção, você usará o token de vendedor (Oauth) para criar a preferência na conta dele,
   // mas aplicando a 'marketplace_fee' (nossa comissão) pra conta da Kings.
   
@@ -38,6 +38,16 @@ export async function createPreference(items: any[], customer: any, orderId?: st
     unit_price: Number(i.price || i.unit_price) || 0,
     currency_id: 'BRL'
   }))
+
+  if (shippingCost && shippingCost > 0) {
+    mpItems.push({
+      id: 'shipping',
+      title: 'Frete',
+      quantity: 1,
+      unit_price: shippingCost,
+      currency_id: 'BRL'
+    })
+  }
 
   const payload: any = {
     items: mpItems,
