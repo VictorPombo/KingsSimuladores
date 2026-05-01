@@ -6,7 +6,7 @@ import { createServerSupabaseClient } from '@kings/db/server'
 
 import { BannerCarousel } from '@/components/store/ui/BannerCarousel'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient()

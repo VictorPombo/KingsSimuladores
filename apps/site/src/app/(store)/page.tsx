@@ -9,6 +9,8 @@ import { BannerCarousel } from '@/components/store/ui/BannerCarousel'
 
 const BASE_URL = process.env.NEXT_PUBLIC_URL_KINGS || 'https://kingssimuladores.com.br'
 
+export const revalidate = 60
+
 // ── SEO: Schema JSON-LD para a Marca e o Site ──
 function HomeJsonLd() {
   const orgSchema = {

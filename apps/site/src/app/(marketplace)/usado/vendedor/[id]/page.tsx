@@ -5,10 +5,7 @@ import { Badge } from '@kings/ui'
 import { ProductCard } from '@kings/ui'
 import Link from 'next/link'
 
-export const revalidate = 0
-
-// Force dynamic since we use dynamic params inside a RSC without static generation path mapping yet
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export default async function VendedorProfilePage({ params }: { params: { id: string } }) {
   const sellerId = params.id

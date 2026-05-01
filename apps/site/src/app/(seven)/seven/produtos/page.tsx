@@ -5,7 +5,7 @@ import { Suspense } from 'react'
 
 import { SevenCatalogFilters } from './SevenCatalogFilters'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 function formatPrice(value: number) {
   return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`

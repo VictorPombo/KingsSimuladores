@@ -4,7 +4,7 @@ import { ListingCard } from '@/components/marketplace/ListingCard'
 import { createAdminClient } from '@kings/db'
 import { MsuCatalogFilters } from './MsuCatalogFilters'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 interface SearchParams {
   q?: string
