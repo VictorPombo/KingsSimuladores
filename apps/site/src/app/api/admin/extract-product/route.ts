@@ -60,8 +60,6 @@ ESTRUTURA ESPERADA DO JSON:
     "titulo_curto": "nome resumido",
     "marca": "fabricante/marca do produto ou null",
     "modelo": "modelo/SKU ou null",
-    "preco_referencia": "Preço final de venda em REAIS (BRL) como float. Se o site estiver em moeda estrangeira, OBRIGATÓRIO converter para BRL multiplicando pela cotação ao vivo fornecida.",
-    "moeda": "Sempre BRL",
     "categoria_sugerida": "categoria principal",
     "tags": ["tag1", "tag2"]
   },
@@ -112,13 +110,14 @@ ESTRUTURA ESPERADA DO JSON:
   "confianca": "alta|media|baixa"
 }
 
-REGRAS VITAIS:
-1. ALUCINAÇÃO ZERO: Se uma informação (como preço, garantia ou avaliações) não existir, retorne null ou um array vazio []. NUNCA invente dados de avaliações, apenas traduza as que existirem. EXTRAIA APENAS AVALIAÇÕES DE 4 E 5 ESTRELAS. IGNORE qualquer review inferior a 4.
-2. FOCO NO PRODUTO: Ignore textos de menus de navegação e rodapés, MAS CAPTURE as avaliações (reviews) dos clientes na página.
-3. CÂMBIO EM TEMPO REAL: Preços devem ser números (float). Se o preço original for estrangeiro, CONVERTA AUTOMATICAMENTE para Reais (BRL). ${exchangeRatesText}
-4. IDIOMA E TRADUÇÃO: Traduza APENAS os textos descritivos (títulos, descrições, ficha técnica, comentários de avaliação, tags) para o Português do Brasil (pt-BR). NÃO altere ou traduza modelos (SKU).
-5. IMAGENS NA DESCRIÇÃO (MUITO IMPORTANTE): A 'descricao_completa' não deve ser apenas texto! Ela deve ser um HTML rico que intercala os parágrafos traduzidos com as tags <img> originais. Toda tag de imagem DEVE ter o estilo 'style="max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0;"' para garantir a responsividade. Exemplo: <h2>...</h2><p>...</p><img src="url_original_do_banner" style="max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0;" />.
-6. IMAGENS REAIS: É estritamente proibido extrair URLs de ícones (svg, png de interface), logos, ilustrações vetorizadas ou ferramentas isoladas. Extraia APENAS fotos reais de alta qualidade do produto.`
+INSTRUÇÕES DE EXTRAÇÃO (IMPORTANTE):
+1. Leia o conteúdo cru da página fornecida (Markdown e Texto).
+2. Extraia TODAS as informações relevantes sobre o produto (especificações, características, SEO, descrições ricas).
+3. TRADUÇÃO OBRIGATÓRIA: VOCÊ DEVE TRADUZIR ABSOLUTAMENTE TODOS OS TEXTOS E DESCRITIVOS PARA O PORTUGUÊS DO BRASIL (PT-BR). NADA DEVE FICAR EM INGLÊS OU CHINÊS!
+4. MANTENHA TODO CÓDIGO HTML DE IMAGENS INTACTO E FUNCIONAL DENTRO DA DESCRICAO COMPLETA. Use a propriedade style="max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0;" em TODAS as tags <img> geradas dentro de "descricao_completa".
+5. Extraia de forma inteligente as principais imagens do produto, separando logotipos irrelevantes.
+6. AVALIAÇÕES: Ignore qualquer avaliação de 1, 2 ou 3 estrelas. Você só pode extrair avaliações de 4 e 5 estrelas!
+7. Retorne o resultado ESTRITAMENTE em formato JSON puro, sem marcações ou code blocks.`
 
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',

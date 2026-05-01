@@ -59,12 +59,43 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
     }
   };
 
-  const DataBlock = ({ label, value }: { label: string, value: any }) => (
+  const updateData = (path: string[], value: any) => {
+    setExtractedData((prev: any) => {
+      if (!prev) return prev;
+      const newData = JSON.parse(JSON.stringify(prev));
+      let current = newData;
+      for (let i = 0; i < path.length - 1; i++) {
+        if (current[path[i]] === undefined) current[path[i]] = {};
+        current = current[path[i]];
+      }
+      current[path[path.length - 1]] = value;
+      return newData;
+    });
+  };
+
+  const DataBlock = ({ label, value, onChange, isTextarea }: { label: string, value: any, onChange?: (val: string) => void, isTextarea?: boolean }) => (
     <div style={{ marginBottom: '16px' }}>
       <label style={labelStyle}>{label}</label>
-      <div style={{ padding: '12px', background: '#1f2025', border: '1px solid #3f424d', borderRadius: '6px', color: value ? '#fff' : '#64748b', fontSize: '0.9rem', lineHeight: 1.5 }}>
-        {value || 'Não encontrado'}
-      </div>
+      {onChange ? (
+        isTextarea ? (
+          <textarea
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' } as React.CSSProperties}
+          />
+        ) : (
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            style={inputStyle}
+          />
+        )
+      ) : (
+        <div style={{ padding: '12px', background: '#1f2025', border: '1px solid #3f424d', borderRadius: '6px', color: value ? '#fff' : '#64748b', fontSize: '0.9rem', lineHeight: 1.5 }}>
+          {value || 'Não encontrado'}
+        </div>
+      )}
     </div>
   );
 
@@ -75,27 +106,18 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
       case 'geral':
         return (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <DataBlock label="Título Completo" value={extractedData.produto?.titulo} />
-            <DataBlock label="Título Curto" value={extractedData.produto?.titulo_curto} />
-            <DataBlock label="Marca / Fabricante" value={extractedData.produto?.marca} />
-            <DataBlock label="Modelo / SKU" value={extractedData.produto?.modelo} />
+            <DataBlock label="Título Completo" value={extractedData.produto?.titulo} onChange={(v) => updateData(['produto', 'titulo'], v)} />
+            <DataBlock label="Título Curto" value={extractedData.produto?.titulo_curto} onChange={(v) => updateData(['produto', 'titulo_curto'], v)} />
+            <DataBlock label="Marca / Fabricante" value={extractedData.produto?.marca} onChange={(v) => updateData(['produto', 'marca'], v)} />
+            <DataBlock label="Modelo / SKU" value={extractedData.produto?.modelo} onChange={(v) => updateData(['produto', 'modelo'], v)} />
+            
             <div style={{ marginBottom: '16px' }}>
-              <label style={labelStyle}>Preço Referência</label>
-              <div style={{ padding: '12px', background: '#1f2025', border: '1px solid #3f424d', borderRadius: '6px', color: '#fff', fontSize: '0.9rem' }}>
-                {extractedData.produto?.preco_referencia ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: extractedData.produto?.moeda === 'BRL' ? '#10b981' : '#f59e0b' }}>
-                      {extractedData.produto?.moeda === 'USD' ? 'US$ ' : extractedData.produto?.moeda === 'EUR' ? '€ ' : 'R$ '}
-                      {extractedData.produto?.preco_referencia}
-                    </span>
-                    {extractedData.produto?.moeda && extractedData.produto?.moeda !== 'BRL' && (
-                      <span style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.2)' }}>Atenção: Moeda Estrangeira</span>
-                    )}
-                  </div>
-                ) : 'Não encontrado'}
-              </div>
+              <label style={labelStyle}>Preço de Venda</label>
+              <input type="text" placeholder="Qual o valor da venda?" style={inputStyle} readOnly />
+              <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px', display: 'block' }}>*Você definirá o preço exato na próxima etapa do cadastro.</span>
             </div>
-            <DataBlock label="Categoria Sugerida" value={extractedData.produto?.categoria_sugerida} />
+            
+            <DataBlock label="Categoria Sugerida" value={extractedData.produto?.categoria_sugerida} onChange={(v) => updateData(['produto', 'categoria_sugerida'], v)} />
             {extractedData.produto?.tags && extractedData.produto.tags.length > 0 && (
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={labelStyle}>Tags</label>
@@ -111,12 +133,12 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
               <div style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid #3f424d' }}>
                 <h4 style={{ color: '#cbd5e1', margin: '0 0 12px 0', fontSize: '0.85rem', textTransform: 'uppercase' }}>Fiscal e Dimensões</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                  <DataBlock label="NCM" value={extractedData.fiscal_e_dimensoes.ncm} />
-                  <DataBlock label="EAN (GTIN)" value={extractedData.fiscal_e_dimensoes.ean} />
-                  <DataBlock label="Peso (kg)" value={extractedData.fiscal_e_dimensoes.peso_kg} />
-                  <DataBlock label="Largura (cm)" value={extractedData.fiscal_e_dimensoes.largura_cm} />
-                  <DataBlock label="Altura (cm)" value={extractedData.fiscal_e_dimensoes.altura_cm} />
-                  <DataBlock label="Comprimento (cm)" value={extractedData.fiscal_e_dimensoes.comprimento_cm} />
+                  <DataBlock label="NCM" value={extractedData.fiscal_e_dimensoes.ncm} onChange={(v) => updateData(['fiscal_e_dimensoes', 'ncm'], v)} />
+                  <DataBlock label="EAN (GTIN)" value={extractedData.fiscal_e_dimensoes.ean} onChange={(v) => updateData(['fiscal_e_dimensoes', 'ean'], v)} />
+                  <DataBlock label="Peso (kg)" value={extractedData.fiscal_e_dimensoes.peso_kg} onChange={(v) => updateData(['fiscal_e_dimensoes', 'peso_kg'], v)} />
+                  <DataBlock label="Largura (cm)" value={extractedData.fiscal_e_dimensoes.largura_cm} onChange={(v) => updateData(['fiscal_e_dimensoes', 'largura_cm'], v)} />
+                  <DataBlock label="Altura (cm)" value={extractedData.fiscal_e_dimensoes.altura_cm} onChange={(v) => updateData(['fiscal_e_dimensoes', 'altura_cm'], v)} />
+                  <DataBlock label="Comprimento (cm)" value={extractedData.fiscal_e_dimensoes.comprimento_cm} onChange={(v) => updateData(['fiscal_e_dimensoes', 'comprimento_cm'], v)} />
                 </div>
               </div>
             )}
@@ -125,18 +147,35 @@ export function ProductSmartImporter({ onImportComplete, onCancel }: ImporterPro
       case 'descricoes':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <DataBlock label="Descrição Curta" value={extractedData.descricoes?.descricao_curta} />
+            <DataBlock label="Descrição Curta" value={extractedData.descricoes?.descricao_curta} onChange={(v) => updateData(['descricoes', 'descricao_curta'], v)} isTextarea />
             {extractedData.descricoes?.diferenciais && extractedData.descricoes.diferenciais.length > 0 && (
               <div>
                 <label style={labelStyle}>Diferenciais</label>
-                <ul style={{ paddingLeft: '20px', color: '#fff', fontSize: '0.9rem', margin: 0, lineHeight: 1.6 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {extractedData.descricoes.diferenciais.map((dif: string, i: number) => (
-                    <li key={i}>{dif}</li>
+                    <input 
+                      key={i} 
+                      type="text" 
+                      value={dif} 
+                      onChange={(e) => updateData(['descricoes', 'diferenciais', String(i)], e.target.value)} 
+                      style={inputStyle} 
+                    />
                   ))}
-                </ul>
+                </div>
               </div>
             )}
-            <DataBlock label="Descrição Completa (HTML)" value={<div dangerouslySetInnerHTML={{ __html: `<style>.ai-preview-img img { max-width: 100%; height: auto; border-radius: 8px; }</style><div class="ai-preview-img">${extractedData.descricoes?.descricao_completa || ''}</div>` }} />} />
+            
+            <DataBlock 
+              label="Descrição Completa (HTML)" 
+              value={extractedData.descricoes?.descricao_completa} 
+              onChange={(v) => updateData(['descricoes', 'descricao_completa'], v)} 
+              isTextarea 
+            />
+            
+            <div style={{ background: '#1f2025', border: '1px solid #3f424d', borderRadius: '8px', padding: '16px' }}>
+              <h4 style={{ color: '#cbd5e1', marginTop: 0, marginBottom: '16px', fontSize: '0.9rem' }}>Pré-visualização da Landing Page</h4>
+              <div dangerouslySetInnerHTML={{ __html: `<style>.ai-preview-img img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 16px auto; }</style><div class="ai-preview-img">${extractedData.descricoes?.descricao_completa || ''}</div>` }} />
+            </div>
           </div>
         );
       case 'especificacoes':
