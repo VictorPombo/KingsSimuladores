@@ -6,7 +6,7 @@ import { Button, Container } from '@kings/ui'
 
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@kings/utils'
-import { createPreference } from '@kings/payments'
+// createPreference é chamado server-side na /api/checkout, não precisa importar aqui
 import { UpsellEngine } from '@/components/store/upsell/UpsellEngine'
 import { CouponInput } from '@/components/store/cart/CouponInput'
 
@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
+  const [checkoutError, setCheckoutError] = useState('')
 
   useEffect(() => {
     async function loadProfile() {
@@ -50,7 +51,10 @@ export default function CheckoutPage() {
           
           if (profile.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
             const defaultAddr = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0]
-            if (defaultAddr.zipCode) setCep(defaultAddr.zipCode.replace(/\D/g, ''))
+            if (defaultAddr.zipCode) {
+              const cleanCep = defaultAddr.zipCode.replace(/\D/g, '')
+              setCep(cleanCep)
+            }
             if (defaultAddr.street) setLogradouro(defaultAddr.street)
             if (defaultAddr.number) setNumero(defaultAddr.number)
             if (defaultAddr.neighborhood) setBairro(defaultAddr.neighborhood)
@@ -63,6 +67,16 @@ export default function CheckoutPage() {
     loadProfile()
   }, [])
 
+  // Auto-fill address and calculate shipping when CEP is loaded from profile
+  useEffect(() => {
+    if (cep && cep.length >= 8 && step === 1) {
+      preencherCep(cep)
+      if (items.length > 0) {
+        calcularFretes(cep)
+      }
+    }
+  }, [cep, items])
+
   // Redirect to home if empty cart
   useEffect(() => {
     if (items.length === 0 && step === 1) {
@@ -70,10 +84,11 @@ export default function CheckoutPage() {
     }
   }, [items, router, step])
 
-  const preencherCep = async () => {
-    if (cep.length >= 8) {
+  const preencherCep = async (overrideCep?: string) => {
+    const targetCep = overrideCep || cep
+    if (targetCep.length >= 8) {
       try {
-        const res = await fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, '')}/json/`)
+        const res = await fetch(`https://viacep.com.br/ws/${targetCep.replace(/\D/g, '')}/json/`)
         const data = await res.json()
         if (!data.erro) {
           setLogradouro(data.logradouro || '')
@@ -86,14 +101,17 @@ export default function CheckoutPage() {
     }
   }
 
-  const calcularFretes = async () => {
+  const calcularFretes = async (overrideCep?: string) => {
+    const targetCep = overrideCep || cep
+    if (!targetCep || targetCep.length < 8) return
+
     try {
       const res = await fetch('/api/shipping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          destinationZip: cep,
-          originZip: '03141030',
+          destinationZip: targetCep,
+          originZip: process.env.NEXT_PUBLIC_DEFAULT_ORIGIN_ZIP || '12929608',
           items: items.map(i => ({ id: i.id, quantity: i.quantity }))
         })
       })
@@ -161,27 +179,17 @@ export default function CheckoutPage() {
       
       const session = await res.json()
       
-      if (session.ok) {
-        if (session.init_point) {
-            // Abre o checkout (real do MP ou nosso /mock-payment local) em uma nova guia 
-            // para ele pagar a primeira loja e não perder a tela atual.
-            window.open(session.init_point, '_blank')
-        } 
-        
-        if (currentStoreIdx < storeNames.length - 1) {
-            setCurrentStoreIdx(currentStoreIdx + 1)
-            setIsProcessing(false)
-        } else {
-            // Concluiu todos!
-            clearCart()
-            router.push(`/account`)
-        }
+      if (session.ok && session.init_point) {
+        // Redireciona o cliente para o checkout real do Mercado Pago
+        clearCart()
+        window.location.href = session.init_point
       } else {
-        alert('Erro ao iniciar pagamento: ' + (session.error || 'Tente novamente.'))
+        setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')
         setIsProcessing(false)
       }
     } catch (err) {
       console.error(err)
+      setCheckoutError('Erro de comunicação com o servidor. Verifique sua conexão e tente novamente.')
       setIsProcessing(false)
     }
   }
@@ -216,7 +224,7 @@ export default function CheckoutPage() {
                       // Trigger fill automatically
                       preencherCep()
                     }
-                  }} onBlur={preencherCep} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
+                  }} onBlur={() => preencherCep()} style={{...inputStyle, width: '150px', flexShrink: 0}} className="checkout-cep-input" />
                   <input type="text" placeholder="Endereço" value={logradouro} onChange={e => setLogradouro(e.target.value)} style={{...inputStyle, flex: 2}} />
                   <input type="text" placeholder="Nº" value={numero} onChange={e => setNumero(e.target.value)} style={{...inputStyle, width: '80px', flexShrink: 0}} className="checkout-number-input" />
                 </div>
@@ -229,7 +237,7 @@ export default function CheckoutPage() {
                   <input type="text" placeholder="Referência (opcional)" value={referencia} onChange={e => setReferencia(e.target.value)} style={{...inputStyle, flex: 1}} />
                 </div>
                 
-                <Button onClick={calcularFretes} style={{ marginTop: '1rem' }} disabled={cep.length < 8}>Continuar para Frete</Button>
+                <Button onClick={() => calcularFretes()} style={{ marginTop: '1rem' }} disabled={cep.length < 8}>Continuar para Frete</Button>
               </div>
             )}
 
@@ -306,10 +314,17 @@ export default function CheckoutPage() {
                   </p>
                 </div>
 
+                {checkoutError && (
+                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ color: '#f87171', fontWeight: 600, fontSize: '0.95rem' }}>⚠️ {checkoutError}</div>
+                    <button onClick={() => setCheckoutError('')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem', textAlign: 'left', padding: 0 }}>Fechar</button>
+                  </div>
+                )}
+
                 <div className="kings-btn-row">
                   <Button variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
                   <Button onClick={handleMultistepPayment} style={{ flex: 1, background: storeNames[currentStoreIdx] === 'seven' ? '#ea580c' : '#00B1EA' }} disabled={isProcessing}>
-                    {isProcessing ? 'Abrindo Gateway...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento Seguro ➔')}
+                    {isProcessing ? 'Redirecionando para o Mercado Pago...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento Seguro ➔')}
                   </Button>
                 </div>
               </div>

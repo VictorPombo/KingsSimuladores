@@ -153,73 +153,85 @@ export function MsuCatalogFilters() {
 
       {isOpen && (
         <div style={{
-          display: 'flex', gap: '16px', flexWrap: 'wrap', padding: '16px',
-          background: 'rgba(15,18,30,0.5)', border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: '12px', alignItems: 'end',
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', padding: '24px',
+          background: 'linear-gradient(145deg, rgba(15,20,35,0.6) 0%, rgba(8,12,24,0.8) 100%)', 
+          border: '1px solid rgba(255,255,255,0.05)',
+          borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+          marginTop: '16px'
         }}>
-          {/* UF */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Estado</label>
-            <select value={currentState || ''} onChange={e => applyFilter('state', e.target.value || null)} style={selectStyle}>
-              <option value="">Todos</option>
-              {UF_LIST.map(uf => <option key={uf} value={uf}>{uf}</option>)}
-            </select>
-          </div>
+          {/* Estilos reutilizáveis para Premium Look */}
+          {(() => {
+            const premiumLabel: React.CSSProperties = {
+              display: 'block', fontSize: '0.7rem', color: '#a1a1aa', textTransform: 'uppercase', 
+              letterSpacing: '1px', marginBottom: '8px', fontWeight: 700
+            };
+            const premiumInput: React.CSSProperties = {
+              background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)',
+              color: '#fff', padding: '12px 16px', borderRadius: '12px', fontSize: '0.9rem', 
+              outline: 'none', transition: 'all 0.2s', width: '100%',
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+            };
 
-          {/* Cidade */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Cidade</label>
-            <input type="text" placeholder="Ex: São Paulo" defaultValue={currentCity || ''} onBlur={e => applyFilter('city', e.target.value || null)}
-              style={{ ...selectStyle, width: '130px' }} />
-          </div>
+            return (
+              <>
+                <div>
+                  <label style={premiumLabel}>Estado</label>
+                  <select value={currentState || ''} onChange={e => applyFilter('state', e.target.value || null)} style={premiumInput}>
+                    <option value="">Todos os Estados</option>
+                    {UF_LIST.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                  </select>
+                </div>
 
-          {/* Marca */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Marca</label>
-            <input type="text" placeholder="Ex: Fanatec" defaultValue={currentBrand || ''} onBlur={e => applyFilter('brand', e.target.value || null)}
-              style={{ ...selectStyle, width: '130px' }} />
-          </div>
+                <div>
+                  <label style={premiumLabel}>Cidade</label>
+                  <input type="text" placeholder="Ex: São Paulo" defaultValue={currentCity || ''} onBlur={e => applyFilter('city', e.target.value || null)}
+                    style={premiumInput} />
+                </div>
 
-          {/* Condição */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Condição</label>
-            <select value={currentCondition || ''} onChange={e => applyFilter('condition', e.target.value || null)} style={selectStyle}>
-              <option value="">Todas</option>
-              {CONDITIONS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-            </select>
-          </div>
+                <div>
+                  <label style={premiumLabel}>Marca</label>
+                  <input type="text" placeholder="Ex: Fanatec" defaultValue={currentBrand || ''} onBlur={e => applyFilter('brand', e.target.value || null)}
+                    style={premiumInput} />
+                </div>
 
-          {/* Tem Caixa */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Caixa Original</label>
-            <select value={currentHasBox || ''} onChange={e => applyFilter('hasBox', e.target.value || null)} style={selectStyle}>
-              <option value="">Tanto faz</option>
-              <option value="true">Sim</option>
-              <option value="false">Não</option>
-            </select>
-          </div>
+                <div>
+                  <label style={premiumLabel}>Condição</label>
+                  <select value={currentCondition || ''} onChange={e => applyFilter('condition', e.target.value || null)} style={premiumInput}>
+                    <option value="">Qualquer Estado</option>
+                    {CONDITIONS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                  </select>
+                </div>
 
-          {/* Preço Min */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Preço Mín.</label>
-            <input type="number" placeholder="R$ 0" defaultValue={searchParams.get('minPrice') || ''} onBlur={e => applyFilter('minPrice', e.target.value || null)}
-              style={{ ...selectStyle, width: '100px' }} />
-          </div>
+                <div>
+                  <label style={premiumLabel}>Caixa Original</label>
+                  <select value={currentHasBox || ''} onChange={e => applyFilter('hasBox', e.target.value || null)} style={premiumInput}>
+                    <option value="">Tanto faz</option>
+                    <option value="true">Sim, possui</option>
+                    <option value="false">Não possui</option>
+                  </select>
+                </div>
 
-          {/* Preço Max */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Preço Máx.</label>
-            <input type="number" placeholder="Sem limite" defaultValue={searchParams.get('maxPrice') || ''} onBlur={e => applyFilter('maxPrice', e.target.value || null)}
-              style={{ ...selectStyle, width: '100px' }} />
-          </div>
+                <div>
+                  <label style={premiumLabel}>Preço Mínimo</label>
+                  <input type="number" placeholder="R$ 0" defaultValue={searchParams.get('minPrice') || ''} onBlur={e => applyFilter('minPrice', e.target.value || null)}
+                    style={premiumInput} />
+                </div>
 
-          {/* Ordenação */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.65rem', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px', fontWeight: 700 }}>Ordenar</label>
-            <select value={currentSort} onChange={e => applyFilter('sort', e.target.value)} style={selectStyle}>
-              {SORT_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-            </select>
-          </div>
+                <div>
+                  <label style={premiumLabel}>Preço Máximo</label>
+                  <input type="number" placeholder="Sem limite" defaultValue={searchParams.get('maxPrice') || ''} onBlur={e => applyFilter('maxPrice', e.target.value || null)}
+                    style={premiumInput} />
+                </div>
+
+                <div>
+                  <label style={premiumLabel}>Ordenar Por</label>
+                  <select value={currentSort} onChange={e => applyFilter('sort', e.target.value)} style={premiumInput}>
+                    {SORT_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                  </select>
+                </div>
+              </>
+            )
+          })()}
         </div>
       )}
     </div>

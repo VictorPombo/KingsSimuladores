@@ -21,8 +21,37 @@ export function ShippingSimulator({ dimensions }: ShippingSimulatorProps) {
   const [options, setOptions] = useState<any[]>([])
   const [errorMSG, setErrorMSG] = useState('')
 
-  const handleCalculate = async () => {
-    if (cep.replace(/\D/g, '').length !== 8) {
+  React.useEffect(() => {
+    async function loadProfileCep() {
+      try {
+        const { createClient } = await import('@kings/db/client')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          const { data: profile } = await supabase.from('profiles').select('addresses').eq('id', user.id).single()
+          if (profile?.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
+            const defaultAddr = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0]
+            if (defaultAddr.zipCode) {
+              const cleanCep = defaultAddr.zipCode.replace(/\D/g, '')
+              setCep(cleanCep)
+              if (cleanCep.length === 8) {
+                // Auto trigger calculation directly
+                handleCalculate(cleanCep)
+              }
+            }
+          }
+        }
+      } catch (err) {
+        // silently ignore error on missing profile/not logged in
+      }
+    }
+    loadProfileCep()
+  }, [])
+
+  const handleCalculate = async (overrideCep?: string) => {
+    const targetCep = overrideCep || cep
+    if (targetCep.replace(/\D/g, '').length !== 8) {
       setErrorMSG('Digite um CEP válido')
       return
     }
@@ -36,7 +65,7 @@ export function ShippingSimulator({ dimensions }: ShippingSimulatorProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          toPostalCode: cep,
+          toPostalCode: targetCep,
           dimensions
         })
       })
@@ -65,7 +94,7 @@ export function ShippingSimulator({ dimensions }: ShippingSimulatorProps) {
           maxLength={9}
           style={{ flex: 1, padding: '12px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', outline: 'none' }}
         />
-        <Button variant="secondary" onClick={handleCalculate} disabled={isLoading}>
+        <Button id="btn-calc-shipping" variant="secondary" onClick={() => handleCalculate()} disabled={isLoading}>
           {isLoading ? 'Calculando...' : 'Calcular Frete'}
         </Button>
       </div>

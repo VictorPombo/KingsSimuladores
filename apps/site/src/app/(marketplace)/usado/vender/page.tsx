@@ -6,6 +6,7 @@ import { createBrowserClient } from '@supabase/ssr'
 import imageCompression from 'browser-image-compression'
 import { UploadCloud, X, ImageIcon, Plus } from 'lucide-react'
 import { TermsModal } from '@/components/marketplace/TermsModal'
+import { uploadMarketplaceImage } from './actions'
 
 const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
@@ -112,14 +113,16 @@ export default function VenderPage() {
         const compressed = await imageCompression(imageFiles[i], options)
         const fileName = `${userId}/${Date.now()}-${i}-${Math.random().toString(36).substring(7)}.webp`
 
-        const { error: uploadError } = await supabase.storage
-          .from('marketplace-listings')
-          .upload(fileName, compressed, { cacheControl: '3600', upsert: false })
+        // Convert Blob to File for FormData
+        const compressedFile = new File([compressed], fileName, { type: 'image/webp' })
+        
+        const formData = new FormData()
+        formData.append('file', compressedFile)
+        formData.append('fileName', fileName)
 
-        if (uploadError) throw new Error(`Erro ao salvar foto ${i + 1}: ${uploadError.message}`)
-
-        const { data: publicUrlData } = supabase.storage.from('marketplace-listings').getPublicUrl(fileName)
-        uploadedUrls.push(publicUrlData.publicUrl)
+        // Usa a Server Action para subir, ignorando RLS
+        const publicUrl = await uploadMarketplaceImage(formData)
+        uploadedUrls.push(publicUrl)
       }
 
       setUploadProgress('Publicando anúncio...')
@@ -140,7 +143,10 @@ export default function VenderPage() {
         })
       })
 
-      if (!res.ok) throw new Error('Falha ao anunciar')
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || 'Falha ao anunciar')
+      }
       setSuccess(true)
     } catch (e: any) {
       alert(e.message || 'Erro ao processar o anúncio.')

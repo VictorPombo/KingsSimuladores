@@ -1,27 +1,32 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Container, Button } from '@kings/ui'
 import { createBrowserClient } from '@supabase/ssr'
 
 export default function LoginPage() {
-  const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [fullName, setFullName] = useState('')
+  const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  // Refs para controlar campos de senha e evitar popup Safari
+  const passwordRef = useRef<HTMLInputElement>(null)
+  const confirmPasswordRef = useRef<HTMLInputElement>(null)
 
   const getSupabase = () => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
     setLoading(true)
+    
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
     const supabase = getSupabase()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
@@ -32,10 +37,17 @@ export default function LoginPage() {
     setLoading(false)
   }
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
     setSuccess('')
+
+    const form = e.currentTarget
+    const formData = new FormData(form)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+    const fullName = formData.get('fullName') as string
 
     if (password !== confirmPassword) {
       setError('As senhas não coincidem.')
@@ -60,15 +72,66 @@ export default function LoginPage() {
     } else {
       setSuccess('Conta criada! Verifique seu e-mail para confirmar o cadastro.')
       setMode('login')
-      setPassword('')
-      setConfirmPassword('')
-      setFullName('')
+      form.reset() // Limpa os campos uncontrolled
+    }
+    setLoading(false)
+  }
+
+  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+    setLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+
+    try {
+      const response = await fetch('/api/auth/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Erro ao enviar email de recuperação.')
+      } else if (data.fallbackLink) {
+        setSuccess('Redirecionando para redefinição de senha...')
+        window.location.href = data.fallbackLink
+      } else {
+        setSuccess('Se o e-mail existir, você receberá um link para redefinir a senha.')
+        setMode('login')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Erro de conexão.')
     }
     setLoading(false)
   }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        .kings-input {
+          width: 100%;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: #fff;
+          padding: 12px 16px;
+          border-radius: 10px;
+          font-size: 0.95rem;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        .kings-input:focus {
+          border-color: rgba(0, 229, 255, 0.5) !important;
+        }
+        .kings-password-mask {
+          -webkit-text-security: disc;
+          -moz-text-security: disc;
+          text-security: disc;
+        }
+      `}} />
       {/* Glow de fundo */}
       <div style={{
         position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
@@ -93,12 +156,14 @@ export default function LoginPage() {
             fontSize: '1.8rem', color: '#fff', fontWeight: 800, margin: '0 0 8px 0',
             letterSpacing: '-0.02em',
           }}>
-            {mode === 'login' ? 'Acesso ao Box' : 'Crie sua licença'}
+            {mode === 'login' ? 'Acessar Conta' : mode === 'register' ? 'Criar conta' : 'Recuperar Senha'}
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
             {mode === 'login'
               ? 'Identifique-se para acessar seu histórico e pedidos.'
-              : 'Cadastre-se para acelerar com a Kings Simuladores.'
+              : mode === 'register'
+              ? 'Cadastre-se para acelerar com a Kings Simuladores.'
+              : 'Digite seu e-mail para receber um link de recuperação.'
             }
           </p>
         </div>
@@ -135,7 +200,9 @@ export default function LoginPage() {
 
         {/* Card */}
         <form
-          onSubmit={mode === 'login' ? handleLogin : handleRegister}
+          onSubmit={mode === 'login' ? handleLogin : mode === 'register' ? handleRegister : handleResetPassword}
+          autoComplete="off"
+          data-form-type="other"
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -156,16 +223,9 @@ export default function LoginPage() {
                 textTransform: 'uppercase', letterSpacing: '0.5px',
               }}>Nome completo</label>
               <input
-                type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
-                placeholder="Piloto"
-                style={{
-                  width: '100%', background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                  padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
-                  outline: 'none', transition: 'border-color 0.2s',
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.5)'}
-                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+                type="text" required
+                placeholder="Piloto" autoComplete="off" name="fullName" id="fullName"
+                className="kings-input"
               />
             </div>
           )}
@@ -177,38 +237,37 @@ export default function LoginPage() {
               textTransform: 'uppercase', letterSpacing: '0.5px',
             }}>E-mail</label>
             <input
-              type="email" required value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              style={{
-                width: '100%', background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
-                outline: 'none', transition: 'border-color 0.2s',
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.5)'}
-              onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+              type="email" required
+              placeholder="seu@email.com" autoComplete="off" name="email" id="email"
+              className="kings-input"
             />
           </div>
 
-          <div>
-            <label style={{
-              display: 'block', marginBottom: '6px',
-              color: 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: 600,
-              textTransform: 'uppercase', letterSpacing: '0.5px',
-            }}>Senha</label>
-            <input
-              type="password" required value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              style={{
-                width: '100%', background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
-                outline: 'none', transition: 'border-color 0.2s',
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.5)'}
-              onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-            />
-          </div>
+          {mode !== 'reset' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label style={{
+                  color: 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: 600,
+                  textTransform: 'uppercase', letterSpacing: '0.5px',
+                }}>Senha</label>
+                {mode === 'login' && (
+                  <button type="button" onClick={() => setMode('reset')} style={{ background: 'none', border: 'none', padding: 0, color: '#06b6d4', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+                    Esqueci a senha
+                  </button>
+                )}
+              </div>
+              <input
+                ref={passwordRef}
+                type="text" required
+                placeholder="••••••••" 
+                autoComplete="off"
+                name="password" id="password"
+                className="kings-input kings-password-mask"
+                data-lpignore="true"
+                data-form-type="other"
+              />
+            </div>
+          )}
 
           {mode === 'register' && (
             <div>
@@ -218,16 +277,14 @@ export default function LoginPage() {
                 textTransform: 'uppercase', letterSpacing: '0.5px',
               }}>Confirmar senha</label>
               <input
-                type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{
-                  width: '100%', background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                  padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
-                  outline: 'none', transition: 'border-color 0.2s',
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.5)'}
-                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+                ref={confirmPasswordRef}
+                type="text" required
+                placeholder="••••••••" 
+                autoComplete="off"
+                name="confirmPassword" id="confirmPassword"
+                className="kings-input kings-password-mask"
+                data-lpignore="true"
+                data-form-type="other"
               />
             </div>
           )}
@@ -256,10 +313,7 @@ export default function LoginPage() {
             onMouseOver={(e) => { if (!loading) e.currentTarget.style.transform = 'translateY(-1px)' }}
             onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}
           >
-            {loading
-              ? (mode === 'login' ? 'Entrando...' : 'Criando conta...')
-              : (mode === 'login' ? 'Acelerar' : 'Criar licença')
-            }
+            {loading ? 'Aguarde...' : mode === 'login' ? 'Entrar' : mode === 'register' ? 'Criar conta' : 'Enviar Link de Recuperação'}
           </button>
 
           {/* Divider */}
@@ -273,7 +327,7 @@ export default function LoginPage() {
           <div style={{ textAlign: 'center' }}>
             {mode === 'login' ? (
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0 }}>
-                Não tem licença?{' '}
+                Não tem conta?{' '}
                 <button
                   type="button"
                   onClick={() => { setMode('register'); setError(''); setSuccess('') }}
@@ -288,7 +342,7 @@ export default function LoginPage() {
               </p>
             ) : (
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0 }}>
-                Já tem licença?{' '}
+                Já tem conta?{' '}
                 <button
                   type="button"
                   onClick={() => { setMode('login'); setError(''); setSuccess('') }}
@@ -298,7 +352,7 @@ export default function LoginPage() {
                     textDecoration: 'underline', textUnderlineOffset: '3px',
                   }}
                 >
-                  Acesso ao Box
+                  Acessar Conta
                 </button>
               </p>
             )}

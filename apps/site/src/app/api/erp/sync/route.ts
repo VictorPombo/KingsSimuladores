@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Produto sincronizado com sucesso nos Marketplaces via Hub ERP Olist.',
-      api_response_id: `mock_evt_${Date.now()}`
+      api_response_id: `erp_sync_${Date.now()}`
     }, { status: 200 })
 
   } catch (err: any) {

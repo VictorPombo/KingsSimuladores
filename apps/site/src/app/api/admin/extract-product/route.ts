@@ -66,8 +66,8 @@ ESTRUTURA ESPERADA DO JSON:
     "tags": ["tag1", "tag2"]
   },
   "descricoes": {
-    "descricao_completa": "descrição longa formatada em HTML básico, com parágrafos",
-    "descricao_curta": "resumo de até 160 caracteres",
+    "descricao_completa": "Código HTML rico completo da página original. Você deve reconstruir a landing page usando tags <h2>, <p>, <ul> e principalmente tags <img> com as URLs originais da página. MANTENHA A DISPOSIÇÃO EXATA DAS IMAGENS. Todo o texto DEVE ser traduzido para Português (PT-BR).",
+    "descricao_curta": "resumo de até 160 caracteres em Português",
     "diferenciais": ["diferencial 1", "diferencial 2"]
   },
   "especificacoes": [
@@ -96,6 +96,14 @@ ESTRUTURA ESPERADA DO JSON:
       "descricao_alt": "descrição da imagem"
     }
   ],
+  "avaliacoes": [
+    {
+      "reviewer_name": "Nome do Cliente",
+      "rating": "Nota do cliente como número (ex: 5, 4.5)",
+      "comment": "Comentário do cliente TRADUZIDO para Português (PT-BR)",
+      "created_at": "Data da avaliação ou null se não houver"
+    }
+  ],
   "seo": {
     "meta_title_sugerido": "título SEO",
     "meta_description_sugerida": "descrição SEO",
@@ -105,11 +113,12 @@ ESTRUTURA ESPERADA DO JSON:
 }
 
 REGRAS VITAIS:
-1. ALUCINAÇÃO ZERO: Se uma informação (como preço ou garantia) não existir, retorne null ou um array vazio []. NUNCA invente dados.
-2. FOCO NO PRODUTO: Ignore textos de menus de navegação, rodapés, ou avaliações de outros produtos.
+1. ALUCINAÇÃO ZERO: Se uma informação (como preço, garantia ou avaliações) não existir, retorne null ou um array vazio []. NUNCA invente dados de avaliações, apenas traduza as que existirem.
+2. FOCO NO PRODUTO: Ignore textos de menus de navegação e rodapés, MAS CAPTURE as avaliações (reviews) dos clientes na página.
 3. CÂMBIO EM TEMPO REAL: Preços devem ser números (float). Se o preço original for estrangeiro, CONVERTA AUTOMATICAMENTE para Reais (BRL). ${exchangeRatesText}
-4. IDIOMA E TRADUÇÃO: Traduza APENAS os textos descritivos (títulos, descrições, ficha técnica, tags) para o Português do Brasil (pt-BR). NÃO altere ou traduza modelos (SKU).
-5. IMAGENS REAIS: É estritamente proibido extrair URLs de ícones (svg, png de interface), logos, ilustrações vetorizadas ou ferramentas isoladas. Extraia APENAS fotos reais de alta qualidade do produto.`
+4. IDIOMA E TRADUÇÃO: Traduza APENAS os textos descritivos (títulos, descrições, ficha técnica, comentários de avaliação, tags) para o Português do Brasil (pt-BR). NÃO altere ou traduza modelos (SKU).
+5. IMAGENS NA DESCRIÇÃO (MUITO IMPORTANTE): A 'descricao_completa' não deve ser apenas texto! Ela deve ser um HTML rico que intercala os parágrafos traduzidos com as tags <img> originais. Exemplo: <h2>...</h2><p>...</p><img src="url_original_do_banner" />.
+6. IMAGENS REAIS: É estritamente proibido extrair URLs de ícones (svg, png de interface), logos, ilustrações vetorizadas ou ferramentas isoladas. Extraia APENAS fotos reais de alta qualidade do produto.`
 
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',

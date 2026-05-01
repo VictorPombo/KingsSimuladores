@@ -175,6 +175,7 @@ export function EditProductForm({ product }: { product: ProductData }) {
                       style={{ ...inputStyle, cursor: 'pointer' }}>
                       <option value="active">Ativo</option>
                       <option value="draft">Rascunho</option>
+                      <option value="disabled">Desativado</option>
                       <option value="archived">Arquivado</option>
                     </select>
                   </div>

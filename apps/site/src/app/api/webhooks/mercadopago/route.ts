@@ -216,6 +216,18 @@ export async function POST(req: Request) {
         // 6. Notificação via Email (Resend)
         const clienteEmail = profile?.email
         if (clienteEmail) {
+          const nfBlock = nfeRes?.pdf_url ? `
+                <div style="margin: 30px 0; padding: 20px; background-color: #f7f9fa; border-radius: 6px;">
+                  <h3 style="margin-top: 0; color: #111;">Sua Fatura e Documentação</h3>
+                  <p style="margin-bottom: 20px; font-size: 14px; color: #555;">Já finalizamos a papelada. Você pode baixar seu recibo e NF eletrônica clicando no botão abaixo:</p>
+                  <a href="${nfeRes.pdf_url}" style="background-color: #111; color: #fff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">Acessar Nota Fiscal Eletrônica</a>
+                </div>
+          ` : `
+                <div style="margin: 30px 0; padding: 20px; background-color: #f7f9fa; border-radius: 6px;">
+                  <p style="font-size: 14px; color: #555;">Sua Nota Fiscal Eletrônica será enviada em breve por e-mail assim que for processada.</p>
+                </div>
+          `
+
           const emailHtml = `
             <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 8px; overflow: hidden;">
               <div style="background-color: #00e5ff; padding: 20px; text-align: center;">
@@ -225,11 +237,7 @@ export async function POST(req: Request) {
                 <p style="font-size: 16px;">Fala <strong>${clienteNome}</strong>,</p>
                 <p style="font-size: 16px; line-height: 1.5;">O pagamento do seu pedido <strong>#${orderId.split('-')[0]}</strong> foi recebido e processado com sucesso na nossa base.</p>
                 
-                <div style="margin: 30px 0; padding: 20px; background-color: #f7f9fa; border-radius: 6px;">
-                  <h3 style="margin-top: 0; color: #111;">Sua Fatura e Documentação</h3>
-                  <p style="margin-bottom: 20px; font-size: 14px; color: #555;">Já finalizamos a papelada. Você pode baixar seu recibo e NF eletrônica clicando no botão abaixo:</p>
-                  <a href="${nfeRes.pdf_url}" style="background-color: #111; color: #fff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">Acessar Nota Fiscal Eletrônica</a>
-                </div>
+                ${nfBlock}
 
                 <p style="font-size: 15px; color: #666;">Fique tranquilo, enviaremos outro aviso digital quando a transportadora embalar o seu pacote.</p>
                 <br>
@@ -241,7 +249,7 @@ export async function POST(req: Request) {
           
           await sendEmailMessage({
             to: clienteEmail,
-            subject: `NF Emitida e Pagamento Confirmado - Pedido #${orderId.split('-')[0]}`,
+            subject: `Pagamento Confirmado - Pedido #${orderId.split('-')[0]}`,
             html: emailHtml
           })
         }

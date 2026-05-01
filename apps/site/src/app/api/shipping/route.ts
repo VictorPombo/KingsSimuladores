@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 const FRENET_TOKEN = process.env.FRENET_TOKEN || ''
+const DEFAULT_ORIGIN = process.env.DEFAULT_ORIGIN_ZIP || '12929608'
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     const payload = {
-      SellerCEP: originZip || '03141030',
+      SellerCEP: originZip || DEFAULT_ORIGIN,
       RecipientCEP: destZip.replace(/\D/g, ''),
       ShipmentInvoiceValue: 100, // could calculate from items, but optional
       ShippingItemArray: [] as any[]
@@ -55,10 +56,12 @@ export async function POST(req: Request) {
 
     const data = await response.json()
     
+    let formattedOptions = []
+
     if (data.ShippingSevicesArray && Array.isArray(data.ShippingSevicesArray)) {
       const validServices = data.ShippingSevicesArray.filter((s: any) => !s.Error && s.ServiceDescription.toUpperCase().includes('SEDEX'))
       
-      const formattedOptions = validServices.map((s: any) => ({
+      formattedOptions = validServices.map((s: any) => ({
         id: s.ServiceCode,
         name: s.ServiceDescription,
         price: s.ShippingPrice,
@@ -70,11 +73,20 @@ export async function POST(req: Request) {
 
       // Ordenar do mais barato pro mais caro
       formattedOptions.sort((a: any, b: any) => parseFloat(a.price) - parseFloat(b.price))
-
-      return NextResponse.json({ options: formattedOptions })
     }
 
-    return NextResponse.json({ options: [] })
+    // Sempre adicionar Retirada no Local
+    formattedOptions.push({
+      id: 'pickup',
+      name: 'Retirada no Local',
+      company: { name: 'Kings Simuladores', picture: '' },
+      price: '0.00',
+      currency: 'R$',
+      custom_delivery_time: 0,
+      delivery_time: 0,
+    })
+
+    return NextResponse.json({ options: formattedOptions })
 
   } catch (error: any) {
     console.error('[Frenet] Erro interno:', error)

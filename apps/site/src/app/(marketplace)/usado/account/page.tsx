@@ -15,11 +15,20 @@ export default async function AccountPage() {
     redirect('/usado/login')
   }
 
+  // Buscar profile para obter o ID correto do vendedor
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .eq('auth_id', user.id)
+    .single()
+    
+  const profileId = userProfile?.id || user.id
+
   // 1. Buscar anúncios do vendedor
   const { data: meusAnunciosData } = await supabase
     .from('marketplace_listings')
     .select('*')
-    .eq('seller_id', user.id)
+    .eq('seller_id', profileId)
     .order('created_at', { ascending: false })
 
   // 2. Buscar vendas realizadas (orders onde o user é o vendedor)
@@ -36,7 +45,7 @@ export default async function AccountPage() {
       listing_id,
       buyer_id
     `)
-    .eq('seller_id', user.id)
+    .eq('seller_id', profileId)
     .order('created_at', { ascending: false })
 
   // 3. Para cada order, buscar listing e buyer info
@@ -85,7 +94,7 @@ export default async function AccountPage() {
               fontSize: '0.85rem', fontWeight: 900, color: '#fff',
               letterSpacing: '2px',
             }}>
-              MSU
+              MEU SIMULADOR USADO
             </div>
           </div>
           <h1 style={{ fontSize: '2rem', color: '#fff', fontWeight: 800, margin: '0 0 4px' }}>

@@ -29,16 +29,7 @@ export default async function SevenAccountPage({ searchParams }: { searchParams:
     .eq('customer_id', profile?.id || user.id)
     .order('created_at', { ascending: false })
 
-  // If no DB orders (since we might be mocking the checkout step locally), use a dummy active order
-  const displayOrders = orders && orders.length > 0 ? orders : [
-    {
-      id: searchParams.order || 'mock-order-id-123',
-      created_at: new Date().toISOString(),
-      status: 'paid',
-      total: 3950.00,
-      tracking_code: 'BR123456789XX',
-    }
-  ]
+  const displayOrders = orders || []
 
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', color: '#f8fafc', fontFamily: 'var(--font-sans)' }}>
@@ -54,11 +45,12 @@ export default async function SevenAccountPage({ searchParams }: { searchParams:
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {displayOrders.map((order: any) => (
                 <div key={order.id} style={{ 
-                  background: 'rgba(30, 41, 59, 0.4)', 
-                  border: '1px solid rgba(255,255,255,0.05)', 
+                  background: '#0f172a', 
+                  border: '1px solid rgba(255,255,255,0.1)', 
                   borderRadius: '0.5rem', 
                   padding: '1.5rem',
-                  display: 'flex', flexDirection: 'column', gap: '1rem'
+                  display: 'flex', flexDirection: 'column', gap: '1rem',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
                     <div>
@@ -101,7 +93,7 @@ export default async function SevenAccountPage({ searchParams }: { searchParams:
           </div>
           
           {/* Sidebar: Profile */}
-          <div style={{ background: 'rgba(30, 41, 59, 0.4)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ background: '#0f172a', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
             <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#94a3b8' }}>Meu Perfil</h2>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

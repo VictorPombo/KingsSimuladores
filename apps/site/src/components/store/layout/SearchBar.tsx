@@ -57,7 +57,7 @@ export function SearchBar({ variant = 'kings' }: { variant?: 'kings' | 'seven' |
     >
       <input
         type="text"
-        placeholder="Tá procurando alguma coisa?"
+        placeholder="Buscar produtos, marcas, categorias..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         style={{

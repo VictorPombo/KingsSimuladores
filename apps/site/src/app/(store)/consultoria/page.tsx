@@ -45,33 +45,11 @@ export default function ConsultoriaPage() {
                   <div>
                     <strong style={{ fontSize: '1.05rem', color: 'var(--success)' }}>100% REVERTIDO EM CUPOM!</strong>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-                      O valor da consultoria (R$ 150) é inteiramente revertido em desconto imediato na sua próxima compra de hardware no site.
+                      O valor da consultoria (R$ 300) é inteiramente revertido em desconto imediato na sua próxima compra de hardware no site.
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-            
-            {/* Espaço reservado para o vídeo */}
-            <div style={{ 
-              width: '100%', 
-              aspectRatio: '16/9', 
-              background: 'rgba(0,0,0,0.4)', 
-              borderRadius: '12px',
-              border: `1px solid rgba(0, 229, 255, 0.3)`,
-              boxShadow: `inset 0 0 30px rgba(0,0,0,0.5)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              color: 'var(--text-muted)',
-              overflow: 'hidden',
-              position: 'relative'
-            }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '12px', color: 'var(--accent)', opacity: 0.8 }}>
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Espaço para Vídeo</span>
+               </div>
             </div>
           </div>
         </div>

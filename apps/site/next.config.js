@@ -32,6 +32,42 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.shopify.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.mozaracing.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fanatec.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.fanatec.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'thrustmaster.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.thrustmaster.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'logitech.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.logitech.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.cloudfront.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.amazonaws.com',
+      },
     ],
   },
 

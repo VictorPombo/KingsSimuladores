@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Package, ShoppingBag, User, ExternalLink, Clock, CheckCircle, XCircle, AlertCircle, FileText, Truck, Lock, Eye, EyeOff } from 'lucide-react'
+import { Package, ShoppingBag, User, ExternalLink, Clock, CheckCircle, XCircle, AlertCircle, FileText, Truck, Lock, Eye, EyeOff, MessageCircle, MessageSquare, LogOut } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
+import { ChatModal } from '@/components/marketplace/ChatModal'
 
 type Listing = {
   id: string
@@ -70,7 +71,32 @@ export function GarageClient({
   orders: Order[]
   profile: UserProfile
 }) {
-  const [activeTab, setActiveTab] = useState<'listings' | 'sales' | 'profile'>('listings')
+  const [activeTab, setActiveTab] = useState<'listings' | 'sales' | 'messages' | 'profile'>('listings')
+  const [conversations, setConversations] = useState<any[]>([])
+  const [loadingChats, setLoadingChats] = useState(false)
+  const [activeChat, setActiveChat] = useState<any | null>(null)
+
+  React.useEffect(() => {
+    if (activeTab === 'messages') {
+      setLoadingChats(true)
+      fetch('/api/messages/conversations', { cache: 'no-store' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.conversations) setConversations(data.conversations)
+          setLoadingChats(false)
+        })
+        .catch(() => setLoadingChats(false))
+    }
+  }, [activeTab])
+
+  const handleLogout = async () => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    await supabase.auth.signOut()
+    window.location.href = '/' // ou /login dependendo da rota
+  }
 
   const activeListings = listings.filter(l => l.status === 'active' || l.status === 'pending_review')
   const soldListings = listings.filter(l => l.status === 'sold')
@@ -79,6 +105,7 @@ export function GarageClient({
   const tabs = [
     { id: 'listings' as const, label: 'Meus Anúncios', icon: <Package size={16} />, count: listings.length },
     { id: 'sales' as const, label: 'Vendas Realizadas', icon: <ShoppingBag size={16} />, count: orders.length },
+    { id: 'messages' as const, label: 'Mensagens', icon: <MessageCircle size={16} />, count: conversations.reduce((acc, c) => acc + (c.unread_count || 0), 0) },
     { id: 'profile' as const, label: 'Meu Perfil', icon: <User size={16} />, count: 0 },
   ]
 
@@ -153,6 +180,17 @@ export function GarageClient({
             )}
           </button>
         ))}
+
+        {/* Separador para empurrar o Sair para a direita */}
+        <div style={{ flex: 1, minWidth: '20px' }}></div>
+        
+        <button 
+          className="garage-tab" 
+          onClick={handleLogout}
+          style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)', marginLeft: 'auto' }}
+        >
+          <LogOut size={16} /> Sair
+        </button>
       </div>
 
       {/* Tab: Meus Anúncios */}
@@ -207,6 +245,75 @@ export function GarageClient({
         </div>
       )}
 
+      {/* Tab: Mensagens */}
+      {activeTab === 'messages' && (
+        <div>
+          {loadingChats ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>Carregando mensagens...</div>
+          ) : conversations.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)', background: 'rgba(15, 18, 30, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' }}>
+              <MessageSquare size={48} strokeWidth={1.5} style={{ marginBottom: '16px', opacity: 0.6, color: '#a1a1aa' }} />
+              <p style={{ fontSize: '1rem', margin: 0, color: '#e4e4e7' }}>Nenhuma conversa ativa.</p>
+              <p style={{ fontSize: '0.85rem', marginTop: '8px' }}>Quando um interessado mandar mensagem em seus produtos, aparecerá aqui.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {conversations.map((conv, idx) => (
+                <div key={idx} onClick={() => setActiveChat(conv)} style={{
+                  display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', cursor: 'pointer',
+                  background: 'rgba(15, 18, 30, 0.6)', backdropFilter: 'blur(12px)',
+                  border: conv.unread_count > 0 ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '12px', transition: 'border-color 0.2s'
+                }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', background: '#000', flexShrink: 0 }}>
+                    {conv.listing_image ? (
+                      <img src={conv.listing_image} alt="Produto" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <Package size={24} color="#888" style={{ margin: '18px' }} />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#fff', fontWeight: 700 }}>{conv.partner_name}</h4>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{new Date(conv.last_message_at).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#8b5cf6', fontWeight: 600, marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      Ref: {conv.listing_title}
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: conv.unread_count > 0 ? '#fff' : 'var(--text-secondary)', fontWeight: conv.unread_count > 0 ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {conv.last_message}
+                    </p>
+                  </div>
+                  {conv.unread_count > 0 && (
+                    <div style={{ background: 'var(--accent)', color: '#000', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>
+                      {conv.unread_count}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal de Chat Ativo */}
+      {activeChat && (
+        <ChatModal
+          listingId={activeChat.listing_id}
+          listingTitle={activeChat.listing_title}
+          listingPrice={0} 
+          partnerId={activeChat.partner_id}
+          partnerName={activeChat.partner_name}
+          onClose={() => {
+            setActiveChat(null)
+            // Recarrega a lista para atualizar lidos
+            fetch('/api/messages/conversations')
+              .then(res => res.json())
+              .then(data => { if (data.conversations) setConversations(data.conversations) })
+          }}
+        />
+      )}
+
       {/* Tab: Vendas Realizadas */}
       {activeTab === 'sales' && (
         <div>
@@ -250,11 +357,40 @@ export function GarageClient({
                           Comprador: <span style={{ color: 'var(--text-secondary)' }}>{order.buyer?.full_name || 'Piloto'}</span>
                         </p>
 
-                        {order.tracking_code && (
+                        {order.tracking_code ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', fontSize: '0.8rem', color: '#06b6d4' }}>
                             <Truck size={14} />
                             Rastreio: <code style={{ background: 'rgba(6,182,212,0.1)', padding: '2px 6px', borderRadius: '4px' }}>{order.tracking_code}</code>
                           </div>
+                        ) : (
+                          order.status === 'paid' && (
+                            <div style={{ marginTop: '12px' }}>
+                              <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginBottom: '6px', fontWeight: 600 }}>Ação Pendente: Informe o envio</div>
+                              <form onSubmit={(e) => {
+                                e.preventDefault();
+                                const form = e.target as HTMLFormElement;
+                                const input = form.elements.namedItem('tracking') as HTMLInputElement;
+                                if (!input.value) return;
+                                
+                                fetch(`/api/orders/${order.id}/tracking`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ tracking_code: input.value })
+                                }).then(res => {
+                                  if(res.ok) window.location.reload();
+                                })
+                              }} style={{ display: 'flex', gap: '8px' }}>
+                                <input name="tracking" type="text" placeholder="Código de Rastreio (Ex: QP123456789BR)" style={{
+                                  background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
+                                  color: '#fff', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', outline: 'none', flex: 1
+                                }} />
+                                <button type="submit" style={{
+                                  background: 'var(--accent)', color: '#000', border: 'none', padding: '8px 16px',
+                                  borderRadius: '8px', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer'
+                                }}>Salvar</button>
+                              </form>
+                            </div>
+                          )
                         )}
                       </div>
 

@@ -32,6 +32,8 @@ export async function createProduct(formData: {
   variations?: { sku: string; stock: number; price: number | null; attributes: Record<string, string> }[]
   fabricante?: string
   outOfStockBehavior: string
+  reviews?: { reviewer_name: string; rating: string | number; comment: string; created_at?: string }[]
+  itemType?: 'product' | 'service'
 }) {
   const supabase = await createServerSupabaseClient()
 
@@ -62,7 +64,8 @@ export async function createProduct(formData: {
     cnpj_emitente: formData.cnpjEmitente,
     attributes: { 
       ...(formData.fabricante ? { marca: formData.fabricante } : {}),
-      out_of_stock_behavior: formData.outOfStockBehavior
+      out_of_stock_behavior: formData.outOfStockBehavior,
+      item_type: formData.itemType || 'product'
     },
   }).select('id').single()
 
@@ -84,35 +87,56 @@ export async function createProduct(formData: {
     }
   }
 
-  // Aciona a ponte Omnichannel assíncrona/interna
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const syncRes = await fetch(`${baseUrl}/api/erp/sync`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        kings_id: newProd.id,
-        title: formData.title,
-        sku: formData.sku || null,
-        price: formData.price,
-        price_compare: formData.priceCompare,
-        stock: formData.stock,
-        ncm: formData.ncm,
-        ean: formData.ean,
-        weight_kg: formData.weightKg,
-        dimensions: {
-          width: formData.width,
-          height: formData.height,
-          length: formData.length
-        }
-      })
-    })
-
-    if (!syncRes.ok) {
-      console.warn('[Admin] Sync Olist avisou que falhou (mas o produto foi salvo no DB).')
+  // Inserção de Avaliações
+  if (formData.reviews && formData.reviews.length > 0) {
+    const reviewsToInsert = formData.reviews.map(rev => ({
+      product_id: newProd.id,
+      reviewer_name: rev.reviewer_name,
+      rating: Number(rev.rating) || 5,
+      comment: rev.comment,
+      status: 'approved',
+      created_at: rev.created_at || new Date().toISOString()
+    }))
+    
+    // As in kings_simuladores, reviews might need an ID or just auto-increment.
+    // If user_id is needed, we leave it null for anonymous/imported reviews.
+    const { error: revErr } = await supabase.from('seller_reviews').insert(reviewsToInsert)
+    if (revErr) {
+      console.warn('[Admin] Erro ao importar avaliações:', revErr)
     }
-  } catch (err) {
-    console.warn('[Admin] Erro de rede ao contatar /api/erp/sync:', err)
+  }
+
+  // Aciona a ponte Omnichannel assíncrona/interna apenas se for Produto Físico
+  if (formData.itemType !== 'service') {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+      const syncRes = await fetch(`${baseUrl}/api/erp/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kings_id: newProd.id,
+          title: formData.title,
+          sku: formData.sku || null,
+          price: formData.price,
+          price_compare: formData.priceCompare,
+          stock: formData.stock,
+          ncm: formData.ncm,
+          ean: formData.ean,
+          weight_kg: formData.weightKg,
+          dimensions: {
+            width: formData.width,
+            height: formData.height,
+            length: formData.length
+          }
+        })
+      })
+
+      if (!syncRes.ok) {
+        console.warn('[Admin] Sync Olist avisou que falhou (mas o produto foi salvo no DB).')
+      }
+    } catch (err) {
+      console.warn('[Admin] Erro de rede ao contatar /api/erp/sync:', err)
+    }
   }
 
   return { success: true }

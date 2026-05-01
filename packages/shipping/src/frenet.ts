@@ -1,5 +1,5 @@
 /**
- * Frenet API Wrapper (with Mock/Stub fallback)
+ * Frenet API Wrapper — PRODUÇÃO
  * 
  * Transportadoras Ativas:
  *  - Correios SEDEX (expressa)
@@ -9,6 +9,7 @@
  *  - Buslog
  * 
  * Removido: Correios PAC (logística lenta, incompatível com simuladores pesados)
+ * Removido: Todos os fallbacks mock
  */
 
 interface Dimensions {
@@ -46,167 +47,102 @@ function isBlocked(serviceName: string): boolean {
 
 export async function calculateShipping(fromPostalCode: string, toPostalCode: string, dimensions: Dimensions[]): Promise<ShippingOption[]> {
   const token = process.env.FRENET_TOKEN
-  const sandbox = process.env.FRENET_SANDBOX !== 'false' // default true
-  
-  const endpoint = sandbox 
-    ? 'https://api.frenet.com.br/shipping/quote'
-    : 'https://api.frenet.com.br/shipping/quote'
 
-  // Se existe token real (não placeholder), tenta a API real
-  if (token && !token.includes('preencher')) {
-    try {
-      const payload = {
-        SellerCEP: fromPostalCode.replace(/\D/g, ''),
-        RecipientCEP: toPostalCode.replace(/\D/g, ''),
-        ShipmentInvoiceValue: dimensions.reduce((acc, d) => acc + (d.insurance_value || 0), 0),
-        ShippingItemArray: dimensions.map((d, index) => ({
-            Weight: d.weight,
-            Length: d.length || 16,
-            Height: d.height || 2,
-            Width: d.width || 11,
-            Quantity: d.quantity || 1,
-            SKU: (index + 1).toString(),
-            Category: "Simulador"
-        }))
-      }
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'token': `${token}`,
-          'User-Agent': 'KingsHub E-commerce Support (contato@kingssimuladores.com.br)'
-        },
-        body: JSON.stringify(payload)
-      })
-
-      if (res.ok) {
-        const json = await res.json()
-        const data = json.ShippingQuoteArray || []
-        
-        // Filter out errors, map to standard shape, then REMOVE blocked services (PAC)
-        const validOptions = data
-          .filter((opt: any) => !opt.Error && opt.ShippingPrice)
-          .filter((opt: any) => !isBlocked(opt.ServiceDescription || ''))
-          .map((opt: any) => ({
-            id: opt.ServiceCode,
-            name: opt.ServiceDescription,
-            company: opt.Carrier || opt.ServiceDescription?.split(' ')[0],
-            price: opt.ShippingPrice,
-            custom_delivery_time: opt.DeliveryTime,
-            logo: null
-          }))
-          .sort((a: ShippingOption, b: ShippingOption) => parseFloat(a.price) - parseFloat(b.price))
-
-        if (validOptions.length > 0) {
-          console.log(`[Kings Shipping] ${validOptions.length} opções retornadas (PAC removido)`)
-          return validOptions
-        }
-      }
-    } catch (e) {
-      console.warn('[Kings Shipping] Falha ao comunicar com Frenet, usando fallback:', e)
-    }
+  if (!token || token.includes('preencher')) {
+    throw new Error('[Kings Shipping] FRENET_TOKEN não configurado. Impossível calcular frete.')
   }
 
-  // ============== FALLBACK (MOCK) ================= 
-  return calculateMockShipping(fromPostalCode, toPostalCode, dimensions)
-}
+  const endpoint = 'https://api.frenet.com.br/shipping/quote'
 
-/**
- * Mock de transportadoras para quando o token real não está configurado.
- * Reproduz a mesma estrutura da API real — SEM o Correios PAC.
- */
-async function calculateMockShipping(fromPostalCode: string, toPostalCode: string, dimensions: Dimensions[]): Promise<ShippingOption[]> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 600))
+  const payload = {
+    SellerCEP: fromPostalCode.replace(/\D/g, ''),
+    RecipientCEP: toPostalCode.replace(/\D/g, ''),
+    ShipmentInvoiceValue: dimensions.reduce((acc, d) => acc + (d.insurance_value || 0), 0),
+    ShippingItemArray: dimensions.map((d, index) => ({
+        Weight: d.weight,
+        Length: d.length || 16,
+        Height: d.height || 2,
+        Width: d.width || 11,
+        Quantity: d.quantity || 1,
+        SKU: (index + 1).toString(),
+        Category: "Simulador"
+    }))
+  }
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'token': `${token}`,
+      'User-Agent': 'KingsHub E-commerce Support (contato@kingssimuladores.com.br)'
+    },
+    body: JSON.stringify(payload)
+  })
+
+  if (!res.ok) {
+    const errorText = await res.text()
+    console.error(`[Kings Shipping] Frenet retornou HTTP ${res.status}:`, errorText)
+    throw new Error(`Falha na comunicação com a Frenet (HTTP ${res.status})`)
+  }
+
+  const json = await res.json()
+  const data = json.ShippingQuoteArray || []
   
-  // Base calculations using CEP digit variation
-  const ending = parseInt(toPostalCode.replace(/\D/g, '').slice(-1) || '0')
-  const basePrice = 85.00 + (ending * 5)
-  const baseDays = 3 + (ending % 3)
-  
-  return [
-    {
-      id: 2,
-      name: 'SEDEX',
-      company: 'Correios',
-      price: (basePrice * 1.6).toFixed(2),
-      custom_delivery_time: baseDays,
-    },
-    {
-      id: 3,
-      name: '.Package',
-      company: 'Jadlog',
-      price: (basePrice * 0.85).toFixed(2),
-      custom_delivery_time: baseDays + 2,
-    },
-    {
-      id: 4,
-      name: '.Com',
-      company: 'Jadlog',
-      price: (basePrice * 1.1).toFixed(2),
-      custom_delivery_time: baseDays + 1,
-    },
-    {
-      id: 9,
-      name: 'Azul Cargo Express',
-      company: 'Azul Cargo',
-      price: (basePrice * 1.3).toFixed(2),
-      custom_delivery_time: Math.max(2, baseDays - 1),
-    },
-    {
-      id: 12,
-      name: 'LATAM Cargo',
-      company: 'LATAM',
-      price: (basePrice * 1.5).toFixed(2),
-      custom_delivery_time: Math.max(2, baseDays - 1),
-    },
-    {
-      id: 15,
-      name: 'Buslog',
-      company: 'Buslog',
-      price: (basePrice * 0.75).toFixed(2),
-      custom_delivery_time: baseDays + 3,
-    },
-  ].sort((a, b) => parseFloat(a.price) - parseFloat(b.price))
+  // Filter out errors, map to standard shape, then REMOVE blocked services (PAC)
+  const validOptions = data
+    .filter((opt: any) => !opt.Error && opt.ShippingPrice)
+    .filter((opt: any) => !isBlocked(opt.ServiceDescription || ''))
+    .map((opt: any) => ({
+      id: opt.ServiceCode,
+      name: opt.ServiceDescription,
+      company: opt.Carrier || opt.ServiceDescription?.split(' ')[0],
+      price: opt.ShippingPrice,
+      custom_delivery_time: opt.DeliveryTime,
+      logo: null
+    }))
+    .sort((a: ShippingOption, b: ShippingOption) => parseFloat(a.price) - parseFloat(b.price))
+
+  if (validOptions.length === 0) {
+    console.warn('[Kings Shipping] Frenet retornou 0 opções válidas para', fromPostalCode, '->', toPostalCode)
+  }
+
+  console.log(`[Kings Shipping] ${validOptions.length} opções retornadas (PAC removido)`)
+  return validOptions
 }
 
 /**
  * Geração de Etiqueta (Frenet)
- * Adiciona ao Carrinho, faz checkout com saldo e gera a URL de impressão logísitca.
+ * Adiciona ao Carrinho, faz checkout com saldo e gera a URL de impressão logística.
+ * 
+ * PRODUÇÃO — Se falhar, retorna success: false.
  */
 export async function generateShippingLabel(orderData: any, itemsData: any[]) {
   const token = process.env.FRENET_TOKEN
-  const sandbox = process.env.FRENET_SANDBOX !== 'false'
 
-  if (token && !token.includes('preencher')) {
-    try {
-      console.log(`[Frenet] Adicionando pedido #${orderData.id} ao carrinho real...`)
-      
-      // Passos reais seriam:
-      // 1. POST /api/v2/me/cart (Cria o ticket no carrinho)
-      // 2. POST /api/v2/me/shipment/checkout (Paga com saldo da carteira)
-      // 3. POST /api/v2/me/shipment/generate (Gera a etiqueta pdf)
-      // Como precisa de regras finas e cartões de crédito/saldo real, vamos simular a resposta estrutural se não bater 100%.
-      
-      return {
-        success: true,
-        tracking_code: `REAL_${Math.random() * 100000}`,
-        ticket_url: "https://Frenet.com.br/painel/minhas-etiquetas" // Exemplo
-      }
-    } catch (e) {
-      console.error('[Kings Shipping Erro] Falha ao gerar etiqueta oficial Frenet:', e)
-    }
+  if (!token || token.includes('preencher')) {
+    console.error('[Kings Shipping] FRENET_TOKEN não configurado. Impossível gerar etiqueta.')
+    return { success: false, tracking_code: null, ticket_url: null }
   }
 
-  // ============== FALLBACK (MOCK) =================
-  console.log(`[Kings Shipping MOCK] Gerando Etiqueta Logística MOCK para o Pedido #${orderData.id}...`)
-  
-  return {
-    success: true,
-    tracking_code: "https://mock.frenet.com.br/etiqueta/impressao?id=" + Math.floor(Math.random() * 99999), 
-    ticket_url: "https://mock.frenet.com.br/etiqueta/impressao"
+  try {
+    console.log(`[Frenet] Gerando etiqueta para pedido #${orderData.id}...`)
+    
+    // TODO: Implementar os 3 passos reais da API Frenet:
+    // 1. POST /api/v2/me/cart (Cria o ticket no carrinho)
+    // 2. POST /api/v2/me/shipment/checkout (Paga com saldo da carteira)
+    // 3. POST /api/v2/me/shipment/generate (Gera a etiqueta pdf)
+    // Por enquanto, a etiqueta será gerada manualmente no painel da Frenet.
+    
+    console.warn(`[Frenet] Geração automática de etiquetas ainda não implementada. Gere manualmente no painel Frenet para o pedido #${orderData.id}.`)
+    
+    return {
+      success: false,
+      tracking_code: null,
+      ticket_url: null
+    }
+  } catch (e) {
+    console.error('[Kings Shipping] Falha ao gerar etiqueta Frenet:', e)
+    return { success: false, tracking_code: null, ticket_url: null }
   }
 }
-

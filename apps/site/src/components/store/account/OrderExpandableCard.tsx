@@ -226,7 +226,7 @@ export function OrderExpandableCard({ order }: { order: any }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {items.length === 0 ? (
                   <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '0.5rem', color: '#94a3b8', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <Info size={16} /> Nenhum item encontrado (ou Mock de demonstração).
+                    <Info size={16} /> Nenhum item encontrado para este pedido.
                   </div>
                 ) : (
                   items.map((item, idx) => (

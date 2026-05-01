@@ -1,24 +1,5 @@
-// ===== MOCK DATA =====
-export const SELLERS = [
-  { id: 's1', name: 'Ricardo Almeida', avatar: 'RA', since: '2024-03', rating: 4.8, sales: 12, blocked: 0 },
-  { id: 's2', name: 'Camila Torres', avatar: 'CT', since: '2023-11', rating: 4.5, sales: 8, blocked: 1 },
-  { id: 's3', name: 'Bruno Martins', avatar: 'BM', since: '2025-01', rating: 5.0, sales: 3, blocked: 0 },
-]
-
-export const BUYERS = [
-  { id: 'b1', name: 'João Silva', avatar: 'JS', since: '2025-02', purchases: 1, blocked: 0 },
-  { id: 'b2', name: 'Ana Costa', avatar: 'AC', since: '2024-08', purchases: 3, blocked: 2 },
-  { id: 'b3', name: 'Pedro Souza', avatar: 'PS', since: '2025-03', purchases: 0, blocked: 0 },
-  { id: 'b4', name: 'Mariana Lima', avatar: 'ML', since: '2024-12', purchases: 2, blocked: 0 },
-]
-
-export const LISTINGS = [
-  { id: 'l1', title: 'Volante Logitech G29 + Pedais', price: 1200, condition: 'Usado - Bom estado', sellerId: 's1', img: '🎮' },
-  { id: 'l2', title: 'Cockpit Playseat Challenge', price: 2800, condition: 'Seminovo', sellerId: 's1', img: '🪑' },
-  { id: 'l3', title: 'Pedal Fanatec CSL Elite', price: 1500, condition: 'Usado - Excelente', sellerId: 's2', img: '🦶' },
-  { id: 'l4', title: 'Cockpit SimRig SR1 Completo', price: 4500, condition: 'Usado - Bom estado', sellerId: 's3', img: '🏎️' },
-  { id: 'l5', title: 'Volante Thrustmaster T300 RS', price: 1800, condition: 'Seminovo', sellerId: 's2', img: '🎯' },
-]
+// ===== FILTRO ANTI-CONTATO (PRODUÇÃO) =====
+// Regras de detecção para bloquear tentativas de compartilhar contato pessoal no chat do MSU.
 
 export type Message = {
   id: string; senderId: string; text: string; time: string; blocked?: boolean; blockReason?: string; isAdmin?: boolean;
@@ -27,51 +8,6 @@ export type Message = {
 export type Conversation = {
   id: string; listingId: string; buyerId: string; sellerId: string; messages: Message[]; lastActivity: string; unreadBuyer: number; unreadSeller: number;
 }
-
-export const INITIAL_CONVERSATIONS: Conversation[] = [
-  {
-    id: 'c1', listingId: 'l1', buyerId: 'b1', sellerId: 's1', lastActivity: '10:45', unreadBuyer: 0, unreadSeller: 1,
-    messages: [
-      { id: 'm1', senderId: 'b1', text: 'Oi! Ainda tem o G29 disponível?', time: '10:30' },
-      { id: 'm2', senderId: 's1', text: 'Sim! Está em ótimo estado, uso há 1 ano apenas.', time: '10:32' },
-      { id: 'm3', senderId: 'b1', text: 'Qual o estado de conservação? Aceita R$1000?', time: '10:35' },
-      { id: 'm4', senderId: 's1', text: 'O mínimo que faço é R$1100. Tá impecável, sem marcas.', time: '10:40' },
-      { id: 'm5', senderId: 'b1', text: 'Fechado! Como faço pra pagar?', time: '10:45' },
-    ]
-  },
-  {
-    id: 'c2', listingId: 'l3', buyerId: 'b2', sellerId: 's2', lastActivity: '09:20', unreadBuyer: 0, unreadSeller: 0,
-    messages: [
-      { id: 'm6', senderId: 'b2', text: 'Boa tarde! O pedal ainda tá disponível?', time: '09:00' },
-      { id: 'm7', senderId: 's2', text: 'Tá sim! Quer mais fotos?', time: '09:05' },
-      { id: 'm8', senderId: 'b2', text: 'Me chama no whats 11 99876-5432', time: '09:10', blocked: true, blockReason: 'Telefone/WhatsApp detectado' },
-      { id: 'm9', senderId: 'b2', text: 'Sim, pode mandar mais fotos por aqui mesmo!', time: '09:15' },
-      { id: 'm10', senderId: 's2', text: 'Perfeito, vou tirar agora e envio!', time: '09:20' },
-    ]
-  },
-  {
-    id: 'c3', listingId: 'l2', buyerId: 'b3', sellerId: 's1', lastActivity: '14:30', unreadBuyer: 1, unreadSeller: 0,
-    messages: [
-      { id: 'm11', senderId: 'b3', text: 'Oi! O cockpit vem com base pra volante?', time: '14:00' },
-      { id: 'm12', senderId: 's1', text: 'Vem completo! Base, assento e suporte de pedal.', time: '14:10' },
-      { id: 'm13', senderId: 'b3', text: 'meu insta é @pedro_sim pra ver minhas fotos do setup', time: '14:15', blocked: true, blockReason: 'Rede social detectada (@usuario)' },
-      { id: 'm14', senderId: 'b3', text: 'Muito bom! Qual o peso total pra calcular frete?', time: '14:20' },
-      { id: 'm15', senderId: 's1', text: 'Pesa uns 18kg no total. CEP de destino?', time: '14:25' },
-      { id: 'm16', senderId: 's1', text: 'Posso fazer R$2500 pra fechar rápido.', time: '14:30', isAdmin: false },
-    ]
-  },
-  {
-    id: 'c4', listingId: 'l4', buyerId: 'b4', sellerId: 's3', lastActivity: '16:00', unreadBuyer: 0, unreadSeller: 0,
-    messages: [
-      { id: 'm17', senderId: 'b4', text: 'Bruno, tenho interesse no cockpit SR1!', time: '15:00' },
-      { id: 'm18', senderId: 's3', text: 'Opa! Posso fazer R$4000 pra você.', time: '15:10' },
-      { id: 'm19', senderId: 'b4', text: 'Fechou! Meu CEP é 01310-100 pra calcular frete.', time: '15:20' },
-      { id: 'm20', senderId: 's3', text: 'Pelo peso vai precisar de transportadora. Vou cotar.', time: '15:30' },
-      { id: 'm21', senderId: 'admin', text: 'Olá! Sou o moderador da plataforma. Lembro que o pagamento deve ser feito exclusivamente pela plataforma para segurança de ambos. Boas negociações!', time: '15:45', isAdmin: true },
-      { id: 'm22', senderId: 's3', text: 'Obrigado pelo aviso! Vamos fazer tudo certinho por aqui.', time: '16:00' },
-    ]
-  },
-]
 
 // ===== CONTACT FILTER =====
 const PHONE_PATTERNS = [

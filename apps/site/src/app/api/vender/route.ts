@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@kings/db'
+import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 
 export async function POST(req: Request) {
@@ -12,7 +13,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
     }
 
-    const { error } = await supabase.from('marketplace_listings').insert({
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('auth_id', user.id)
+      .single()
+
+    if (!profile) {
+      return NextResponse.json({ error: 'Perfil do vendedor não encontrado' }, { status: 404 })
+    }
+
+    const adminSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { error } = await adminSupabase.from('marketplace_listings').insert({
       id: crypto.randomUUID(),
       title: body.title,
       price: body.price,
@@ -27,7 +43,7 @@ export async function POST(req: Request) {
       has_usage_marks: body.has_usage_marks ?? false,
       shipping_options: body.shipping_options || null,
       status: 'pending_review',
-      seller_id: user.id,
+      seller_id: profile.id,
       commission_rate: 0.15,
     })
 
