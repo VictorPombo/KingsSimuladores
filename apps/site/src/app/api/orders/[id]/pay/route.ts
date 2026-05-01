@@ -63,7 +63,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       customer, 
       order.id, 
       undefined, 
-      order.brand_origin as any
+      order.brand_origin as any,
+      order.shipping_cost
     )
 
     // Atualizar no banco de dados
