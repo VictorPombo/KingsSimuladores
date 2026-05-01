@@ -9,9 +9,10 @@ export async function POST(req: Request) {
 
     // 1. Authenticate user from session
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (!user) {
+      console.error('[Checkout API] Unauthorized error. Auth Error:', authError)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

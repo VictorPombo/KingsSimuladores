@@ -130,7 +130,7 @@ export async function POST(req: Request) {
           // RATEIO DE FRETE: Simplificado - joga o frete para a loja principal do pedido se houver, ou divide
           // Como não temos regra contábil exata aqui, vamos colocar o frete total na primeira iteração (na loja matriz do pedido)
           const isMainStore = store === order.brand_origin
-          const shippingVal = isMainStore ? order.shipping_cost : 0
+          const shippingVal = isMainStore ? (order as any).shipping_cost : 0
           
           const orderPayload = {
             id: `${order.id}-${store}`, // Sufixo para evitar duplicação no ERP se não suportar o mesmo ID
@@ -153,6 +153,7 @@ export async function POST(req: Request) {
             void pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
               .then(async (res) => {
                 if (res && res.status !== 'error') {
+                  const resAny = res as any
                   await adminSupabase.from('invoices').insert({
                     order_id: order.id,
                     store_origin: store,
@@ -161,8 +162,8 @@ export async function POST(req: Request) {
                     nfe_number: '',
                     nfe_key: '',
                     status: 'issued',
-                    xml_url: res.xml_url || '',
-                    pdf_url: res.pdf_url || ''
+                    xml_url: resAny.xml_url || '',
+                    pdf_url: resAny.pdf_url || ''
                   })
                   if (res.tiny_id) await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
                   console.log(`[Webhook MP] NF-e do Pedido ${orderId} (Seven) enfileirada assincronamente.`)
@@ -177,17 +178,18 @@ export async function POST(req: Request) {
             console.log('OrderPayload:', JSON.stringify(orderPayload, null, 2))
             const res = await pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
             if (res && res.status !== 'error') {
-               if (!nfeResFirst) nfeResFirst = res; // salva o link pra usar no wpp
+               const resAny = res as any
+               if (!nfeResFirst) nfeResFirst = res;
                await adminSupabase.from('invoices').insert({
                 order_id: order.id,
                 store_origin: store,
                 erp_id: res.tiny_id || res.id || '',
-                cnpj_emitente: res.cnpj_emitente || '',
-                nfe_number: res.nfe_number || '',
-                nfe_key: res.nfe_key || '',
+                cnpj_emitente: '',
+                nfe_number: '',
+                nfe_key: '',
                 status: 'issued',
-                xml_url: res.xml_url || '',
-                pdf_url: res.pdf_url || ''
+                xml_url: resAny.xml_url || '',
+                pdf_url: resAny.pdf_url || ''
               })
               console.log(`[Webhook MP] NF-e do Pedido ${orderId} (${store}) salva no banco.`)
             }

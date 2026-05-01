@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { Container } from '@kings/ui'
 import { formatPrice } from '@kings/utils'
 import { OrderStatusBadge } from '@/components/store/account/OrderStatusBadge'
+import { SyncInvoiceButton } from '@/components/store/account/SyncInvoiceButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +26,7 @@ export default async function SevenAccountPage({ searchParams }: { searchParams:
   // Fetch orders usando profile.id (customer_id nos pedidos é profile.id)
   const { data: orders } = await supabase
     .from('orders')
-    .select('*')
+    .select('*, invoices(*)')
     .eq('customer_id', profile?.id || user.id)
     .order('created_at', { ascending: false })
 
@@ -79,9 +80,11 @@ export default async function SevenAccountPage({ searchParams }: { searchParams:
                   )}
                   
                   <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '0.5rem 1rem', borderRadius: '0.25rem', color: '#f8fafc', cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }}>
-                      Puxar Nota Fiscal (PDF)
-                    </button>
+                    <SyncInvoiceButton 
+                      orderId={order.id} 
+                      invoiceId={order.invoices && order.invoices.length > 0 ? order.invoices[0].id : undefined}
+                      initialPdfUrl={order.invoices && order.invoices.length > 0 ? order.invoices[0].pdf_url : undefined}
+                    />
                     <button style={{ background: 'transparent', border: '1px solid #ea580c', padding: '0.5rem 1rem', borderRadius: '0.25rem', color: '#ea580c', cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }}>
                       Atendimento Seven
                     </button>

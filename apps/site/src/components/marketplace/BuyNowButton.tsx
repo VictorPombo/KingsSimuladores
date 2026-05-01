@@ -14,22 +14,19 @@ interface Props {
 }
 
 export function BuyNowButton({ listingId, listingTitle, listingPrice, imageUrl, sellerId }: Props) {
-  const { dispatch } = useCart()
+  const { addItem } = useCart()
   const router = useRouter()
 
   const handleBuyNow = () => {
     // 1. Add item to cart
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: {
-        id: listingId,
-        name: listingTitle,
-        price: listingPrice,
-        image: imageUrl,
-        quantity: 1,
-        storeOrigin: 'msu',
-        sellerId: sellerId
-      }
+    addItem({
+      id: listingId,
+      title: listingTitle,
+      price: listingPrice,
+      imageUrl: imageUrl,
+      brand: 'MSU',
+      quantity: 1,
+      storeOrigin: 'msu',
     })
     
     // 2. Redirect to universal checkout
