@@ -62,27 +62,30 @@ export async function POST(req: Request) {
         // 3. Buscar os itens do pedido para Controle de Estoque
         const { data: items } = await supabase
           .from('order_items')
-          .select('product_id, quantity')
+          .select('product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, stock_quantity)')
           .eq('order_id', orderId)
           
         if (items) {
           for (const item of items) {
-            // Em caso de Kings (produtos da marca principal)
-            if (order.brand_origin === 'kings' && item.product_id) {
-              const { data: product } = await supabase
-                  .from('products')
-                  .select('stock_quantity')
-                  .eq('id', item.product_id)
-                  .single()
-
-              if (product) {
+            const origin = item.store_origin || order.brand_origin
+            // Em caso de Kings ou Seven (produtos nativos)
+            if ((origin === 'kings' || origin === 'seven') && item.product_id) {
+              const product = item.product as any
+              if (product && typeof product.stock_quantity === 'number') {
                   const newStock = Math.max(0, product.stock_quantity - item.quantity)
                   await supabase.from('products').update({ stock_quantity: newStock }).eq('id', item.product_id)
+              } else {
+                 // fallback if relationship failed
+                 const { data: p } = await supabase.from('products').select('stock_quantity').eq('id', item.product_id).single()
+                 if (p) {
+                   const newStock = Math.max(0, p.stock_quantity - item.quantity)
+                   await supabase.from('products').update({ stock_quantity: newStock }).eq('id', item.product_id)
+                 }
               }
             }
             
             // Em caso de Meu Simulador Usado (MSU), marcamos como vendido
-            if (order.brand_origin === 'msu' && item.product_id) {
+            if (origin === 'msu' && item.product_id) {
                await supabase.from('marketplace_listings').update({ status: 'sold' }).eq('id', item.product_id)
             }
           }
@@ -95,64 +98,96 @@ export async function POST(req: Request) {
 
         console.log(`[Webhook MP] Sucesso! Pedido ${orderId} aprovado e estoque atualizado.`)
         
-        // 4. Injeção no Olist ERP (Emissão de NF-e e Baixa de Estoque)
+        // 4. Injeção no Olist ERP Fatiada (Emissão de NF-e e Baixa de Estoque Multi-loja)
         const profilesData = order.profiles as any
         const profile = Array.isArray(profilesData) ? profilesData[0] : profilesData
 
-        const orderPayload = {
-          id: order.id,
-          total: order.total,
-          customer: {
-            name: profile?.full_name,
-            email: profile?.email
-          },
-          shipping: order.shipping_address
+        let nfeResFirst: any = null; // Guardar a primeira NFe gerada para usar no WhatsApp como referência (se quiser)
+
+        // Agrupar itens por loja
+        const storeGroups: Record<string, any[]> = {}
+        if (items) {
+          items.forEach(item => {
+            const origin = item.store_origin || order.brand_origin || 'kings'
+            if (!storeGroups[origin]) storeGroups[origin] = []
+            storeGroups[origin].push(item)
+          })
+        } else {
+          // fallback
+          storeGroups[order.brand_origin || 'kings'] = []
         }
 
-        // Emitir e guardar a NF-e via ERP (Não-bloqueante para não dar Timeout no MP)
-        let nfeRes: any = null;
+        const adminSupabase = createAdminClient()
 
-        if (order.brand_origin === 'seven') {
-          void pushOrderToOlist(orderPayload, order.brand_origin)
-            .then(async (res) => {
-              if (res && res.id) {
-                const adminSupabase = createAdminClient()
-                await adminSupabase.from('invoices').insert({
-                  id: res.id,
-                  order_id: order.id,
-                  cnpj_emitente: res.cnpj_emitente || '',
-                  nfe_number: res.nfe_number || '',
-                  nfe_key: res.nfe_key || '',
-                  status: res.status,
-                  xml_url: res.xml_url || '',
-                  pdf_url: res.pdf_url || ''
-                })
-                // Atualizar ERP ID no pedido
-                if (res.tiny_id) {
-                  await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
-                }
-                console.log(`[Webhook MP] NF-e do Pedido ${orderId} enfileirada assincronamente.`)
-              }
-            })
-            .catch(err => console.error('[Olist Async Error]', err))
-        } else {
-          // Mantém síncrono para Kings (comportamento legado)
-          nfeRes = await pushOrderToOlist(orderPayload, order.brand_origin)
+        // Para cada loja, montar o payload e disparar para o ERP
+        for (const store of Object.keys(storeGroups)) {
+          const storeItems = storeGroups[store]
+          // Calcula subtotal dos itens dessa loja
+          const storeSubtotal = storeItems.reduce((acc, curr) => acc + (curr.total_price || (curr.unit_price * curr.quantity) || 0), 0)
           
-          if (nfeRes) {
-             await supabase.from('invoices').insert({
-              id: nfeRes.id,
-              order_id: order.id,
-              cnpj_emitente: nfeRes.cnpj_emitente,
-              nfe_number: nfeRes.nfe_number,
-              nfe_key: nfeRes.nfe_key,
-              status: nfeRes.status,
-              xml_url: nfeRes.xml_url,
-              pdf_url: nfeRes.pdf_url
-            })
-            console.log(`[Webhook MP] NF-e do Pedido ${orderId} salva no banco (Kings/MSU).`)
+          // RATEIO DE FRETE: Simplificado - joga o frete para a loja principal do pedido se houver, ou divide
+          // Como não temos regra contábil exata aqui, vamos colocar o frete total na primeira iteração (na loja matriz do pedido)
+          const isMainStore = store === order.brand_origin
+          const shippingVal = isMainStore ? order.shipping_cost : 0
+          
+          const orderPayload = {
+            id: `${order.id}-${store}`, // Sufixo para evitar duplicação no ERP se não suportar o mesmo ID
+            total: storeSubtotal + (shippingVal || 0),
+            customer: {
+              name: profile?.full_name,
+              email: profile?.email
+            },
+            shipping: order.shipping_address,
+            items: storeItems.map(i => ({
+               product_id: i.product_id,
+               title: i.product?.title || 'Produto Genérico',
+               quantity: i.quantity,
+               unit_price: i.unit_price
+            }))
+          }
+
+          if (store === 'seven') {
+            void pushOrderToOlist(orderPayload, store)
+              .then(async (res) => {
+                if (res && res.status !== 'error') {
+                  await adminSupabase.from('invoices').insert({
+                    order_id: order.id,
+                    store_origin: store,
+                    erp_id: res.tiny_id || res.id || '',
+                    cnpj_emitente: res.cnpj_emitente || '',
+                    nfe_number: res.nfe_number || '',
+                    nfe_key: res.nfe_key || '',
+                    status: res.status,
+                    xml_url: res.xml_url || '',
+                    pdf_url: res.pdf_url || ''
+                  })
+                  if (res.tiny_id) await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
+                  console.log(`[Webhook MP] NF-e do Pedido ${orderId} (Seven) enfileirada assincronamente.`)
+                }
+              })
+              .catch(err => console.error('[Olist Async Error]', err))
+          } else {
+            // Kings ou MSU mantêm síncrono
+            const res = await pushOrderToOlist(orderPayload, store)
+            if (res && res.status !== 'error') {
+               if (!nfeResFirst) nfeResFirst = res; // salva o link pra usar no wpp
+               await adminSupabase.from('invoices').insert({
+                order_id: order.id,
+                store_origin: store,
+                erp_id: res.tiny_id || res.id || '',
+                cnpj_emitente: res.cnpj_emitente || '',
+                nfe_number: res.nfe_number || '',
+                nfe_key: res.nfe_key || '',
+                status: res.status,
+                xml_url: res.xml_url || '',
+                pdf_url: res.pdf_url || ''
+              })
+              console.log(`[Webhook MP] NF-e do Pedido ${orderId} (${store}) salva no banco.`)
+            }
           }
         }
+        
+        let nfeRes = nfeResFirst; // mock compatibility for the rest of the file
         
         // 5. Notificação via Chatwoot (WhatsApp)
         const clienteNome = profile?.full_name?.split(' ')[0] || 'Cliente'
@@ -258,6 +293,6 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('[Webhook MP Fatal]', error)
     // Se der 500, o MP tentará enviar denovo, então capturamos
-    return NextResponse.json({ error: 'Processing error' }, { status: 500 })
+    return NextResponse.json({ error: 'Processing error', details: error.message }, { status: 500 })
   }
 }

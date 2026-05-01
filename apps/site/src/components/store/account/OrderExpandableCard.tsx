@@ -11,6 +11,7 @@ export function OrderExpandableCard({ order }: { order: any }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
   const [items, setItems] = useState<any[]>([])
+  const [invoices, setInvoices] = useState<any[]>([])
   
   const orderNumber = order.id.split('-')[0].toUpperCase()
 
@@ -37,6 +38,9 @@ export function OrderExpandableCard({ order }: { order: any }) {
     if (!error && orderItems) {
       setItems(orderItems)
     }
+
+    const { data: invs } = await supabase.from('invoices').select('*').eq('order_id', order.id)
+    if (invs) setInvoices(invs)
     
     setIsLoading(false)
   }
@@ -235,9 +239,26 @@ export function OrderExpandableCard({ order }: { order: any }) {
             
             {/* Ações Inferiores */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-              <button className="action-btn" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', padding: '10px 16px', borderRadius: '0.5rem', color: '#e2e8f0', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
-                Nota Fiscal
-              </button>
+              {invoices.length > 0 ? (
+                invoices.map((inv, idx) => (
+                  <a 
+                    key={idx}
+                    href={inv.pdf_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="action-btn" 
+                    style={{ textDecoration: 'none', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', padding: '10px 16px', borderRadius: '0.5rem', color: '#e2e8f0', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                  >
+                    Nota Fiscal ({inv.store_origin === 'seven' ? 'Seven' : (inv.store_origin === 'msu' ? 'MSU' : 'Kings')})
+                  </a>
+                ))
+              ) : (
+                order.status === 'paid' && (
+                  <button className="action-btn" disabled style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 16px', borderRadius: '0.5rem', color: '#64748b', cursor: 'not-allowed', fontSize: '0.85rem', fontWeight: 600 }}>
+                    Nota Fiscal (Processando...)
+                  </button>
+                )
+              )}
               <a 
                 href={`https://wa.me/5511970603441?text=Olá, preciso de ajuda com o meu pedido %23${orderNumber}`}
                 target="_blank"

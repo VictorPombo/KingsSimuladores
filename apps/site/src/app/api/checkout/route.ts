@@ -71,6 +71,7 @@ export async function POST(req: Request) {
       quantity: item.quantity,
       unit_price: item.price,
       total_price: item.price * item.quantity,
+      store_origin: item.storeOrigin || 'kings',
     }))
 
     const { error: itemsErr } = await supabase
