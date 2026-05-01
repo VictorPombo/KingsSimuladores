@@ -55,40 +55,40 @@ export function DalesteSticker() {
 
       {/* VERSÃO DESKTOP (FIXA NO CANTO ESQUERDO) */}
       <div className="desktop-only" style={{ position: 'fixed', bottom: 0, left: 0, zIndex: 9999, opacity: opacity, pointerEvents: opacity > 0.5 ? 'auto' : 'none' }}>
-        <Link href="/quem-somos" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-end', width: '320px', cursor: 'pointer' }} className="sticker-pump group">
+        <Link href="/quem-somos" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-end', width: '240px', cursor: 'pointer' }} className="sticker-pump group">
 
           <div style={{
-            marginBottom: '-30px',
-            marginLeft: '20px',
+            marginBottom: '-25px',
+            marginLeft: '15px',
             textAlign: 'center',
             background: 'rgba(6, 8, 15, 0.9)',
             backdropFilter: 'blur(16px)',
-            padding: '12px 16px',
-            borderRadius: '12px',
+            padding: '10px 12px',
+            borderRadius: '10px',
             border: '1px solid rgba(0, 229, 255, 0.3)',
             boxShadow: '0 10px 40px rgba(0, 0, 0, 0.8)',
             zIndex: 3,
             position: 'relative',
-            width: '230px'
+            width: '180px'
           }}>
-            <p style={{ margin: 0, fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.2 }}>Olá eu sou Fernando Albertoni</p>
-            <p style={{ margin: '4px 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Conhecido como Daleste</p>
-            <p style={{ margin: '8px 0 0', fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--success)', fontWeight: 700, lineHeight: 1.3 }}>Clica aqui para conhecer minha história!</p>
+            <p style={{ margin: 0, fontWeight: 800, fontSize: '0.72rem', color: 'var(--text-primary)', lineHeight: 1.2 }}>Olá eu sou Fernando Albertoni</p>
+            <p style={{ margin: '3px 0', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Conhecido como Daleste</p>
+            <p style={{ margin: '6px 0 0', fontSize: '0.68rem', fontStyle: 'italic', color: 'var(--success)', fontWeight: 700, lineHeight: 1.3 }}>Clica aqui para conhecer minha história!</p>
           </div>
 
           <img
             src="/daleste.png"
             alt="Fernando Albertoni - Desktop"
             style={{
-              width: '130%',
+              width: '100%',
               height: 'auto',
               objectFit: 'contain',
               objectPosition: 'left bottom',
-              filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.8))',
+              filter: 'drop-shadow(0 12px 25px rgba(0,0,0,0.8))',
               zIndex: 2,
               position: 'relative',
               pointerEvents: 'none',
-              transform: 'translate(-85px, 15px)'
+              transform: 'translate(-60px, 12px)'
             }}
           />
         </Link>

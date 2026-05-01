@@ -496,6 +496,7 @@ export default function CriarProdutoPage() {
             <select value={status} onChange={e => setStatus(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
               <option value="draft">Rascunho</option>
               <option value="active">Ativo</option>
+              <option value="disabled">Desativado</option>
               <option value="archived">Arquivado</option>
             </select>
           </div>

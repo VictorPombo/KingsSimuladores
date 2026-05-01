@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Container, Button } from '@kings/ui'
 import { createBrowserClient } from '@supabase/ssr'
 
@@ -8,6 +8,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  // Refs para controlar campos de senha e evitar popup Safari
+  const passwordRef = useRef<HTMLInputElement>(null)
+  const confirmPasswordRef = useRef<HTMLInputElement>(null)
 
   const getSupabase = () => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -92,6 +96,9 @@ export default function LoginPage() {
 
       if (!response.ok) {
         setError(data.error || 'Erro ao enviar email de recuperação.')
+      } else if (data.fallbackLink) {
+        setSuccess('Redirecionando para redefinição de senha...')
+        window.location.href = data.fallbackLink
       } else {
         setSuccess('Se o e-mail existir, você receberá um link para redefinir a senha.')
         setMode('login')
@@ -118,6 +125,11 @@ export default function LoginPage() {
         }
         .kings-input:focus {
           border-color: rgba(0, 229, 255, 0.5) !important;
+        }
+        .kings-password-mask {
+          -webkit-text-security: disc;
+          -moz-text-security: disc;
+          text-security: disc;
         }
       `}} />
       {/* Glow de fundo */}
@@ -188,9 +200,9 @@ export default function LoginPage() {
 
         {/* Card */}
         <form
-          action="#"
           onSubmit={mode === 'login' ? handleLogin : mode === 'register' ? handleRegister : handleResetPassword}
           autoComplete="off"
+          data-form-type="other"
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -203,10 +215,6 @@ export default function LoginPage() {
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
           }}
         >
-          {/* Safari Honeypot para evitar que ele fique pedindo para salvar a senha a cada letra digitada no email */}
-          <input type="text" name="safari_username_honeypot" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }} tabIndex={-1} aria-hidden="true" autoComplete="username" />
-          <input type="password" name="safari_password_honeypot" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }} tabIndex={-1} aria-hidden="true" autoComplete="current-password" />
-
           {mode === 'register' && (
             <div>
               <label style={{
@@ -216,7 +224,7 @@ export default function LoginPage() {
               }}>Nome completo</label>
               <input
                 type="text" required
-                placeholder="Piloto" autoComplete="name" name="fullName" id="fullName"
+                placeholder="Piloto" autoComplete="off" name="fullName" id="fullName"
                 className="kings-input"
               />
             </div>
@@ -230,7 +238,7 @@ export default function LoginPage() {
             }}>E-mail</label>
             <input
               type="email" required
-              placeholder="seu@email.com" autoComplete="username" name="email" id="email"
+              placeholder="seu@email.com" autoComplete="off" name="email" id="email"
               className="kings-input"
             />
           </div>
@@ -249,12 +257,14 @@ export default function LoginPage() {
                 )}
               </div>
               <input
-                type="password" required
+                ref={passwordRef}
+                type="text" required
                 placeholder="••••••••" 
-                autoComplete={mode === 'login' ? "current-password" : "new-password"} 
+                autoComplete="off"
                 name="password" id="password"
-                className="kings-input"
+                className="kings-input kings-password-mask"
                 data-lpignore="true"
+                data-form-type="other"
               />
             </div>
           )}
@@ -267,12 +277,14 @@ export default function LoginPage() {
                 textTransform: 'uppercase', letterSpacing: '0.5px',
               }}>Confirmar senha</label>
               <input
-                type="password" required
+                ref={confirmPasswordRef}
+                type="text" required
                 placeholder="••••••••" 
-                autoComplete="new-password" 
+                autoComplete="off"
                 name="confirmPassword" id="confirmPassword"
-                className="kings-input"
+                className="kings-input kings-password-mask"
                 data-lpignore="true"
+                data-form-type="other"
               />
             </div>
           )}

@@ -393,7 +393,7 @@ function translateStatus(status: string): string {
   const map: Record<string, string> = {
     paid: 'Pago', shipped: 'Enviado', delivered: 'Entregue',
     pending: 'Pendente', cancelled: 'Cancelado', refunded: 'Reembolsado',
-    active: 'Ativo', draft: 'Rascunho', archived: 'Arquivado',
+    active: 'Ativo', draft: 'Rascunho', disabled: 'Desativado', archived: 'Arquivado',
   }
   return map[status] || status
 }

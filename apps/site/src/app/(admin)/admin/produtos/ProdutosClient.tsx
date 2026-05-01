@@ -13,6 +13,7 @@ type Product = {
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   active: { label: 'Ativo', color: '#10b981' },
   draft: { label: 'Rascunho', color: '#f59e0b' },
+  disabled: { label: 'Desativado', color: '#ef4444' },
   archived: { label: 'Arquivado', color: '#64748b' },
 }
 
