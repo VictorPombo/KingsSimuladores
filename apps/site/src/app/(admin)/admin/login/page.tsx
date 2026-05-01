@@ -48,22 +48,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1e1e1e', padding: '20px' }}>
-      <div style={{ width: '100%', maxWidth: '400px' }}>
-        <div style={{ 
-          background: '#2c2e36', 
-          border: '1px solid #3f424d', 
-          borderRadius: '12px', 
-          padding: '32px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Container maxWidth="400px">
+        <Card glow>
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <h1
-              style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', margin: 0, letterSpacing: '-0.5px' }}
+              className="gradient-text"
+              style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 800 }}
             >
-              Kings<span style={{ color: '#64748b', fontWeight: 400 }}>Hub</span> Admin
+              KINGS HUB — ADMIN
             </h1>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '8px' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '8px' }}>
               Acesso restrito a administradores
             </p>
           </div>
@@ -74,7 +69,7 @@ export default function LoginPage() {
               </div>
             )}
             <div>
-              <label style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
                 E-mail
               </label>
               <input
@@ -85,18 +80,18 @@ export default function LoginPage() {
                 required
                 style={{
                   width: '100%',
-                  background: '#1e1e1e',
-                  border: '1px solid #3f424d',
-                  borderRadius: '6px',
-                  padding: '12px 14px',
-                  color: '#fff',
-                  fontSize: '0.95rem',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '10px 14px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.9rem',
                   outline: 'none',
                 }}
               />
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
                 Senha
               </label>
               <input
@@ -107,38 +102,22 @@ export default function LoginPage() {
                 required
                 style={{
                   width: '100%',
-                  background: '#1e1e1e',
-                  border: '1px solid #3f424d',
-                  borderRadius: '6px',
-                  padding: '12px 14px',
-                  color: '#fff',
-                  fontSize: '0.95rem',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '10px 14px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.9rem',
                   outline: 'none',
                 }}
               />
             </div>
-            <button 
-              type="submit"
-              disabled={loading}
-              style={{ 
-                width: '100%', 
-                marginTop: '16px',
-                background: '#3b82f6',
-                color: '#fff',
-                border: 'none',
-                padding: '12px',
-                borderRadius: '6px',
-                fontSize: '1rem',
-                fontWeight: 600,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1
-              }}
-            >
+            <Button size="lg" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
               {loading ? 'Autenticando...' : 'Entrar'}
-            </button>
+            </Button>
           </form>
-        </div>
-      </div>
+        </Card>
+      </Container>
     </div>
   )
 }
