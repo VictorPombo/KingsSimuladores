@@ -105,7 +105,7 @@ export function CartDrawer() {
           )}
 
           {/* Motor de Recomendação Inteligente */}
-          {items.length > 0 && <UpsellEngine variant="compact" maxItems={2} />}
+          {items.length > 0 && <UpsellEngine variant="compact" maxItems={2} storeContext={isSeven ? 'seven' : isMsu ? 'msu' : 'kings'} />}
         </div>
 
         {items.length > 0 && (

@@ -24,6 +24,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.tcdn.com.br',
       },
+      {
+        protocol: 'https',
+        hostname: 'mozaracing.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.shopify.com',
+      },
     ],
   },
 

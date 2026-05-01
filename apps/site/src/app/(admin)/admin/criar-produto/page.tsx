@@ -31,6 +31,7 @@ export default function CriarProdutoPage() {
   // Fotos
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [externalImageUrls, setExternalImageUrls] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +46,13 @@ export default function CriarProdutoPage() {
   }
 
   const removeImage = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index))
+    // If it's an external image (loaded before uploaded files)
+    if (index < externalImageUrls.length) {
+      setExternalImageUrls(prev => prev.filter((_, i) => i !== index))
+    } else {
+      const fileIndex = index - externalImageUrls.length
+      setImageFiles(prev => prev.filter((_, i) => i !== fileIndex))
+    }
     setImagePreviews(prev => prev.filter((_, i) => i !== index))
   }
 
@@ -56,7 +63,9 @@ export default function CriarProdutoPage() {
   const [price, setPrice] = useState(0)
   const [priceCompare, setPriceCompare] = useState<number | null>(null)
   const [stock, setStock] = useState(1)
+  const [outOfStockBehavior, setOutOfStockBehavior] = useState('unavailable')
   const [sku, setSku] = useState('')
+  const [fabricante, setFabricante] = useState('')
   const [brandId, setBrandId] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [status, setStatus] = useState('draft')
@@ -114,6 +123,9 @@ export default function CriarProdutoPage() {
             uploadedUrls.push(publicUrl)
           }
         }
+        
+        // Add external URLs that weren't uploaded by user but imported by AI
+        uploadedUrls.push(...externalImageUrls)
 
         const payloadVars = hasVariations && selectedGridId 
           ? variationsData.map(v => {
@@ -131,7 +143,9 @@ export default function CriarProdutoPage() {
           title, slug, description, price, priceCompare, stock: hasVariations ? 0 : stock, 
           sku, brandId, categoryId, status, weightKg, width, height, length, ncm, ean, cnpjEmitente,
           images: uploadedUrls,
-          variations: payloadVars
+          variations: payloadVars,
+          fabricante,
+          outOfStockBehavior
         })
         setSuccess('Produto criado e pronto para o Hub Omnichannel!')
         setTimeout(() => router.push('/admin/produtos'), 1500)
@@ -176,26 +190,53 @@ export default function CriarProdutoPage() {
                 }
                 
                 if (dadosExtraidos.produto?.marca) {
-                  const matchBrand = brands.find(b => b.name.toLowerCase() === dadosExtraidos.produto.marca.toLowerCase());
+                  setFabricante(dadosExtraidos.produto.marca)
+                  const matchBrand = brands.find(b => b.name.toLowerCase() === dadosExtraidos.produto.marca.toLowerCase() || b.display_name?.toLowerCase() === dadosExtraidos.produto.marca.toLowerCase());
                   if (matchBrand) setBrandId(matchBrand.id);
+                }
+                
+                if (dadosExtraidos.imagens && dadosExtraidos.imagens.length > 0) {
+                  const urls = dadosExtraidos.imagens.map((img: any) => img.url).filter(Boolean)
+                  setExternalImageUrls(prev => [...prev, ...urls])
+                  setImagePreviews(prev => [...prev, ...urls])
                 }
                 
                 let combinedDescription = "";
                 if (dadosExtraidos.descricoes?.descricao_completa) {
-                  combinedDescription += dadosExtraidos.descricoes.descricao_completa + "\n\n";
+                  // Replace <p> and <br> with newlines, then strip other HTML tags
+                  let cleanDesc = dadosExtraidos.descricoes.descricao_completa
+                    .replace(/<\/?p[^>]*>/gi, '\n\n')
+                    .replace(/<br\s*\/?>/gi, '\n')
+                    .replace(/<[^>]*>?/gm, '');
+                  
+                  // Clean up multiple newlines
+                  cleanDesc = cleanDesc.replace(/\n\s*\n/g, '\n\n').trim();
+                  
+                  combinedDescription += cleanDesc + "\n\n";
                 }
                 if (dadosExtraidos.especificacoes && dadosExtraidos.especificacoes.length > 0) {
-                   combinedDescription += "<h3>Especificações Técnicas</h3>\n<ul>\n";
+                   combinedDescription += "ESPECIFICAÇÕES TÉCNICAS\n\n";
                    dadosExtraidos.especificacoes.forEach((g: any) => {
                      g.itens?.forEach((i: any) => {
-                       combinedDescription += `<li><strong>${i.nome}:</strong> ${i.valor}</li>\n`;
+                       combinedDescription += `• ${i.nome}: ${i.valor}\n`;
                      });
                    });
-                   combinedDescription += "</ul>\n";
+                   combinedDescription += "\n";
                 }
-                if (combinedDescription) setDescription(combinedDescription);
+                if (combinedDescription) setDescription(combinedDescription.trim());
 
                 if (dadosExtraidos.seo?.slug_sugerido) setSlug(dadosExtraidos.seo.slug_sugerido);
+
+                if (dadosExtraidos.fiscal_e_dimensoes) {
+                  const f = dadosExtraidos.fiscal_e_dimensoes;
+                  if (f.ncm) setNcm(String(f.ncm).replace(/\D/g, ''));
+                  if (f.ean) setEan(String(f.ean));
+                  else setEan('SEM GTIN');
+                  if (f.peso_kg) setWeightKg(Number(f.peso_kg));
+                  if (f.largura_cm) setWidth(Number(f.largura_cm));
+                  if (f.altura_cm) setHeight(Number(f.altura_cm));
+                  if (f.comprimento_cm) setLength(Number(f.comprimento_cm));
+                }
 
                 setMostrarImportador(false);
              }}
@@ -273,7 +314,7 @@ export default function CriarProdutoPage() {
       {/* Preços */}
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><DollarSign size={20} color="#10b981" /> Preço e estoque</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.5fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Preço de venda *</label>
             <div style={{ display: 'flex' }}>
@@ -291,6 +332,26 @@ export default function CriarProdutoPage() {
           <div>
             <label style={labelStyle}>{hasVariations ? 'Estoque (Ignorado c/ Variação)' : 'Estoque Base *'}</label>
             <input type="number" min={0} value={stock} onChange={e => setStock(Number(e.target.value))} disabled={hasVariations} style={{...inputStyle, opacity: hasVariations ? 0.5 : 1}} onFocus={focusHandler} onBlur={blurHandler} />
+          </div>
+          <div>
+            <label style={labelStyle}>Quando acabar o estoque</label>
+            <select value={outOfStockBehavior} onChange={e => setOutOfStockBehavior(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+              <option value="unavailable">Tornar o produto indisponível</option>
+              <option value="immediate">Continuar vendendo c/ disp. imediata</option>
+              <option value="1_day">Continuar vendendo c/ disp. de 1 dia útil</option>
+              <option value="2_days">Continuar vendendo c/ disp. de 2 dias úteis</option>
+              <option value="3_days">Continuar vendendo c/ disp. de 3 dias úteis</option>
+              <option value="4_days">Continuar vendendo c/ disp. de 4 dias úteis</option>
+              <option value="5_days">Continuar vendendo c/ disp. de 5 dias úteis</option>
+              <option value="6_days">Continuar vendendo c/ disp. de 6 dias úteis</option>
+              <option value="7_days">Continuar vendendo c/ disp. de 7 dias úteis</option>
+              <option value="10_days">Continuar vendendo c/ disp. de 10 dias úteis</option>
+              <option value="15_days">Continuar vendendo c/ disp. de 15 dias úteis</option>
+              <option value="20_days">Continuar vendendo c/ disp. de 20 dias úteis</option>
+              <option value="30_days">Continuar vendendo c/ disp. de 30 dias úteis</option>
+              <option value="45_days">Continuar vendendo c/ disp. de 45 dias úteis</option>
+              <option value="60_days">Continuar vendendo c/ disp. de 60 dias úteis</option>
+            </select>
           </div>
         </div>
       </div>
@@ -338,7 +399,11 @@ export default function CriarProdutoPage() {
                   <tbody>
                     {variationsData.map((v, i) => (
                       <tr key={i} style={{ borderTop: '1px solid #3f424d' }}>
-                        <td style={{ padding: '10px', fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>{v.opt}</td>
+                        <td style={{ padding: '10px' }}>
+                          <input type="text" value={v.opt} onChange={(e) => {
+                            const nd = [...variationsData]; nd[i].opt = e.target.value; setVariationsData(nd);
+                          }} style={{ ...inputStyle, padding: '8px 12px', fontSize: '0.85rem', fontWeight: 'bold' }} />
+                        </td>
                         <td style={{ padding: '10px' }}>
                           <input type="text" value={v.sku} onChange={(e) => {
                             const nd = [...variationsData]; nd[i].sku = e.target.value; setVariationsData(nd);
@@ -363,6 +428,11 @@ export default function CriarProdutoPage() {
                     ))}
                   </tbody>
                 </table>
+                <div style={{ padding: '12px', display: 'flex', justifyContent: 'flex-start' }}>
+                  <button type="button" onClick={() => setVariationsData([...variationsData, { opt: 'Nova Opção', sku: '', price: '', stock: 0 }])} style={{ padding: '8px 16px', background: 'transparent', border: '1px dashed #64748b', borderRadius: '6px', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    + Adicionar Nova Opção
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -374,11 +444,19 @@ export default function CriarProdutoPage() {
         <h2 style={sectionTitleStyle}><Archive size={20} color="#f59e0b" /> Organização</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Marca *</label>
-            <select value={brandId} onChange={e => setBrandId(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+            <label style={labelStyle}>Loja Origem *</label>
+            <select value={brandId} onChange={e => {
+              setBrandId(e.target.value)
+              const selectedBrand = brands.find(b => b.id === e.target.value)
+              if (selectedBrand?.cnpj) setCnpjEmitente(selectedBrand.cnpj)
+            }} style={{ ...inputStyle, cursor: 'pointer' }}>
               <option value="">Selecionar...</option>
-              {brands.map((b: any) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              {brands.map((b: any) => <option key={b.id} value={b.id}>{b.display_name || b.name}</option>)}
             </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Fabricante (Marca)</label>
+            <input type="text" value={fabricante} onChange={e => setFabricante(e.target.value)} placeholder="Ex: Moza, Fanatec" style={inputStyle} onFocus={focusHandler} onBlur={blurHandler} />
           </div>
           <div>
             <label style={labelStyle}>Categoria</label>

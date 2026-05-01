@@ -29,7 +29,7 @@ function detectCategory(title: string): string {
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const { cartItems, limit = 3 } = await request.json()
+    const { cartItems, limit = 3, storeContext = 'kings' } = await request.json()
 
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json({ suggestions: [] })
@@ -60,7 +60,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       .from('products')
       .select('id, title, slug, price, images, attributes, stock, brands!inner(name)')
       .eq('status', 'active')
-      .eq('brands.name', 'kings')
+      .eq('brands.name', storeContext)
       .gt('stock', 0)
       .or(orFilters)
       .order('price', { ascending: true })
