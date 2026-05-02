@@ -4,8 +4,18 @@ import { CategoryNav, MobileCategoryNav } from './CategoryNav'
 import { SearchBar } from './SearchBar'
 import { AuthAction } from './AuthAction'
 import { StoreSwitcher } from './StoreSwitcher'
+import { createServerSupabaseClient } from '@kings/db'
 
 export async function Header() {
+  const supabase = await createServerSupabaseClient()
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('id, name, slug')
+    .eq('brand_scope', 'kings')
+    .order('sort_order', { ascending: true })
+
+  const kingsCategories = categories || []
+
   return (
     <>
       {/* =======================================================
@@ -71,7 +81,7 @@ export async function Header() {
           </Container>
           
           {/* Barra Secundária de Categorias (Estilo Clássico Kings) */}
-          <CategoryNav />
+          <CategoryNav categories={kingsCategories} />
         </header>
       </div>
 
@@ -118,7 +128,7 @@ export async function Header() {
               </div>
             </div>
 
-            <MobileCategoryNav />
+            <MobileCategoryNav categories={kingsCategories} />
           </div>
         </header>
       </div>

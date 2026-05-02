@@ -3,65 +3,19 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
-const MENU_ITEMS = [
 
-  {
-    label: "TODOS PRODUTOS",
-    href: "/produtos"
-  },
-  {
-    label: "THERMALTAKE",
-    href: "/marcas/thermaltake"
-  },
-  {
-    label: "PLATAFORMAS",
-    href: "/categorias/pc",
-    subItems: [
-      { label: "COMPUTADOR – PC", href: "/categorias/pc" },
-      { label: "PLAYSTATION", href: "/categorias/playstation" },
-      { label: "XBOX", href: "/categorias/xbox" }
-    ]
-  },
-  {
-    label: "THRUSTMASTER",
-    href: "/marcas/thrustmaster",
-    subItems: [
-      { label: "BASES TM", href: "/produtos?brand=thrustmaster&category=base" },
-      { label: "KIT COMPLETO TM", href: "/produtos?brand=thrustmaster&category=kit-completo" },
-      { label: "PEDALEIRA TM", href: "/produtos?brand=thrustmaster&category=pedais" },
-      { label: "VOLANTES", href: "/produtos?brand=thrustmaster&category=volantes" }
-    ]
-  },
-  {
-    label: "MOZA RACING",
-    href: "/marcas/moza",
-    subItems: [
-      { label: "BASES - APENAS BASES", href: "/produtos?brand=moza&category=base" },
-      { label: "KIT COMPLETO", href: "/produtos?brand=moza&category=kit-completo" },
-      { label: "PEDAIS", href: "/produtos?brand=moza&category=pedais" },
-      { label: "VOLANTES", href: "/produtos?brand=moza&category=volantes" }
-    ]
-  },
-  {
-    label: "KIT COMPLETO",
-    href: "/categorias/kit-completo"
-  },
-  {
-    label: "COCKPIT",
-    href: "/categorias/cockpit"
-  },
-  {
-    label: "CONSULTORIA",
-    href: "/consultoria"
-  },
-  {
-    label: "QUEM SOMOS?",
-    href: "/quem-somos"
-  }
-]
-
-export function CategoryNav() {
+export function CategoryNav({ categories = [] }: { categories?: Array<{id: string, name: string, slug: string}> }) {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
+
+  const menuItems = [
+    { label: "TODOS PRODUTOS", href: "/produtos" },
+    ...categories.map(c => ({
+      label: c.name.toUpperCase(),
+      href: `/categorias/${c.slug}`
+    })),
+    { label: "CONSULTORIA", href: "/consultoria" },
+    { label: "QUEM SOMOS?", href: "/quem-somos" }
+  ]
 
   return (
     <nav 
@@ -98,7 +52,7 @@ export function CategoryNav() {
             text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
           }
         `}} />
-        {MENU_ITEMS.map((item, idx) => {
+        {menuItems.map((item, idx) => {
           const isConsultoria = item.label === 'CONSULTORIA';
           return (
           <div 
@@ -127,7 +81,7 @@ export function CategoryNav() {
               {item.label}
             </Link>
 
-            {item.subItems && activeDropdown === idx && (
+            {(item as any).subItems && activeDropdown === idx && (
               <div 
                 style={{
                   position: 'absolute',
@@ -145,7 +99,7 @@ export function CategoryNav() {
                   zIndex: 9999
                 }}
               >
-                {item.subItems.map((sub, sIdx) => (
+                {(item as any).subItems.map((sub: any, sIdx: number) => (
                   <Link 
                     key={sIdx}
                     href={sub.href}
@@ -183,7 +137,17 @@ export function CategoryNav() {
   )
 }
 
-export function MobileCategoryNav() {
+export function MobileCategoryNav({ categories = [] }: { categories?: Array<{id: string, name: string, slug: string}> }) {
+  const menuItems = [
+    { label: "TODOS PRODUTOS", href: "/produtos" },
+    ...categories.map(c => ({
+      label: c.name.toUpperCase(),
+      href: `/categorias/${c.slug}`
+    })),
+    { label: "CONSULTORIA", href: "/consultoria" },
+    { label: "QUEM SOMOS?", href: "/quem-somos" }
+  ]
+
   return (
     <nav style={{ width: '100%' }}>
       <div 
@@ -197,7 +161,7 @@ export function MobileCategoryNav() {
           scrollSnapType: 'x mandatory'
         }}
       >
-        {MENU_ITEMS.map((item, idx) => {
+        {menuItems.map((item, idx) => {
           const isConsultoria = item.label === 'CONSULTORIA';
           return (
           <Link 

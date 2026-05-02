@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 export type StoreType = 'kings' | 'msu' | 'seven' | 'all'
@@ -24,11 +24,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const setAndSaveStore = (store: StoreType) => {
+  const setAndSaveStore = useCallback((store: StoreType) => {
     setCurrentStore(store)
     document.cookie = `admin_store=${store}; path=/admin; max-age=31536000`
     router.refresh() // Trigger Server Components to re-render with new cookie
-  }
+  }, [router])
 
   return (
     <StoreContext.Provider value={{ currentStore, setCurrentStore: setAndSaveStore }}>

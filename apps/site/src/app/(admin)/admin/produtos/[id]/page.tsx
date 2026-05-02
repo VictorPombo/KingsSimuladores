@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getProductById } from './actions'
+import { getProductById, getAllCategories } from './actions'
 import { EditProductForm } from './EditProductForm'
 
 export const dynamic = 'force-dynamic'
@@ -10,6 +10,8 @@ export default async function EditProductPage({ params }: { params: { id: string
   if (!product) {
     notFound()
   }
+
+  const allCategories = await getAllCategories()
 
   const mapped = {
     id: product.id,
@@ -30,7 +32,7 @@ export default async function EditProductPage({ params }: { params: { id: string
     created_at: product.created_at,
     updated_at: product.updated_at,
     brand_name: (product as any).brands?.display_name || (product as any).brands?.name || 'Desconhecida',
-    category_name: (product as any).categories?.name || null,
+    category_id: product.category_id || null,
     fabricante: product.attributes?.marca || null,
     attributes: product.attributes || {},
     cost_price: product.attributes?.cost_price || null
@@ -38,7 +40,7 @@ export default async function EditProductPage({ params }: { params: { id: string
 
   return (
     <div style={{ padding: '2rem', minHeight: '100vh', color: '#fff', background: '#1e1e1e' }}>
-      <EditProductForm key={mapped.updated_at} product={mapped} />
+      <EditProductForm key={mapped.updated_at} product={mapped} allCategories={allCategories} />
     </div>
   )
 }

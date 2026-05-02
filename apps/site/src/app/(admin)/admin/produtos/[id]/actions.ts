@@ -27,6 +27,8 @@ export async function updateProduct(id: string, formData: FormData) {
   const imagesRaw = formData.get('images') as string
   const images = imagesRaw ? JSON.parse(imagesRaw) : undefined
 
+  const categoryId = formData.get('category_id') as string || null
+
   if (!title || isNaN(price) || isNaN(stock)) {
     return { success: false, error: 'Campos obrigatórios não preenchidos.' }
   }
@@ -44,6 +46,7 @@ export async function updateProduct(id: string, formData: FormData) {
     ncm,
     ean,
     cnpj_emitente,
+    category_id: categoryId,
     updated_at: new Date().toISOString(),
   }
 
@@ -93,5 +96,16 @@ export async function getProductById(id: string) {
     return null
   }
 
+  return data
+}
+
+export async function getAllCategories() {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, brand_scope')
+    .order('name')
+  
+  if (error || !data) return []
   return data
 }

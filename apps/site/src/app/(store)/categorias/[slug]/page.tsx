@@ -6,79 +6,72 @@ import { notFound } from 'next/navigation'
 
 export const revalidate = 60
 
-const CATEGORY_DATA: Record<string, { title: string, desc: string, color: string }> = {
-  cockpit: {
-    title: "COCKPITS PROFISSIONAIS",
+const UI_METADATA: Record<string, { desc: string, color: string }> = {
+  'kings-cockpits': {
     desc: "A fundação do seu simulador. Estruturas prontas para aguentar o torque absurdo de bases Direct Drive.",
     color: "#00e5ff" // Cyan/Kings
   },
-  'kit-completo': {
-    title: "KITS COMPLETOS",
+  'kings-kits-completos': {
     desc: "Pluge, ligue e acelere. Conjuntos fechados de Base + Volante + Pedal.",
     color: "#a855f7" 
   },
-  pc: {
-    title: "PLATAFORMAS - PC",
+  'kings-computadores': {
     desc: "Equipamentos com certificação e drivers 100% otimizados para Windows.",
     color: "#06b6d4" 
   },
-  playstation: {
-    title: "PLAYSTATION",
-    desc: "Ecossistemas com chip de segurança PlayStation (PS4/PS5).",
-    color: "#003791" 
-  },
-  xbox: {
-    title: "XBOX",
-    desc: "Equipamentos que dão acesso direto aos recursos do Xbox Series X/S.",
-    color: "#0e7a0d" 
-  },
-  base: {
-    title: "BASES E MOTORES",
+  'kings-bases': {
     desc: "O coração do seu simulador. Tecnologias Direct Drive em sua máxima performance.",
     color: "#f59e0b" 
   },
-  pedais: {
-    title: "PEDAIS HIGH-END",
+  'kings-pedais': {
     desc: "Porque freadas perfeitas ganham corridas com precisão magnética e Load Cell.",
     color: "#ef4444" 
   },
-  volantes: {
-    title: "VOLANTES",
+  'kings-volantes': {
     desc: "Fórmulas, GT3 ou Rally. Arcos para você não precisar tirar a mão da direção.",
     color: "#10b981" 
+  },
+  'kings-acessorios': {
+    desc: "Aprimore sua experiência com acessórios oficiais para seu simulador.",
+    color: "#8b5cf6"
   }
 }
 
 export default async function CategoryShowcasePage({ params }: { params: { slug: string } }) {
-  const data = CATEGORY_DATA[params.slug]
-  
-  if (!data) {
-    notFound()
-  }
-
   let products: any[] = []
+  let category: any = null
   
   try {
     const supabase = await createServerSupabaseClient()
     
-    let query = supabase
+    const { data: cat } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('slug', params.slug)
+      .eq('brand_scope', 'kings')
+      .single()
+
+    if (!cat) {
+      notFound()
+    }
+    
+    category = cat
+
+    const { data: prods } = await supabase
       .from('products')
       .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(name)')
       .eq('status', 'active')
       .eq('brands.name', 'kings')
+      .eq('category_id', cat.id)
+      .order('created_at', { ascending: false })
       
-    if (params.slug === 'base') query = query.or('title.ilike.%base%,title.ilike.%motor%')
-    else if (params.slug === 'volantes') query = query.or('title.ilike.%volante%,title.ilike.%arco%')
-    else if (params.slug === 'kit-completo') query = query.or('title.ilike.%kit%,title.ilike.%bundle%')
-    else if (params.slug === 'pedais') query = query.or('title.ilike.%pedal%,title.ilike.%pedais%')
-    else query = query.ilike('title', `%${params.slug}%`)
-
-    const result = await query.order('created_at', { ascending: false })
-    
-    products = result.data || []
+    products = prods || []
   } catch (err) {
     console.error("Erro buscando produtos de categoria:", err)
+    if (!category) notFound()
   }
+
+  const meta = UI_METADATA[category.slug] || { desc: "Explore nossa seleção de produtos.", color: "#00e5ff" }
 
   return (
     <div style={{ padding: '40px 0', minHeight: 'calc(100vh - 80px)' }}>
@@ -97,22 +90,22 @@ export default async function CategoryShowcasePage({ params }: { params: { slug:
           <div style={{
             position: 'absolute',
             top: 0, right: 0, bottom: 0, left: 0,
-            background: `radial-gradient(circle at 10% 90%, ${data.color}20 0%, transparent 60%)`,
+            background: `radial-gradient(circle at 10% 90%, ${meta.color}20 0%, transparent 60%)`,
             zIndex: 0,
             pointerEvents: 'none'
           }} />
           
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-              <div style={{ width: '40px', height: '4px', background: data.color, borderRadius: '2px' }} />
+              <div style={{ width: '40px', height: '4px', background: meta.color, borderRadius: '2px' }} />
               <h4 style={{ textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>VITRINE CLASSIFICADA</h4>
             </div>
-            <h1 className="font-display" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 16px 0', color: 'var(--text-primary)', textShadow: `0 0 20px ${data.color}40` }}>
-              {data.title}
+            <h1 className="font-display" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 16px 0', color: 'var(--text-primary)', textShadow: `0 0 20px ${meta.color}40` }}>
+              {category.name}
             </h1>
             <div style={{ maxWidth: '800px', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
               <p style={{ margin: 0, fontSize: '1.1rem' }}>
-                {data.desc}
+                {meta.desc}
               </p>
             </div>
           </div>
@@ -126,7 +119,7 @@ export default async function CategoryShowcasePage({ params }: { params: { slug:
           
           {products.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px', background: 'var(--bg-subtle)', borderRadius: 'var(--radius)' }}>
-              <p style={{ color: 'var(--text-muted)' }}>No momento, ainda não etiquetamos nenhum equipamento para "{params.slug}".</p>
+              <p style={{ color: 'var(--text-muted)' }}>No momento, ainda não etiquetamos nenhum equipamento para "{category.name}".</p>
             </div>
           ) : (
             <div className="kings-catalog-grid">

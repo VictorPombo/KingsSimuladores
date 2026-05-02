@@ -15,6 +15,7 @@ export default async function ProductsPage({
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   let products: any[] = []
+  let activeCategories: any[] = []
   
   const category = typeof searchParams.category === 'string' ? searchParams.category : null
   const brand = typeof searchParams.brand === 'string' ? searchParams.brand : null
@@ -22,6 +23,16 @@ export default async function ProductsPage({
   
   try {
     const supabase = await createServerSupabaseClient()
+    
+    // Buscar categorias ativas para a Kings
+    const { data: allCategories } = await supabase
+      .from('categories')
+      .select('id, name, slug')
+      .eq('brand_scope', 'kings')
+      .order('sort_order', { ascending: true })
+
+    activeCategories = allCategories || []
+
     let query = supabase
       .from('products')
       .select('id, title, slug, price, price_compare, images, attributes, stock, brands!inner(name)')
@@ -34,28 +45,13 @@ export default async function ProductsPage({
     }
 
     if (category) {
-      const term = category.toLowerCase()
-      
-      if (term === 'pedal' || term === 'pedais') {
-        query = query.or('title.ilike.%pedal%,title.ilike.%pedais%')
-      } else if (term === 'volante' || term === 'volantes') {
-        query = query.or('title.ilike.%volante%,title.ilike.%arco%')
-      } else if (term === 'base') {
-        query = query.or('title.ilike.%base%,title.ilike.%motor%')
-      } else if (term === 'kit' || term === 'kit-completo') {
-        query = query.or('title.ilike.%kit%,title.ilike.%bundle%')
-      } else if (term === 'cockpit' || term === 'cockpits') {
-        query = query.ilike('title', '%cockpit%')
-      } else if (term === 'pc' || term === 'computador') {
-        query = query.or('title.ilike.%pc%,title.ilike.%windows%,title.ilike.%computador%')
-      } else if (term === 'playstation') {
-        query = query.or('title.ilike.%playstation%,title.ilike.%ps4%,title.ilike.%ps5%')
-      } else if (term === 'xbox') {
-        query = query.ilike('title', '%xbox%')
+      // Find the category by slug
+      const matchedCategory = activeCategories.find(c => c.slug === category)
+      if (matchedCategory) {
+        query = query.eq('category_id', matchedCategory.id)
       } else {
-        // Fallback genérico para remover "s" do final e tentar pegar a raiz da palavra
-        const rootTerm = term.endsWith('s') ? term.slice(0, -1) : term
-        query = query.ilike('title', `%${rootTerm}%`)
+        // Fallback for old queries or bad URLs
+        query = query.ilike('title', `%${category}%`)
       }
     }
     
@@ -92,7 +88,7 @@ export default async function ProductsPage({
 
         {/* Filter Bar (horizontal, collapsible, sticky) */}
         <Suspense fallback={<div style={{ padding: '12px 20px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', marginBottom: '24px' }}>Carregando filtros...</div>}>
-          <CatalogFilters />
+          <CatalogFilters categories={activeCategories} />
         </Suspense>
 
         {/* Product Grid */}

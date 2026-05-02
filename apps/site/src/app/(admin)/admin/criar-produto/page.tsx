@@ -13,7 +13,7 @@ const labelStyle: React.CSSProperties = { display: 'block', color: '#cbd5e1', fo
 const sectionStyle: React.CSSProperties = { background: '#2c2e36', borderRadius: '8px', border: '1px solid #3f424d', padding: '28px', marginBottom: '20px' }
 const sectionTitleStyle: React.CSSProperties = { fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px' }
 
-const RichEditor = ({ value, onChange, onFocus, onBlur }: { value: string, onChange: (val: string) => void, onFocus?: () => void, onBlur?: () => void }) => {
+const RichEditor = ({ value, onChange, onFocus, onBlur }: { value: string, onChange: (val: string) => void, onFocus?: any, onBlur?: any }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== value && document.activeElement !== editorRef.current) {

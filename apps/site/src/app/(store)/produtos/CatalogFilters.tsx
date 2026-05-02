@@ -4,20 +4,13 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
 
-const CATEGORIES = [
-  { id: 'cockpits', label: 'Cockpits' },
-  { id: 'volantes', label: 'Volantes' },
-  { id: 'pedais', label: 'Pedais' },
-  { id: 'acessorios', label: 'Acessórios' },
-]
-
 const BRANDS = [
   { id: 'xtreme', label: 'Xtreme Racing' },
   { id: 'fanatec', label: 'Fanatec' },
   { id: 'moza', label: 'Moza Racing' },
 ]
 
-export function CatalogFilters() {
+export function CatalogFilters({ categories = [] }: { categories?: Array<{id: string, name: string, slug: string}> }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
@@ -191,13 +184,13 @@ export function CatalogFilters() {
                   fontWeight: 700,
                 }}>Categorias</h4>
                 <div className="kings-filter-chips-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {CATEGORIES.map(cat => (
+                  {categories.map(cat => (
                     <button
                       key={cat.id}
-                      className={`kings-filter-chip ${currentCategory === cat.id ? 'active' : ''}`}
-                      onClick={() => toggleFilter('category', cat.id)}
+                      className={`kings-filter-chip ${currentCategory === cat.slug ? 'active' : ''}`}
+                      onClick={() => toggleFilter('category', cat.slug)}
                     >
-                      {cat.label}
+                      {cat.name}
                     </button>
                   ))}
                 </div>

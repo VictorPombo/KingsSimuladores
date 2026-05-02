@@ -43,7 +43,7 @@ export async function POST(req: Request) {
           .from('orders')
           .update({ status: 'paid', payment_id: paymentId, payment_method: paymentData.payment_method_id })
           .eq('id', orderId)
-          .select('id, customer_id, brand_origin, total, shipping_address, coupon_id, profiles(full_name, email, phone)')
+          .select('id, customer_id, brand_origin, total, shipping_address, coupon_id, profiles(full_name, email, phone, cpf_cnpj)')
           .single()
 
         if (orderErr || !order) {
@@ -137,7 +137,9 @@ export async function POST(req: Request) {
             total: storeSubtotal + (shippingVal || 0),
             customer: {
               name: profile?.full_name,
-              email: profile?.email
+              email: profile?.email,
+              cpf_cnpj: profile?.cpf_cnpj,
+              phone: profile?.phone
             },
             shipping: order.shipping_address,
             shipping_cost: shippingVal,

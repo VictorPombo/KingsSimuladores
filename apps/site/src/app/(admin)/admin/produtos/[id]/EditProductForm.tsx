@@ -9,7 +9,7 @@ type ProductData = {
   id: string; title: string; slug: string; sku: string | null; price: number; price_compare: number | null
   stock: number; status: string; weight_kg: number | null; dimensions_cm: {width: number, height: number, length: number} | null; images: string[]; description: string | null
   ncm: string | null; ean: string | null; cnpj_emitente: string | null; created_at: string; updated_at: string
-  brand_name: string; category_name: string | null; fabricante: string | null; attributes?: Record<string, any>
+  brand_name: string; category_id: string | null; fabricante: string | null; attributes?: Record<string, any>
   cost_price: number | null
 }
 
@@ -23,7 +23,7 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px',
 }
 
-export function EditProductForm({ product }: { product: ProductData }) {
+export function EditProductForm({ product, allCategories = [] }: { product: ProductData, allCategories?: Array<{id: string, name: string, brand_scope: string}> }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
@@ -180,6 +180,20 @@ export function EditProductForm({ product }: { product: ProductData }) {
                     </select>
                   </div>
                 </div>
+
+                <div style={{ marginTop: '14px' }}>
+                  <label style={labelStyle}>Categoria</label>
+                  <select name="category_id" defaultValue={product.category_id || ''}
+                    style={{ ...inputStyle, cursor: 'pointer' }}>
+                    <option value="">Sem Categoria</option>
+                    {allCategories.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name} ({cat.brand_scope === 'kings' ? 'Kings' : 'Seven'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div style={{ marginTop: '14px' }}>
                   <label style={labelStyle}>Fabricante (Marca do Produto)</label>
                   <input name="fabricante" defaultValue={product.fabricante || ''} placeholder="Ex: Moza, Fanatec, Simagic" style={inputStyle}
@@ -338,7 +352,7 @@ export function EditProductForm({ product }: { product: ProductData }) {
                 </div>
                 <div>
                   <span style={{ color: '#64748b' }}>Categoria: </span>
-                  <span style={{ color: '#e2e8f0' }}>{product.category_name || '—'}</span>
+                  <span style={{ color: '#e2e8f0' }}>{allCategories.find(c => c.id === product.category_id)?.name || '—'}</span>
                 </div>
                 <div>
                   <span style={{ color: '#64748b' }}>Criado: </span>

@@ -16,6 +16,8 @@ export function RevenueChart({ currentStore }: { currentStore: string }) {
     async function fetchRevenue() {
       try {
         const supabase = createClient()
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000)
         const sevenDaysAgo = new Date()
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
         const isoStart = sevenDaysAgo.toISOString()
@@ -38,7 +40,9 @@ export function RevenueChart({ currentStore }: { currentStore: string }) {
           }
         }
 
-        const { data: rows } = await query
+        const { data: rows, error } = await query.abortSignal(controller.signal)
+        clearTimeout(timeoutId)
+        if (error) throw error
 
         // Group by day
         const byDay: Record<string, number> = {}
