@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { Container, Button } from '@kings/ui'
 import { createBrowserClient } from '@supabase/ssr'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function SevenLoginPage() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -12,6 +13,8 @@ export default function SevenLoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const getSupabase = () => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,7 +59,15 @@ export default function SevenLoginPage() {
       },
     })
     if (error) {
-      setError(error.message)
+      if (error.message.includes('Error sending confirmation email') || error.message.includes('rate limit')) {
+        setError('Conta criada, mas o e-mail de confirmação não pôde ser enviado no momento. Tente fazer o login ou contate o suporte.')
+        setMode('login')
+        setPassword('')
+        setConfirmPassword('')
+        setFullName('')
+      } else {
+        setError(error.message)
+      }
     } else {
       setSuccess('Conta criada! Verifique seu e-mail para confirmar o cadastro.')
       setMode('login')
@@ -196,18 +207,32 @@ export default function SevenLoginPage() {
               color: '#94a3b8', fontSize: '0.82rem', fontWeight: 600,
               textTransform: 'uppercase', letterSpacing: '0.5px',
             }}>Senha</label>
-            <input
-              type="password" required value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              style={{
-                width: '100%', background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
-                outline: 'none', transition: 'border-color 0.2s',
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(234, 88, 12, 0.5)'}
-              onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'} required value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                style={{
+                  width: '100%', background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+                  padding: '12px 16px', paddingRight: '40px', borderRadius: '10px', fontSize: '0.95rem',
+                  outline: 'none', transition: 'border-color 0.2s',
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(234, 88, 12, 0.5)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           {mode === 'register' && (
@@ -217,18 +242,32 @@ export default function SevenLoginPage() {
                 color: '#94a3b8', fontSize: '0.82rem', fontWeight: 600,
                 textTransform: 'uppercase', letterSpacing: '0.5px',
               }}>Confirmar senha</label>
-              <input
-                type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{
-                  width: '100%', background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                  padding: '12px 16px', borderRadius: '10px', fontSize: '0.95rem',
-                  outline: 'none', transition: 'border-color 0.2s',
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(234, 88, 12, 0.5)'}
-                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'} required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%', background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+                    padding: '12px 16px', paddingRight: '40px', borderRadius: '10px', fontSize: '0.95rem',
+                    outline: 'none', transition: 'border-color 0.2s',
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(234, 88, 12, 0.5)'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{
+                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           )}
 

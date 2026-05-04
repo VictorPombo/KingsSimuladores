@@ -2,12 +2,15 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Container, Button } from '@kings/ui'
 import { createBrowserClient } from '@supabase/ssr'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   // Refs para controlar campos de senha e evitar popup Safari
   const passwordRef = useRef<HTMLInputElement>(null)
@@ -68,7 +71,13 @@ export default function LoginPage() {
       },
     })
     if (error) {
-      setError(error.message)
+      if (error.message.includes('Error sending confirmation email') || error.message.includes('rate limit')) {
+        setError('Conta criada, mas houve um erro ao enviar o e-mail de confirmação. (Limite de envios atingido no Supabase). Tente fazer o login se a confirmação não for obrigatória.')
+        setMode('login')
+        form.reset()
+      } else {
+        setError(error.message)
+      }
     } else {
       setSuccess('Conta criada! Verifique seu e-mail para confirmar o cadastro.')
       setMode('login')
@@ -256,16 +265,31 @@ export default function LoginPage() {
                   </button>
                 )}
               </div>
-              <input
-                ref={passwordRef}
-                type="text" required
-                placeholder="••••••••" 
-                autoComplete="off"
-                name="password" id="password"
-                className="kings-input kings-password-mask"
-                data-lpignore="true"
-                data-form-type="other"
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  ref={passwordRef}
+                  type="text" required
+                  placeholder="••••••••" 
+                  autoComplete="off"
+                  name="password" id="password"
+                  className={`kings-input ${!showPassword ? 'kings-password-mask' : ''}`}
+                  data-lpignore="true"
+                  data-form-type="other"
+                  style={{ paddingRight: '40px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           )}
 
@@ -276,16 +300,31 @@ export default function LoginPage() {
                 color: 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: 600,
                 textTransform: 'uppercase', letterSpacing: '0.5px',
               }}>Confirmar senha</label>
-              <input
-                ref={confirmPasswordRef}
-                type="text" required
-                placeholder="••••••••" 
-                autoComplete="off"
-                name="confirmPassword" id="confirmPassword"
-                className="kings-input kings-password-mask"
-                data-lpignore="true"
-                data-form-type="other"
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  ref={confirmPasswordRef}
+                  type="text" required
+                  placeholder="••••••••" 
+                  autoComplete="off"
+                  name="confirmPassword" id="confirmPassword"
+                  className={`kings-input ${!showConfirmPassword ? 'kings-password-mask' : ''}`}
+                  data-lpignore="true"
+                  data-form-type="other"
+                  style={{ paddingRight: '40px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{
+                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           )}
 
