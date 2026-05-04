@@ -103,6 +103,17 @@ export default function CheckoutPage() {
     }
   }
 
+  // Agrupar itens por loja
+  const groups = items.reduce((acc, item) => {
+    const brand = item.brand || 'kings'
+    const store = brand.toLowerCase().includes('seven') ? 'seven' : (brand.toLowerCase().includes('msu') ? 'msu' : 'kings')
+    if (!acc[store]) acc[store] = []
+    acc[store].push(item)
+    return acc
+  }, {} as Record<string, typeof items>)
+
+  const storeNames = Object.keys(groups)
+
   const calcularFretes = async (overrideCep?: string) => {
     if (isRetirada) {
       const pickupOption = {
@@ -124,23 +135,62 @@ export default function CheckoutPage() {
     if (!targetCep || targetCep.length < 8) return
 
     try {
-      const res = await fetch('/api/shipping', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          destinationZip: targetCep,
-          originZip: process.env.NEXT_PUBLIC_DEFAULT_ORIGIN_ZIP || '12929608',
-          items: items.map(i => ({ id: i.id, quantity: i.quantity }))
-        })
-      })
-      const data = await res.json()
+      let storeOptions: Record<string, any[]> = {}
       
-      if (data.options && data.options.length > 0) {
-        setFretes(data.options)
-        setSelectedFrete(data.options[0]) // Select first option by default
+      for (const store of storeNames) {
+        const storeItems = groups[store]
+        const res = await fetch('/api/shipping', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            destinationZip: targetCep,
+            store: store,
+            items: storeItems.map(i => ({ id: i.id, quantity: i.quantity }))
+          })
+        })
+        const data = await res.json()
+        storeOptions[store] = data.options && data.options.length > 0 ? data.options : []
+      }
+
+      // Aggregate options
+      if (storeNames.length === 1) {
+        const opts = storeOptions[storeNames[0]] || []
+        setFretes(opts)
+        setSelectedFrete(opts.length > 0 ? opts[0] : null)
       } else {
-        setFretes([])
-        setSelectedFrete(null)
+        // Múltiplas lojas: soma as opções mais baratas para criar um frete único combinado
+        let totalCheapest = 0
+        let maxTime = 0
+        let allValid = true
+
+        for (const store of storeNames) {
+          const opts = storeOptions[store]
+          if (!opts || opts.length === 0) {
+            allValid = false
+            break
+          }
+          // The API already sorts by price, so [0] is cheapest
+          const cheapest = opts[0]
+          totalCheapest += parseFloat(cheapest.price)
+          if (parseInt(cheapest.delivery_time) > maxTime) maxTime = parseInt(cheapest.delivery_time)
+        }
+
+        if (allValid) {
+          const combinedOption = {
+            id: 'combined_shipping',
+            name: 'Frete Padrão (Múltiplas Origens)',
+            company: { name: 'Logística Parceira', picture: '' },
+            price: totalCheapest.toFixed(2),
+            currency: 'R$',
+            custom_delivery_time: maxTime,
+            delivery_time: maxTime,
+          }
+          setFretes([combinedOption])
+          setSelectedFrete(combinedOption)
+        } else {
+          setFretes([])
+          setSelectedFrete(null)
+        }
       }
       setStep(2)
     } catch (err) {
@@ -153,20 +203,7 @@ export default function CheckoutPage() {
   if (items.length === 0 && step === 1) return null
 
   const valorFrete = selectedFrete ? parseFloat(selectedFrete.price) : 0
-  // totalPrice já vem do CartContext COM o desconto aplicado
   const totalGeral = totalPrice + valorFrete
-
-  // Agrupar itens por loja
-  const groups = items.reduce((acc, item) => {
-    const brand = item.brand || 'kings'
-    const store = brand.toLowerCase().includes('seven') ? 'seven' : (brand.toLowerCase().includes('msu') ? 'msu' : 'kings')
-    if (!acc[store]) acc[store] = []
-    acc[store].push(item)
-    return acc
-  }, {} as Record<string, typeof items>)
-
-  const storeNames = Object.keys(groups)
-
 
   const handleMultistepPayment = async () => {
     setIsProcessing(true)

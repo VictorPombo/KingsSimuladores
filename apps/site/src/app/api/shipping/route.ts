@@ -1,19 +1,25 @@
 import { NextResponse } from 'next/server'
 
-const FRENET_TOKEN = process.env.FRENET_TOKEN || ''
-const DEFAULT_ORIGIN = process.env.DEFAULT_ORIGIN_ZIP || '12929608'
+const FRENET_TOKEN_KINGS = process.env.FRENET_TOKEN_KINGS || process.env.FRENET_TOKEN || ''
+const FRENET_TOKEN_SEVEN = process.env.FRENET_TOKEN_SEVEN || ''
+const DEFAULT_ORIGIN_KINGS = process.env.FRENET_CEP_ORIGEM_KINGS || process.env.DEFAULT_ORIGIN_ZIP || '12929608'
+const DEFAULT_ORIGIN_SEVEN = process.env.FRENET_CEP_ORIGEM_SEVEN || '00000000'
 
 export async function POST(req: Request) {
   try {
-    const { destinationZip, originZip, items, toPostalCode, dimensions } = await req.json()
+    const { destinationZip, originZip, items, toPostalCode, dimensions, store } = await req.json()
     const destZip = destinationZip || toPostalCode
 
     if (!destZip) {
       return NextResponse.json({ error: 'CEP de destino é obrigatório' }, { status: 400 })
     }
 
+    const isSeven = store === 'seven'
+    const token = isSeven ? FRENET_TOKEN_SEVEN : FRENET_TOKEN_KINGS
+    const fallbackOrigin = isSeven ? DEFAULT_ORIGIN_SEVEN : DEFAULT_ORIGIN_KINGS
+
     const payload = {
-      SellerCEP: originZip || DEFAULT_ORIGIN,
+      SellerCEP: originZip || fallbackOrigin,
       RecipientCEP: destZip.replace(/\D/g, ''),
       ShipmentInvoiceValue: 100, // could calculate from items, but optional
       ShippingItemArray: [] as any[]
@@ -44,7 +50,7 @@ export async function POST(req: Request) {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'token': FRENET_TOKEN
+        'token': token
       },
       body: JSON.stringify(payload)
     })
