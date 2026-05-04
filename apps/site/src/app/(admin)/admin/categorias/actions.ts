@@ -25,3 +25,43 @@ export async function createCategoryAction(data: { name: string; slug: string; b
   revalidatePath('/produtos')
   return { success: true }
 }
+
+export async function updateCategoryAction(id: string, data: { name: string; slug: string; brand_scope: string | null }) {
+  const supabase = createAdminClient()
+  
+  const { error } = await supabase
+    .from('categories')
+    .update({
+      name: data.name,
+      slug: data.slug || data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      brand_scope: data.brand_scope || null,
+    })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error updating category:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/categorias')
+  revalidatePath('/produtos')
+  return { success: true }
+}
+
+export async function deleteCategoryAction(id: string) {
+  const supabase = createAdminClient()
+  
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error deleting category:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/categorias')
+  revalidatePath('/produtos')
+  return { success: true }
+}

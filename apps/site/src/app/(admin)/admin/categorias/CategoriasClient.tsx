@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useTransition } from 'react'
-import { Plus, Folder, Loader2, Save, X, Settings2, ShieldAlert } from 'lucide-react'
-import { createCategoryAction } from './actions'
+import { Plus, Folder, Loader2, Save, X, Settings2, ShieldAlert, Edit2, Trash2 } from 'lucide-react'
+import { createCategoryAction, updateCategoryAction, deleteCategoryAction } from './actions'
 
 type Category = { id: string; name: string; slug: string; brand_scope: string | null; sort_order: number; parent_id: string | null }
 
@@ -15,15 +15,23 @@ const inputStyle: React.CSSProperties = {
 export function CategoriasClient({ categories }: { categories: Category[] }) {
   const [showForm, setShowForm] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [editId, setEditId] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [brandScope, setBrandScope] = useState<string>('')
 
   const handleSave = () => {
     startTransition(async () => {
-      const res = await createCategoryAction({ name, slug, brand_scope: brandScope || null })
+      let res
+      if (editId) {
+        res = await updateCategoryAction(editId, { name, slug, brand_scope: brandScope || null })
+      } else {
+        res = await createCategoryAction({ name, slug, brand_scope: brandScope || null })
+      }
+      
       if (res.success) {
         setShowForm(false)
+        setEditId(null)
         setName('')
         setSlug('')
         setBrandScope('')
@@ -31,6 +39,26 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
         alert('Erro ao salvar: ' + res.error)
       }
     })
+  }
+
+  const handleEdit = (c: Category) => {
+    setEditId(c.id)
+    setName(c.name)
+    setSlug(c.slug)
+    setBrandScope(c.brand_scope || '')
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta categoria? Isso não pode ser desfeito.')) {
+      startTransition(async () => {
+        const res = await deleteCategoryAction(id)
+        if (!res.success) {
+          alert('Erro ao excluir: ' + res.error)
+        }
+      })
+    }
   }
 
   return (
@@ -48,14 +76,20 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
           </div>
         </div>
         <button 
-          onClick={() => setShowForm(!showForm)} 
-          disabled={showForm}
+          onClick={() => {
+            setEditId(null)
+            setName('')
+            setSlug('')
+            setBrandScope('')
+            setShowForm(!showForm)
+          }} 
+          disabled={showForm && !editId}
           style={{
             display: 'flex', alignItems: 'center', gap: '8px',
-            background: showForm ? '#3f424d' : '#8b5cf6', border: 'none', borderRadius: '10px',
-            padding: '12px 24px', color: '#fff', fontWeight: 600, fontSize: '0.9rem', cursor: showForm ? 'default' : 'pointer',
+            background: (showForm && !editId) ? '#3f424d' : '#8b5cf6', border: 'none', borderRadius: '10px',
+            padding: '12px 24px', color: '#fff', fontWeight: 600, fontSize: '0.9rem', cursor: (showForm && !editId) ? 'default' : 'pointer',
             transition: 'transform 0.2s, background 0.2s',
-            boxShadow: showForm ? 'none' : '0 4px 12px rgba(139,92,246,0.3)'
+            boxShadow: (showForm && !editId) ? 'none' : '0 4px 12px rgba(139,92,246,0.3)'
           }}>
           <Plus size={18} /> Nova Categoria
         </button>
@@ -66,7 +100,7 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
         <div style={{ background: '#24252b', borderRadius: '16px', border: '1px solid #8b5cf680', padding: '24px', animation: 'fadeIn 0.3s ease-out' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
             <Settings2 size={18} color="#8b5cf6" />
-            <h3 style={{ color: '#e2e8f0', fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Configurar Categoria</h3>
+            <h3 style={{ color: '#e2e8f0', fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>{editId ? 'Editar Categoria' : 'Configurar Nova Categoria'}</h3>
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr 1fr', gap: '20px', alignItems: 'start' }}>
@@ -99,7 +133,10 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #3f424d80' }}>
             <button 
-              onClick={() => setShowForm(false)}
+              onClick={() => {
+                setShowForm(false)
+                setEditId(null)
+              }}
               style={{ padding: '10px 20px', background: 'transparent', border: '1px solid #3f424d', borderRadius: '8px', color: '#94a3b8', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <X size={16} /> Cancelar
             </button>
@@ -107,7 +144,7 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
               onClick={handleSave} disabled={isPending || !name}
               style={{ padding: '10px 24px', background: '#10b981', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 600, cursor: isPending || !name ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: isPending || !name ? 0.6 : 1 }}>
               {isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              Salvar Categoria
+              {editId ? 'Atualizar Categoria' : 'Salvar Categoria'}
             </button>
           </div>
         </div>
@@ -118,11 +155,12 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
         
         {/* Cabeçalho da Lista */}
         {categories.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 2fr) 1fr 1fr 80px', gap: '16px', padding: '0 20px', color: '#64748b', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 2fr) 1fr 1fr 80px 80px', gap: '16px', padding: '0 20px', color: '#64748b', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
             <div>Nome da Categoria</div>
             <div>URL Slug</div>
             <div>Escopo de Exibição</div>
             <div style={{ textAlign: 'right' }}>Ordem</div>
+            <div style={{ textAlign: 'center' }}>Ações</div>
           </div>
         )}
 
@@ -138,7 +176,7 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
         ) : (
           categories.map(c => (
             <div key={c.id} style={{ 
-              display: 'grid', gridTemplateColumns: 'minmax(200px, 2fr) 1fr 1fr 80px', gap: '16px', alignItems: 'center',
+              display: 'grid', gridTemplateColumns: 'minmax(200px, 2fr) 1fr 1fr 80px 80px', gap: '16px', alignItems: 'center',
               background: '#24252b', padding: '16px 20px', borderRadius: '12px', border: '1px solid #3f424d80',
               transition: 'transform 0.2s, border-color 0.2s', cursor: 'default'
             }}
@@ -169,6 +207,23 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
               
               <div style={{ textAlign: 'right', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
                 {c.sort_order}
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                <button 
+                  onClick={() => handleEdit(c)}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#3b82f6', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Editar Categoria"
+                >
+                  <Edit2 size={18} />
+                </button>
+                <button 
+                  onClick={() => handleDelete(c.id)}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Excluir Categoria"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
             </div>
           ))

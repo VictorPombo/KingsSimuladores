@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useTransition } from 'react'
-import { Plus, Grid3X3, Loader2, Save, X, Settings2, ShieldAlert, Trash2 } from 'lucide-react'
-import { createGridAction, deleteGridAction } from './actions'
+import { Plus, Grid3X3, Loader2, Save, X, Settings2, ShieldAlert, Trash2, Edit2 } from 'lucide-react'
+import { createGridAction, deleteGridAction, updateGridAction } from './actions'
 
 type VariationGrid = { id: string; name: string; options: string[] }
 
@@ -15,6 +15,7 @@ const inputStyle: React.CSSProperties = {
 export function GradesClient({ grids }: { grids: VariationGrid[] }) {
   const [showForm, setShowForm] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [editId, setEditId] = useState<string | null>(null)
   
   const [name, setName] = useState('')
   const [tagInput, setTagInput] = useState('')
@@ -37,9 +38,16 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
 
   const handleSave = () => {
     startTransition(async () => {
-      const res = await createGridAction({ name, options })
+      let res
+      if (editId) {
+        res = await updateGridAction(editId, { name, options })
+      } else {
+        res = await createGridAction({ name, options })
+      }
+
       if (res.success) {
         setShowForm(false)
+        setEditId(null)
         setName('')
         setOptions([])
         setTagInput('')
@@ -47,6 +55,15 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
         alert('Erro ao salvar grade: ' + res.error)
       }
     })
+  }
+
+  const handleEdit = (g: VariationGrid) => {
+    setEditId(g.id)
+    setName(g.name)
+    setOptions(g.options || [])
+    setTagInput('')
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDelete = (id: string, gridName: string) => {
@@ -73,14 +90,20 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
           </div>
         </div>
         <button 
-          onClick={() => setShowForm(!showForm)} 
-          disabled={showForm}
+          onClick={() => {
+            setEditId(null)
+            setName('')
+            setOptions([])
+            setTagInput('')
+            setShowForm(!showForm)
+          }} 
+          disabled={showForm && !editId}
           style={{
             display: 'flex', alignItems: 'center', gap: '8px',
-            background: showForm ? '#3f424d' : '#22d3ee', border: 'none', borderRadius: '10px',
-            padding: '12px 24px', color: showForm ? '#fff' : '#0f172a', fontWeight: 700, fontSize: '0.9rem', cursor: showForm ? 'default' : 'pointer',
+            background: (showForm && !editId) ? '#3f424d' : '#22d3ee', border: 'none', borderRadius: '10px',
+            padding: '12px 24px', color: (showForm && !editId) ? '#fff' : '#0f172a', fontWeight: 700, fontSize: '0.9rem', cursor: (showForm && !editId) ? 'default' : 'pointer',
             transition: 'transform 0.2s, background 0.2s',
-            boxShadow: showForm ? 'none' : '0 4px 12px rgba(34, 211, 238, 0.3)'
+            boxShadow: (showForm && !editId) ? 'none' : '0 4px 12px rgba(34, 211, 238, 0.3)'
           }}>
           <Plus size={18} /> Nova Grade
         </button>
@@ -91,7 +114,7 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
         <div style={{ background: '#24252b', borderRadius: '16px', border: '1px solid #22d3ee80', padding: '24px', animation: 'fadeIn 0.3s ease-out' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
             <Settings2 size={18} color="#22d3ee" />
-            <h3 style={{ color: '#e2e8f0', fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Montar Matriz de Variações</h3>
+            <h3 style={{ color: '#e2e8f0', fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>{editId ? 'Editar Matriz' : 'Montar Matriz de Variações'}</h3>
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(250px, 1fr) 2fr', gap: '20px', alignItems: 'start' }}>
@@ -127,7 +150,10 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #3f424d80' }}>
             <button 
-              onClick={() => setShowForm(false)}
+              onClick={() => {
+                setShowForm(false)
+                setEditId(null)
+              }}
               style={{ padding: '10px 20px', background: 'transparent', border: '1px solid #3f424d', borderRadius: '8px', color: '#94a3b8', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <X size={16} /> Cancelar
             </button>
@@ -135,7 +161,7 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
               onClick={handleSave} disabled={isPending || !name || options.length === 0}
               style={{ padding: '10px 24px', background: '#10b981', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 600, cursor: (isPending || !name || options.length === 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: (isPending || !name || options.length === 0) ? 0.6 : 1 }}>
               {isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              Salvar Matriz
+              {editId ? 'Atualizar Matriz' : 'Salvar Matriz'}
             </button>
           </div>
         </div>
@@ -145,10 +171,10 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         
         {grids.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr 80px', gap: '16px', padding: '0 20px', color: '#64748b', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr 100px', gap: '16px', padding: '0 20px', color: '#64748b', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
             <div>Nome da Matriz</div>
             <div>Opções Disponíveis</div>
-            <div style={{ textAlign: 'right' }}>Ações</div>
+            <div style={{ textAlign: 'center' }}>Ações</div>
           </div>
         )}
 
@@ -163,7 +189,7 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
         ) : (
           grids.map(g => (
             <div key={g.id} style={{ 
-              display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr 80px', gap: '16px', alignItems: 'center',
+              display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr 100px', gap: '16px', alignItems: 'center',
               background: '#24252b', padding: '16px 20px', borderRadius: '12px', border: '1px solid #3f424d80',
               transition: 'transform 0.2s, border-color 0.2s', cursor: 'default'
             }}
@@ -185,11 +211,21 @@ export function GradesClient({ grids }: { grids: VariationGrid[] }) {
                 ))}
               </div>
               
-              <div style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ textAlign: 'center', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                <button 
+                  disabled={isPending}
+                  onClick={() => handleEdit(g)}
+                  style={{ background: '#3b82f615', border: '1px solid #3b82f630', color: '#3b82f6', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Editar Grade"
+                >
+                  <Edit2 size={16} />
+                </button>
                 <button 
                   disabled={isPending}
                   onClick={() => handleDelete(g.id, g.name)}
-                  style={{ background: '#ef444415', border: '1px solid #ef444430', color: '#ef4444', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  style={{ background: '#ef444415', border: '1px solid #ef444430', color: '#ef4444', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Excluir Grade"
+                >
                   <Trash2 size={16} />
                 </button>
               </div>
