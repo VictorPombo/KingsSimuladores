@@ -21,7 +21,7 @@ export async function Header() {
       {/* =======================================================
           🖥️ DESKTOP: CÓDIGO ORIGINAL INTACTO
        ========================================================= */}
-      <div className="hidden lg:block">
+      <div className="desktop-only">
         <header
           style={{
             position: 'sticky',
@@ -88,7 +88,7 @@ export async function Header() {
       {/* =======================================================
           📱 MOBILE: MENU OTIMIZADO PARA CELULAR
        ========================================================= */}
-      <div className="block lg:hidden">
+      <div className="mobile-only">
         <header
           style={{
             position: 'sticky',

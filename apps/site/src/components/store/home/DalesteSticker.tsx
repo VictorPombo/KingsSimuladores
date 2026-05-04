@@ -54,7 +54,7 @@ export function DalesteSticker() {
       `}} />
 
       {/* VERSÃO DESKTOP (FIXA NO CANTO ESQUERDO) */}
-      <div className="hidden md:block" style={{ position: 'fixed', bottom: 0, left: 0, zIndex: 9999, opacity: opacity, pointerEvents: opacity > 0.5 ? 'auto' : 'none' }}>
+      <div className="desktop-only" style={{ position: 'fixed', bottom: 0, left: 0, zIndex: 9999, opacity: opacity, pointerEvents: opacity > 0.5 ? 'auto' : 'none' }}>
         <Link href="/quem-somos" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-end', width: '240px', cursor: 'pointer' }} className="sticker-pump group">
 
           <div style={{
@@ -95,7 +95,7 @@ export function DalesteSticker() {
       </div>
 
       {/* VERSÃO MOBILE (BANNER CLICÁVEL REDIRECIONANDO PARA A HISTÓRIA) */}
-      <div className="block md:hidden w-full mx-auto" style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '0 16px', margin: '-50px 0 -50px', zIndex: 10 }}>
+      <div className="mobile-only w-full mx-auto" style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '0 16px', margin: '-50px 0 -50px', zIndex: 10 }}>
         <Link href="/quem-somos" style={{ display: 'block', width: '100%', textDecoration: 'none' }}>
           <img
             src="/banner-fernando.png"
