@@ -85,11 +85,22 @@ export function EditProductForm({ product, allCategories = [] }: { product: Prod
               method: 'POST',
               body: uploadForm
             })
-            const result = await res.json()
             
-            if (!res.ok || result.error) {
-              throw new Error(result.error || 'Erro no upload da imagem.')
+            if (!res.ok) {
+              if (res.status === 413) {
+                throw new Error('A imagem é muito pesada (máx 4MB). Tente enviar uma foto menor.')
+              }
+              let errorMsg = 'Erro no upload da imagem.'
+              try {
+                const result = await res.json()
+                if (result.error) errorMsg = result.error
+              } catch (e) {
+                // Ignore JSON parse error for plain text error responses like 500 or 502
+              }
+              throw new Error(errorMsg)
             }
+            
+            const result = await res.json()
             finalUrls.push(result.url)
           }
         }

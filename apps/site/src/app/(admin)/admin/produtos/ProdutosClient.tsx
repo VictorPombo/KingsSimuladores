@@ -46,7 +46,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
   const filtered = products.filter(p => {
     const matchSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.sku || '').toLowerCase().includes(searchTerm.toLowerCase())
-    const matchStatus = statusFilter === 'all' || p.status === statusFilter
+    const matchStatus = statusFilter === 'all' ? p.status !== 'archived' : p.status === statusFilter
     const matchStock = stockFilter === 'all' ||
       (stockFilter === 'in_stock' && p.stock > 0) ||
       (stockFilter === 'out_of_stock' && p.stock === 0)
@@ -359,9 +359,17 @@ export function ProdutosClient({ products }: { products: Product[] }) {
               </button>
               <button
                 onClick={() => {
-                  startTransition(() => { deleteProduct(deleteConfirmId); setDeleteConfirmId(null) })
+                  if (!deleteConfirmId) return;
+                  startTransition(async () => { 
+                    const res = await deleteProduct(deleteConfirmId);
+                    if (res && !res.success) {
+                      alert(res.error || 'Erro ao remover produto.');
+                    }
+                    setDeleteConfirmId(null);
+                  })
                 }}
-                style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, transition: 'background 0.2s' }}
+                disabled={isPending}
+                style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: isPending ? 'not-allowed' : 'pointer', fontWeight: 600, transition: 'background 0.2s', opacity: isPending ? 0.7 : 1 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#dc2626'}
                 onMouseLeave={e => e.currentTarget.style.background = '#ef4444'}
               >
