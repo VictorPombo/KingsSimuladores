@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@kings/db/server'
-import { markCommissionPaid } from './actions'
+import { markCommissionPaid, updateCommissionRate } from './actions'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 30
@@ -48,10 +48,41 @@ export default async function ComissoesAdminPage() {
   const totalRetidoKings = pendentes.reduce((acc, curr) => acc + curr.commission_amount, 0)
   const totalDevidoVendedores = pendentes.reduce((acc, curr) => acc + curr.seller_payout, 0)
 
+  // 3. Resgatar Taxa de Comissão Atual
+  const { data: currentRateData } = await supabase.from('platform_settings').select('value').eq('key', 'msu_commission_rate').single()
+  const currentRateDecimal = currentRateData?.value ? parseFloat(currentRateData.value) : 0.13
+  const currentRatePercentage = (currentRateDecimal * 100).toFixed(0) // ex: 13
+
   return (
     <div style={{ padding: '2rem', minHeight: '100vh', color: '#fff', background: '#0a0d14' }}>
       <h1 className="text-3xl font-orbitron font-bold text-yellow-400 mb-2">Gestão de Comissões (MSU Split)</h1>
       <p className="text-gray-400 mb-8">Administração do Sub-Ledger financeiro e prestação de contas de terceiros.</p>
+
+      {/* Edição da Taxa de Comissão */}
+      <div className="bg-[#111827] border border-gray-800 rounded-lg p-6 mb-10 flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div>
+          <h3 className="text-lg text-white font-semibold mb-1">Taxa de Corretagem da Plataforma</h3>
+          <p className="text-sm text-gray-500">
+            Esta é a porcentagem cobrada sobre as vendas do Meu Simulador Usado. 
+            Atualize para ajustar o valor que será retido pela KingsHub.
+          </p>
+        </div>
+        <form action={updateCommissionRate} className="flex gap-3">
+          <div className="relative">
+            <input 
+              type="number" 
+              name="commission_rate" 
+              defaultValue={currentRatePercentage}
+              min="0" max="100" step="1" required
+              className="bg-gray-800 border border-gray-700 text-white text-lg font-mono rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-24 p-2.5 text-center" 
+            />
+            <span className="absolute inset-y-0 right-3 flex items-center text-gray-400 pointer-events-none">%</span>
+          </div>
+          <button type="submit" className="bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+            Salvar
+          </button>
+        </form>
+      </div>
 
       {/* Cards Analíticos de Risco */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">

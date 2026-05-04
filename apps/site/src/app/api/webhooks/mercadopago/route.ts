@@ -290,9 +290,19 @@ export async function POST(req: Request) {
                 const product = item.product as any
                 if (product.seller_id) {
                    try {
-                     // Matemática do Split: 15% de corretagem para KingsHub
+                     // Matemática do Split: Taxa dinâmica da KingsHub
                      const saleAmount = product.price * item.quantity
-                     const commissionRate = 0.15 // 15%
+                     
+                     // Buscar taxa na tabela de configurações (fallback para 13%)
+                     let commissionRate = 0.13 
+                     const { data: config } = await supabase.from('platform_settings').select('value').eq('key', 'msu_commission_rate').single()
+                     if (config?.value) {
+                       const parsed = parseFloat(config.value)
+                       if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) {
+                         commissionRate = parsed
+                       }
+                     }
+                     
                      const commissionAmount = saleAmount * commissionRate
                      const sellerPayout = saleAmount - commissionAmount
                      
