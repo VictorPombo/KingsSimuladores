@@ -83,10 +83,10 @@ ESTRUTURA ESPERADA DO JSON:
   "fiscal_e_dimensoes": {
     "ncm": "Tente deduzir o NCM. Para volantes, pedais, simuladores e video games use o padrão Mercosul '95045000'. Se for outro equipamento tente deduzir, caso contrário null",
     "ean": "EAN/Código de Barras do produto ou null",
-    "peso_kg": "Peso do produto em KG como numero float. Procure por 'Weight' no texto. Se achar 2.95KG, retorne 2.95. Faça o máximo esforço para encontrar.",
-    "largura_cm": "Largura em cm como numero float. Procure nas especificações de 'Dimensions'. Faça o máximo esforço.",
-    "altura_cm": "Altura em cm como numero float. Procure nas especificações de 'Dimensions'. Faça o máximo esforço.",
-    "comprimento_cm": "Comprimento em cm como numero float. Procure nas especificações de 'Dimensions'. Faça o máximo esforço."
+    "peso_kg": "Peso do produto em KG como número. Busque exaustivamente por 'Weight', 'Peso', 'Mass', 'Gross Weight', 'kg', 'lbs' (se lbs, converta para kg). Se achar algo como '7.5kg', retorne apenas o número 7.5. MÁXIMA PRIORIDADE.",
+    "largura_cm": "Largura em cm como número. Busque por 'Width', 'W', 'Largura'. Se achar em 'mm', divida por 10 para converter em cm. Se for um texto tipo '300x200x100mm', identifique a largura.",
+    "altura_cm": "Altura em cm como número. Busque por 'Height', 'H', 'Altura'. Se achar em 'mm', divida por 10 para converter em cm.",
+    "comprimento_cm": "Comprimento em cm como número. Busque por 'Length', 'Depth', 'L', 'D', 'Comprimento', 'Profundidade'. Se achar em 'mm', divida por 10."
   },
   "imagens": [
     {
@@ -119,7 +119,7 @@ INSTRUÇÕES DE EXTRAÇÃO (IMPORTANTE):
 6. AVALIAÇÕES: Ignore qualquer avaliação de 1, 2 ou 3 estrelas. Você só pode extrair avaliações de 4 e 5 estrelas!
 7. Retorne o resultado ESTRITAMENTE em formato JSON puro, sem marcações ou code blocks.`
 
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

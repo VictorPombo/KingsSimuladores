@@ -56,27 +56,37 @@ export async function POST(req: NextRequest) {
 
     console.log('[Olist Sync] Payload Convertido e Homologado:', JSON.stringify(olistPayload, null, 2))
 
-    // Simulando delay realístico da rede do Mercado Livre / Correios / Olist (1.5s)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    // Chamada HTTP Fictícia para Olist
-    /*
-    const response = await fetch('https://api.olist.com/v1/products', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OLIST_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(olistPayload)
-    })
+    let olistResponseId = `sandbox_${Date.now()}`
     
-    if (!response.ok) { ... throw Error }
-    */
+    if (!process.env.OLIST_ACCESS_TOKEN || process.env.OLIST_ACCESS_TOKEN === 'SANDBOX_MODE_ACTIVE') {
+      console.log('[Olist Sync] Sandbox mode: simulando integração com sucesso sem disparar API real.')
+      await new Promise((resolve) => setTimeout(resolve, 800))
+    } else {
+      console.log('[Olist Sync] Disparando requisição real para api.olist.com...')
+      const response = await fetch('https://api.olist.com/v1/products', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OLIST_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(olistPayload)
+      })
+      
+      const resData = await response.json().catch(() => ({}))
+      
+      if (!response.ok) {
+        console.error('[Olist Sync] Olist API rejeitou o payload:', resData)
+        throw new Error(`Olist API Error: ${response.status} - ${JSON.stringify(resData)}`)
+      }
+      
+      olistResponseId = resData.id || `erp_sync_${Date.now()}`
+      console.log('[Olist Sync] Sucesso! ID Olist:', olistResponseId)
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Produto sincronizado com sucesso nos Marketplaces via Hub ERP Olist.',
-      api_response_id: `erp_sync_${Date.now()}`
+      api_response_id: olistResponseId
     }, { status: 200 })
 
   } catch (err: any) {

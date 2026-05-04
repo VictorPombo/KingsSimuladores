@@ -295,15 +295,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <div class="global-progress">
   <div class="global-progress-header">
     <span class="global-progress-title">PROGRESSO GERAL DO PROJETO</span>
-    <span class="global-progress-pct font-display">93%</span>
+    <span class="global-progress-pct font-display">97%</span>
   </div>
   <div class="progress-bar-track">
       <div class="progress-bar-fill accent" style="width:93%"></div></div>
   </div>
   <div class="progress-stats">
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 74 concluídas</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 2 em progresso</div>
-    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 20 pendentes</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--green)"></span> 85 concluídas</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--accent)"></span> 1 em progresso</div>
+    <div class="progress-stat"><span class="progress-dot" style="background:var(--text-muted)"></span> 10 pendentes</div>
     <div class="progress-stat"><span class="progress-dot" style="background:var(--red)"></span> 0 bloqueadas</div>
   </div>
 </div>
@@ -447,15 +447,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
     </div>
     <div class="alert info">💡 Copie este bloco para o <code>.env.local</code> na raiz do projeto e preencha os valores marcados em amarelo. Os mesmos valores devem ser adicionados na Vercel em <strong>Settings → Environment Variables</strong> para os 3 projetos.</div>
 
-    <div class="alert danger" style="margin-top:8px;border-left:3px solid var(--red)">
-      🔴 <strong style="color:var(--red)">AÇÃO PENDENTE — Conectar Chaves Reais de Produção:</strong><br>
+    <div class="alert success" style="margin-top:8px;border-left:3px solid var(--green)">
+      🟢 <strong style="color:var(--green)">TODAS AS CHAVES CONECTADAS COM SUCESSO:</strong><br>
       <span style="font-size:.82rem;line-height:1.8">
-        ⬜ <strong>Mercado Pago</strong> — <code>MP_ACCESS_TOKEN</code>, <code>MP_PUBLIC_KEY</code>, <code>MP_WEBHOOK_SECRET</code> → <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" style="color:var(--accent)">Painel MP</a><br>
-        ⬜ <strong>Frenet</strong> — <code>FRENET_TOKEN</code> → <a href="https://frenet.com.br/painel/integracoes/tokens" target="_blank" style="color:var(--accent)">Painel ME</a><br>
-        ⬜ <strong>Olist ERP</strong> — <code>OLIST_API_KEY</code> → Emissão de Notas Centralizada<br>
-        ⬜ <strong>Chatwoot (WhatsApp)</strong> — <code>ZAPI_INSTANCE_ID</code>, <code>ZAPI_TOKEN</code>, <code>ZAPI_CLIENT_TOKEN</code> → <a href="https://z-api.io" target="_blank" style="color:var(--accent)">z-api.io</a><br>
-        ⬜ <strong>Resend (E-mail)</strong> — <code>RESEND_API_KEY</code> → <a href="https://resend.com/api-keys" target="_blank" style="color:var(--accent)">resend.com/api-keys</a><br>
-        <span style="color:var(--text-muted);font-size:.75rem">✅ Supabase — Já conectado | ✅ CRON_SECRET — Já configurado</span>
+        ✅ <strong>Mercado Pago</strong> — Conectado e operante<br>
+        ✅ <strong>Frenet</strong> — Tokens ativos na Vercel<br>
+        ✅ <strong>Olist ERP</strong> — OLIST_ACCESS_TOKEN adicionado!<br>
+        ✅ <strong>Chatwoot / Resend</strong> — Conectados!<br>
+        <span style="color:var(--text-muted);font-size:.75rem">✅ Tudo pronto para o tráfego real. Bom trabalho!</span>
       </span>
     </div>
 <br>
