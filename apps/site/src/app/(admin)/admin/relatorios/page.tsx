@@ -1,7 +1,7 @@
 import { RelatoriosClient } from './RelatoriosClient'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 30
 
 export default function RelatoriosAdminPage() {
   // O middleware já valida autenticação e role admin — não precisa duplicar aqui

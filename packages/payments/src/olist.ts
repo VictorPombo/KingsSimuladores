@@ -30,6 +30,10 @@ export interface OlistOrderInput {
     title: string
     quantity: number
     unit_price: number
+    ncm?: string
+    gtin?: string
+    origem?: string
+    cfop?: string
   }>
 }
 
@@ -41,41 +45,58 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
     return null
   }
 
+  const rawCpfCnpj = orderPayload.customer.cpf_cnpj || '';
+  const cpfCnpj = rawCpfCnpj.replace(/\D/g, '');
+  if (!cpfCnpj || (cpfCnpj.length !== 11 && cpfCnpj.length !== 14) || cpfCnpj === '00000000000') {
+    console.error(`[Tiny ERP] ❌ Rejeitado: Pedido ${orderPayload.id} não possui CPF/CNPJ válido. Valor recebido: "${rawCpfCnpj}". Sincronização cancelada para evitar rejeição na SEFAZ.`);
+    return null;
+  }
+
   try {
     console.log(`[Tiny ERP] Injetando Pedido ${orderPayload.id} (Empresa: ${brand_origin})...`)
     
+    const rawCep = (orderPayload.shipping.zip || orderPayload.shipping.cep || '').replace(/\D/g, '');
+    const cep = rawCep.length === 8 ? rawCep : '00000000'; // Tiny accepts 8 digits
+
+    let cidade = orderPayload.shipping.city || '';
+    let uf = orderPayload.shipping.state || '';
+    if (!cidade && orderPayload.shipping.cidade) {
+      const partes = orderPayload.shipping.cidade.split('/');
+      cidade = partes[0]?.trim() || '';
+      if (!uf && partes[1]) uf = partes[1]?.trim() || '';
+    }
+
+    const enderecoObj = {
+      endereco: orderPayload.shipping.street || orderPayload.shipping.logradouro || '',
+      numero: orderPayload.shipping.number || orderPayload.shipping.numero || '',
+      complemento: orderPayload.shipping.complement || orderPayload.shipping.complemento || '',
+      bairro: orderPayload.shipping.neighborhood || orderPayload.shipping.bairro || '',
+      cep,
+      cidade,
+      uf
+    };
+
     const tinyPedido = {
       pedido: {
         data_pedido: new Date().toLocaleDateString('pt-BR'),
         cliente: {
           nome: orderPayload.customer.name || 'Cliente Avulso',
-          cpf_cnpj: orderPayload.customer.cpf_cnpj || '00000000000',
+          cpf_cnpj: cpfCnpj,
           email: orderPayload.customer.email || '',
           fone: orderPayload.customer.phone || '',
-          // Address fields required by SEFAZ on invoice generation
-          endereco: orderPayload.shipping.street || orderPayload.shipping.logradouro || '',
-          numero: orderPayload.shipping.number || orderPayload.shipping.numero || '',
-          complemento: orderPayload.shipping.complement || orderPayload.shipping.complemento || '',
-          bairro: orderPayload.shipping.neighborhood || orderPayload.shipping.bairro || '',
-          cep: (orderPayload.shipping.zip || orderPayload.shipping.cep || '00000000').replace(/\D/g, ''),
-          cidade: orderPayload.shipping.city || (orderPayload.shipping.cidade ? orderPayload.shipping.cidade.split('/')[0].trim() : ''),
-          uf: orderPayload.shipping.state || (orderPayload.shipping.cidade && orderPayload.shipping.cidade.includes('/') ? orderPayload.shipping.cidade.split('/')[1].trim() : '')
+          ...enderecoObj
         },
-        endereco_entrega: {
-          endereco: orderPayload.shipping.street || orderPayload.shipping.logradouro || '',
-          numero: orderPayload.shipping.number || orderPayload.shipping.numero || '',
-          complemento: orderPayload.shipping.complement || orderPayload.shipping.complemento || '',
-          bairro: orderPayload.shipping.neighborhood || orderPayload.shipping.bairro || '',
-          cep: (orderPayload.shipping.zip || orderPayload.shipping.cep || '00000000').replace(/\D/g, ''),
-          cidade: orderPayload.shipping.city || (orderPayload.shipping.cidade ? orderPayload.shipping.cidade.split('/')[0].trim() : ''),
-          uf: orderPayload.shipping.state || (orderPayload.shipping.cidade && orderPayload.shipping.cidade.includes('/') ? orderPayload.shipping.cidade.split('/')[1].trim() : '')
-        },
+        endereco_entrega: enderecoObj,
         itens: (orderPayload.items || []).map(item => ({
           item: {
             codigo: item.product_id,
             descricao: item.title,
             quantidade: item.quantity,
-            valor_unitario: item.unit_price
+            valor_unitario: item.unit_price,
+            ncm: item.ncm || '',
+            origem: item.origem || '0',
+            gtin: item.gtin || 'SEM GTIN',
+            cfop: item.cfop || ''
           }
         })),
         valor_frete: orderPayload.shipping_cost || 0,
@@ -84,6 +105,8 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
         situacao: 'Aprovado'
       }
     }
+
+    console.info(`[Tiny ERP] Payload Montado para Pedido ${orderPayload.id}:`, JSON.stringify(tinyPedido.pedido.itens, null, 2))
 
     const params = new URLSearchParams()
     params.append('token', token)
@@ -106,7 +129,7 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
           ? data.retorno.registros[0]?.registro 
           : data.retorno.registros?.registro;
 
-        console.log(`[Tiny ERP] ✅ Pedido ${orderPayload.id} injetado com sucesso.`)
+        console.log(`[Tiny ERP] ✅ Pedido ${orderPayload.id} injetado com sucesso. ID ERP: ${registroObj?.id}`)
         return { 
           id: registroObj?.id || `tiny_${orderPayload.id}`,
           tiny_id: registroObj?.id,

@@ -35,7 +35,7 @@ export default async function SevenLayout({
         src="https://www.googletagmanager.com/gtag/js?id=AW-11399026698" 
         strategy="afterInteractive" 
       />
-      <Script id="google-ads" strategy="afterInteractive">
+      <Script id="google-analytics-seven" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}

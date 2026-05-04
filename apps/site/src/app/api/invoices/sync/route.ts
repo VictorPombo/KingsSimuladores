@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@kings/db'
+import { createServerSupabaseClient } from '@kings/db/server'
 
 export async function POST(req: Request) {
   try {
@@ -8,17 +9,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
     }
 
-    const supabase = createAdminClient()
+    const supabase = await createServerSupabaseClient()
+    const supabaseAdmin = createAdminClient()
+
+    // Authentication Check
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Admin Check
+    const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).single()
+    const isAdmin = profile?.role === 'admin'
 
     // 1. Fetch the invoice record
-    const { data: invoice } = await supabase
+    const { data: invoice } = await supabaseAdmin
       .from('invoices')
-      .select('*')
+      .select('*, order:orders(user_id)')
       .eq('order_id', orderId)
       .single()
 
     if (!invoice) {
-      return NextResponse.json({ error: 'Invoice not found in DB' }, { status: 404 })
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 })
+    }
+
+    // Authorization Check (IDOR)
+    if (!isAdmin && invoice.order?.user_id !== user.id) {
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 })
     }
 
     if (invoice.pdf_url) {
@@ -30,13 +47,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Order not injected in Tiny ERP properly or using mock' }, { status: 400 })
     }
 
-    // O ERP ID salvo quando a API responde OK é puramente numérico (ex: "123456789")
-    // Se por acaso cair no catch ou fallback (ex: tiny_UUID), não tem como consultar o pedido.obter.
-    const erpIdNum = invoice.erp_id.startsWith('tiny_') ? null : invoice.erp_id
-
-    if (!erpIdNum) {
-        return NextResponse.json({ error: 'Invalid ERP ID for Tiny (not an integer)' }, { status: 400 })
-    }
+    const erpIdNum = invoice.erp_id; // Removido o bloqueio estrito que cortava o prefixo 'tiny_'
 
     const token = invoice.store_origin === 'seven' ? process.env.OLIST_API_KEY_SEVEN : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN)
 
@@ -55,8 +66,9 @@ export async function POST(req: Request) {
     const dataPedido = await resPedido.json()
 
     if (!dataPedido.retorno || dataPedido.retorno.status !== 'OK') {
-        console.error('[Invoice Sync] Erro pedido.obter:', dataPedido)
-        return NextResponse.json({ error: 'Failed to fetch order from Tiny' }, { status: 500 })
+        console.error('[Invoice Sync] Erro pedido.obter ou pedido não encontrado:', dataPedido)
+        // Se a nota ou o pedido ainda não refletiu, retornamos pendente em vez de estourar 500
+        return NextResponse.json({ message: 'Pedido ainda não processado no ERP', pending: true })
     }
 
     const idNotaFiscal = dataPedido.retorno.pedido?.id_nota_fiscal
@@ -99,7 +111,7 @@ export async function POST(req: Request) {
     // 4. Update DB
     console.log('[API Sync] Atualizando DB com pdfUrl:', pdfUrl)
 
-    const { error: updateError } = await supabase.from('invoices').update({
+    const { error: updateError } = await supabaseAdmin.from('invoices').update({
         pdf_url: pdfUrl,
         status: 'issued'
     }).eq('id', invoice.id)

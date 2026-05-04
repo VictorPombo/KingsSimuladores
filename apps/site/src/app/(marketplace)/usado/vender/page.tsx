@@ -6,7 +6,6 @@ import { createBrowserClient } from '@supabase/ssr'
 import imageCompression from 'browser-image-compression'
 import { UploadCloud, X, ImageIcon, Plus } from 'lucide-react'
 import { TermsModal } from '@/components/marketplace/TermsModal'
-import { uploadMarketplaceImage } from './actions'
 
 const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
@@ -17,10 +16,12 @@ export default function VenderPage() {
   const [showTerms, setShowTerms] = useState<boolean | null>(null) // null = loading
   const [uploadProgress, setUploadProgress] = useState('')
   const [generating, setGenerating] = useState(false)
+  
+  const [categories, setCategories] = useState<any[]>([])
 
   const [form, setForm] = useState({
     title: '', price: '', condition: 'good', description: '',
-    brand: '', model: '', city: '', state: '',
+    brand: '', model: '', city: '', state: '', category_id: '',
     hasOriginalBox: false, hasUsageMarks: false,
     weight: '', width: '', height: '', length: '', zip: ''
   })
@@ -29,9 +30,9 @@ export default function VenderPage() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Check if user accepted terms
+  // Initialization: check terms & fetch categories
   useEffect(() => {
-    const checkTerms = async () => {
+    const init = async () => {
       const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -39,6 +40,7 @@ export default function VenderPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) { router.push('/usado/login'); return }
 
+      // Check terms
       const { data: profile } = await supabase
         .from('profiles')
         .select('accepted_listing_terms_at')
@@ -46,8 +48,12 @@ export default function VenderPage() {
         .single()
 
       setShowTerms(!profile?.accepted_listing_terms_at)
+
+      // Fetch categories
+      const { data: cats } = await supabase.from('categories').select('id, name').order('name')
+      if (cats) setCategories(cats)
     }
-    checkTerms()
+    init()
   }, [router])
 
   const handleAcceptTerms = async () => {
@@ -64,7 +70,6 @@ export default function VenderPage() {
     setShowTerms(false)
   }
 
-  // Auto-fill city from CEP
   const preencherCep = async () => {
     if (form.zip.replace(/\D/g, '').length >= 8) {
       try {
@@ -79,8 +84,22 @@ export default function VenderPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
+    
+    // Validate type and size (max 5MB)
+    const validFiles = files.filter(f => {
+      if (!f.type.startsWith('image/')) {
+        alert(`${f.name} não é uma imagem válida. Apenas imagens são permitidas.`)
+        return false
+      }
+      if (f.size > 5 * 1024 * 1024) {
+        alert(`A imagem ${f.name} ultrapassa o limite de 5MB.`)
+        return false
+      }
+      return true
+    })
+
     const remaining = 5 - imageFiles.length
-    const toAdd = files.slice(0, remaining)
+    const toAdd = validFiles.slice(0, remaining)
     setImageFiles(prev => [...prev, ...toAdd])
     setImagePreviews(prev => [...prev, ...toAdd.map(f => URL.createObjectURL(f))])
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -94,7 +113,7 @@ export default function VenderPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (imageFiles.length === 0) return alert('Anexe pelo menos uma foto!')
-    if (!form.brand || !form.model || !form.city || !form.state) return alert('Preencha Marca, Modelo, Cidade e Estado.')
+    if (!form.brand || !form.model || !form.city || !form.state || !form.category_id) return alert('Preencha Categoria, Marca, Modelo, Cidade e Estado.')
     setIsSubmitting(true)
 
     try {
@@ -103,25 +122,30 @@ export default function VenderPage() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
       const { data: { session } } = await supabase.auth.getSession()
-      const userId = session?.user?.id || 'guest-seller'
+      const userId = session?.user?.id
+      if (!userId) throw new Error('Sessão expirada')
 
+      const productId = crypto.randomUUID()
       const uploadedUrls: string[] = []
       const options = { maxSizeMB: 1, maxWidthOrHeight: 1200, useWebWorker: true, fileType: 'image/webp' as const }
 
+      // Upload client-side directly to storage
       for (let i = 0; i < imageFiles.length; i++) {
         setUploadProgress(`Comprimindo e subindo foto ${i + 1} de ${imageFiles.length}...`)
         const compressed = await imageCompression(imageFiles[i], options)
-        const fileName = `${userId}/${Date.now()}-${i}-${Math.random().toString(36).substring(7)}.webp`
-
-        // Convert Blob to File for FormData
+        const fileName = `${Date.now()}-${i}-${Math.random().toString(36).substring(7)}.webp`
+        const filePath = `${userId}/${productId}/${fileName}`
+        
         const compressedFile = new File([compressed], fileName, { type: 'image/webp' })
         
-        const formData = new FormData()
-        formData.append('file', compressedFile)
-        formData.append('fileName', fileName)
+        const { error } = await supabase.storage.from('msu-listings').upload(filePath, compressedFile, {
+          cacheControl: '3600',
+          upsert: false
+        })
 
-        // Usa a Server Action para subir, ignorando RLS
-        const publicUrl = await uploadMarketplaceImage(formData)
+        if (error) throw new Error(`Erro ao subir imagem: ${error.message}`)
+        
+        const { data: { publicUrl } } = supabase.storage.from('msu-listings').getPublicUrl(filePath)
         uploadedUrls.push(publicUrl)
       }
 
@@ -131,9 +155,11 @@ export default function VenderPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: productId, // Injecting the UUID
           title: form.title, price: parseFloat(form.price), condition: form.condition,
           imageUrls: uploadedUrls, description: form.description,
           brand: form.brand, model: form.model, city: form.city, state: form.state,
+          category_id: form.category_id,
           has_original_box: form.hasOriginalBox, has_usage_marks: form.hasUsageMarks,
           shipping_options: {
             weight: parseFloat(form.weight), width: parseFloat(form.width),
@@ -147,7 +173,8 @@ export default function VenderPage() {
         const errData = await res.json()
         throw new Error(errData.error || 'Falha ao anunciar')
       }
-      setSuccess(true)
+      // Redireciona o vendedor para o novo painel
+      router.push('/usado/dashboard?tab=ads')
     } catch (e: any) {
       alert(e.message || 'Erro ao processar o anúncio.')
     } finally {
@@ -156,39 +183,16 @@ export default function VenderPage() {
     }
   }
 
-  // Loading state
   if (showTerms === null) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#71717a' }}>Carregando...</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0A0A0A' }}>
+      <div style={{ color: '#E8002D' }}>Carregando...</div>
     </div>
   )
 
-  // Terms modal
-  if (showTerms) return (
-    <TermsModal onAccept={handleAcceptTerms} onCancel={() => router.push('/usado')} />
-  )
-
-  // Success
-  if (success) return (
-    <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '120px' }}>
-      <Container style={{ textAlign: 'center' }}>
-        <div style={{ background: 'rgba(10, 14, 26, 0.8)', padding: '3rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)', maxWidth: '500px', margin: '0 auto' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏁</div>
-          <h1 style={{ color: '#fff', fontSize: '1.5rem', marginBottom: '1rem' }}>Equipamento na Garagem!</h1>
-          <p style={{ color: '#a1a1aa', marginBottom: '2rem' }}>
-            Seu classificado foi para a fila de <strong>Moderação</strong>.
-            Status: <code style={{ color: '#06b6d4', background: 'rgba(6, 182, 212, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>pending_review</code>.
-          </p>
-          <Button onClick={() => router.push('/usado')} style={{ background: '#06b6d4', color: '#000', fontWeight: 800 }}>
-            Voltar ao Paddock
-          </Button>
-        </div>
-      </Container>
-    </div>
-  )
+  if (showTerms) return <TermsModal onAccept={handleAcceptTerms} onCancel={() => router.push('/usado')} />
 
   return (
-    <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
+    <div style={{ background: '#0A0A0A', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
       <style dangerouslySetInnerHTML={{__html: `
         .vender-title { font-size: 2.5rem; }
         .vender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -199,7 +203,7 @@ export default function VenderPage() {
       `}} />
       <Container>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#06b6d4', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.85rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#E8002D', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.85rem' }}>
             VENDA SEU SETUP
           </div>
           <h1 className="vender-title" style={{ fontWeight: 900, color: '#fff', marginBottom: '0.5rem', letterSpacing: '-0.5px' }}>Anunciar Equipamento.</h1>
@@ -207,26 +211,26 @@ export default function VenderPage() {
             Desapegue do seu hardware. A comissão só é retida em caso de venda bem-sucedida.
           </p>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(10, 14, 26, 0.6)', padding: '2.5rem', borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', background: '#111', padding: '2.5rem', borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
 
             {/* Upload Multi-Image */}
             <div>
-              <label style={labelStyle}>Fotos Reais do Equipamento * <span style={{ color: '#71717a', fontWeight: 400 }}>({imageFiles.length}/5)</span></label>
+              <label style={labelStyle}>Fotos Reais do Equipamento * <span style={{ color: '#71717a', fontWeight: 400 }}>({imageFiles.length}/5) Max: 5MB</span></label>
               <input type="file" accept="image/*" multiple ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
                 {imagePreviews.map((src, i) => (
-                  <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: '12px', overflow: 'hidden', border: i === 0 ? '2px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)' }}>
+                  <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: '12px', overflow: 'hidden', border: i === 0 ? '2px solid #E8002D' : '1px solid rgba(255,255,255,0.1)' }}>
                     <img src={src} alt={`Foto ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#06b6d4', color: '#000', textAlign: 'center', fontSize: '0.6rem', fontWeight: 800, padding: '2px' }}>CAPA</div>}
+                    {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#E8002D', color: '#fff', textAlign: 'center', fontSize: '0.6rem', fontWeight: 800, padding: '2px' }}>CAPA</div>}
                     <button type="button" onClick={() => removeImage(i)} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', color: '#fff', border: 'none', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                       <X size={12} />
                     </button>
                   </div>
                 ))}
                 {imageFiles.length < 5 && (
-                  <div onClick={() => fileInputRef.current?.click()} style={{ aspectRatio: '1', borderRadius: '12px', border: '2px dashed rgba(6, 182, 212, 0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', background: 'rgba(6, 182, 212, 0.02)' }}>
-                    <Plus size={24} color="#06b6d4" />
+                  <div onClick={() => fileInputRef.current?.click()} style={{ aspectRatio: '1', borderRadius: '12px', border: '2px dashed rgba(232, 0, 45, 0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', background: 'rgba(232, 0, 45, 0.02)' }}>
+                    <Plus size={24} color="#E8002D" />
                     <span style={{ color: '#71717a', fontSize: '0.7rem', marginTop: '4px' }}>Adicionar</span>
                   </div>
                 )}
@@ -240,32 +244,16 @@ export default function VenderPage() {
               <label style={labelStyle}>Título do Anúncio *</label>
               <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} type="text" placeholder="Ex: Fanatec CSL DD 8Nm + Pedais" style={inputStyle} />
             </div>
-
+            
             <div className="vender-grid">
               <div>
-                <label style={labelStyle}>Marca *</label>
-                <input required value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} type="text" placeholder="Ex: Fanatec, Moza, Simagic" style={inputStyle} />
-              </div>
-              <div>
-                <label style={labelStyle}>Modelo *</label>
-                <input required value={form.model} onChange={e => setForm({...form, model: e.target.value})} type="text" placeholder="Ex: CSL DD, R5 Bundle" style={inputStyle} />
-              </div>
-            </div>
-
-            <div className="vender-grid">
-              <div>
-                <label style={labelStyle}>Preço (R$) *</label>
-                <input required value={form.price} onChange={e => setForm({...form, price: e.target.value})} type="number" placeholder="Apenas números" style={inputStyle} />
-                {parseFloat(form.price) > 0 && (
-                  <div style={{ marginTop: '8px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(6, 214, 160, 0.06)', border: '1px solid rgba(6, 214, 160, 0.15)' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#06d6a0', fontWeight: 700 }}>
-                      Você receberá: R$ {(parseFloat(form.price) * 0.85).toFixed(2).replace('.', ',')}
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: '#71717a', marginTop: '2px' }}>
-                      Taxa da plataforma (15%): -R$ {(parseFloat(form.price) * 0.15).toFixed(2).replace('.', ',')}
-                    </div>
-                  </div>
-                )}
+                <label style={labelStyle}>Categoria *</label>
+                <select required value={form.category_id} onChange={e => setForm({...form, category_id: e.target.value})} style={inputStyle}>
+                  <option value="">Selecione a Categoria</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label style={labelStyle}>Estado de Conservação *</label>
@@ -278,10 +266,36 @@ export default function VenderPage() {
               </div>
             </div>
 
+            <div className="vender-grid">
+              <div>
+                <label style={labelStyle}>Marca *</label>
+                <input required value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} type="text" placeholder="Ex: Fanatec, Moza, Simagic" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Modelo *</label>
+                <input required value={form.model} onChange={e => setForm({...form, model: e.target.value})} type="text" placeholder="Ex: CSL DD, R5 Bundle" style={inputStyle} />
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Preço (R$) *</label>
+              <input required value={form.price} onChange={e => setForm({...form, price: e.target.value})} type="number" placeholder="Apenas números" style={inputStyle} />
+              {parseFloat(form.price) > 0 && (
+                <div style={{ marginTop: '8px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(232, 0, 45, 0.06)', border: '1px solid rgba(232, 0, 45, 0.15)' }}>
+                  <div style={{ fontSize: '0.85rem', color: '#E8002D', fontWeight: 700 }}>
+                    Você receberá: R$ {(parseFloat(form.price) * 0.85).toFixed(2).replace('.', ',')}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#71717a', marginTop: '2px' }}>
+                    Taxa da plataforma (15%): -R$ {(parseFloat(form.price) * 0.15).toFixed(2).replace('.', ',')}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Checkboxes profissionais */}
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', border: form.hasOriginalBox ? '1px solid #06d6a0' : '1px solid rgba(255,255,255,0.1)', background: form.hasOriginalBox ? 'rgba(6, 214, 160, 0.08)' : 'transparent', cursor: 'pointer', transition: 'all 0.2s', flex: 1, minWidth: '200px' }}>
-                <input type="checkbox" checked={form.hasOriginalBox} onChange={e => setForm({...form, hasOriginalBox: e.target.checked})} style={{ accentColor: '#06d6a0', width: '18px', height: '18px' }} />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', border: form.hasOriginalBox ? '1px solid #E8002D' : '1px solid rgba(255,255,255,0.1)', background: form.hasOriginalBox ? 'rgba(232, 0, 45, 0.08)' : 'transparent', cursor: 'pointer', transition: 'all 0.2s', flex: 1, minWidth: '200px' }}>
+                <input type="checkbox" checked={form.hasOriginalBox} onChange={e => setForm({...form, hasOriginalBox: e.target.checked})} style={{ accentColor: '#E8002D', width: '18px', height: '18px' }} />
                 <div>
                   <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>📦 Tem caixa original</div>
                   <div style={{ color: '#71717a', fontSize: '0.75rem' }}>O produto acompanha a embalagem</div>
@@ -320,8 +334,8 @@ export default function VenderPage() {
                     setGenerating(false)
                   }}
                   style={{
-                    background: generating ? 'rgba(167,139,250,0.08)' : 'rgba(167,139,250,0.12)',
-                    color: '#a78bfa', border: '1px solid rgba(167,139,250,0.25)',
+                    background: generating ? 'rgba(232,0,45,0.08)' : 'rgba(232,0,45,0.12)',
+                    color: '#E8002D', border: '1px solid rgba(232,0,45,0.25)',
                     padding: '4px 12px', borderRadius: '8px', fontSize: '0.75rem',
                     fontWeight: 700, cursor: generating ? 'wait' : 'pointer',
                     opacity: !form.brand || !form.model ? 0.4 : 1,
@@ -381,7 +395,7 @@ export default function VenderPage() {
               </div>
             </div>
 
-            <Button type="submit" disabled={isSubmitting} style={{ background: '#06b6d4', color: '#000', fontSize: '1.1rem', fontWeight: 800, padding: '1.5rem', borderRadius: '0.75rem', marginTop: '1rem' }}>
+            <Button type="submit" disabled={isSubmitting} style={{ background: '#E8002D', color: '#fff', fontSize: '1.1rem', fontWeight: 800, padding: '1.5rem', borderRadius: '0.75rem', marginTop: '1rem', border: 'none', transition: 'background 0.2s', cursor: 'pointer' }}>
               {isSubmitting ? uploadProgress || 'Processando...' : 'Publicar Anúncio (Sujeito a Moderação)'}
             </Button>
           </form>
@@ -394,6 +408,6 @@ export default function VenderPage() {
 const labelStyle = { display: 'block' as const, fontSize: '0.95rem', color: '#e4e4e7', marginBottom: '0.5rem', fontWeight: 600 }
 
 const inputStyle = {
-  width: '100%', background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255,255,255,0.1)',
+  width: '100%', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)',
   color: '#fff', padding: '1rem', borderRadius: '0.75rem', outline: 'none', fontSize: '1rem', transition: 'border-color 0.2s ease'
 }

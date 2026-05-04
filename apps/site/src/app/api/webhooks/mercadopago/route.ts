@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         // 3. Buscar os itens do pedido para Controle de Estoque
         const { data: items, error: itemsErr } = await supabase
           .from('order_items')
-          .select('product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, stock, sku)')
+          .select('id, product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, stock, sku, ncm, ean, seller_id, price)')
           .eq('order_id', orderId)
           
         if (itemsErr) console.error('[Webhook MP] Erro ao buscar order_items:', itemsErr);
@@ -86,9 +86,9 @@ export async function POST(req: Request) {
               }
             }
             
-            // Em caso de Meu Simulador Usado (MSU), marcamos como vendido
+            // Em caso de Meu Simulador Usado (MSU), marcamos como vendido na tabela products
             if (origin === 'msu' && item.product_id) {
-               await supabase.from('marketplace_listings').update({ status: 'sold' }).eq('id', item.product_id)
+               await supabase.from('products').update({ status: 'sold' }).eq('id', item.product_id)
             }
           }
         }
@@ -143,19 +143,31 @@ export async function POST(req: Request) {
             },
             shipping: order.shipping_address,
             shipping_cost: shippingVal,
-            items: storeItems.map(i => ({
-               product_id: i.product?.sku || i.product_id, // Send SKU to ERP if available!
-               title: i.product?.title || 'Item',
-               quantity: i.quantity,
-               unit_price: i.unit_price
-            }))
+            items: storeItems.map(i => {
+               // Resolvemos o UF para o CFOP
+               let uf = order.shipping_address?.state || '';
+               if (!uf && order.shipping_address?.cidade && order.shipping_address.cidade.includes('/')) {
+                 uf = order.shipping_address.cidade.split('/')[1].trim();
+               }
+               const cfopCalculado = (uf.toUpperCase() === 'SP') ? '5102' : '6102';
+
+               return {
+                 product_id: i.product?.sku || i.product_id, // Send SKU to ERP if available!
+                 title: i.product?.title || 'Item',
+                 quantity: i.quantity,
+                 unit_price: i.unit_price,
+                 ncm: i.product?.ncm || '',
+                 gtin: i.product?.ean || 'SEM GTIN',
+                 origem: '0', // 0 = Nacional
+                 cfop: cfopCalculado
+               };
+            })
           }
 
           if (store === 'seven') {
             void pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
               .then(async (res) => {
                 if (res && res.status !== 'error') {
-                  const resAny = res as any
                   await adminSupabase.from('invoices').insert({
                     order_id: order.id,
                     store_origin: store,
@@ -163,37 +175,42 @@ export async function POST(req: Request) {
                     cnpj_emitente: '',
                     nfe_number: '',
                     nfe_key: '',
-                    status: 'issued',
-                    xml_url: resAny.xml_url || '',
-                    pdf_url: resAny.pdf_url || ''
+                    status: 'pending', // Deixamos como pending para o sync buscar depois
+                    xml_url: '', // Vazio de forma intencional (processamento assíncrono)
+                    pdf_url: ''  // Vazio de forma intencional
                   })
                   if (res.tiny_id) await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
-                  console.log(`[Webhook MP] NF-e do Pedido ${orderId} (Seven) enfileirada assincronamente.`)
+                  console.log(`[Webhook MP] NF-e do Pedido ${orderId} (Seven) enfileirada assincronamente (PENDING).`)
                 }
               })
               .catch(err => console.error('[Olist Async Error]', err))
           } else {
-            // Kings ou MSU mantêm síncrono
+            // Kings ou MSU mantêm síncrono no disparo, mas assíncrono na NFe
             console.log('============= DEBUG WEBHOOK =============')
             console.log('API KEY IN NEXTJS:', process.env.OLIST_API_KEY_KINGS)
             console.log('Store:', store)
             console.log('OrderPayload:', JSON.stringify(orderPayload, null, 2))
-            const res = await pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
-            if (res && res.status !== 'error') {
-               const resAny = res as any
-               if (!nfeResFirst) nfeResFirst = res;
-               await adminSupabase.from('invoices').insert({
-                order_id: order.id,
-                store_origin: store,
-                erp_id: res.tiny_id || res.id || '',
-                cnpj_emitente: '',
-                nfe_number: '',
-                nfe_key: '',
-                status: 'issued',
-                xml_url: resAny.xml_url || '',
-                pdf_url: resAny.pdf_url || ''
-              })
-              console.log(`[Webhook MP] NF-e do Pedido ${orderId} (${store}) salva no banco.`)
+            
+            try {
+              const res = await pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
+              if (res && res.status !== 'error') {
+                 if (!nfeResFirst) nfeResFirst = res;
+                 await adminSupabase.from('invoices').insert({
+                  order_id: order.id,
+                  store_origin: store,
+                  erp_id: res.tiny_id || res.id || '',
+                  cnpj_emitente: '',
+                  nfe_number: '',
+                  nfe_key: '',
+                  status: 'pending', // Deixamos como pending
+                  xml_url: '', // Vazio intencionalmente
+                  pdf_url: ''  // Vazio intencionalmente
+                })
+                if (res.tiny_id) await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
+                console.log(`[Webhook MP] Pedido ${orderId} (${store}) salvo no banco. NFe em processamento (PENDING).`)
+              }
+            } catch (err) {
+              console.error(`[Olist Sync Error] Falha ao injetar pedido ${orderId} na loja ${store}:`, err)
             }
           }
         }
@@ -206,9 +223,7 @@ export async function POST(req: Request) {
         
         if (clientePhone) {
           let wppText = `🏎️ Fala *${clienteNome}*, tudo acelerando por aí?\n\nPassando para confirmar que o pagamento do seu pedido (*#${orderId.split('-')[0]}*) foi aprovado com sucesso! ✅\n\n`
-          if (nfeRes?.pdf_url) {
-            wppText += `Aqui está a sua Nota Fiscal Eletrônica:\n📄 ${nfeRes.pdf_url}\n\n`
-          }
+          wppText += `A sua Nota Fiscal Eletrônica já está em processamento e será disponibilizada no seu painel em breve.\n\n`
           wppText += `Entraremos em contato novamente assim que sua encomenda for despachada. Grande abraço da equipe KingsHub!`
           
           await sendWhatsappMessage({
@@ -220,15 +235,10 @@ export async function POST(req: Request) {
         // 6. Notificação via Email (Resend)
         const clienteEmail = profile?.email
         if (clienteEmail) {
-          const nfBlock = nfeRes?.pdf_url ? `
+          const nfBlock = `
                 <div style="margin: 30px 0; padding: 20px; background-color: #f7f9fa; border-radius: 6px;">
                   <h3 style="margin-top: 0; color: #111;">Sua Fatura e Documentação</h3>
-                  <p style="margin-bottom: 20px; font-size: 14px; color: #555;">Já finalizamos a papelada. Você pode baixar seu recibo e NF eletrônica clicando no botão abaixo:</p>
-                  <a href="${nfeRes.pdf_url}" style="background-color: #111; color: #fff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">Acessar Nota Fiscal Eletrônica</a>
-                </div>
-          ` : `
-                <div style="margin: 30px 0; padding: 20px; background-color: #f7f9fa; border-radius: 6px;">
-                  <p style="font-size: 14px; color: #555;">Sua Nota Fiscal Eletrônica será enviada em breve por e-mail assim que for processada.</p>
+                  <p style="margin-bottom: 20px; font-size: 14px; color: #555;">Já finalizamos a papelada. A sua Nota Fiscal Eletrônica está sendo processada neste exato momento e estará disponível para download no seu painel de usuário em breve!</p>
                 </div>
           `
 
@@ -271,35 +281,69 @@ export async function POST(req: Request) {
         }
 
         // 8. Integração Contábil: Split Payment MSU (Comissões)
-        if (order.brand_origin === 'msu' && items && items.length > 0) {
-          console.log(`[Webhook MP] Calculando Sub-Ledger (Split Payment) para Pedido MSU ${orderId}`)
+        if (items && items.length > 0) {
+          console.log(`[Webhook MP] Calculando Sub-Ledger (Split Payment) para Pedido ${orderId}`)
           
           for (const item of items) {
-             if (item.product_id) {
-                // Buscamos o Listing original para capturar o Seller ID e o Preço Base Real (Prevenindo spoofing de price no carrinho)
-                const { data: listing } = await supabase
-                  .from('marketplace_listings')
-                  .select('seller_id, price')
-                  .eq('id', item.product_id)
-                  .single()
+             const origin = item.store_origin || order.brand_origin
+             if (origin === 'msu' && item.product_id && item.product) {
+                const product = item.product as any
+                if (product.seller_id) {
+                   try {
+                     // Matemática do Split: 15% de corretagem para KingsHub
+                     const saleAmount = product.price * item.quantity
+                     const commissionRate = 0.15 // 15%
+                     const commissionAmount = saleAmount * commissionRate
+                     const sellerPayout = saleAmount - commissionAmount
+                     
+                     // Inserindo na nova tabela 'payouts'
+                     await supabase.from('payouts').insert({
+                       order_item_id: item.id,
+                       seller_id: product.seller_id,
+                       gross_amount: saleAmount,
+                       platform_fee_amount: commissionAmount,
+                       net_amount: sellerPayout,
+                       status: 'held' // Fica retido em Escrow (Garantia)
+                     })
+                     console.log(`[Webhook MP] ✅ Split Contábil (15%) - MSU -> Vendedor Retém: R$${sellerPayout.toFixed(2)} | KingsHub Retém: R$${commissionAmount.toFixed(2)}.`)
 
-                if (listing && listing.seller_id) {
-                   // Matemática do Split: 10% de corretagem para KingsHub
-                   const saleAmount = listing.price * item.quantity
-                   const commissionRate = 0.10 // 10%
-                   const commissionAmount = saleAmount * commissionRate
-                   const sellerPayout = saleAmount - commissionAmount
-                   
-                   await supabase.from('commissions').insert({
-                     order_id: orderId,
-                     seller_id: listing.seller_id,
-                     sale_amount: saleAmount,
-                     commission_rate: commissionRate,
-                     commission_amount: commissionAmount,
-                     seller_payout: sellerPayout,
-                     payout_status: 'pending' // Fica aguardando liberação formal/passagem dos 7 dias
-                   })
-                   console.log(`[Webhook MP] ✅ Split Contábil - MSU -> Vendedor Retém: R$${sellerPayout.toFixed(2)} | KingsHub Retém: R$${commissionAmount.toFixed(2)}.`)
+                     // 8.5 Disparo de E-mail de Venda Realizada
+                     const { data: sellerProfile } = await supabase.from('profiles').select('email, full_name').eq('id', product.seller_id).single()
+                     if (sellerProfile && sellerProfile.email) {
+                       const MSU_URL = process.env.NEXT_PUBLIC_URL_MSU || 'https://kingssimuladores.com.br/usado'
+                       const html = `
+<div style="font-family: Arial, sans-serif; background-color: #0A0A0A; padding: 40px 20px; color: #fff; text-align: center;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #111; border: 1px solid rgba(232,0,45,0.2); border-radius: 12px; padding: 30px;">
+    <div style="font-size: 40px; margin-bottom: 10px;">📦</div>
+    <h1 style="color: #fff; margin-bottom: 10px;">Vendido!</h1>
+    <p style="color: #a1a1aa; font-size: 16px; line-height: 1.6;">
+      Alguém acaba de comprar o seu <strong>${product.title}</strong> no MeuSimuladorUsado! O pagamento já foi confirmado.
+    </p>
+    
+    <div style="background-color: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; padding: 20px; margin: 30px 0;">
+      <p style="margin: 0; color: #71717a; font-size: 14px;">Você vai receber:</p>
+      <h2 style="margin: 5px 0 0 0; color: #22c55e; font-size: 28px;">R$ ${sellerPayout.toFixed(2).replace('.', ',')}</h2>
+    </div>
+
+    <p style="color: #a1a1aa; font-size: 15px; margin-bottom: 30px;">
+      Por favor, acesse o seu painel agora mesmo para ver os dados de endereço do comprador e combinar o envio.
+    </p>
+    
+    <a href="${MSU_URL}/dashboard" style="display: inline-block; background-color: #E8002D; color: #fff; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+      Ver Dados de Envio
+    </a>
+  </div>
+</div>`
+                       await sendEmailMessage({
+                         to: sellerProfile.email,
+                         subject: "Vendido! Prepare o envio do seu equipamento 📦",
+                         html
+                       })
+                       console.log(`[Webhook MP] E-mail de venda MSU enviado para o vendedor: ${sellerProfile.email}`)
+                     }
+                   } catch (err) {
+                     console.error(`[Webhook MP] Erro ao registrar payout do item ${item.id}:`, err)
+                   }
                 }
              }
           }

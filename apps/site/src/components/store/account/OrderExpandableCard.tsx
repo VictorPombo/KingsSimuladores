@@ -13,6 +13,7 @@ export function OrderExpandableCard({ order }: { order: any }) {
   const [items, setItems] = useState<any[]>([])
   const [invoices, setInvoices] = useState<any[]>([])
   const [syncingInvoiceId, setSyncingInvoiceId] = useState<string | null>(null)
+  const [isConfirming, setIsConfirming] = useState<string | null>(null)
   
   const handleSyncInvoice = async (orderId: string, invoiceId: string) => {
     setSyncingInvoiceId(invoiceId)
@@ -61,7 +62,14 @@ export function OrderExpandableCard({ order }: { order: any }) {
       .eq('order_id', order.id)
 
     if (!error && orderItems) {
-      setItems(orderItems)
+      const itemIds = orderItems.map(i => i.id)
+      const { data: payoutsData } = await supabase.from('payouts').select('*').in('order_item_id', itemIds)
+      
+      const itemsWithPayouts = orderItems.map(item => ({
+         ...item,
+         payout: payoutsData?.find(p => p.order_item_id === item.id)
+      }))
+      setItems(itemsWithPayouts)
     }
 
     const { data: invs } = await supabase.from('invoices').select('*').eq('order_id', order.id)
@@ -87,6 +95,30 @@ export function OrderExpandableCard({ order }: { order: any }) {
     } catch (err) {
       alert('Erro de comunicação.')
       setIsPaying(false)
+    }
+  }
+
+  const handleConfirmReceipt = async (payoutId: string) => {
+    if (!confirm('Confirmar o recebimento do produto? O dinheiro será liberado para o vendedor e você não poderá abrir reclamação por defeito.')) return
+    
+    setIsConfirming(payoutId)
+    try {
+      const res = await fetch('/api/orders/release-escrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payoutId })
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Erro ao liberar pagamento.')
+      }
+      
+      setItems(prev => prev.map(item => item.payout?.id === payoutId ? { ...item, payout: { ...item.payout, status: 'available' } } : item))
+      alert('Obrigado! O pagamento foi liberado para o vendedor.')
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      setIsConfirming(null)
     }
   }
 
@@ -243,6 +275,25 @@ export function OrderExpandableCard({ order }: { order: any }) {
                         <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
                           Quantidade: {item.quantity} x {formatPrice(item.unit_price)}
                         </div>
+                        {item.payout?.tracking_code && item.payout?.status === 'held' && (
+                          <div style={{ marginTop: '10px' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#10b981', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Truck size={14} /> Enviado pelo Vendedor (Cód: <strong>{item.payout.tracking_code}</strong>)
+                            </div>
+                            <button 
+                              onClick={() => handleConfirmReceipt(item.payout.id)}
+                              disabled={isConfirming === item.payout.id}
+                              style={{ background: '#E8002D', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: isConfirming === item.payout.id ? 'not-allowed' : 'pointer', fontSize: '0.8rem', fontWeight: 700 }}
+                            >
+                              {isConfirming === item.payout.id ? 'Liberando...' : 'Já Recebi e Testei'}
+                            </button>
+                          </div>
+                        )}
+                        {(item.payout?.status === 'available' || item.payout?.status === 'paid') && (
+                           <div style={{ fontSize: '0.8rem', color: '#22c55e', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <CheckCircle size={14} /> Recebimento Confirmado
+                           </div>
+                        )}
                       </div>
                       <div style={{ fontWeight: 700, color: '#fff', fontSize: '1.1rem' }}>
                         {formatPrice(item.total_price)}

@@ -1023,8 +1023,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
         <div class="phase-meta"><span>⏱ Bloqueado por APIs</span><span>📦 7 planos</span><span>🔥 CRÍTICA</span></div>
       </div>
       <div class="phase-progress">
-        <div class="phase-pct" style="color:var(--yellow)">55%</div>
-        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--yellow);width:55%"></div></div>
+        <div class="phase-pct" style="color:var(--yellow)">90%</div>
+        <div class="phase-bar"><div class="phase-bar-fill" style="background:var(--yellow);width:90%"></div></div>
       </div>
       <span class="phase-status pending">Aguardando APIs</span>
   </div>
@@ -1164,8 +1164,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
       <!-- PENDENTES A PRODUZIR -->
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/google</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML dinâmico em tempo real de produtos estruturados pra Google Shopping.</td><td>Google Merchant Center</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/feed/tiktok</span></td><td><span class="int-status active">Construído</span></td><td>(Fase 06) XML variante de catálogo pra TikTok Shops com estoque síncrono.</td><td>TikTok For Business</td></tr>
+      <tr><td><span style="font-family:'JetBrains Mono';color:var(--green)">/api/erp/sync</span></td><td><span class="int-status active">Construído</span></td><td>Recebe o payload do produto recém-cadastrado na KingsHub (com NCM, EAN, dimensões) e injeta no ERP Olist. (MOCK ATIVO)</td><td>Olist API</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/shipping</span></td><td><span class="int-status decide">Pendente</span></td><td>(Fase 07) Receptor passivo que detecta Encomenda "Em Trânsito/Entregue" para Zap.</td><td>Frenet / Chatwoot</td></tr>
-      <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/erp/sync</span></td><td><span class="int-status decide">Pendente</span></td><td>Recebe o payload do produto recém-cadastrado na KingsHub (com NCM, EAN, dimensões) e injeta no ERP Olist.</td><td>Olist API</td></tr>
       <tr><td><span style="font-family:'JetBrains Mono';color:var(--yellow)">/api/webhooks/erp</span></td><td><span class="int-status decide">Pendente</span></td><td>Webhook passivo que escuta o Olist. Ocorre venda na Shopee/ML -> dá baixa no estoque central do Supabase.</td><td>Olist API</td></tr>
     </tbody>
   </table>
@@ -1209,7 +1209,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--tex
 <br>
 
 <footer class="footer">
-  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date">10 de Abril de 2026</span></p>
+  <p>Kings Hub Production Dashboard — Atualizado em <span id="update-date">4 de Maio de 2026</span></p>
   <p style="margin-top:4px;color:var(--accent)">Metodologia: GSD + Superpowers | Stack: Next.js 14 + Supabase Pro + Vercel (1 site unificado)</p>
   <p style="margin-top:4px;color:var(--text-muted)">Decisões resolvidas: Site unificado · Lançamento simultâneo · Supabase Pro · Admin em /admin · NFs via Olist · Estoque interno</p>
 </footer>

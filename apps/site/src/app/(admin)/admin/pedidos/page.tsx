@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from '@kings/db/server'
 import { PedidosClient } from './PedidosClient'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 30
 
 import { cookies } from 'next/headers'
 

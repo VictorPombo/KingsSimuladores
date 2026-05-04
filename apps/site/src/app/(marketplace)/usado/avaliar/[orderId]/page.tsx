@@ -4,7 +4,7 @@ import { Card } from '@kings/ui'
 import { Button } from '@kings/ui'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 60
 
 // Ação Server-side para gravar o review blindando com RLS
 async function submitReview(formData: FormData) {

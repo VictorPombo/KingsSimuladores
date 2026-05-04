@@ -28,23 +28,34 @@ export async function POST(req: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    const { error } = await adminSupabase.from('marketplace_listings').insert({
-      id: crypto.randomUUID(),
+    const { error } = await adminSupabase.from('products').insert({
+      id: body.id || crypto.randomUUID(),
       title: body.title,
       price: body.price,
-      condition: body.condition,
+      // For used items, we can store condition and other specifics in attributes jsonb
+      attributes: {
+        condition: body.condition,
+        brand_name: body.brand || null,
+        model: body.model || null,
+        has_original_box: body.has_original_box ?? false,
+        has_usage_marks: body.has_usage_marks ?? false,
+        city: body.city || null,
+        state: body.state || null,
+      },
       images: body.imageUrls || (body.imageUrl ? [body.imageUrl] : []),
       description: body.description,
-      brand: body.brand || null,
-      model: body.model || null,
-      city: body.city || null,
-      state: body.state || null,
-      has_original_box: body.has_original_box ?? false,
-      has_usage_marks: body.has_usage_marks ?? false,
-      shipping_options: body.shipping_options || null,
       status: 'pending_review',
       seller_id: profile.id,
-      commission_rate: 0.15,
+      category_id: body.category_id || null,
+      // Default stock for used item is usually 1
+      stock: 1,
+      // Extract weight and dimensions if provided in shipping_options
+      weight_kg: body.shipping_options?.weight || null,
+      dimensions_cm: body.shipping_options ? {
+        width: body.shipping_options.width,
+        height: body.shipping_options.height,
+        length: body.shipping_options.length
+      } : null
     })
 
     if (error) {

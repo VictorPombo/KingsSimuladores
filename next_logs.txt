@@ -1,0 +1,127 @@
+
+> kingshub-next@0.1.0 dev
+> dotenv -e .env.local -- turbo run dev
+
+• turbo 2.9.3
+
+   • Packages in scope: @kings/config, @kings/db, @kings/notifications, @kings/payments, @kings/shipping, @kings/site, @kings/ui, @kings/utils
+   • Running dev in 8 packages
+   • Remote caching disabled
+
+@kings/site:dev: cache bypass, force executing fb5afc154e9376fa
+@kings/site:dev: 
+@kings/site:dev: > @kings/site@0.0.0 dev
+@kings/site:dev: > next dev --port 3000
+@kings/site:dev: 
+@kings/site:dev:   ▲ Next.js 14.2.35
+@kings/site:dev:   - Local:        http://localhost:3000
+@kings/site:dev:   - Environments: .env.local
+@kings/site:dev: 
+@kings/site:dev:  ✓ Starting...
+@kings/site:dev:  ✓ Ready in 1300ms
+@kings/site:dev:  ✓ Compiled /src/middleware in 276ms (140 modules)
+@kings/site:dev: <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (215kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+@kings/site:dev:  ○ Compiling /admin/produtos ...
+@kings/site:dev:  ✓ Compiled /admin/produtos in 1615ms (812 modules)
+@kings/site:dev:  GET /admin/produtos 200 in 2414ms
+@kings/site:dev:  ○ Compiling /admin/categorias ...
+@kings/site:dev:  ✓ Compiled /admin/categorias in 637ms (837 modules)
+@kings/site:dev:  GET /admin/categorias 200 in 823ms
+@kings/site:dev:  GET /admin/produtos 200 in 564ms
+@kings/site:dev:  ○ Compiling /admin/produtos/[id] ...
+@kings/site:dev:  ✓ Compiled /admin/produtos/[id] in 971ms (905 modules)
+@kings/site:dev:  GET /admin/produtos/be0f0bf7-549a-47be-bed8-1fc2ae3fa148 200 in 1866ms
+@kings/site:dev:  ⚠ ./src/app/(admin)/admin/produtos/[id]/page.tsx
+@kings/site:dev: Attempted import error: 'getAllCategories' is not exported from './actions' (imported as 'getAllCategories').
+@kings/site:dev: 
+@kings/site:dev: Import trace for requested module:
+@kings/site:dev: ./src/app/(admin)/admin/produtos/[id]/page.tsx
+@kings/site:dev:  ⨯ src/app/(admin)/admin/produtos/[id]/page.tsx (14:47) @ getAllCategories
+@kings/site:dev:  ⨯ TypeError: (0 , _actions__WEBPACK_IMPORTED_MODULE_2__.getAllCategories) is not a function
+@kings/site:dev:     at EditProductPage (admin/produtos/[id]/page.tsx:21:91)
+@kings/site:dev: digest: "3900873509"
+@kings/site:dev: [0m [90m 12 |[39m   }[0m
+@kings/site:dev: [0m [90m 13 |[39m[0m
+@kings/site:dev: [0m[31m[1m>[22m[39m[90m 14 |[39m   [36mconst[39m allCategories [33m=[39m [36mawait[39m getAllCategories()[0m
+@kings/site:dev: [0m [90m    |[39m                                               [31m[1m^[22m[39m[0m
+@kings/site:dev: [0m [90m 15 |[39m[0m
+@kings/site:dev: [0m [90m 16 |[39m   [36mconst[39m mapped [33m=[39m {[0m
+@kings/site:dev: [0m [90m 17 |[39m     id[33m:[39m product[33m.[39mid[33m,[39m[0m
+@kings/site:dev:  ✓ Compiled in 455ms (905 modules)
+@kings/site:dev:  ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+@kings/site:dev:  GET /admin/produtos/be0f0bf7-549a-47be-bed8-1fc2ae3fa148 200 in 288ms
+@kings/site:dev:  ✓ Compiled in 700ms (905 modules)
+@kings/site:dev:  ✓ Compiled in 395ms (905 modules)
+@kings/site:dev:  ✓ Compiled in 620ms (905 modules)
+@kings/site:dev:  ○ Compiling /_not-found ...
+@kings/site:dev:  ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+@kings/site:dev:  ✓ Compiled /_not-found in 867ms (908 modules)
+@kings/site:dev:  GET /admin/produto 404 in 966ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777673419148 404 in 21ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777673419148 404 in 44ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 45ms
+@kings/site:dev:  GET /_next/static/chunks/app/layout.js 404 in 45ms
+@kings/site:dev:  ○ Compiling /admin ...
+@kings/site:dev:  ✓ Compiled /admin in 2.1s (1967 modules)
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777673429260 404 in 21ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777673429260 404 in 45ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 45ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 44ms
+@kings/site:dev:  GET /admin 200 in 3722ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777673441141 404 in 28ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777673441141 404 in 31ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 33ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 33ms
+@kings/site:dev:  GET /admin?tab=seven 200 in 312ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777673459816 404 in 31ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 29ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777673459816 404 in 31ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 30ms
+@kings/site:dev:  GET /admin?tab=seven 200 in 408ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777673463020 404 in 24ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 28ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 27ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777673463020 404 in 28ms
+@kings/site:dev:  GET /admin?tab=seven 200 in 311ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777673467712 404 in 28ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 30ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777673467712 404 in 32ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 32ms
+@kings/site:dev:  GET /admin?tab=kings 200 in 400ms
+@kings/site:dev:  GET /api/supabase-query 404 in 393ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777674028089 404 in 37ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 42ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777674028089 404 in 44ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 43ms
+@kings/site:dev:  GET /admin?tab=kings 200 in 600ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777674029572 404 in 22ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777674029572 404 in 31ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 30ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 31ms
+@kings/site:dev:  GET /admin?tab=kings 200 in 257ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777674030468 404 in 35ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777674030468 404 in 39ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 39ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 38ms
+@kings/site:dev:  GET /admin?tab=kings 200 in 244ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777674036391 404 in 27ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 36ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777674036391 404 in 36ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 36ms
+@kings/site:dev:  GET /admin 200 in 422ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777674153340 404 in 26ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 39ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 40ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777674153340 404 in 42ms
+@kings/site:dev:  GET /admin 200 in 706ms
+@kings/site:dev:  GET /_next/static/css/app/layout.css?v=1777674155032 404 in 29ms
+@kings/site:dev:  GET /_next/static/chunks/app-pages-internals.js 404 in 30ms
+@kings/site:dev:  GET /_next/static/chunks/main-app.js?v=1777674155032 404 in 30ms
+@kings/site:dev:  GET /_next/static/chunks/app/(admin)/admin/layout.js 404 in 30ms
+@kings/site:dev:  GET /admin 200 in 374ms
+@kings/site:dev: [?25h
+
+ Tasks:    1 successful, 1 total
+Cached:    0 cached, 1 total
+  Time:    1h28m50.957s 
+

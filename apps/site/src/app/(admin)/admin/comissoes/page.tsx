@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@kings/db/server'
 import { markCommissionPaid } from './actions'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 30
 
 export default async function ComissoesAdminPage() {
   const supabase = await createServerSupabaseClient()
