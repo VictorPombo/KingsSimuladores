@@ -139,57 +139,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
 
       <section style={{ padding: '40px 0' }}>
         <Container style={{ maxWidth: '1400px' }}>
-          {/* TAB SEGMENTATION */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '32px', flexWrap: 'wrap' }}>
-            <Link href="/admin?tab=kings" style={{ textDecoration: 'none' }}>
-              <div style={{ 
-                padding: '10px 20px', 
-                borderRadius: '8px', 
-                border: isKingsTab || isAllTab ? '1px solid #10b981' : '1px solid var(--border)',
-                background: isKingsTab || isAllTab ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)', 
-                color: isKingsTab || isAllTab ? '#10b981' : 'var(--text-muted)', 
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                letterSpacing: '1px',
-                transition: 'all 0.2s',
-                boxShadow: isKingsTab || isAllTab ? '0 0 15px rgba(16, 185, 129, 0.1)' : 'none'
-              }}>
-                👑 LOJA KINGS (D2C)
-              </div>
-            </Link>
-            <Link href="/admin?tab=msu" style={{ textDecoration: 'none' }}>
-              <div style={{ 
-                padding: '10px 20px', 
-                borderRadius: '8px', 
-                border: isMsuTab ? '1px solid #06b6d4' : '1px solid var(--border)',
-                background: isMsuTab ? 'rgba(6, 182, 212, 0.15)' : 'var(--bg-card)', 
-                color: isMsuTab ? '#06b6d4' : 'var(--text-muted)', 
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                letterSpacing: '1px',
-                transition: 'all 0.2s',
-                boxShadow: isMsuTab ? '0 0 15px rgba(6, 182, 212, 0.1)' : 'none'
-              }}>
-                ♻️ MSU MARKETPLACE (C2C)
-              </div>
-            </Link>
-            <Link href="/admin?tab=seven" style={{ textDecoration: 'none' }}>
-              <div style={{ 
-                padding: '10px 20px', 
-                borderRadius: '8px', 
-                border: isSevenTab ? '1px solid #ea580c' : '1px solid var(--border)',
-                background: isSevenTab ? 'rgba(234, 88, 12, 0.15)' : 'var(--bg-card)', 
-                color: isSevenTab ? '#ea580c' : 'var(--text-muted)', 
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                letterSpacing: '1px',
-                transition: 'all 0.2s',
-                boxShadow: isSevenTab ? '0 0 15px rgba(234, 88, 12, 0.1)' : 'none'
-              }}>
-                🏁 SEVEN SIM RACING
-              </div>
-            </Link>
-          </div>
+
 
           <div className="admin-header-flex" style={{ marginBottom: '24px' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', color: '#f8fafc', margin: 0 }}>
@@ -269,32 +219,32 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
             <div>
               <h3 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-display)', color: '#f8fafc', marginBottom: '16px' }}>🚀 Ações Rápidas</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <Link href={isMsuTab ? '/admin/moderacao' : '/admin/criar-produto'} style={{ textDecoration: 'none' }}>
+                <Link href={isMsuTab ? '/admin/moderacao' : '/admin/produtos'} style={{ textDecoration: 'none' }}>
                   <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s' }} className="hover:border-[#00e5ff] hover:-translate-y-1">
                     <div style={{ background: 'rgba(0,229,255,0.1)', padding: '10px', borderRadius: '8px' }}><Zap size={20} color="#00e5ff" /></div>
                     <div>
-                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{isMsuTab ? 'Moderar Anúncios' : 'Cadastrar Novo Produto'}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isMsuTab ? 'Aprove listagens da comunidade' : 'Envie direto para ML e Shopee'}</div>
+                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{isMsuTab ? 'Moderar Anúncios' : 'Gerenciar Catálogo'}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isMsuTab ? 'Aprove listagens da comunidade' : 'Acesse o inventário sincronizado do ERP'}</div>
                     </div>
                   </div>
                 </Link>
 
-                <Link href={isMsuTab ? '/admin/msu-comissoes' : '/admin/pedidos'} style={{ textDecoration: 'none' }}>
+                <Link href={isMsuTab ? '/admin/msu-chat' : '/admin/pedidos'} style={{ textDecoration: 'none' }}>
                   <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s' }} className="hover:border-[#8b5cf6] hover:-translate-y-1">
                     <div style={{ background: 'rgba(139,92,246,0.1)', padding: '10px', borderRadius: '8px' }}><ShoppingBag size={20} color="#8b5cf6" /></div>
                     <div>
-                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{isMsuTab ? 'Repasses e Comissões' : 'Painel de Fulfillment'}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isMsuTab ? 'Acompanhe as taxas Cobradas' : 'Despache pedidos urgentes'}</div>
+                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{isMsuTab ? 'Chat & Negociações' : 'Painel de Pedidos'}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isMsuTab ? 'Acompanhe as mensagens C2C' : 'Acompanhe e despache pedidos recentes'}</div>
                     </div>
                   </div>
                 </Link>
 
-                <Link href="/admin/chave-api" style={{ textDecoration: 'none' }}>
+                <Link href={isMsuTab ? '/admin/msu-comissoes' : '/admin/aplicativos'} style={{ textDecoration: 'none' }}>
                   <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s' }} className="hover:border-[#f59e0b] hover:-translate-y-1">
                     <div style={{ background: 'rgba(245,158,11,0.1)', padding: '10px', borderRadius: '8px' }}><ShieldCheck size={20} color="#f59e0b" /></div>
                     <div>
-                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>Configurações de Integração</div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Mercado Pago, Melhor Envio, Bling</div>
+                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{isMsuTab ? 'Extrato de Comissões' : 'Configurações de Integração'}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isMsuTab ? 'Verifique as taxas de repasse' : 'Gerencie chaves de API, Bling e Olist'}</div>
                     </div>
                   </div>
                 </Link>

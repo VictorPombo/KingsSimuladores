@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 
 export async function getMsuCommissionRate() {
   const supabase = await createServerSupabaseClient()
@@ -23,6 +23,20 @@ export async function updateMsuCommissionRate(rate: number) {
   
   const { error } = await supabase.from('brands').update({ settings: newSettings }).eq('name', 'msu')
   
+  if (error) {
+    return { success: false, error: error.message }
+  }
+  return { success: true }
+}
+
+export async function updateMarketplaceOrderStatus(id: string, newStatus: string, updates: any = {}) {
+  const supabase = createAdminClient()
+  
+  const { error } = await supabase
+    .from('marketplace_orders')
+    .update({ status: newStatus, ...updates })
+    .eq('id', id)
+    
   if (error) {
     return { success: false, error: error.message }
   }

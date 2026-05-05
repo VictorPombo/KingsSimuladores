@@ -51,7 +51,7 @@ export default function MsuLogin() {
 
     setLoading(true)
     const supabase = getSupabase()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -69,11 +69,16 @@ export default function MsuLogin() {
         setError(error.message)
       }
     } else {
-      setSuccess('Conta criada! Verifique seu e-mail para confirmar o cadastro.')
-      setMode('login')
-      setPassword('')
-      setConfirmPassword('')
-      setFullName('')
+      if (data.session) {
+        // Se já retornou sessão, o e-mail confirmation está desligado. Redireciona logo!
+        window.location.href = '/usado/account'
+      } else {
+        setSuccess('Conta criada! Verifique seu e-mail para confirmar o cadastro.')
+        setMode('login')
+        setPassword('')
+        setConfirmPassword('')
+        setFullName('')
+      }
     }
     setLoading(false)
   }

@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react'
 import { Plus, Folder, Loader2, Save, X, Settings2, ShieldAlert, Edit2, Trash2 } from 'lucide-react'
 import { createCategoryAction, updateCategoryAction, deleteCategoryAction } from './actions'
+import { useStoreContext } from '../components/StoreContext'
 
 type Category = { id: string; name: string; slug: string; brand_scope: string | null; sort_order: number; parent_id: string | null }
 
@@ -13,6 +14,7 @@ const inputStyle: React.CSSProperties = {
 }
 
 export function CategoriasClient({ categories }: { categories: Category[] }) {
+  const { currentStore } = useStoreContext()
   const [showForm, setShowForm] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [editId, setEditId] = useState<string | null>(null)
@@ -60,6 +62,14 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
       })
     }
   }
+
+  const filteredCategories = categories.filter(c => {
+    if (currentStore === 'all') return true;
+    if (currentStore === 'kings') return c.brand_scope === 'kings' || !c.brand_scope;
+    if (currentStore === 'seven') return c.brand_scope === 'seven' || !c.brand_scope;
+    if (currentStore === 'msu') return c.brand_scope === 'msu' || !c.brand_scope;
+    return true;
+  });
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -127,6 +137,7 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
                 <option value="">🛒 Ambas (Global)</option>
                 <option value="kings">⚪️ Kings Simuladores</option>
                 <option value="msu">🟠 Meu Simulador Usado</option>
+                <option value="seven">🏎️ Seven Sim Racing</option>
               </select>
             </div>
           </div>
@@ -165,16 +176,16 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
         )}
 
         {/* Itens */}
-        {categories.length === 0 ? (
+        {filteredCategories.length === 0 ? (
           <div style={{ background: '#24252b', borderRadius: '16px', border: '1px dashed #3f424d', padding: '60px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ background: '#1c1d22', padding: '20px', borderRadius: '50%', marginBottom: '16px' }}>
               <ShieldAlert size={32} color="#64748b" />
             </div>
-            <h3 style={{ color: '#f8fafc', fontSize: '1.2rem', margin: '0 0 8px 0' }}>Sua árvore de categorias está vazia</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: 0, maxWidth: '400px' }}>Categorias organizam os produtos e permitem criar menus dinâmicos no site. Comece criando a primeira agora!</p>
+            <h3 style={{ color: '#f8fafc', fontSize: '1.2rem', margin: '0 0 8px 0' }}>Nenhuma categoria encontrada para esta loja</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: 0, maxWidth: '400px' }}>Você não possui categorias cadastradas no escopo desta loja, ou a árvore está vazia.</p>
           </div>
         ) : (
-          categories.map(c => (
+          filteredCategories.map(c => (
             <div key={c.id} style={{ 
               display: 'grid', gridTemplateColumns: 'minmax(200px, 2fr) 1fr 1fr 80px 80px', gap: '16px', alignItems: 'center',
               background: '#24252b', padding: '16px 20px', borderRadius: '12px', border: '1px solid #3f424d80',
@@ -197,11 +208,11 @@ export function CategoriasClient({ categories }: { categories: Category[] }) {
               <div>
                 <span style={{ 
                   padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase',
-                  background: !c.brand_scope ? '#64748b20' : c.brand_scope === 'kings' ? '#3b82f620' : '#f59e0b20',
-                  color: !c.brand_scope ? '#cbd5e1' : c.brand_scope === 'kings' ? '#60a5fa' : '#fbbf24',
-                  border: `1px solid ${!c.brand_scope ? '#64748b40' : c.brand_scope === 'kings' ? '#3b82f640' : '#f59e0b40'}`
+                  background: !c.brand_scope ? '#64748b20' : c.brand_scope === 'kings' ? '#3b82f620' : c.brand_scope === 'seven' ? '#ea580c20' : '#f59e0b20',
+                  color: !c.brand_scope ? '#cbd5e1' : c.brand_scope === 'kings' ? '#60a5fa' : c.brand_scope === 'seven' ? '#ea580c' : '#fbbf24',
+                  border: `1px solid ${!c.brand_scope ? '#64748b40' : c.brand_scope === 'kings' ? '#3b82f640' : c.brand_scope === 'seven' ? '#ea580c40' : '#f59e0b40'}`
                 }}>
-                  {!c.brand_scope ? 'Global' : c.brand_scope === 'kings' ? 'Kings' : 'MSU'}
+                  {!c.brand_scope ? 'Global' : c.brand_scope === 'kings' ? 'Kings' : c.brand_scope === 'seven' ? 'Seven' : 'MSU'}
                 </span>
               </div>
               

@@ -27,10 +27,10 @@ export async function POST(req: Request) {
 
     if (items && items.length > 0) {
       payload.ShippingItemArray = items.map((item: any) => ({
-        Height: 20,
-        Length: 20,
-        Width: 20,
-        Weight: 2, 
+        Height: item.height || 20,
+        Length: item.length || 20,
+        Width: item.width || 20,
+        Weight: item.weight || 2, 
         Quantity: item.quantity
       }))
     } else if (dimensions && dimensions.length > 0) {

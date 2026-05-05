@@ -2,7 +2,7 @@
 
 import { createAdminClient } from '@kings/db'
 import { revalidatePath } from 'next/cache'
-import { processExternalImages } from '../../utils/imageUtils'
+
 
 export async function updateProduct(id: string, formData: FormData) {
   const supabase = createAdminClient()
@@ -51,7 +51,7 @@ export async function updateProduct(id: string, formData: FormData) {
   }
 
   if (images !== undefined) {
-    updatePayload.images = await processExternalImages(images)
+    updatePayload.images = images
   }
 
   // Fetch existing attributes to merge

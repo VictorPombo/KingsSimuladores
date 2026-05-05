@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useTransition, useCallback } from 'react'
+import React, { useState, useTransition, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Search, Plus, Minus, Trash2, Loader2, CheckCircle, User, MapPin, Package, Truck, CreditCard, FileText, AlertTriangle } from 'lucide-react'
 import { searchProducts, searchClients, createOrder } from './actions'
 
 const ESTADOS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
-type Product = { id: string; title: string; sku: string; price: number; stock: number; images: string[] }
+type Product = { id: string; title: string; sku: string; price: number; stock: number; images: string[]; weight_kg?: number; attributes?: any }
 type CartItem = Product & { quantity: number }
 type Client = { id: string; full_name: string; email: string; phone: string; cpf_cnpj: string; addresses: any }
 
@@ -68,22 +68,41 @@ export default function CriarPedidoPage() {
   const [success, setSuccess] = useState('')
 
   // ─── CEP Auto-fill ───
-  async function handleCepBlur() {
-    const cleanCep = cep.replace(/\D/g, '')
+  async function fetchAddressData(targetCep: string) {
+    const cleanCep = targetCep.replace(/\D/g, '')
     if (cleanCep.length !== 8) return
     setLoadingCep(true)
     try {
-      const res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`)
-      const data = await res.json()
-      if (!data.erro) {
-        setStreet(data.logradouro || '')
-        setNeighborhood(data.bairro || '')
-        setCity(data.localidade || '')
-        setState(data.uf || 'SP')
+      // Tenta via BrasilAPI primeiro (mais rápido e sem tanto rate-limit)
+      let res = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleanCep}`)
+      if (!res.ok) {
+        // Fallback para ViaCEP
+        res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`)
       }
-    } catch {}
+      
+      const data = await res.json()
+      if (!data.erro && !data.errors) {
+        setStreet(data.street || data.logradouro || '')
+        setNeighborhood(data.neighborhood || data.bairro || '')
+        setCity(data.city || data.localidade || '')
+        setState(data.state || data.uf || 'SP')
+      }
+      
+      if (cart.length > 0) {
+        await calculateShipping(cleanCep, cart)
+      }
+    } catch (e) {
+      console.error('Erro ao buscar CEP:', e)
+    }
     setLoadingCep(false)
   }
+
+  useEffect(() => {
+    const cleanCep = cep.replace(/\D/g, '')
+    if (cleanCep.length === 8) {
+      fetchAddressData(cleanCep)
+    }
+  }, [cep])
 
   // ─── Busca de Produtos ───
   async function handleProductSearch() {
@@ -129,17 +148,80 @@ export default function CriarPedidoPage() {
     } else {
       setCart([...cart, { ...product, quantity: 1 }])
     }
+    // Auto calcular se tiver CEP
+    if (cep.replace(/\D/g, '').length === 8) {
+      setTimeout(() => calculateShipping(cep.replace(/\D/g, ''), [...cart, { ...product, quantity: 1 }]), 100)
+    }
   }
 
   function updateQty(id: string, delta: number) {
-    setCart(cart.map(i => {
+    const newCart = cart.map(i => {
       if (i.id !== id) return i
       const newQty = Math.max(1, Math.min(i.stock, i.quantity + delta))
       return { ...i, quantity: newQty }
-    }))
+    })
+    setCart(newCart)
+    if (cep.replace(/\D/g, '').length === 8) {
+      setTimeout(() => calculateShipping(cep.replace(/\D/g, ''), newCart), 100)
+    }
   }
 
-  function removeFromCart(id: string) { setCart(cart.filter(i => i.id !== id)) }
+  function removeFromCart(id: string) { 
+    const newCart = cart.filter(i => i.id !== id)
+    setCart(newCart) 
+    if (newCart.length === 0) setShippingCost(0)
+    else if (cep.replace(/\D/g, '').length === 8) {
+      setTimeout(() => calculateShipping(cep.replace(/\D/g, ''), newCart), 100)
+    }
+  }
+
+  // ─── API Frete Automático ───
+  async function calculateShipping(targetCep: string, currentCart: CartItem[]) {
+    try {
+      const shipRes = await fetch('/api/shipping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          destinationZip: targetCep,
+          items: currentCart.map(i => {
+            // Extrair dimensões do JSONB se existirem, senão usar valores padrão proporcionais ao peso
+            const attrs = i.attributes || {}
+            let w = 20, h = 20, l = 20
+            if (attrs.width) w = Number(attrs.width)
+            if (attrs.height) h = Number(attrs.height)
+            if (attrs.length) l = Number(attrs.length)
+            
+            // Cockpits pesam na faixa de 30kg, se não tiver peso cadastrado mas tiver "cockpit" no nome, assume 30kg
+            let weight = i.weight_kg ? Number(i.weight_kg) : 2
+            if (!i.weight_kg && i.title.toLowerCase().includes('cockpit')) {
+              weight = 30
+              w = 50; h = 50; l = 100 // Dimensões volumétricas estimadas de um cockpit
+            }
+
+            return { 
+              quantity: i.quantity,
+              weight: weight,
+              width: w,
+              height: h,
+              length: l
+            }
+          }),
+          store: 'kings' 
+        })
+      })
+      const shipData = await shipRes.json()
+      if (shipData.options && shipData.options.length > 0) {
+        const sedex = shipData.options.find((o: any) => o.name.toUpperCase().includes('SEDEX'))
+        if (sedex) {
+           setShippingCost(parseFloat(sedex.price))
+           setDeliveryDays(parseInt(sedex.delivery_time || '1'))
+           setShippingMethod('correios_sedex')
+        }
+      }
+    } catch (e) {
+      console.error('Erro ao calcular frete:', e)
+    }
+  }
 
   // ─── Cálculos ───
   const subtotal = cart.reduce((a, i) => a + i.price * i.quantity, 0)
@@ -279,8 +361,8 @@ export default function CriarPedidoPage() {
           <div>
             <label style={labelStyle}>CEP *</label>
             <div style={{ position: 'relative' }}>
-              <input type="text" placeholder="00000-000" value={cep} onChange={e => setCep(e.target.value)} onBlur={handleCepBlur} style={inputStyle}
-                onFocus={(e: any) => e.currentTarget.style.borderColor = '#10b981'} />
+              <input type="text" placeholder="00000-000" value={cep} onChange={e => setCep(e.target.value)} style={inputStyle}
+                onFocus={(e: any) => e.currentTarget.style.borderColor = '#10b981'} onBlur={(e: any) => e.currentTarget.style.borderColor = '#3f424d'} />
               {loadingCep && <Loader2 size={16} color="#10b981" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', animation: 'spin 1s linear infinite' }} />}
             </div>
           </div>
@@ -356,7 +438,16 @@ export default function CriarPedidoPage() {
             </div>
             {productResults.map((p: any) => (
               <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 60px', padding: '12px 14px', borderBottom: '1px solid #3f424d', alignItems: 'center', fontSize: '0.85rem', color: '#e2e8f0' }}>
-                <div>{p.title}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {p.images && p.images[0] ? (
+                    <img src={p.images[0]} alt={p.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #3f424d' }} />
+                  ) : (
+                    <div style={{ width: '40px', height: '40px', background: '#3f424d', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                      <Package size={16} />
+                    </div>
+                  )}
+                  <span style={{ fontWeight: 500 }}>{p.title}</span>
+                </div>
                 <div style={{ color: p.stock > 0 ? '#10b981' : '#ef4444' }}>{p.stock} un.</div>
                 <div style={{ fontFamily: 'monospace' }}>R$ {Number(p.price).toFixed(2)}</div>
                 <div>
@@ -380,9 +471,18 @@ export default function CriarPedidoPage() {
             </div>
             {cart.map(item => (
               <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '2fr 120px 100px 80px', padding: '12px 14px', borderBottom: '1px solid #3f424d', alignItems: 'center', fontSize: '0.85rem', color: '#e2e8f0' }}>
-                <div>
-                  <div style={{ fontWeight: 500 }}>{item.title}</div>
-                  <div style={{ color: '#64748b', fontSize: '0.75rem' }}>R$ {item.price.toFixed(2)} un.</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {item.images && item.images[0] ? (
+                    <img src={item.images[0]} alt={item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #3f424d' }} />
+                  ) : (
+                    <div style={{ width: '40px', height: '40px', background: '#3f424d', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                      <Package size={16} />
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontWeight: 500 }}>{item.title}</div>
+                    <div style={{ color: '#64748b', fontSize: '0.75rem' }}>R$ {item.price.toFixed(2)} un.</div>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <button onClick={() => updateQty(item.id, -1)} style={{ background: '#3f424d', border: 'none', borderRadius: '4px', padding: '4px', cursor: 'pointer', color: '#fff', display: 'flex' }}><Minus size={14} /></button>
@@ -409,18 +509,11 @@ export default function CriarPedidoPage() {
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><Truck size={20} color="#22d3ee" /> Informações de entrega</h2>
 
-        {(!cep || cart.length === 0) && (
-          <div style={{ padding: '12px 16px', background: '#f59e0b18', border: '1px solid #f59e0b30', borderRadius: '6px', marginBottom: '20px', fontSize: '0.8rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertTriangle size={16} /> Para calcular a entrega, preencha o CEP e adicione ao menos um produto.
-          </div>
-        )}
-
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Forma de entrega *</label>
             <select value={shippingMethod} onChange={e => setShippingMethod(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
               <option value="personalizado">Personalizado</option>
-              <option value="correios_pac">Correios PAC</option>
               <option value="correios_sedex">Correios SEDEX</option>
               <option value="retirada">Retirada em mãos</option>
             </select>

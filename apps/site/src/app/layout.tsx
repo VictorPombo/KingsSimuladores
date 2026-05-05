@@ -40,20 +40,23 @@ export const metadata: Metadata = {
 
 import { StreamingBackground } from '@kings/ui'
 
+import { Inter, Rajdhani, JetBrains_Mono } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-body', display: 'swap' })
+const rajdhani = Rajdhani({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-display', display: 'swap' })
+const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' })
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" style={{ backgroundColor: '#06080f' }}>
+    <html lang="pt-BR" className={`${inter.variable} ${rajdhani.variable} ${jetbrains.variable}`} style={{ backgroundColor: '#06080f' }}>
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
+        {/* Fontes agora gerenciadas nativamente pelo Next.js */}
       </head>
-      <body>
+      <body className="font-body">
         <StreamingBackground />
         {children}
       </body>

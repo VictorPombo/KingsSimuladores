@@ -13,6 +13,14 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
+  // 1. REDIRECIONAMENTO DE LEGADO (TRAY)
+  // Se o usuário tentar acessar /adm no domínio antigo, enviamos ele direto para o Commerce Suite da Tray
+  if (url.pathname.startsWith('/adm') || url.pathname.startsWith('/admin_tray')) {
+    if (hostname.includes('sevensimracing')) {
+      return NextResponse.redirect(new URL(`https://sevensimracing.tray.com.br${url.pathname}${url.search}`))
+    }
+  }
+
   const hasDevAccess = request.cookies.has('dev_access')
   
   // Se não tem acesso liberado, e não é uma rota interna estática/imagem

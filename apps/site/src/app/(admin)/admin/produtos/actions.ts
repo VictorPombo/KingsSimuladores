@@ -24,16 +24,27 @@ export async function toggleProductStatus(productId: string, currentStatus: stri
 export async function deleteProduct(productId: string) {
   const supabase = await createServerSupabaseClient()
   
-  // Realiza um Soft Delete (Arquiva) ou Hard Delete
-  // Para segurança em lojas, geralmente mudamos para 'archived' para não quebrar orders
-  const { error } = await supabase
-    .from('products')
-    .update({ status: 'archived' })
-    .eq('id', productId)
+  // Check if it's already archived
+  const { data: prod } = await supabase.from('products').select('status').eq('id', productId).single()
 
-  if (error) {
-    console.error('Erro ao arquivar/deletar produto:', error)
-    return { success: false, error: 'Erro ao deletar produto. Pode estar vinculado a pedidos.' }
+  if (prod?.status === 'archived') {
+    // HARD DELETE se já estiver arquivado (Lixeira definitiva)
+    const { error } = await supabase.from('products').delete().eq('id', productId)
+    if (error) {
+      console.error('Erro ao deletar definitivamente o produto:', error)
+      return { success: false, error: 'Não foi possível deletar o produto definitivamente. Verifique se ele não possui vendas atreladas.' }
+    }
+  } else {
+    // SOFT DELETE (Move para a lixeira/arquivado)
+    const { error } = await supabase
+      .from('products')
+      .update({ status: 'archived' })
+      .eq('id', productId)
+
+    if (error) {
+      console.error('Erro ao arquivar produto:', error)
+      return { success: false, error: 'Erro ao arquivar produto.' }
+    }
   }
 
   revalidatePath('/admin/produtos')

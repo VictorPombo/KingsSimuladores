@@ -197,9 +197,15 @@ export function EditProductForm({ product, allCategories = [] }: { product: Prod
                   <select name="category_id" defaultValue={product.category_id || ''}
                     style={{ ...inputStyle, cursor: 'pointer' }}>
                     <option value="">Sem Categoria</option>
-                    {allCategories.map(cat => (
+                    {allCategories
+                      .filter(cat => {
+                         const isKings = product.brand_name?.toLowerCase().includes('kings') || product.brand_name?.toLowerCase().includes('msu');
+                         const scope = isKings ? 'kings' : 'seven';
+                         return cat.brand_scope === scope;
+                      })
+                      .map(cat => (
                       <option key={cat.id} value={cat.id}>
-                        {cat.name} ({cat.brand_scope === 'kings' ? 'Kings' : 'Seven'})
+                        {cat.name}
                       </option>
                     ))}
                   </select>

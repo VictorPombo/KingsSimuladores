@@ -36,8 +36,8 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
 
   const filtered = orders.filter(o => {
     const matchSearch = o.id.includes(searchTerm) ||
-      o.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.profiles?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      (o.profiles?.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (o.profiles?.email || '').toLowerCase().includes(searchTerm.toLowerCase())
     const matchStatus = statusFilter === 'all' || o.status === statusFilter
     const matchBrand = brandFilter === 'all' || o.brand_origin === brandFilter
     return matchSearch && matchStatus && matchBrand

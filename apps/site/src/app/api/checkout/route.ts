@@ -84,6 +84,40 @@ export async function POST(req: Request) {
       // Ideally we would rollback the order here or it would be in an RPC transaction
     }
 
+    // 6. MSU Marketplace Segregation (Escrow Model)
+    if (storeContext === 'msu') {
+      const { data: brand } = await supabase.from('brands').select('settings').eq('name', 'msu').single()
+      // Fallback para 15% conforme regra de negócio oficial, se não houver na tabela
+      let commissionRate = 15; 
+      if (brand?.settings?.commission_rate !== undefined) {
+        commissionRate = Number(brand.settings.commission_rate);
+      }
+
+      for (const item of items) {
+        // Obter seller_id do produto anunciado
+        const { data: listing } = await supabase.from('marketplace_listings').select('seller_id').eq('id', item.id).single()
+        
+        if (listing?.seller_id) {
+          const itemTotal = item.price * item.quantity
+          const kingsFee = (itemTotal * commissionRate) / 100
+          const sellerNet = itemTotal - kingsFee
+
+          await supabase.from('marketplace_orders').insert({
+            buyer_id: profile.id,
+            seller_id: listing.seller_id,
+            listing_id: item.id,
+            total_price: itemTotal,
+            commission_rate: commissionRate,
+            kings_fee: kingsFee,
+            seller_net: sellerNet,
+            status: 'awaiting_payment',
+            mp_preference_id: preference.id, // Vínculo principal para o webhook antigo (caso falhe o order_id)
+            order_id: newOrder.id // Novo vínculo estrutural criado na migration 010
+          })
+        }
+      }
+    }
+
     // Return the real session/order
     return NextResponse.json({
       ok: true,

@@ -12,7 +12,7 @@ export async function getBrands() {
 
 export async function getCategories() {
   const supabase = await createServerSupabaseClient()
-  const { data } = await supabase.from('categories').select('id, name, slug').order('name')
+  const { data } = await supabase.from('categories').select('id, name, slug, brand_scope').order('name')
   return data || []
 }
 

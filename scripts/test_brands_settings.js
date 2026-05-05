@@ -1,0 +1,12 @@
+require('dotenv').config({ path: 'apps/site/.env.local' })
+const { createClient } = require('@supabase/supabase-js')
+
+async function run() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabase = createClient(supabaseUrl, supabaseKey)
+
+  const { data: brands, error } = await supabase.from('brands').select('*').eq('name', 'msu')
+  console.log(brands)
+}
+run()

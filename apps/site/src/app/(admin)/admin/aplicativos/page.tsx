@@ -3,12 +3,8 @@
 const apps = [
   { name: 'Mercado Pago', desc: 'Pagamentos: Pix, Boleto, Cartão 12x, Split Payment', icon: '💰', status: 'active', color: '#00bcff' },
   { name: 'Frenet', desc: 'Cotação e geração de etiquetas (Sedex, Jadlog, Azul Cargo, LATAM, Buslog)', icon: '📦', status: 'active', color: '#00c853' },
-  { name: 'Chatwoot', desc: 'Central de WhatsApp: Disparos com transbordo humano', icon: '💬', status: 'active', color: '#1f93ff' },
   { name: 'Resend', desc: 'E-mails transacionais: confirmação, NF, newsletter', icon: '✉️', status: 'active', color: '#6366f1' },
-  { name: 'Olist ERP', desc: 'Emissão automática de NF-e e Sincronização de Estoque B2C', icon: '🧾', status: 'pending', color: '#ff5400' },
-  { name: 'Google Shopping', desc: 'Feed XML de produtos para Merchant Center', icon: '🛍️', status: 'active', color: '#4285F4' },
-  { name: 'TikTok Shop', desc: 'Feed de catálogo para TikTok For Business', icon: '🎵', status: 'active', color: '#ff0050' },
-  { name: 'Google Analytics', desc: 'Rastreamento de conversões e comportamento', icon: '📊', status: 'pending', color: '#fbbc04' },
+  { name: 'Olist ERP', desc: 'Emissão automática de NF-e e Sincronização de Estoque B2C', icon: '🧾', status: 'active', color: '#ff5400' },
 ]
 
 export default function AplicativosPage() {

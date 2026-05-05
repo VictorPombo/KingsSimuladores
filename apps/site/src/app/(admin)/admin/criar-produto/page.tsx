@@ -6,7 +6,7 @@ import { ArrowLeft, Package, DollarSign, Archive, Settings, Loader2, CheckCircle
 import { getBrands, getCategories, createProduct, getVariationGrids } from './actions'
 import { ProductSmartImporter } from '../components/ProductSmartImporter'
 import imageCompression from 'browser-image-compression'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@kings/db/client'
 
 const inputStyle: React.CSSProperties = { width: '100%', background: '#1f2025', border: '1px solid #3f424d', borderRadius: '6px', padding: '10px 14px', color: '#fff', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }
 const labelStyle: React.CSSProperties = { display: 'block', color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }
@@ -134,25 +134,27 @@ export default function CriarProdutoPage() {
         
         // 1. Processar e Enviar Imagens se existirem
         if (imageFiles.length > 0) {
-          const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-          )
-          
           for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i]
             const options = { maxSizeMB: 1, maxWidthOrHeight: 1080, useWebWorker: true, fileType: 'image/webp' as any }
             const compressedFile = await imageCompression(file, options)
-            const fileName = `catalog/${Date.now()}-${Math.random().toString(36).substring(7)}.webp`
             
-            const { error: uploadErr } = await supabase.storage.from('produtos').upload(fileName, compressedFile, { cacheControl: '3600' })
-            if (uploadErr) {
-               console.warn("Erro ao fazer upload da img, avisar admin para criar o bucket 'produtos'.", uploadErr)
-               throw new Error("Erro de Upload: Verifique se o bucket 'produtos' existe e está público no Supabase.")
+            const formData = new FormData()
+            formData.append('file', compressedFile, file.name)
+            
+            const uploadRes = await fetch('/api/admin/upload-image', {
+              method: 'POST',
+              body: formData
+            })
+            
+            if (!uploadRes.ok) {
+               const errData = await uploadRes.json()
+               console.warn("Erro da API de upload:", errData)
+               throw new Error("Erro de Upload: " + (errData.error || "Falha ao enviar imagem para a nuvem."))
             }
             
-            const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(fileName)
-            uploadedUrls.push(publicUrl)
+            const { url } = await uploadRes.json()
+            if (url) uploadedUrls.push(url)
           }
         }
         
@@ -194,8 +196,8 @@ export default function CriarProdutoPage() {
     })
   }
 
-  const focusHandler = (e: any) => e.currentTarget.style.borderColor = '#8b5cf6'
-  const blurHandler = (e: any) => e.currentTarget.style.borderColor = '#3f424d'
+  const focusHandler = (e: any) => { if (e?.currentTarget) e.currentTarget.style.borderColor = '#8b5cf6' }
+  const blurHandler = (e: any) => { if (e?.currentTarget) e.currentTarget.style.borderColor = '#3f424d' }
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto' }}>
@@ -523,9 +525,16 @@ export default function CriarProdutoPage() {
           </div>
           <div>
             <label style={labelStyle}>Categoria</label>
-            <select value={categoryId} onChange={e => setCategoryId(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              <option value="">Sem categoria</option>
-              {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            <select value={categoryId} onChange={e => setCategoryId(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }} disabled={!brandId}>
+              <option value="">{brandId ? 'Sem categoria' : 'Selecione a Loja Origem primeiro...'}</option>
+              {categories
+                .filter((c: any) => {
+                  if (!brandId) return false;
+                  const selectedBrand = brands.find((b: any) => b.id === brandId);
+                  const scope = selectedBrand?.name === 'msu' ? 'kings' : selectedBrand?.name;
+                  return c.brand_scope === scope;
+                })
+                .map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div>

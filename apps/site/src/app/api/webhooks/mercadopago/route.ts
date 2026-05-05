@@ -43,7 +43,7 @@ export async function POST(req: Request) {
           .from('orders')
           .update({ status: 'paid', payment_id: paymentId, payment_method: paymentData.payment_method_id })
           .eq('id', orderId)
-          .select('id, customer_id, brand_origin, total, shipping_address, coupon_id, profiles(full_name, email, phone, cpf_cnpj)')
+          .select('id, customer_id, brand_origin, total, shipping_address, coupon_id, preference_id, profiles(full_name, email, phone, cpf_cnpj)')
           .single()
 
         if (orderErr || !order) {
@@ -280,47 +280,37 @@ export async function POST(req: Request) {
           console.log(`[Webhook MP] Etiqueta Logística vinculada ao Pedido ${orderId}`)
         }
 
-        // 8. Integração Contábil: Split Payment MSU (Comissões)
-        if (items && items.length > 0) {
-          console.log(`[Webhook MP] Calculando Sub-Ledger (Split Payment) para Pedido ${orderId}`)
+        // 8. Integração Contábil: Split Payment MSU (Comissões - Escrow Model)
+        if (items && items.length > 0 && order.preference_id) {
+          console.log(`[Webhook MP] Atualizando status de pagamentos MSU no Sub-Ledger para Pedido ${orderId}`)
           
+          // Atualiza o status em lote para todos os itens da MSU dessa compra
+          await supabase.from('marketplace_orders').update({ 
+            status: 'paid',
+            mp_payment_id: paymentId
+          }).eq('mp_preference_id', order.preference_id)
+
           for (const item of items) {
              const origin = item.store_origin || order.brand_origin
              if (origin === 'msu' && item.product_id && item.product) {
                 const product = item.product as any
                 if (product.seller_id) {
                    try {
-                     // Matemática do Split: Taxa dinâmica da KingsHub
-                     const saleAmount = product.price * item.quantity
+                     // Buscar os valores exatos retidos na hora do checkout (Kings_fee e seller_net)
+                     const { data: mpOrder } = await supabase.from('marketplace_orders')
+                        .select('seller_net, kings_fee')
+                        .eq('listing_id', item.id)
+                        .eq('mp_preference_id', order.preference_id)
+                        .single()
+                        
+                     const sellerPayout = mpOrder?.seller_net || 0
                      
-                     // Buscar taxa na tabela de configurações (fallback para 13%)
-                     let commissionRate = 0.13 
-                     const { data: config } = await supabase.from('platform_settings').select('value').eq('key', 'msu_commission_rate').single()
-                     if (config?.value) {
-                       const parsed = parseFloat(config.value)
-                       if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) {
-                         commissionRate = parsed
-                       }
-                     }
-                     
-                     const commissionAmount = saleAmount * commissionRate
-                     const sellerPayout = saleAmount - commissionAmount
-                     
-                     // Inserindo na nova tabela 'payouts'
-                     await supabase.from('payouts').insert({
-                       order_item_id: item.id,
-                       seller_id: product.seller_id,
-                       gross_amount: saleAmount,
-                       platform_fee_amount: commissionAmount,
-                       net_amount: sellerPayout,
-                       status: 'held' // Fica retido em Escrow (Garantia)
-                     })
-                     console.log(`[Webhook MP] ✅ Split Contábil (15%) - MSU -> Vendedor Retém: R$${sellerPayout.toFixed(2)} | KingsHub Retém: R$${commissionAmount.toFixed(2)}.`)
+                     console.log(`[Webhook MP] ✅ Venda MSU Registrada - Item ${item.id} -> Vendedor Retém: R$${sellerPayout.toFixed(2)} | KingsHub Retém: R$${(mpOrder?.kings_fee || 0).toFixed(2)}.`)
 
                      // 8.5 Disparo de E-mail de Venda Realizada
                      const { data: sellerProfile } = await supabase.from('profiles').select('email, full_name').eq('id', product.seller_id).single()
                      if (sellerProfile && sellerProfile.email) {
-                       const MSU_URL = process.env.NEXT_PUBLIC_URL_MSU || 'https://kingssimuladores.com.br/usado'
+                       const MSU_URL = process.env.NEXT_PUBLIC_URL_MSU || 'https://meusimuladorusado.com.br'
                        const html = `
 <div style="font-family: Arial, sans-serif; background-color: #0A0A0A; padding: 40px 20px; color: #fff; text-align: center;">
   <div style="max-width: 600px; margin: 0 auto; background-color: #111; border: 1px solid rgba(232,0,45,0.2); border-radius: 12px; padding: 30px;">
@@ -339,7 +329,7 @@ export async function POST(req: Request) {
       Por favor, acesse o seu painel agora mesmo para ver os dados de endereço do comprador e combinar o envio.
     </p>
     
-    <a href="${MSU_URL}/dashboard" style="display: inline-block; background-color: #E8002D; color: #fff; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+    <a href="${MSU_URL}/usado/dashboard" style="display: inline-block; background-color: #E8002D; color: #fff; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
       Ver Dados de Envio
     </a>
   </div>
@@ -352,7 +342,7 @@ export async function POST(req: Request) {
                        console.log(`[Webhook MP] E-mail de venda MSU enviado para o vendedor: ${sellerProfile.email}`)
                      }
                    } catch (err) {
-                     console.error(`[Webhook MP] Erro ao registrar payout do item ${item.id}:`, err)
+                     console.error(`[Webhook MP] Erro ao registrar email de venda do item ${item.id}:`, err)
                    }
                 }
              }

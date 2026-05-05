@@ -119,7 +119,7 @@ INSTRUÇÕES DE EXTRAÇÃO (IMPORTANTE):
 6. AVALIAÇÕES: Ignore qualquer avaliação de 1, 2 ou 3 estrelas. Você só pode extrair avaliações de 4 e 5 estrelas!
 7. Retorne o resultado ESTRITAMENTE em formato JSON puro, sem marcações ou code blocks.`
 
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`, {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

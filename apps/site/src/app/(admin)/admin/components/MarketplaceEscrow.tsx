@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { Shield, Truck, Package, MapPin, Star, Check, CheckCircle, AlertTriangle, ChevronRight, DollarSign, TrendingUp, BarChart3, Eye, Download, Ban, Lock, Wallet, CreditCard, Clock, Save } from 'lucide-react'
 import { createClient } from '@kings/db/client'
-import { getMsuCommissionRate, updateMsuCommissionRate } from '../msu-pagamentos/actions'
+import { getMsuCommissionRate, updateMsuCommissionRate, updateMarketplaceOrderStatus } from '../msu-pagamentos/actions'
 
 const S = {
   card: { background:'#2c2e36', borderRadius:'10px', border:'1px solid #3f424d', overflow:'hidden' } as React.CSSProperties,
@@ -11,7 +11,7 @@ const S = {
   label: { color:'#94a3b8', fontSize:'0.75rem', textTransform:'uppercase' as const, letterSpacing:'0.5px', marginBottom:'4px' },
 }
 
-type View = 'orders' | 'detail' | 'seller' | 'admin'
+type View = 'orders' | 'detail' | 'seller' | 'admin' | 'guide'
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
   awaiting_payment: { label: 'Aguardando Pagamento', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
@@ -23,6 +23,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
   dispute: { label: 'Em Disputa', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
   refunded: { label: 'Reembolsado', color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' },
   cancelled: { label: 'Cancelado', color: '#64748b', bg: 'rgba(100,116,139,0.1)' },
+  payout_completed: { label: 'Repasse Efetuado', color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
 }
 
 export function MarketplaceEscrow() {
@@ -69,15 +70,12 @@ export function MarketplaceEscrow() {
   const openDetail = (id: string) => { setSelectedId(id); setView('detail') }
 
   const updateStatus = async (id: string, newStatus: string, updates: any = {}) => {
-    const { error } = await supabase
-      .from('marketplace_orders')
-      .update({ status: newStatus, ...updates })
-      .eq('id', id)
+    const { success, error } = await updateMarketplaceOrderStatus(id, newStatus, updates)
       
-    if (!error) {
+    if (success) {
       fetchOrders()
     } else {
-      alert('Erro ao atualizar status: ' + error.message)
+      alert('Erro ao atualizar status: ' + error)
     }
   }
 
@@ -149,10 +147,10 @@ export function MarketplaceEscrow() {
     if (!selected) return null
     
     // Status timestamps for timeline
-    const isPaid = ['paid', 'awaiting_shipment', 'shipped', 'delivered', 'completed', 'dispute'].includes(selected.status)
-    const isShipped = ['shipped', 'delivered', 'completed', 'dispute'].includes(selected.status)
-    const isDelivered = ['delivered', 'completed', 'dispute'].includes(selected.status)
-    const isCompleted = selected.status === 'completed'
+    const isPaid = ['paid', 'awaiting_shipment', 'shipped', 'delivered', 'completed', 'dispute', 'payout_completed'].includes(selected.status)
+    const isShipped = ['shipped', 'delivered', 'completed', 'dispute', 'payout_completed'].includes(selected.status)
+    const isDelivered = ['delivered', 'completed', 'dispute', 'payout_completed'].includes(selected.status)
+    const isCompleted = ['completed', 'payout_completed'].includes(selected.status)
     
     const steps = [
       { label: 'Pedido Realizado', date: new Date(selected.created_at).toLocaleDateString(), done: true, current: false },
@@ -214,6 +212,7 @@ export function MarketplaceEscrow() {
               {(selected.status === 'paid' || selected.status === 'awaiting_shipment') && <button onClick={() => updateStatus(selected.id, 'shipped', { tracking_code: 'BR' + Math.random().toString().slice(2,11) + 'CD' })} style={{ ...S.btn, background:'linear-gradient(135deg,#8b5cf6,#7c3aed)' }}><Truck size={16}/> Simular Envio</button>}
               {selected.status === 'shipped' && <button onClick={() => updateStatus(selected.id, 'delivered')} style={{ ...S.btn, background:'linear-gradient(135deg,#06b6d4,#0891b2)' }}><Package size={16}/> Simular Entrega</button>}
               {selected.status === 'delivered' && <button onClick={() => updateStatus(selected.id, 'completed')} style={{ ...S.btn, background:'linear-gradient(135deg,#22c55e,#16a34a)' }}><CheckCircle size={16}/> Confirmar Recebimento</button>}
+              {selected.status === 'completed' && view === 'admin' && <button onClick={() => updateStatus(selected.id, 'payout_completed')} style={{ ...S.btn, background:'linear-gradient(135deg,#f59e0b,#d97706)' }}><Wallet size={16}/> Marcar Repasse Efetuado</button>}
               {selected.status === 'delivered' && <button onClick={() => updateStatus(selected.id, 'dispute')} style={{ ...S.btn, background:'rgba(239,68,68,0.15)', color:'#ef4444', border:'1px solid rgba(239,68,68,0.3)' }}><AlertTriangle size={16}/> Abrir Disputa</button>}
               {selected.status === 'dispute' && view === 'admin' && <>
                 <button onClick={() => updateStatus(selected.id, 'refunded')} style={{ ...S.btn, background:'rgba(239,68,68,0.15)', color:'#ef4444', border:'1px solid rgba(239,68,68,0.3)' }}><Ban size={16}/> Reembolso Total</button>
@@ -233,7 +232,7 @@ export function MarketplaceEscrow() {
             <div style={{ ...S.card, padding:'20px', marginBottom:'16px' }}>
               <h4 style={{ color:'#fff', fontSize:'0.9rem', fontWeight:700, marginBottom:'16px', display:'flex', alignItems:'center', gap:'6px' }}><DollarSign size={16} color="#f59e0b"/> Decomposição</h4>
               <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
-                <div style={{ display:'flex', justifyContent:'space-between' }}><span style={{ color:'#94a3b8', fontSize:'0.85rem' }}>Comissão Plataforma ({(selected.commission_rate*100).toFixed(0)}%)</span><span style={{ color:'#f59e0b', fontWeight:600 }}>-{formatBRL(selected.kings_fee)}</span></div>
+                <div style={{ display:'flex', justifyContent:'space-between' }}><span style={{ color:'#94a3b8', fontSize:'0.85rem' }}>Comissão Plataforma ({(selected.commission_rate).toFixed(0)}%)</span><span style={{ color:'#f59e0b', fontWeight:600 }}>-{formatBRL(selected.kings_fee)}</span></div>
                 <div style={{ borderTop:'1px solid #3f424d', paddingTop:'10px', display:'flex', justifyContent:'space-between' }}><span style={{ color:'#fff', fontWeight:700 }}>Líquido Vendedor</span><span style={{ color:'#8b5cf6', fontWeight:800, fontSize:'1.1rem' }}>{formatBRL(selected.seller_net)}</span></div>
               </div>
             </div>
@@ -248,15 +247,21 @@ export function MarketplaceEscrow() {
   }
 
   const renderAdminDash = () => {
-    const completed = orders.filter(o => o.status === 'completed')
+    const completed = orders.filter(o => ['completed', 'payout_completed'].includes(o.status))
     const disputes = orders.filter(o => o.status === 'dispute')
     
     const totalRevenue = completed.reduce((s,o) => s + (o.kings_fee || 0), 0)
     const totalSales = completed.reduce((s,o) => s + (o.total_price || 0), 0)
-    const escrowHeld = orders.filter(o => ['paid','awaiting_shipment','shipped','delivered'].includes(o.status)).reduce((s,o) => s + (o.total_price || 0), 0)
+    // Cofre (Escrow) is money we hold: paid, awaiting_shipment, shipped, delivered, completed. When it's payout_completed, we don't hold the seller_net anymore.
+    const escrowHeld = orders.filter(o => ['paid','awaiting_shipment','shipped','delivered', 'completed'].includes(o.status)).reduce((s,o) => s + (o.seller_net || 0), 0)
 
     return (
       <div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          <button onClick={() => setView('guide')} style={{ ...S.btn, background: 'linear-gradient(135deg,#3b82f6,#2563eb)' }}>
+            📚 Guia de Operação
+          </button>
+        </div>
         <div style={{ ...S.card, padding:'16px', marginBottom:'24px', borderColor:'rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <AlertTriangle size={24} color="#3b82f6" />
@@ -323,9 +328,66 @@ export function MarketplaceEscrow() {
     )
   }
 
+  const renderGuide = () => {
+    return (
+      <div>
+        <button onClick={() => setView('admin')} style={{ ...S.btn, background:'transparent', color:'#94a3b8', padding:'0 0 16px 0', fontSize:'0.85rem' }}>← Voltar para o Painel</button>
+        <div style={{ ...S.card, padding:'32px', maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <h2 style={{ color:'#fff', fontSize:'1.8rem', fontWeight:800, margin: '0 0 8px' }}>📚 Guia de Operação Manual do Escrow</h2>
+            <p style={{ color: '#94a3b8', fontSize: '1rem', margin: 0 }}>Como realizar o repasse do dinheiro das vendas da MSU.</p>
+          </div>
+
+          <div style={{ background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:'8px', padding:'20px', marginBottom:'32px' }}>
+            <h4 style={{ color:'#f59e0b', margin:'0 0 12px', fontSize:'1rem', display:'flex', alignItems:'center', gap:'8px' }}><AlertTriangle size={20}/> Atenção à Logística Financeira</h4>
+            <p style={{ color:'#e2e8f0', margin:'0 0 12px', lineHeight:1.6, fontSize:'0.9rem' }}>
+              A API de "Split Automático" do Mercado Pago está em desenvolvimento. Atualmente, <strong>100% do valor da compra cai na conta principal da KingsHub</strong>. A taxa da plataforma (13%) fica com a Kings, e o restante (Líquido Vendedor) precisa ser transferido manualmente para o usuário após o fim do pedido.
+            </p>
+          </div>
+
+          <h3 style={{ color:'#fff', fontSize:'1.2rem', fontWeight:700, margin:'0 0 20px', borderBottom:'1px solid #3f424d', paddingBottom:'12px' }}>Passo a Passo do Repasse</h3>
+          
+          <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+            <div style={{ display:'flex', gap:'16px' }}>
+              <div style={{ width:'32px', height:'32px', borderRadius:'50%', background:'#1f2025', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, flexShrink:0 }}>1</div>
+              <div>
+                <h5 style={{ color:'#fff', margin:'0 0 4px', fontSize:'1rem' }}>Aguardar o Status "Concluído"</h5>
+                <p style={{ color:'#94a3b8', margin:0, fontSize:'0.9rem', lineHeight:1.5 }}>Nunca pague o vendedor antes do produto chegar. O dinheiro só sai do cofre da Kings quando o comprador receber o pacote sem problemas e o status do pedido no painel marcar <span style={{ color:'#22c55e', fontWeight:700 }}>Concluído</span>.</p>
+              </div>
+            </div>
+
+            <div style={{ display:'flex', gap:'16px' }}>
+              <div style={{ width:'32px', height:'32px', borderRadius:'50%', background:'#1f2025', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, flexShrink:0 }}>2</div>
+              <div>
+                <h5 style={{ color:'#fff', margin:'0 0 4px', fontSize:'1rem' }}>Verificar o Valor Líquido</h5>
+                <p style={{ color:'#94a3b8', margin:0, fontSize:'0.9rem', lineHeight:1.5 }}>Clique no ícone de "olho" no pedido para abrir os detalhes. Localize a caixa de "Decomposição" e anote o valor exato em <span style={{ color:'#8b5cf6', fontWeight:700 }}>Líquido Vendedor</span>.</p>
+              </div>
+            </div>
+
+            <div style={{ display:'flex', gap:'16px' }}>
+              <div style={{ width:'32px', height:'32px', borderRadius:'50%', background:'#1f2025', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, flexShrink:0 }}>3</div>
+              <div>
+                <h5 style={{ color:'#fff', margin:'0 0 4px', fontSize:'1rem' }}>Fazer o PIX Manualmente</h5>
+                <p style={{ color:'#94a3b8', margin:0, fontSize:'0.9rem', lineHeight:1.5 }}>Entre em contato com o vendedor usando o e-mail ou WhatsApp registrado no perfil dele, solicite a chave PIX, e faça a transferência pelo aplicativo do seu banco.</p>
+              </div>
+            </div>
+
+            <div style={{ display:'flex', gap:'16px' }}>
+              <div style={{ width:'32px', height:'32px', borderRadius:'50%', background:'#1f2025', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, flexShrink:0 }}>4</div>
+              <div>
+                <h5 style={{ color:'#fff', margin:'0 0 4px', fontSize:'1rem' }}>Marcar Repasse Efetuado</h5>
+                <p style={{ color:'#94a3b8', margin:0, fontSize:'0.9rem', lineHeight:1.5 }}>Volte na tela do pedido e clique no botão laranja <span style={{ color:'#f59e0b', fontWeight:700 }}>Marcar Repasse Efetuado</span>. Isso muda o status do pedido e evita que outro administrador pague o vendedor de forma duplicada.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
-      {view === 'detail' ? renderDetail() : renderAdminDash()}
+      {view === 'detail' ? renderDetail() : view === 'guide' ? renderGuide() : renderAdminDash()}
     </div>
   )
 }

@@ -7,7 +7,7 @@ export async function searchProducts(query: string) {
   const supabase = await createServerSupabaseClient()
   const { data } = await supabase
     .from('products')
-    .select('id, title, sku, price, stock, images, status')
+    .select('id, title, sku, price, stock, images, status, weight_kg, attributes')
     .eq('status', 'active')
     .ilike('title', `%${query}%`)
     .limit(10)
