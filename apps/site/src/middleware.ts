@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   // Se o usuário tentar acessar /adm no domínio antigo, enviamos ele direto para o Commerce Suite da Tray
   if (url.pathname.startsWith('/adm') || url.pathname.startsWith('/admin_tray')) {
     if (hostname.includes('sevensimracing')) {
-      return NextResponse.redirect(new URL(`https://sevensimracing.tray.com.br${url.pathname}${url.search}`))
+      return NextResponse.redirect(new URL(`https://1433338.commercesuite.com.br${url.pathname}${url.search}`))
     }
   }
 
