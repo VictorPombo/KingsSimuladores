@@ -3,6 +3,7 @@
 import React, { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Package, Image as ImageIcon, AlertCircle, Check, X, UploadCloud } from 'lucide-react'
+import imageCompression from 'browser-image-compression'
 import { updateProduct } from './actions'
 
 type ProductData = {
@@ -77,9 +78,23 @@ export function EditProductForm({ product, allCategories = [] }: { product: Prod
           if (img.type === 'existing') {
             finalUrls.push(img.url)
           } else {
+            // Compress image before upload to avoid Vercel 4.5MB limit and save storage
+            const options = {
+              maxSizeMB: 1, // Target max size 1MB
+              maxWidthOrHeight: 1920,
+              useWebWorker: true,
+              fileType: 'image/webp'
+            }
+            let fileToUpload = img.file
+            try {
+              fileToUpload = await imageCompression(img.file, options)
+            } catch (error) {
+              console.warn('Erro ao comprimir imagem, enviando original:', error)
+            }
+
             // Upload via server-side API (uses service role key, bypasses RLS)
             const uploadForm = new FormData()
-            uploadForm.append('file', img.file)
+            uploadForm.append('file', fileToUpload)
             
             const res = await fetch('/api/admin/upload-image', {
               method: 'POST',
