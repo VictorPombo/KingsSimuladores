@@ -14,7 +14,7 @@ export function StoreSwitcher({ store }: StoreSwitcherProps) {
     href = '/';
   } else if (store === 'seven') {
     label = 'SEVEN SIM RACING';
-    href = '/seven';
+    href = 'https://www.sevensimracing.com.br';
   } else if (store === 'msu') {
     label = 'MEU SIMULADOR USADO';
     href = '/usado';
@@ -23,6 +23,8 @@ export function StoreSwitcher({ store }: StoreSwitcherProps) {
   return (
     <Link 
       href={href} 
+      target={store === 'seven' ? '_blank' : undefined}
+      rel={store === 'seven' ? 'noopener noreferrer' : undefined}
       className={`${themeClass} hover:scale-105`}
       style={{
         fontSize: 'clamp(10px, 2.5vw, 12px)',
