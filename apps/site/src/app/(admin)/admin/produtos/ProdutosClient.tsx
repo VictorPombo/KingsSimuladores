@@ -7,7 +7,7 @@ import { toggleProductStatus, deleteProduct } from './actions'
 type Product = {
   id: string; title: string; slug: string; sku: string | null; price: number; price_compare: number | null
   stock: number; status: string; weight_kg: number | null; images: string[]; created_at: string
-  brand_name: string; category_name: string | null; ncm?: string | null;
+  brand_name: string; category_name: string | null; ncm?: string | null; dimensions_cm?: { width?: number; height?: number; length?: number } | null;
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -44,7 +44,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
   }
 
   const filtered = products.filter(p => {
-    const matchSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchSearch = (p.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.sku || '').toLowerCase().includes(searchTerm.toLowerCase())
     const matchStatus = statusFilter === 'all' ? p.status !== 'archived' : p.status === statusFilter
     const matchStock = stockFilter === 'all' ||
@@ -175,6 +175,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
                 {renderBrandBadge(p.brand_name)}
                 {p.sku && <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#64748b' }}>{p.sku}</span>}
                 {!p.ncm && <span title="Produto bloqueado de emitir NF-e por falta de código NCM" style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#ef4444', border: '1px solid #ef444450', borderRadius: '4px', padding: '2px 6px', display: 'inline-flex', alignItems: 'center', background: 'rgba(239,68,68,0.1)', cursor: 'help' }}>⚠️ Falta NCM</span>}
+                {(!p.weight_kg || !p.dimensions_cm || !p.dimensions_cm.width || !p.dimensions_cm.height || !p.dimensions_cm.length) && <span title="Produto bloqueado de calcular frete por falta de peso ou dimensões" style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#f59e0b', border: '1px solid #f59e0b50', borderRadius: '4px', padding: '2px 6px', display: 'inline-flex', alignItems: 'center', background: 'rgba(245,158,11,0.1)', cursor: 'help' }}>⚠️ Faltam Medidas</span>}
               </div>
             </div>
           </div>
@@ -246,6 +247,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
                     <span style={{ color: '#4a4d57', fontSize: '0.65rem' }}>•</span>
                     <span style={{ fontSize: '0.65rem', color: '#4a4d57' }}>{new Date(p.created_at).toLocaleDateString('pt-BR')}</span>
                     {!p.ncm && <span title="Produto bloqueado de emitir NF-e por falta de código NCM" style={{ marginLeft: '4px', fontSize: '0.65rem', fontWeight: 'bold', color: '#ef4444', border: '1px solid #ef444450', borderRadius: '4px', padding: '1px 5px', display: 'inline-flex', alignItems: 'center', background: 'rgba(239,68,68,0.1)', cursor: 'help' }}>⚠️ Falta NCM</span>}
+                    {(!p.weight_kg || !p.dimensions_cm || !p.dimensions_cm.width || !p.dimensions_cm.height || !p.dimensions_cm.length) && <span title="Produto bloqueado de calcular frete por falta de peso ou dimensões" style={{ marginLeft: '4px', fontSize: '0.65rem', fontWeight: 'bold', color: '#f59e0b', border: '1px solid #f59e0b50', borderRadius: '4px', padding: '1px 5px', display: 'inline-flex', alignItems: 'center', background: 'rgba(245,158,11,0.1)', cursor: 'help' }}>⚠️ Faltam Medidas</span>}
                   </div>
                 </td>
                 <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>

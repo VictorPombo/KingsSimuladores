@@ -4,8 +4,6 @@ import { DollarSign, TrendingUp, ArrowDownRight, Clock, AlertCircle, Wallet, Pie
 
 export const dynamic = 'force-dynamic'
 
-export const dynamic = 'force-dynamic'
-
 export default async function MsuComissoesPage() {
   const supabase = await createServerSupabaseClient()
 
