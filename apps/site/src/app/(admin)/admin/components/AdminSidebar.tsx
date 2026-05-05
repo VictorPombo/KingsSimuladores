@@ -81,11 +81,24 @@ const MENU_SECTIONS = [
     color: '#ea580c',
     logoUrl: '/logo-seven.svg',
     items: [
-      { 
-        label: 'Acessar Painel Tray', 
-        icon: ExternalLink, 
-        href: 'https://loja-s.tray.com.br/adm/login.php?loja=1433338',
-        external: true
+      { label: 'Visão Geral', icon: PieChart, href: '/admin?tab=seven' },
+      {
+        label: 'Pedidos',
+        icon: ShoppingCart,
+        subItems: [
+          { label: 'Todos os Pedidos', href: '/admin/pedidos' },
+          { label: 'Notas Fiscais', href: '/admin/notas-fiscais' },
+          { label: 'Clientes', href: '/admin/clientes' }
+        ]
+      },
+      {
+        label: 'Catálogo',
+        icon: Package,
+        subItems: [
+          { label: 'Produtos', href: '/admin/produtos' },
+          { label: 'Categorias', href: '/admin/categorias' },
+          { label: 'Marcas', href: '/admin/marcas' }
+        ]
       }
     ]
   },
@@ -355,13 +368,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                         {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                       </button>
                     ) : (
-                      <Link 
-                        href={item.href!} 
-                        onClick={() => !item.external && handleLinkClick(section.title)} 
-                        target={item.external ? "_blank" : undefined}
-                        rel={item.external ? "noopener noreferrer" : undefined}
-                        style={{ textDecoration: 'none' }}
-                      >
+                      <Link href={item.href!} onClick={() => handleLinkClick(section.title)} style={{ textDecoration: 'none' }}>
                         <div 
                           className="sidebar-item-hover"
                           style={{
