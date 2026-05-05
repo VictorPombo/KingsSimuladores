@@ -1,7 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { Shield, Truck, Package, MapPin, Star, Check, CheckCircle, AlertTriangle, ChevronRight, DollarSign, TrendingUp, BarChart3, Eye, Download, Ban, Lock, Wallet, CreditCard, Clock } from 'lucide-react'
+import { Shield, Truck, Package, MapPin, Star, Check, CheckCircle, AlertTriangle, ChevronRight, DollarSign, TrendingUp, BarChart3, Eye, Download, Ban, Lock, Wallet, CreditCard, Clock, Save } from 'lucide-react'
 import { createClient } from '@kings/db/client'
+import { getMsuCommissionRate, updateMsuCommissionRate } from '../msu-pagamentos/actions'
 
 const S = {
   card: { background:'#2c2e36', borderRadius:'10px', border:'1px solid #3f424d', overflow:'hidden' } as React.CSSProperties,
@@ -38,6 +39,7 @@ export function MarketplaceEscrow() {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setCurrentUserId(data.user.id)
     })
+    getMsuCommissionRate().then(setCommissionRate)
   }, [])
 
   const fetchOrders = async () => {
@@ -255,6 +257,18 @@ export function MarketplaceEscrow() {
 
     return (
       <div>
+        <div style={{ ...S.card, padding:'16px', marginBottom:'24px', borderColor:'rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <AlertTriangle size={24} color="#3b82f6" />
+            <div>
+              <h4 style={{ color:'#3b82f6', fontSize:'0.95rem', fontWeight:700, margin: '0 0 4px' }}>🚧 Bloqueio Automático em Desenvolvimento</h4>
+              <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
+                A funcionalidade de bloqueio nativo do saldo na conta do vendedor (Escrow) e repasse automático da comissão via API bancária está em construção. Atualmente os repasses constam no painel e devem ser pagos via PIX manualmente.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'16px', marginBottom:'24px' }}>
           {[
             { label:'Vendas Concluídas', value: formatBRL(totalSales), color:'#10b981', icon:<TrendingUp size={18}/> },
@@ -284,7 +298,22 @@ export function MarketplaceEscrow() {
         <div style={{ marginBottom:'16px' }}>
           <span style={S.label}>Comissão Padrão da Plataforma</span>
           <div style={{ display:'flex', alignItems:'center', gap:'12px', marginTop:'8px' }}>
-            <input type="range" min={5} max={20} value={commissionRate} onChange={e => setCommissionRate(+e.target.value)} style={{ flex:1 }} />
+            <input 
+              type="range" min={5} max={20} 
+              value={commissionRate} 
+              onChange={e => setCommissionRate(+e.target.value)} 
+              onMouseUp={async () => {
+                const res = await updateMsuCommissionRate(commissionRate);
+                if (res.success) alert(`Taxa atualizada para ${commissionRate}% no banco de dados!`);
+                else alert('Erro ao atualizar taxa');
+              }}
+              onTouchEnd={async () => {
+                const res = await updateMsuCommissionRate(commissionRate);
+                if (res.success) alert(`Taxa atualizada para ${commissionRate}% no banco de dados!`);
+                else alert('Erro ao atualizar taxa');
+              }}
+              style={{ flex:1 }} 
+            />
             <span style={{ color:'#f59e0b', fontWeight:800, fontSize:'1.1rem', minWidth:'40px' }}>{commissionRate}%</span>
           </div>
         </div>

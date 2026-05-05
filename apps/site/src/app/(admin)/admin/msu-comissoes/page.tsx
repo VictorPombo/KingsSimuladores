@@ -4,10 +4,15 @@ import { DollarSign, TrendingUp, ArrowDownRight, Clock, AlertCircle, Wallet, Pie
 
 export const dynamic = 'force-dynamic'
 
-const COMMISSION_RATE = 0.12 // 12%
+export const dynamic = 'force-dynamic'
 
 export default async function MsuComissoesPage() {
   const supabase = await createServerSupabaseClient()
+
+  // Buscar a taxa configurada na barra
+  const { data: brand } = await supabase.from('brands').select('settings').eq('name', 'msu').single()
+  const commissionRatePercent = brand?.settings?.commission_rate !== undefined ? Number(brand.settings.commission_rate) : 15
+  const commissionRate = commissionRatePercent / 100
 
   const { data: orders } = await supabase
     .from('marketplace_orders')
@@ -24,15 +29,15 @@ export default async function MsuComissoesPage() {
   // KPIs calculados
   const totalRevenue = allOrders.reduce((sum, o) => sum + (o.total_price || 0), 0)
   const totalCommission = allOrders.reduce((sum, o) => {
-    // Usar kings_fee se existir, senão calcular 12%
-    return sum + (o.kings_fee || (o.total_price || 0) * COMMISSION_RATE)
+    // Usar kings_fee se existir, senão calcular usando a taxa atual
+    return sum + (o.kings_fee || (o.total_price || 0) * commissionRate)
   }, 0)
   const totalTransferred = allOrders
     .filter(o => o.status === 'completed' || o.status === 'delivered')
-    .reduce((sum, o) => sum + (o.seller_net || (o.total_price || 0) * (1 - COMMISSION_RATE)), 0)
+    .reduce((sum, o) => sum + (o.seller_net || (o.total_price || 0) * (1 - commissionRate)), 0)
   const totalPending = allOrders
     .filter(o => o.status !== 'completed' && o.status !== 'delivered' && o.status !== 'cancelled')
-    .reduce((sum, o) => sum + (o.seller_net || (o.total_price || 0) * (1 - COMMISSION_RATE)), 0)
+    .reduce((sum, o) => sum + (o.seller_net || (o.total_price || 0) * (1 - commissionRate)), 0)
 
   const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
 
@@ -54,8 +59,8 @@ export default async function MsuComissoesPage() {
           <div>
             <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, margin: '0 0 6px' }}>Como funciona?</h3>
             <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
-              Quando um equipamento é vendido no MSU, a Kings retém <strong style={{ color: '#cbd5e1' }}>{(COMMISSION_RATE * 100).toFixed(0)}% de comissão sobre o valor da venda</strong> (split de pagamento) e o restante é repassado ao vendedor. <br/>
-              <span style={{ color: '#64748b' }}>Os valores abaixo são calculados em tempo real a partir das transações registradas.</span>
+              Quando um equipamento é vendido no MSU, a Kings retém a <strong style={{ color: '#cbd5e1' }}>comissão configurada (atualmente em {commissionRatePercent}%) sobre o valor da venda</strong> (split de pagamento) e o restante é repassado ao vendedor. <br/>
+              <span style={{ color: '#64748b' }}>A comissão padrão atual pode ser ajustada na aba Pagamentos & Cofre.</span>
             </p>
           </div>
         </div>
@@ -64,7 +69,7 @@ export default async function MsuComissoesPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           {[
             { label: 'Receita de Vendas', value: fmt(totalRevenue), color: '#10b981', Icon: TrendingUp },
-            { label: `Comissão Kings (${(COMMISSION_RATE * 100).toFixed(0)}%)`, value: fmt(totalCommission), color: '#f59e0b', Icon: PieChart },
+            { label: `Comissão Kings (${commissionRatePercent}%)`, value: fmt(totalCommission), color: '#f59e0b', Icon: PieChart },
             { label: 'Repasses Efetuados', value: fmt(totalTransferred), color: '#3b82f6', Icon: ArrowDownRight },
             { label: 'Repasses Pendentes', value: fmt(totalPending), color: '#ef4444', Icon: Clock },
           ].map((k, i) => (
@@ -101,8 +106,8 @@ export default async function MsuComissoesPage() {
                     </div>
                   </td></tr>
                 ) : allOrders.map((o: any) => {
-                  const commission = o.kings_fee || (o.total_price || 0) * COMMISSION_RATE
-                  const sellerNet = o.seller_net || (o.total_price || 0) * (1 - COMMISSION_RATE)
+                  const commission = o.kings_fee || (o.total_price || 0) * commissionRate
+                  const sellerNet = o.seller_net || (o.total_price || 0) * (1 - commissionRate)
                   const buyerName = Array.isArray(o.profiles) ? o.profiles[0]?.full_name : o.profiles?.full_name
                   const isCompleted = o.status === 'completed' || o.status === 'delivered'
                   const isCancelled = o.status === 'cancelled'

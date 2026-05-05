@@ -35,7 +35,7 @@ const MENU_SECTIONS = [
         subItems: [
           { label: 'Todos os Pedidos', href: '/admin/pedidos' },
           { label: 'Notas Fiscais', href: '/admin/notas-fiscais' },
-          { label: 'Rascunhos (Criar)', href: '/admin/criar-pedido' },
+          { label: 'Criar Pedido', href: '/admin/criar-pedido' },
           { label: 'Clientes', href: '/admin/clientes' }
         ]
       },
@@ -166,7 +166,16 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
         if (item.subItems) {
           const isActive = item.subItems.some(sub => {
             const pathWithoutQuery = sub.href.split('?')[0]
-            return pathWithoutQuery === pathname && sub.href !== 'javascript:;'
+            const isMatch = pathWithoutQuery === pathname && sub.href !== 'javascript:;'
+            
+            if (!isMatch) return false;
+            
+            if (currentStore !== 'all') {
+              if (section.title === 'LOJA KINGS B2C' && currentStore !== 'kings') return false;
+              if (section.title === 'MARKETPLACE MSU' && currentStore !== 'msu') return false;
+              if (section.title === 'SEVEN SIM RACING' && currentStore !== 'seven') return false;
+            }
+            return true;
           })
           if (isActive) {
             setOpenMenus(prev => ({ ...prev, [`${section.title}-${item.label}`]: true }))
@@ -174,7 +183,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
         }
       })
     })
-  }, [pathname])
+  }, [pathname, currentStore])
 
   const toggleMenu = (key: string) => {
     setOpenMenus(prev => ({ ...prev, [key]: !prev[key] }))
@@ -186,13 +195,26 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
     else if (title === 'SEVEN SIM RACING') setCurrentStore('seven')
   }
 
-  const isMenuPathActive = (href: string) => {
+  const isMenuPathActive = (href: string, sectionTitle: string) => {
     const [hrefPath, hrefQuery] = href.split('?')
+    let isPathMatch = false;
+
     if (hrefQuery) {
       const hrefTab = new URLSearchParams(hrefQuery).get('tab')
-      return pathname === hrefPath && searchParams.get('tab') === hrefTab
+      isPathMatch = pathname === hrefPath && searchParams.get('tab') === hrefTab
+    } else {
+      isPathMatch = pathname === href && href !== 'javascript:;'
     }
-    return pathname === href && href !== 'javascript:;'
+
+    if (!isPathMatch) return false;
+
+    if (currentStore !== 'all') {
+      if (sectionTitle === 'LOJA KINGS B2C' && currentStore !== 'kings') return false;
+      if (sectionTitle === 'MARKETPLACE MSU' && currentStore !== 'msu') return false;
+      if (sectionTitle === 'SEVEN SIM RACING' && currentStore !== 'seven') return false;
+    }
+
+    return true;
   }
 
   return (
@@ -315,7 +337,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                 const isOpen = openMenus[menuKey]
                 const Icon = item.icon
                 
-                const isRootActive = isMenuPathActive(item.href || '')
+                const isRootActive = isMenuPathActive(item.href || '', section.title)
 
                 return (
                   <div key={idx} style={{ padding: '0 12px', marginBottom: '4px' }}>
@@ -380,7 +402,7 @@ export function AdminSidebar({ onCloseMobile }: { onCloseMobile?: () => void }) 
                     gap: '2px' 
                   }}>
                     {item.subItems.map((sub: any, sIdx: number) => {
-                      const isActive = isMenuPathActive(sub.href)
+                      const isActive = isMenuPathActive(sub.href, section.title)
                       const isMock = sub.href === 'javascript:;'
 
                       return (
