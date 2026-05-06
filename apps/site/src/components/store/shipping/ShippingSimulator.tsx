@@ -107,7 +107,7 @@ export function ShippingSimulator({ dimensions }: ShippingSimulatorProps) {
           {options.map(opt => (
             <div key={opt.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
               <div>
-                <strong style={{ color: '#fff' }}>{opt.company} {opt.name}</strong>
+                <strong style={{ color: '#fff' }}>{typeof opt.company === 'object' ? opt.company?.name : opt.company} {opt.name}</strong>
                 <span style={{ color: 'var(--text-muted)', marginLeft: '8px' }}>Até {opt.custom_delivery_time} dias úteis</span>
               </div>
               <div style={{ color: 'var(--accent)', fontWeight: 600 }}>
