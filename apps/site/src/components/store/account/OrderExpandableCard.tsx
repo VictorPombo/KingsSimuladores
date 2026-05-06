@@ -172,7 +172,7 @@ export function OrderExpandableCard({ order }: { order: any }) {
             <Clock size={14} /> Data da Compra
           </div>
           <div style={{ fontWeight: 600, color: '#e2e8f0' }}>
-            {new Date(order.created_at).toLocaleDateString('pt-BR')} às {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(order.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })} às {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}
           </div>
         </div>
         
