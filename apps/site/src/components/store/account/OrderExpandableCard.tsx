@@ -171,7 +171,9 @@ export function OrderExpandableCard({ order }: { order: any }) {
           <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
             <Clock size={14} /> Data da Compra
           </div>
-          <div style={{ fontWeight: 600, color: '#e2e8f0' }}>{new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
+          <div style={{ fontWeight: 600, color: '#e2e8f0' }}>
+            {new Date(order.created_at).toLocaleDateString('pt-BR')} às {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          </div>
         </div>
         
         <div>
