@@ -30,12 +30,12 @@ export async function POST(req: Request) {
       .single()
 
     if (!invoice) {
-      return NextResponse.json({ error: 'Not Found' }, { status: 404 })
+      return NextResponse.json({ error: 'Not Found (No invoice in DB)' }, { status: 404 })
     }
 
     // Authorization Check (IDOR)
     if (!isAdmin && invoice.order?.customer_id !== user.id) {
-      return NextResponse.json({ error: 'Not Found' }, { status: 404 })
+      return NextResponse.json({ error: 'Not Found (Unauthorized IDOR)' }, { status: 404 })
     }
 
     if (invoice.pdf_url) {
