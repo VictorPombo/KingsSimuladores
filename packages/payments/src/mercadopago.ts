@@ -63,7 +63,8 @@ export async function createPreference(items: any[], customer: any, orderId?: st
       pending: `${process.env.NEXT_PUBLIC_URL_KINGS}/account?pending=true`,
       failure: `${process.env.NEXT_PUBLIC_URL_KINGS}/checkout?error=payment_failed`
     },
-    auto_return: 'approved'
+    auto_return: 'approved',
+    notification_url: `${process.env.NEXT_PUBLIC_URL_KINGS}/api/webhooks/mercadopago?store=${storeContext || 'kings'}`
   }
 
   // Bloco de Split Payment (Retenção Contábil na Fonte)
