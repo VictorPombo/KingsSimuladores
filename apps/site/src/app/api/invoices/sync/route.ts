@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     // 1. Fetch the invoice record
     const { data: invoice } = await supabaseAdmin
       .from('invoices')
-      .select('*, order:orders(user_id)')
+      .select('*, order:orders(customer_id)')
       .eq('order_id', orderId)
       .single()
 
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     // Authorization Check (IDOR)
-    if (!isAdmin && invoice.order?.user_id !== user.id) {
+    if (!isAdmin && invoice.order?.customer_id !== user.id) {
       return NextResponse.json({ error: 'Not Found' }, { status: 404 })
     }
 
