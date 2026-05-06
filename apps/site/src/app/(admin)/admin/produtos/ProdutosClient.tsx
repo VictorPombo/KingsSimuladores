@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useTransition, useEffect } from 'react'
-import { Search, Plus, Package, Edit2, Trash2, Download, Image, AlertCircle, Power } from 'lucide-react'
+import { Search, Plus, Package, Edit2, Trash2, Download, Image, AlertCircle, Power, RefreshCw, CheckCircle, XCircle } from 'lucide-react'
 import { toggleProductStatus, deleteProduct } from './actions'
 
 type Product = {
@@ -24,6 +24,8 @@ export function ProdutosClient({ products }: { products: Product[] }) {
   const [brandFilter, setBrandFilter] = useState('all')
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [syncResults, setSyncResults] = useState<any>(null)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -286,6 +288,39 @@ export function ProdutosClient({ products }: { products: Product[] }) {
           <button onClick={exportCSV} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid #3f424d', borderRadius: '8px', padding: '10px 16px', color: '#cbd5e1', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer' }}>
             <Download size={16} /> Exportar
           </button>
+          <button
+            disabled={isSyncing}
+            onClick={async () => {
+              if (!confirm('Deseja sincronizar todos os produtos ativos com o Tiny ERP (Olist)?\n\nIsso vai cadastrar/atualizar cada produto no ERP para emissão de NF-e.')) return
+              setIsSyncing(true)
+              setSyncResults(null)
+              try {
+                const res = await fetch('/api/admin/sync-products-erp', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ productIds: [] })
+                })
+                const data = await res.json()
+                setSyncResults(data)
+              } catch (err) {
+                alert('Erro ao sincronizar com o ERP.')
+              } finally {
+                setIsSyncing(false)
+              }
+            }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              background: isSyncing ? '#64748b' : 'linear-gradient(135deg, #f59e0b, #d97706)',
+              border: 'none', borderRadius: '8px', padding: '10px 16px',
+              color: '#fff', fontWeight: 600, fontSize: '0.85rem',
+              cursor: isSyncing ? 'not-allowed' : 'pointer',
+              boxShadow: isSyncing ? 'none' : '0 2px 8px rgba(245,158,11,0.3)',
+              opacity: isSyncing ? 0.7 : 1, transition: 'all 0.2s'
+            }}
+          >
+            <RefreshCw size={16} className={isSyncing ? 'animate-spin' : ''} style={isSyncing ? { animation: 'spin 1s linear infinite' } : {}} />
+            {isSyncing ? 'Sincronizando...' : 'Sincronizar ERP'}
+          </button>
           <a href="/admin/criar-produto" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', border: 'none', borderRadius: '8px', padding: '10px 20px', color: '#fff', fontWeight: 600, fontSize: '0.85rem', textDecoration: 'none', boxShadow: '0 2px 8px rgba(139,92,246,0.3)' }}>
             <Plus size={16} /> Novo Produto
           </a>
@@ -378,6 +413,54 @@ export function ProdutosClient({ products }: { products: Product[] }) {
                 {isPending ? 'Removendo...' : 'Sim, Remover'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resultados da Sincronização ERP */}
+      {syncResults && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#1f2025', padding: '28px', borderRadius: '12px', width: '100%', maxWidth: '600px', border: '1px solid #3f424d', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem' }}>Resultado da Sincronização</h3>
+              <button onClick={() => setSyncResults(null)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ background: '#2c2e36', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 'bold' }}>Total</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{syncResults.total}</div>
+              </div>
+              <div style={{ background: '#2c2e36', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 'bold' }}>Sucesso</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#10b981' }}>{syncResults.success}</div>
+              </div>
+              <div style={{ background: '#2c2e36', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 'bold' }}>Erros</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: syncResults.errors > 0 ? '#ef4444' : '#64748b' }}>{syncResults.errors}</div>
+              </div>
+            </div>
+            
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {(syncResults.results || []).map((r: any, i: number) => (
+                <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', padding: '10px 12px', background: '#2c2e36', borderRadius: '8px', fontSize: '0.83rem' }}>
+                  {r.status === 'ok' || r.status === 'updated' ? (
+                    <CheckCircle size={16} color="#10b981" style={{ flexShrink: 0 }} />
+                  ) : (
+                    <XCircle size={16} color="#ef4444" style={{ flexShrink: 0 }} />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: '#e2e8f0', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</div>
+                    <div style={{ color: r.status === 'error' ? '#ef4444' : '#64748b', fontSize: '0.75rem' }}>
+                      {r.status === 'updated' ? '🔄 Atualizado' : r.message}
+                    </div>
+                  </div>
+                  {r.sku && <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#64748b' }}>{r.sku}</span>}
+                </div>
+              ))}
+            </div>
+            
+            <button onClick={() => setSyncResults(null)} style={{ marginTop: '16px', width: '100%', background: '#8b5cf6', color: '#fff', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Fechar</button>
           </div>
         </div>
       )}
