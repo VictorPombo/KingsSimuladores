@@ -7,15 +7,33 @@ import { useState } from 'react'
 export function CategoryNav({ categories = [] }: { categories?: Array<{id: string, name: string, slug: string}> }) {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
 
-  const menuItems = [
+  const maxVisibleCategories = 5;
+  const visibleCategories = categories.slice(0, maxVisibleCategories);
+  const hiddenCategories = categories.slice(maxVisibleCategories);
+
+  const menuItems: any[] = [
     { label: "TODOS PRODUTOS", href: "/produtos" },
-    ...categories.map(c => ({
+    ...visibleCategories.map(c => ({
       label: c.name.toUpperCase(),
       href: `/categorias/${c.slug}`
-    })),
+    }))
+  ]
+
+  if (hiddenCategories.length > 0) {
+    menuItems.push({
+      label: "OUTROS +",
+      href: "#",
+      subItems: hiddenCategories.map(c => ({
+        label: c.name.toUpperCase(),
+        href: `/categorias/${c.slug}`
+      }))
+    })
+  }
+
+  menuItems.push(
     { label: "CONSULTORIA", href: "/consultoria" },
     { label: "QUEM SOMOS?", href: "/quem-somos" }
-  ]
+  )
 
   return (
     <nav 
@@ -35,7 +53,7 @@ export function CategoryNav({ categories = [] }: { categories?: Array<{id: strin
         alignItems: 'center',
         justifyContent: 'center',
         gap: '32px',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
       }}>
         <style dangerouslySetInnerHTML={{__html: `
           @keyframes pulseGlowConsultoria {
