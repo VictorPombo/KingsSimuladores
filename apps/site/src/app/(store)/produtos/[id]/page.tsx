@@ -152,7 +152,14 @@ export default async function ProductPage({ params }: { params: { id: string } }
               </div>
             </div>
 
-            <ShippingSimulator dimensions={[{ weight: 25, width: 60, height: 60, length: 60 }]} />
+            <ShippingSimulator 
+              dimensions={[{ 
+                weight: product.weight_kg || 2, 
+                width: product.dimensions_cm?.width || 20, 
+                height: product.dimensions_cm?.height || 20, 
+                length: product.dimensions_cm?.length || 20 
+              }]} 
+            />
 
               <AddToCartButton 
                 product={{
@@ -161,7 +168,13 @@ export default async function ProductPage({ params }: { params: { id: string } }
                   price: finalPrice,
                   imageUrl,
                   brand: brandName,
-                  storeOrigin: 'kings'
+                  storeOrigin: 'kings',
+                  dimensions: {
+                    weight: product.weight_kg || 2,
+                    width: product.dimensions_cm?.width || 20,
+                    height: product.dimensions_cm?.height || 20,
+                    length: product.dimensions_cm?.length || 20
+                  }
                 }} 
               />
           </div>

@@ -10,6 +10,7 @@ export interface CartItem {
   brand: string
   storeOrigin: 'kings' | 'msu' | 'seven'
   quantity: number
+  dimensions?: { weight: number, width: number, height: number, length: number }
 }
 
 export interface CouponState {

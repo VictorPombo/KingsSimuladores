@@ -145,7 +145,14 @@ export default function CheckoutPage() {
           body: JSON.stringify({
             destinationZip: targetCep,
             store: store,
-            items: storeItems.map(i => ({ id: i.id, quantity: i.quantity }))
+            items: storeItems.map(i => ({ 
+              id: i.id, 
+              quantity: i.quantity,
+              weight: i.dimensions?.weight,
+              width: i.dimensions?.width,
+              height: i.dimensions?.height,
+              length: i.dimensions?.length
+            }))
           })
         })
         const data = await res.json()
