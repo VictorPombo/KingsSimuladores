@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 import { createPreference } from '@kings/payments'
 
 export async function POST(req: Request) {
@@ -60,9 +60,11 @@ export async function POST(req: Request) {
     // 4. Mercado Pago Preference Creation with External Reference
     const preference = await createPreference(items, customer, newOrder.id, undefined, storeContext, orderData.shipping_cost)
 
+    const adminSupabase = createAdminClient()
+
     // 4.5. Update Order with Preference ID
     if (preference.id) {
-       await supabase.from('orders').update({ preference_id: preference.id }).eq('id', newOrder.id)
+       await adminSupabase.from('orders').update({ preference_id: preference.id }).eq('id', newOrder.id)
     }
 
     // 5. Insert Order Items natively
@@ -75,7 +77,7 @@ export async function POST(req: Request) {
       store_origin: item.storeOrigin || 'kings',
     }))
 
-    const { error: itemsErr } = await supabase
+    const { error: itemsErr } = await adminSupabase
       .from('order_items')
       .insert(orderItemsData as any)
 
@@ -102,7 +104,7 @@ export async function POST(req: Request) {
           const kingsFee = (itemTotal * commissionRate) / 100
           const sellerNet = itemTotal - kingsFee
 
-          await supabase.from('marketplace_orders').insert({
+          await adminSupabase.from('marketplace_orders').insert({
             buyer_id: profile.id,
             seller_id: listing.seller_id,
             listing_id: item.id,

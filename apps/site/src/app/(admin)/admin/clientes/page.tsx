@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 import { ClientesClient } from './ClientesClient'
 
 export const dynamic = 'force-dynamic'
@@ -16,10 +16,10 @@ export default async function AdminClientesPage() {
       </div>
     )
   }
-  const supabase = await createServerSupabaseClient()
+  const supabase = createAdminClient()
 
   // Buscar pedidos agrupados por customer e aplicar filtro da loja
-  let ordersQuery = supabase.from('orders').select('customer_id, total')
+  let ordersQuery = supabase.from('orders').select('customer_id, total, status')
   if (storeCookie === 'kings' || storeCookie === 'seven') {
     ordersQuery = ordersQuery.eq('brand_origin', storeCookie)
   }
@@ -52,7 +52,12 @@ export default async function AdminClientesPage() {
   for (const o of (orders || []) as any[]) {
     const entry = orderMap.get(o.customer_id) || { count: 0, total: 0 }
     entry.count++
-    entry.total += Number(o.total || 0)
+    
+    // Sum only confirmed orders
+    if (['paid', 'shipped', 'delivered', 'completed'].includes(o.status)) {
+      entry.total += Number(o.total || 0)
+    }
+    
     orderMap.set(o.customer_id, entry)
   }
 

@@ -11,10 +11,37 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordValue, setPasswordValue] = useState('')
+  const [confirmPasswordValue, setConfirmPasswordValue] = useState('')
+  const [emailValue, setEmailValue] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
 
   // Refs para controlar campos de senha e evitar popup Safari
   const passwordRef = useRef<HTMLInputElement>(null)
   const confirmPasswordRef = useRef<HTMLInputElement>(null)
+
+  const handleEmailBlur = async () => {
+    if (!emailValue || mode !== 'register') {
+      setEmailError('')
+      return
+    }
+    setIsCheckingEmail(true)
+    try {
+      const res = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailValue })
+      })
+      const data = await res.json()
+      if (data.exists) {
+        setEmailError('Este e-mail já está em uso')
+      } else {
+        setEmailError('')
+      }
+    } catch(e) {}
+    setIsCheckingEmail(false)
+  }
 
   const getSupabase = () => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -63,25 +90,43 @@ export default function LoginPage() {
 
     setLoading(true)
     const supabase = getSupabase()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
       },
     })
+    
+    // Supabase returns a fake success if the email is already registered (to prevent email enumeration).
+    // We can detect this by checking if the user object has no identities.
+    if (data?.user && data.user.identities && data.user.identities.length === 0) {
+      setError('Este e-mail já está cadastrado. Por favor, faça login ou recupere sua senha.')
+      setLoading(false)
+      return
+    }
+
     if (error) {
       if (error.message.includes('Error sending confirmation email') || error.message.includes('rate limit')) {
         setError('Conta criada, mas houve um erro ao enviar o e-mail de confirmação. (Limite de envios atingido no Supabase). Tente fazer o login se a confirmação não for obrigatória.')
         setMode('login')
         form.reset()
+        setPasswordValue('')
+        setConfirmPasswordValue('')
+      } else if (error.message.includes('User already registered')) {
+        setError('Este e-mail já está cadastrado. Por favor, faça login ou recupere sua senha.')
       } else {
         setError(error.message)
       }
     } else {
-      setSuccess('Conta criada! Verifique seu e-mail para confirmar o cadastro.')
-      setMode('login')
-      form.reset() // Limpa os campos uncontrolled
+      if (data.session) {
+        // Se a sessão já foi criada (Auto-Confirm ON), entra direto
+        window.location.href = '/'
+      } else {
+        setSuccess('Conta criada com sucesso! Você já pode acessar o sistema (ou verifique seu e-mail se exigido).')
+        setMode('login')
+        form.reset() // Limpa os campos uncontrolled
+      }
     }
     setLoading(false)
   }
@@ -249,7 +294,18 @@ export default function LoginPage() {
               type="email" required
               placeholder="seu@email.com" autoComplete="off" name="email" id="email"
               className="kings-input"
+              value={emailValue}
+              onChange={e => {
+                setEmailValue(e.target.value)
+                if (emailError) setEmailError('')
+              }}
+              onBlur={handleEmailBlur}
+              style={{
+                borderColor: emailError ? '#ef4444' : undefined
+              }}
             />
+            {isCheckingEmail && <span style={{ color: '#00e5ff', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>Verificando...</span>}
+            {emailError && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>{emailError}</span>}
           </div>
 
           {mode !== 'reset' && (
@@ -275,6 +331,8 @@ export default function LoginPage() {
                   className={`kings-input ${!showPassword ? 'kings-password-mask' : ''}`}
                   data-lpignore="true"
                   data-form-type="other"
+                  value={passwordValue}
+                  onChange={(e) => setPasswordValue(e.target.value)}
                   style={{ paddingRight: '40px' }}
                 />
                 <button
@@ -310,7 +368,12 @@ export default function LoginPage() {
                   className={`kings-input ${!showConfirmPassword ? 'kings-password-mask' : ''}`}
                   data-lpignore="true"
                   data-form-type="other"
-                  style={{ paddingRight: '40px' }}
+                  value={confirmPasswordValue}
+                  onChange={(e) => setConfirmPasswordValue(e.target.value)}
+                  style={{ 
+                    paddingRight: '40px',
+                    borderColor: confirmPasswordValue && passwordValue !== confirmPasswordValue ? '#ef4444' : confirmPasswordValue && passwordValue === confirmPasswordValue ? '#10b981' : undefined
+                  }}
                 />
                 <button
                   type="button"
@@ -325,6 +388,16 @@ export default function LoginPage() {
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {confirmPasswordValue && passwordValue !== confirmPasswordValue && (
+                <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                  As senhas não coincidem
+                </span>
+              )}
+              {confirmPasswordValue && passwordValue === confirmPasswordValue && (
+                <span style={{ color: '#10b981', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                  Senhas iguais
+                </span>
+              )}
             </div>
           )}
 

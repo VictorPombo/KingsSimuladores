@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createAdminClient } from '@kings/db/server'
 import { PedidosClient } from './PedidosClient'
 
 export const dynamic = 'force-dynamic'
@@ -17,7 +17,7 @@ export default async function AdminPedidosPage() {
     )
   }
   try {
-    const supabase = await createServerSupabaseClient()
+    const supabase = createAdminClient()
 
     let query = supabase
       .from('orders')
