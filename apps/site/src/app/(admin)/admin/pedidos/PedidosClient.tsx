@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download } from 'lucide-react'
+import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download, ShoppingBag } from 'lucide-react'
+import { createClient } from '@kings/db/client'
 
 type Order = {
   id: string
@@ -36,6 +37,32 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [brandFilter, setBrandFilter] = useState<string>('all')
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
+  const [orderItems, setOrderItems] = useState<Record<string, any[]>>({})
+  const [loadingItems, setLoadingItems] = useState<string | null>(null)
+
+  const handleExpand = async (orderId: string) => {
+    if (expandedOrder === orderId) {
+      setExpandedOrder(null)
+      return
+    }
+    setExpandedOrder(orderId)
+    // Fetch items if not already cached
+    if (!orderItems[orderId]) {
+      setLoadingItems(orderId)
+      try {
+        const supabase = createClient()
+        const { data: items } = await supabase
+          .from('order_items')
+          .select('id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, images)')
+          .eq('order_id', orderId)
+        setOrderItems(prev => ({ ...prev, [orderId]: items || [] }))
+      } catch (err) {
+        console.error('Erro ao carregar itens:', err)
+      } finally {
+        setLoadingItems(null)
+      }
+    }
+  }
 
   const filtered = orders.filter(o => {
     const matchSearch = o.id.includes(searchTerm) ||
@@ -179,7 +206,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                   <React.Fragment key={order.id}>
                     <tr
                       style={{ borderBottom: '1px solid #3f424d', cursor: 'pointer', transition: 'background 0.15s' }}
-                      onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                      onClick={() => handleExpand(order.id)}
                       onMouseEnter={(e: any) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                       onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}
                     >
@@ -232,7 +259,45 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                     {isExpanded && (
                       <tr style={{ background: '#1f2025' }}>
                         <td colSpan={10} style={{ padding: '20px 24px' }}>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', fontSize: '0.8rem' }}>
+                          {/* Itens do Pedido */}
+                          <div style={{ marginBottom: '20px' }}>
+                            <div style={{ color: '#94a3b8', fontWeight: 'bold', marginBottom: '10px', textTransform: 'uppercase', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <ShoppingBag size={14} color="#00e5ff" /> Produtos Comprados
+                            </div>
+                            {loadingItems === order.id ? (
+                              <div style={{ padding: '12px', color: '#64748b', fontSize: '0.8rem' }}>Carregando itens...</div>
+                            ) : (orderItems[order.id] || []).length === 0 ? (
+                              <div style={{ padding: '12px', color: '#64748b', fontSize: '0.8rem' }}>Nenhum item encontrado.</div>
+                            ) : (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {(orderItems[order.id] || []).map((item: any, idx: number) => (
+                                  <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '6px', overflow: 'hidden', background: '#2c2e36', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                      {item.product?.images?.[0] ? (
+                                        <img src={item.product.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      ) : (
+                                        <Package size={16} color="#64748b" />
+                                      )}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ color: '#e2e8f0', fontSize: '0.83rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.product?.title || 'Produto'}</div>
+                                      <div style={{ color: '#64748b', fontSize: '0.73rem', marginTop: '2px' }}>
+                                        {item.product?.sku && <span style={{ fontFamily: 'monospace' }}>{item.product.sku}</span>}
+                                        {item.product?.sku && ' · '}
+                                        {item.quantity}x R$ {Number(item.unit_price).toFixed(2)}
+                                      </div>
+                                    </div>
+                                    <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 'bold', color: '#00e5ff', flexShrink: 0 }}>
+                                      R$ {Number(item.total_price).toFixed(2)}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Detalhes do Pedido */}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', fontSize: '0.8rem', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>ID Completo</div>
                               <div style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{order.id}</div>
