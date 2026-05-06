@@ -268,6 +268,31 @@ export async function POST(req: Request) {
           })
         }
         
+        // 6.5 Notificação via Email para a Administração (Kings)
+        const adminEmailHtml = `
+          <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #22c55e; padding: 20px; text-align: center;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">💰 Nova Venda Realizada!</h1>
+            </div>
+            <div style="padding: 30px;">
+              <p style="font-size: 16px;">Uma nova compra foi aprovada no sistema!</p>
+              <ul style="font-size: 15px; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+                <li><strong>Pedido:</strong> #${orderId.split('-')[0]}</li>
+                <li><strong>Cliente:</strong> ${profile?.full_name || 'Desconhecido'}</li>
+                <li><strong>Telefone:</strong> ${profile?.phone || 'Não informado'}</li>
+                <li><strong>Loja:</strong> ${(order.brand_origin || 'KINGS').toUpperCase()}</li>
+              </ul>
+              <p style="font-size: 15px;">Acesse o painel administrativo para verificar a separação e envio.</p>
+            </div>
+          </div>
+        `
+        
+        await sendEmailMessage({
+          to: 'contato@kingssimuladores.com.br',
+          subject: `💰 Nova Venda! Pedido #${orderId.split('-')[0]} aprovado`,
+          html: adminEmailHtml
+        })
+        
         // 7. Integração Logística: Gerar Etiqueta (Frenet)
         const labelResult = await generateShippingLabel(order, items || [])
         
