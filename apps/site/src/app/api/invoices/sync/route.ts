@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     // Admin Check
-    const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).single()
+    const { data: profile } = await supabaseAdmin.from('profiles').select('id, role').eq('auth_id', user.id).single()
     const isAdmin = profile?.role === 'admin'
 
     // 1. Fetch the invoice record
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     // Authorization Check (IDOR)
-    if (!isAdmin && invoice.order?.customer_id !== user.id) {
+    if (!isAdmin && invoice.order?.customer_id !== profile?.id) {
       return NextResponse.json({ error: 'Not Found (Unauthorized IDOR)' }, { status: 404 })
     }
 
