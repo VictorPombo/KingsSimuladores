@@ -69,37 +69,46 @@ export async function GET(req: Request) {
       const approvedPayment = payments.find((p: any) => p.status === 'approved')
       
       if (approvedPayment) {
-        // ACHAMOS! Esse pedido foi pago mas o webhook falhou. Vamos atualizar.
-        console.log(`[Cron Verify] 🎯 Pedido ${order.id} FOI PAGO (payment ${approvedPayment.id})! Atualizando...`)
+        // ACHAMOS! Esse pedido foi pago mas o webhook falhou.
+        // NÃO atualizamos o status aqui — deixamos o webhook fazer TUDO 
+        // (status, estoque, Olist NF-e, email, WhatsApp, etc.)
+        console.log(`[Cron Verify] 🎯 Pedido ${order.id} FOI PAGO (payment ${approvedPayment.id})! Re-disparando webhook completo...`)
         
-        const { error: updateErr } = await supabase
-          .from('orders')
-          .update({
+        try {
+          const webhookUrl = `https://www.kingssimuladores.com.br/api/webhooks/mercadopago?store=${storeContext}`
+          const webhookRes = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'payment.updated',
+              data: { id: approvedPayment.id }
+            })
+          })
+          
+          if (webhookRes.ok) {
+            updated++
+            results.push({ order: order.id, status: 'fixed_via_webhook', paymentId: approvedPayment.id })
+            console.log(`[Cron Verify] ✅ Webhook processou pedido ${order.id} com sucesso`)
+          } else {
+            // Se o webhook falhar, aí sim fazemos o update manual como último recurso
+            console.error(`[Cron Verify] Webhook retornou ${webhookRes.status}, fazendo update manual...`)
+            await supabase.from('orders').update({
+              status: 'paid',
+              payment_id: String(approvedPayment.id),
+              payment_method: approvedPayment.payment_method_id || 'unknown'
+            }).eq('id', order.id)
+            updated++
+            results.push({ order: order.id, status: 'fixed_manual_fallback', paymentId: approvedPayment.id })
+          }
+        } catch (webhookErr) {
+          console.error(`[Cron Verify] Erro ao re-disparar webhook, fazendo update manual:`, webhookErr)
+          await supabase.from('orders').update({
             status: 'paid',
             payment_id: String(approvedPayment.id),
             payment_method: approvedPayment.payment_method_id || 'unknown'
-          })
-          .eq('id', order.id)
-        
-        if (!updateErr) {
+          }).eq('id', order.id)
           updated++
-          results.push({ order: order.id, status: 'fixed', paymentId: approvedPayment.id })
-          
-          // Também disparar o webhook internamente para processar estoque, NF-e, etc.
-          try {
-            const webhookUrl = `https://www.kingssimuladores.com.br/api/webhooks/mercadopago?store=${storeContext}`
-            await fetch(webhookUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                action: 'payment.updated',
-                data: { id: approvedPayment.id }
-              })
-            })
-            console.log(`[Cron Verify] Webhook re-disparado para pedido ${order.id}`)
-          } catch (webhookErr) {
-            console.error(`[Cron Verify] Erro ao re-disparar webhook:`, webhookErr)
-          }
+          results.push({ order: order.id, status: 'fixed_manual_fallback', paymentId: approvedPayment.id })
         }
       } else {
         results.push({ order: order.id, status: 'still_pending' })
