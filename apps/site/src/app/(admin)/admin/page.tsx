@@ -1,5 +1,5 @@
 import { Card, Container, Badge } from '@kings/ui'
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 import Link from 'next/link'
 import { RevenueChart } from './components/AdminCharts'
 import { TrendingUp, Clock, MoveRight, ShoppingBag, ShieldCheck, Zap } from 'lucide-react'
@@ -23,7 +23,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
   let recentOrders: any[] = []
 
   try {
-    const supabase = await createServerSupabaseClient()
+    const supabase = createAdminClient()
     
     if (isMsuTab) {
       // MSU MARKETPLACE STATS

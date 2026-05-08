@@ -1,7 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download, ShoppingBag } from 'lucide-react'
+import { createClient } from '@kings/db/client'
 
 type Order = {
   id: string
@@ -16,7 +18,16 @@ type Order = {
   tracking_code: string | null
   coupon_id: string | null
   created_at: string
-  profiles: { full_name: string; email: string; phone: string } | null
+  shipping_address?: {
+    cep?: string
+    bairro?: string
+    cidade?: string
+    numero?: string
+    logradouro?: string
+    referencia?: string
+    complemento?: string
+  } | null
+  profiles: { full_name: string; email: string; phone: string; cpf_cnpj?: string | null } | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
@@ -29,10 +40,38 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
 }
 
 export function PedidosClient({ orders }: { orders: Order[] }) {
-  const [searchTerm, setSearchTerm] = useState('')
+  const searchParams = useSearchParams()
+  const initialSearch = searchParams.get('search') || ''
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [brandFilter, setBrandFilter] = useState<string>('all')
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
+  const [orderItems, setOrderItems] = useState<Record<string, any[]>>({})
+  const [loadingItems, setLoadingItems] = useState<string | null>(null)
+
+  const handleExpand = async (orderId: string) => {
+    if (expandedOrder === orderId) {
+      setExpandedOrder(null)
+      return
+    }
+    setExpandedOrder(orderId)
+    // Fetch items if not already cached
+    if (!orderItems[orderId]) {
+      setLoadingItems(orderId)
+      try {
+        const supabase = createClient()
+        const { data: items } = await supabase
+          .from('order_items')
+          .select('id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, images)')
+          .eq('order_id', orderId)
+        setOrderItems(prev => ({ ...prev, [orderId]: items || [] }))
+      } catch (err) {
+        console.error('Erro ao carregar itens:', err)
+      } finally {
+        setLoadingItems(null)
+      }
+    }
+  }
 
   const filtered = orders.filter(o => {
     const matchSearch = o.id.includes(searchTerm) ||
@@ -176,7 +215,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                   <React.Fragment key={order.id}>
                     <tr
                       style={{ borderBottom: '1px solid #3f424d', cursor: 'pointer', transition: 'background 0.15s' }}
-                      onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                      onClick={() => handleExpand(order.id)}
                       onMouseEnter={(e: any) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                       onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}
                     >
@@ -184,7 +223,8 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                         #{order.id.split('-')[0]}
                       </td>
                       <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                        {new Date(order.created_at).toLocaleDateString('pt-BR')}
+                        {new Date(order.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
+                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</div>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ color: '#e2e8f0', fontSize: '0.85rem', fontWeight: 500 }}>{order.profiles?.full_name || 'Desconhecido'}</div>
@@ -228,14 +268,68 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                     {isExpanded && (
                       <tr style={{ background: '#1f2025' }}>
                         <td colSpan={10} style={{ padding: '20px 24px' }}>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', fontSize: '0.8rem' }}>
+                          {/* Itens do Pedido */}
+                          <div style={{ marginBottom: '20px' }}>
+                            <div style={{ color: '#94a3b8', fontWeight: 'bold', marginBottom: '10px', textTransform: 'uppercase', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <ShoppingBag size={14} color="#00e5ff" /> Produtos Comprados
+                            </div>
+                            {loadingItems === order.id ? (
+                              <div style={{ padding: '12px', color: '#64748b', fontSize: '0.8rem' }}>Carregando itens...</div>
+                            ) : (orderItems[order.id] || []).length === 0 ? (
+                              <div style={{ padding: '12px', color: '#64748b', fontSize: '0.8rem' }}>Nenhum item encontrado.</div>
+                            ) : (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {(orderItems[order.id] || []).map((item: any, idx: number) => (
+                                  <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '6px', overflow: 'hidden', background: '#2c2e36', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                      {item.product?.images?.[0] ? (
+                                        <img src={item.product.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      ) : (
+                                        <Package size={16} color="#64748b" />
+                                      )}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ color: '#e2e8f0', fontSize: '0.83rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.product?.title || 'Produto'}</div>
+                                      <div style={{ color: '#64748b', fontSize: '0.73rem', marginTop: '2px' }}>
+                                        {item.product?.sku && <span style={{ fontFamily: 'monospace' }}>{item.product.sku}</span>}
+                                        {item.product?.sku && ' · '}
+                                        {item.quantity}x R$ {Number(item.unit_price).toFixed(2)}
+                                      </div>
+                                    </div>
+                                    <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 'bold', color: '#00e5ff', flexShrink: 0 }}>
+                                      R$ {Number(item.total_price).toFixed(2)}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Detalhes do Pedido */}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', fontSize: '0.8rem', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                             <div>
-                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>ID Completo</div>
-                              <div style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{order.id}</div>
+                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Cliente</div>
+                              <div style={{ color: '#e2e8f0', fontWeight: 500 }}>{order.profiles?.full_name || 'Desconhecido'}</div>
+                              <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{order.profiles?.email || ''}</div>
+                              {order.profiles?.cpf_cnpj && (
+                                <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '2px' }}>Doc: {order.profiles.cpf_cnpj}</div>
+                              )}
                             </div>
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Pagamento</div>
-                              <div style={{ color: '#e2e8f0' }}>{order.payment_method || 'Não informado'}</div>
+                              <div style={{ color: '#e2e8f0', fontWeight: 500 }}>
+                                {(() => {
+                                  const pm = (order.payment_method || '').toLowerCase();
+                                  if (pm === 'pix') return 'PIX (Mercado Pago)';
+                                  if (['master', 'visa', 'amex', 'hipercard', 'elo', 'credit_card'].includes(pm)) return `Cartão de Crédito (${pm.toUpperCase()})`;
+                                  if (pm === 'ticket' || pm === 'boleto') return 'Boleto (Mercado Pago)';
+                                  return pm ? pm.toUpperCase() : 'Não informado';
+                                })()}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>ID Completo</div>
+                              <div style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{order.id}</div>
                             </div>
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Rastreio</div>
@@ -252,6 +346,45 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Cupom</div>
                               <div style={{ color: order.coupon_id ? '#10b981' : '#64748b' }}>{order.coupon_id ? 'Sim' : 'Nenhum'}</div>
+                            </div>
+                            <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', marginTop: '8px' }}>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                <div>
+                                  <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Endereço de Entrega</div>
+                                  {order.shipping_address ? (
+                                    <div style={{ color: '#e2e8f0', fontSize: '0.75rem', lineHeight: '1.4' }}>
+                                      {order.shipping_address.logradouro}, {order.shipping_address.numero} {order.shipping_address.complemento ? ` - ${order.shipping_address.complemento}` : ''}<br />
+                                      {order.shipping_address.bairro} - {order.shipping_address.cidade}<br />
+                                      CEP: {order.shipping_address.cep}
+                                    </div>
+                                  ) : (
+                                    <div style={{ color: '#64748b', fontSize: '0.75rem' }}>Endereço não informado no pedido</div>
+                                  )}
+                                </div>
+                                <div>
+                                  <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Resumo de Valores</div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                                      <span>Subtotal:</span>
+                                      <span>R$ {Number(order.subtotal).toFixed(2)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                                      <span>Frete:</span>
+                                      <span>R$ {Number(order.shipping_cost).toFixed(2)}</span>
+                                    </div>
+                                    {Number(order.discount) > 0 && (
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ef4444' }}>
+                                        <span>Desconto:</span>
+                                        <span>-R$ {Number(order.discount).toFixed(2)}</span>
+                                      </div>
+                                    )}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0', fontWeight: 'bold', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                                      <span>Total Pago:</span>
+                                      <span>R$ {Number(order.total).toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                           

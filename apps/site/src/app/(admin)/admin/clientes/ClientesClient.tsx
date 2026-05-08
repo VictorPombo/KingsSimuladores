@@ -143,7 +143,8 @@ export function ClientesClient({ clients }: { clients: Client[] }) {
               {filtered.length === 0 ? (
                 <tr><td colSpan={7} style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>Nenhum cliente encontrado.</td></tr>
               ) : filtered.map(c => (
-                <tr key={c.id} style={{ borderBottom: '1px solid #3f424d', transition: 'background 0.15s' }}
+                <tr key={c.id} style={{ borderBottom: '1px solid #3f424d', transition: 'background 0.15s', cursor: 'pointer' }}
+                  onClick={() => window.location.href = `/admin/pedidos?search=${encodeURIComponent(c.email || c.full_name || '')}`}
                   onMouseEnter={(e: any) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                   onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}>
                   <td style={{ padding: '14px 16px' }}>

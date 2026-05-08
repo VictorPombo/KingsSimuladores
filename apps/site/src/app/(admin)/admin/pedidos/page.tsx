@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createAdminClient } from '@kings/db/server'
 import { PedidosClient } from './PedidosClient'
 
 export const dynamic = 'force-dynamic'
@@ -17,14 +17,14 @@ export default async function AdminPedidosPage() {
     )
   }
   try {
-    const supabase = await createServerSupabaseClient()
+    const supabase = createAdminClient()
 
     let query = supabase
       .from('orders')
       .select(`
         id, brand_origin, order_type, status, subtotal, shipping_cost, discount, total,
-        payment_method, tracking_code, coupon_id, created_at,
-        profiles!customer_id ( full_name, email, phone )
+        payment_method, tracking_code, coupon_id, created_at, shipping_address,
+        profiles!customer_id ( full_name, email, phone, cpf_cnpj )
       `)
       .order('created_at', { ascending: false })
 

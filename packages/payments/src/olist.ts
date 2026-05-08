@@ -93,7 +93,7 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
             descricao: item.title,
             quantidade: item.quantity,
             valor_unitario: item.unit_price,
-            ncm: item.ncm || '',
+            ncm: (item.ncm || '').replace(/\D/g, ''),
             origem: item.origem || '0',
             gtin: item.gtin || 'SEM GTIN',
             cfop: item.cfop || ''

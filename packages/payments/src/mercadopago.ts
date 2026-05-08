@@ -64,7 +64,8 @@ export async function createPreference(items: any[], customer: any, orderId?: st
       failure: `${process.env.NEXT_PUBLIC_URL_KINGS}/checkout?error=payment_failed`
     },
     auto_return: 'approved',
-    notification_url: `${process.env.NEXT_PUBLIC_URL_KINGS}/api/webhooks/mercadopago?store=${storeContext || 'kings'}`
+    // IMPORTANTE: Forçar www para evitar redirect 301 da Vercel que quebra o webhook do MP
+    notification_url: `https://www.kingssimuladores.com.br/api/webhooks/mercadopago?store=${storeContext || 'kings'}`
   }
 
   // Bloco de Split Payment (Retenção Contábil na Fonte)
