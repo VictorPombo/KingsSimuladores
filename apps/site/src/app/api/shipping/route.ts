@@ -65,7 +65,12 @@ export async function POST(req: Request) {
     let formattedOptions = []
 
     if (data.ShippingSevicesArray && Array.isArray(data.ShippingSevicesArray)) {
-      const validServices = data.ShippingSevicesArray.filter((s: any) => !s.Error && s.ServiceDescription.toUpperCase().includes('SEDEX'))
+      const blockedServices = ['pac', 'mini envios', 'jamef']
+      const validServices = data.ShippingSevicesArray.filter((s: any) => {
+        if (s.Error || !s.ShippingPrice) return false;
+        const lowerDesc = (s.ServiceDescription || '').toLowerCase();
+        return !blockedServices.some(blocked => lowerDesc.includes(blocked));
+      })
       
       formattedOptions = validServices.map((s: any) => ({
         id: s.ServiceCode,
@@ -74,7 +79,7 @@ export async function POST(req: Request) {
         currency: 'R$',
         custom_delivery_time: s.DeliveryTime, // added to match ShippingSimulator expectation
         delivery_time: s.DeliveryTime,
-        company: { name: s.Carrier, picture: '' }
+        company: { name: s.Carrier || s.ServiceDescription?.split(' ')[0] || 'Transportadora', picture: '' }
       }))
 
       // Ordenar do mais barato pro mais caro

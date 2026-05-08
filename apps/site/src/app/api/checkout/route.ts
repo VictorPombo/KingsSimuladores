@@ -44,6 +44,7 @@ export async function POST(req: Request) {
       shipping_address: address,
       preference_id: null,
       coupon_id: coupon_id || null,
+      notes: shipping?.name ? `Frete: ${shipping.name}` : null,
     }
 
     const { data: newOrder, error: orderErr } = await supabase

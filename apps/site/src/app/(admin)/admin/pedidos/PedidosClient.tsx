@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download, ShoppingBag } from 'lucide-react'
 import { createClient } from '@kings/db/client'
 
@@ -18,6 +18,7 @@ type Order = {
   tracking_code: string | null
   coupon_id: string | null
   created_at: string
+  order_number?: number | null
   shipping_address?: {
     cep?: string
     bairro?: string
@@ -28,6 +29,7 @@ type Order = {
     complemento?: string
   } | null
   profiles: { full_name: string; email: string; phone: string; cpf_cnpj?: string | null } | null
+  notes?: string | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
@@ -48,6 +50,31 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({})
   const [loadingItems, setLoadingItems] = useState<string | null>(null)
+  const [trackingInput, setTrackingInput] = useState<string>('')
+  const [savingTracking, setSavingTracking] = useState<string | null>(null)
+  const router = useRouter()
+
+  const handleSaveTracking = async (orderId: string) => {
+    setSavingTracking(orderId)
+    try {
+      const res = await fetch('/api/admin/tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, trackingCode: trackingInput })
+      })
+      if (res.ok) {
+        alert('Rastreio salvo! Status atualizado para "Enviado".')
+        router.refresh()
+      } else {
+        const data = await res.json()
+        alert('Erro: ' + (data.error || 'Falha ao salvar'))
+      }
+    } catch {
+      alert('Erro de conexão')
+    } finally {
+      setSavingTracking(null)
+    }
+  }
 
   const handleExpand = async (orderId: string) => {
     if (expandedOrder === orderId) {
@@ -74,9 +101,11 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
   }
 
   const filtered = orders.filter(o => {
-    const matchSearch = o.id.includes(searchTerm) ||
-      (o.profiles?.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (o.profiles?.email || '').toLowerCase().includes(searchTerm.toLowerCase())
+    const searchString = searchTerm.toLowerCase()
+    const matchSearch = o.id.includes(searchString) ||
+      (o.order_number && String(o.order_number).includes(searchString)) ||
+      (o.profiles?.full_name || '').toLowerCase().includes(searchString) ||
+      (o.profiles?.email || '').toLowerCase().includes(searchString)
     const matchStatus = statusFilter === 'all' || o.status === statusFilter
     const matchBrand = brandFilter === 'all' || o.brand_origin === brandFilter
     return matchSearch && matchStatus && matchBrand
@@ -91,7 +120,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
     if (!filtered.length) return
     const headers = ['Pedido', 'Data', 'Cliente', 'Email', 'Marca', 'Status', 'Subtotal', 'Frete', 'Desconto', 'Total', 'Pagamento', 'Rastreio']
     const rows = filtered.map(o => [
-      '#' + o.id.split('-')[0],
+      o.order_number ? '#' + o.order_number : '#' + o.id.split('-')[0],
       new Date(o.created_at).toLocaleDateString('pt-BR'),
       o.profiles?.full_name || '-',
       o.profiles?.email || '-',
@@ -220,7 +249,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                       onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}
                     >
                       <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontSize: '0.85rem', color: '#cbd5e1' }}>
-                        #{order.id.split('-')[0]}
+                        {order.order_number ? `#${order.order_number}` : `#${order.id.split('-')[0]}`}
                       </td>
                       <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
                         {new Date(order.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
@@ -332,8 +361,43 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                               <div style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{order.id}</div>
                             </div>
                             <div>
-                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Rastreio</div>
-                              <div style={{ color: order.tracking_code ? '#3b82f6' : '#64748b' }}>{order.tracking_code || 'Sem rastreio'}</div>
+                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Envio</div>
+                              <div style={{ color: '#e2e8f0', fontSize: '0.8rem' }}>{order.notes || 'Não informado'}</div>
+                              {order.tracking_code ? (
+                                <a
+                                  href={`https://rastreio.frenet.com.br/COR/${order.tracking_code}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ color: '#3b82f6', fontSize: '0.75rem', textDecoration: 'underline', marginTop: '4px', display: 'inline-block' }}
+                                >
+                                  🔗 {order.tracking_code}
+                                </a>
+                              ) : (
+                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '6px' }}>
+                                  <input
+                                    type="text"
+                                    placeholder="Cód. rastreio"
+                                    value={expandedOrder === order.id ? trackingInput : ''}
+                                    onChange={(e) => setTrackingInput(e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    style={{
+                                      background: '#2a2d35', border: '1px solid #3f424d', borderRadius: '4px',
+                                      padding: '4px 8px', color: '#e2e8f0', fontSize: '0.75rem', width: '140px'
+                                    }}
+                                  />
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleSaveTracking(order.id); }}
+                                    disabled={!trackingInput || savingTracking === order.id}
+                                    style={{
+                                      background: trackingInput ? '#3b82f6' : '#3f424d', color: '#fff',
+                                      border: 'none', borderRadius: '4px', padding: '4px 10px', cursor: trackingInput ? 'pointer' : 'default',
+                                      fontSize: '0.7rem', fontWeight: 'bold', whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {savingTracking === order.id ? '...' : 'Salvar'}
+                                  </button>
+                                </div>
+                              )}
                             </div>
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Tipo</div>
