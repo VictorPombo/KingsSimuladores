@@ -93,14 +93,16 @@ export async function POST(req: Request) {
             ? data.retorno.registros[0]?.registro 
             : data.retorno.registros?.registro
 
+          const regId = reg?.id
+          
           successCount++
           results.push({ 
             id: product.id, 
             title: product.title, 
             sku: product.sku,
             status: 'ok', 
-            erp_id: reg?.id,
-            message: `Produto sincronizado com Tiny (ID: ${reg?.id})`
+            erp_id: regId,
+            message: regId ? `Produto sincronizado com Tiny (ID: ${regId})` : `Produto sincronizado com Tiny com sucesso`
           })
           
           console.log(`[Sync ERP] ✅ ${product.title} → Tiny ID: ${reg?.id}`)
@@ -110,8 +112,13 @@ export async function POST(req: Request) {
             ? erros.map((e: any) => e.erro || e).join('; ') 
             : JSON.stringify(erros)
 
+          let wasUpdated = false
+
           // If duplicate, try to update instead
           if (errorMsg.includes('duplicidade')) {
+            // Pequena pausa para evitar estourar as 60 req/min da Tiny
+            await new Promise(r => setTimeout(r, 600))
+
             // Search for existing product by SKU
             const searchParams = new URLSearchParams()
             searchParams.append('token', storeToken)
@@ -127,6 +134,9 @@ export async function POST(req: Request) {
             const existingId = searchData.retorno?.produtos?.[0]?.produto?.id
 
             if (existingId) {
+              // Pequena pausa para evitar estourar as 60 req/min da Tiny (3 reqs seguidas)
+              await new Promise(r => setTimeout(r, 600))
+
               // Update existing product
               const updateParams = new URLSearchParams()
               updateParams.append('token', storeToken)
@@ -156,20 +166,22 @@ export async function POST(req: Request) {
                   message: `Produto atualizado no Tiny (ID: ${existingId})`
                 })
                 console.log(`[Sync ERP] 🔄 ${product.title} atualizado no Tiny (ID: ${existingId})`)
-                continue
+                wasUpdated = true
               }
             }
           }
 
-          errorCount++
-          results.push({ 
-            id: product.id, 
-            title: product.title,
-            sku: product.sku,
-            status: 'error', 
-            message: errorMsg 
-          })
-          console.error(`[Sync ERP] ❌ ${product.title}: ${errorMsg}`)
+          if (!wasUpdated) {
+            errorCount++
+            results.push({ 
+              id: product.id, 
+              title: product.title,
+              sku: product.sku,
+              status: 'error', 
+              message: errorMsg 
+            })
+            console.error(`[Sync ERP] ❌ ${product.title}: ${errorMsg}`)
+          }
         }
 
         // Rate limit: Tiny API allows ~30 requests/minute

@@ -291,7 +291,36 @@ export function ProdutosClient({ products }: { products: Product[] }) {
           <button
             disabled={isSyncing}
             onClick={async () => {
+              if (!confirm('Deseja CLONAR o catálogo da Olist para o site?\n\n- Produtos faltando no site serão CRIADOS (como Rascunho).\n- Preços defasados serão ATUALIZADOS.\n- Produtos que não existem mais na Olist serão ARQUIVADOS.\n\nEsta é uma ação completa de espelhamento.')) return
+              
+              setIsSyncing(true)
+              setSyncResults(null)
+              try {
+                const res = await fetch('/api/admin/mirror-erp', { method: 'POST' })
+                const data = await res.json()
+                setSyncResults(data)
+              } catch (err) {
+                alert('Erro ao clonar o catálogo do ERP.')
+              } finally {
+                setIsSyncing(false)
+              }
+            }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              background: isSyncing ? '#64748b' : 'transparent',
+              border: '1px solid #8b5cf6', borderRadius: '8px', padding: '10px 16px',
+              color: '#8b5cf6', fontWeight: 600, fontSize: '0.85rem',
+              cursor: isSyncing ? 'not-allowed' : 'pointer',
+              opacity: isSyncing ? 0.7 : 1, transition: 'all 0.2s'
+            }}
+          >
+            {isSyncing ? 'Clonando...' : 'Clonar Catálogo (Olist -> Site)'}
+          </button>
+          <button
+            disabled={isSyncing}
+            onClick={async () => {
               if (!confirm('Deseja sincronizar todos os produtos ativos com o Tiny ERP (Olist)?\n\nIsso vai cadastrar/atualizar cada produto no ERP para emissão de NF-e.')) return
+              
               setIsSyncing(true)
               setSyncResults(null)
               try {
@@ -460,7 +489,38 @@ export function ProdutosClient({ products }: { products: Product[] }) {
               ))}
             </div>
             
-            <button onClick={() => setSyncResults(null)} style={{ marginTop: '16px', width: '100%', background: '#8b5cf6', color: '#fff', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Fechar</button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+              <button onClick={() => setSyncResults(null)} style={{ flex: 1, background: 'transparent', color: '#cbd5e1', border: '1px solid #3f424d', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Fechar</button>
+              
+              {syncResults.errors > 0 && !syncResults.isCloneResult && (
+                <button 
+                  disabled={isSyncing}
+                  onClick={async () => {
+                    const failedIds = syncResults.results.filter((r: any) => r.status === 'error').map((r: any) => r.id);
+                    if (failedIds.length === 0) return;
+                    
+                    setIsSyncing(true);
+                    setSyncResults(null);
+                    try {
+                      const res = await fetch('/api/admin/sync-products-erp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productIds: failedIds })
+                      });
+                      const data = await res.json();
+                      setSyncResults(data);
+                    } catch (err) {
+                      alert('Erro ao sincronizar com o ERP.');
+                    } finally {
+                      setIsSyncing(false);
+                    }
+                  }} 
+                  style={{ flex: 2, background: isSyncing ? '#64748b' : '#8b5cf6', color: '#fff', border: 'none', padding: '12px', borderRadius: '8px', cursor: isSyncing ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                >
+                  {isSyncing ? 'Sincronizando...' : `Continuar Falhas (${syncResults.errors})`}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -29,7 +29,6 @@ export async function GET(req: Request) {
     .from('orders')
     .select('id, preference_id, brand_origin, created_at')
     .eq('status', 'pending')
-    .not('preference_id', 'is', null)
     .gte('created_at', twoDaysAgo)
     .order('created_at', { ascending: false })
     .limit(20)

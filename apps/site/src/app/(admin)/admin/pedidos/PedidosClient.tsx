@@ -18,7 +18,16 @@ type Order = {
   tracking_code: string | null
   coupon_id: string | null
   created_at: string
-  profiles: { full_name: string; email: string; phone: string } | null
+  shipping_address?: {
+    cep?: string
+    bairro?: string
+    cidade?: string
+    numero?: string
+    logradouro?: string
+    referencia?: string
+    complemento?: string
+  } | null
+  profiles: { full_name: string; email: string; phone: string; cpf_cnpj?: string | null } | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
@@ -297,14 +306,30 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                           </div>
 
                           {/* Detalhes do Pedido */}
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', fontSize: '0.8rem', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', fontSize: '0.8rem', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                             <div>
-                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>ID Completo</div>
-                              <div style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{order.id}</div>
+                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Cliente</div>
+                              <div style={{ color: '#e2e8f0', fontWeight: 500 }}>{order.profiles?.full_name || 'Desconhecido'}</div>
+                              <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{order.profiles?.email || ''}</div>
+                              {order.profiles?.cpf_cnpj && (
+                                <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '2px' }}>Doc: {order.profiles.cpf_cnpj}</div>
+                              )}
                             </div>
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Pagamento</div>
-                              <div style={{ color: '#e2e8f0' }}>{order.payment_method || 'Não informado'}</div>
+                              <div style={{ color: '#e2e8f0', fontWeight: 500 }}>
+                                {(() => {
+                                  const pm = (order.payment_method || '').toLowerCase();
+                                  if (pm === 'pix') return 'PIX (Mercado Pago)';
+                                  if (['master', 'visa', 'amex', 'hipercard', 'elo', 'credit_card'].includes(pm)) return `Cartão de Crédito (${pm.toUpperCase()})`;
+                                  if (pm === 'ticket' || pm === 'boleto') return 'Boleto (Mercado Pago)';
+                                  return pm ? pm.toUpperCase() : 'Não informado';
+                                })()}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>ID Completo</div>
+                              <div style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{order.id}</div>
                             </div>
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Rastreio</div>
@@ -321,6 +346,45 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Cupom</div>
                               <div style={{ color: order.coupon_id ? '#10b981' : '#64748b' }}>{order.coupon_id ? 'Sim' : 'Nenhum'}</div>
+                            </div>
+                            <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', marginTop: '8px' }}>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                <div>
+                                  <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Endereço de Entrega</div>
+                                  {order.shipping_address ? (
+                                    <div style={{ color: '#e2e8f0', fontSize: '0.75rem', lineHeight: '1.4' }}>
+                                      {order.shipping_address.logradouro}, {order.shipping_address.numero} {order.shipping_address.complemento ? ` - ${order.shipping_address.complemento}` : ''}<br />
+                                      {order.shipping_address.bairro} - {order.shipping_address.cidade}<br />
+                                      CEP: {order.shipping_address.cep}
+                                    </div>
+                                  ) : (
+                                    <div style={{ color: '#64748b', fontSize: '0.75rem' }}>Endereço não informado no pedido</div>
+                                  )}
+                                </div>
+                                <div>
+                                  <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Resumo de Valores</div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                                      <span>Subtotal:</span>
+                                      <span>R$ {Number(order.subtotal).toFixed(2)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                                      <span>Frete:</span>
+                                      <span>R$ {Number(order.shipping_cost).toFixed(2)}</span>
+                                    </div>
+                                    {Number(order.discount) > 0 && (
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ef4444' }}>
+                                        <span>Desconto:</span>
+                                        <span>-R$ {Number(order.discount).toFixed(2)}</span>
+                                      </div>
+                                    )}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0', fontWeight: 'bold', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                                      <span>Total Pago:</span>
+                                      <span>R$ {Number(order.total).toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                           
