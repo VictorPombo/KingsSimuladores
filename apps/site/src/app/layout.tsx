@@ -46,6 +46,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-body', display: 'swa
 const rajdhani = Rajdhani({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-display', display: 'swap' })
 const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' })
 
+import Script from 'next/script'
+
 export default function RootLayout({
   children,
 }: {
@@ -57,6 +59,15 @@ export default function RootLayout({
         {/* Fontes agora gerenciadas nativamente pelo Next.js */}
       </head>
       <body className="font-body">
+        <Script src="https://www.googletagmanager.com/gtag/js?id=AW-11399026698" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-11399026698');
+          `}
+        </Script>
         <StreamingBackground />
         {children}
       </body>
