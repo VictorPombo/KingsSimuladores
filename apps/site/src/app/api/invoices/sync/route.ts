@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     const supabaseAdmin = createAdminClient()
 
     // Authentication Check
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await (supabase.auth as any).getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

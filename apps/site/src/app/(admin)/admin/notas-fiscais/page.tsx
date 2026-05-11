@@ -1,10 +1,11 @@
-import { createServerSupabaseClient } from '@kings/db/server'
 import { NotasFiscaisClient } from './NotasFiscaisClient'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 30
 
 import { cookies } from 'next/headers'
+
+import { createAdminClient } from '@kings/db/server'
 
 export default async function AdminNotasFiscaisPage() {
   const storeCookie = cookies().get('admin_store')?.value || 'all'
@@ -16,7 +17,7 @@ export default async function AdminNotasFiscaisPage() {
       </div>
     )
   }
-  const supabase = await createServerSupabaseClient()
+  const supabase = createAdminClient()
 
     let query = supabase
       .from('invoices')
@@ -43,9 +44,13 @@ export default async function AdminNotasFiscaisPage() {
     created_at: inv.created_at,
     cnpj_emitente: inv.cnpj_emitente,
     order_id: inv.order_id,
-    order_total: Number(inv.orders?.total || 0),
-    order_status: inv.orders?.status || '-',
-    customer_name: inv.orders?.profiles?.full_name || 'Desconhecido',
+    order_total: Number((Array.isArray(inv.orders) ? inv.orders[0] : inv.orders)?.total || 0),
+    order_status: (Array.isArray(inv.orders) ? inv.orders[0] : inv.orders)?.status || '-',
+    customer_name: (() => {
+      const order = Array.isArray(inv.orders) ? inv.orders[0] : inv.orders;
+      const profile = Array.isArray(order?.profiles) ? order.profiles[0] : order?.profiles;
+      return profile?.full_name || 'Desconhecido';
+    })(),
   }))
 
   return (
