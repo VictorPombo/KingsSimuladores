@@ -43,11 +43,63 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invoice already has PDF', pdf_url: invoice.pdf_url, status: invoice.status })
     }
 
-    if (!invoice.erp_id || invoice.erp_id.startsWith('mock_')) {
-      return NextResponse.json({ error: 'Order not injected in Tiny ERP properly or using mock' }, { status: 400 })
-    }
+    let erpIdNum = invoice.erp_id;
 
-    const erpIdNum = invoice.erp_id; // Removido o bloqueio estrito que cortava o prefixo 'tiny_'
+    if (!erpIdNum || erpIdNum.startsWith('mock_')) {
+      // Pedido não foi injetado (ou falhou na primeira vez). Tentar injetar agora!
+      const { pushOrderToOlist } = await import('@kings/payments');
+      
+      const { data: order } = await supabaseAdmin
+        .from('orders')
+        .select('id, brand_origin, status, total, shipping_address, shipping_cost, profiles(full_name, email, phone, cpf_cnpj)')
+        .eq('id', orderId)
+        .single()
+        
+      const { data: items } = await supabaseAdmin
+        .from('order_items')
+        .select('id, product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, ncm, ean)')
+        .eq('order_id', orderId)
+
+      if (order && items) {
+        const profilesData = order.profiles as any
+        const customerProfile = Array.isArray(profilesData) ? profilesData[0] : profilesData
+        const store = order.brand_origin || 'kings'
+
+        const orderPayload = {
+          id: order.id,
+          total: order.total,
+          customer: {
+            name: customerProfile?.full_name || 'Desconhecido',
+            email: customerProfile?.email || '',
+            cpf_cnpj: customerProfile?.cpf_cnpj || '',
+            phone: customerProfile?.phone || ''
+          },
+          shipping: order.shipping_address || {},
+          shipping_cost: order.shipping_cost || 0,
+          items: items.map((i: any) => ({
+            product_id: i.product?.sku || i.product_id,
+            title: i.product?.title || 'Item',
+            quantity: i.quantity,
+            unit_price: i.unit_price,
+            ncm: i.product?.ncm || '',
+            gtin: i.product?.ean || 'SEM GTIN',
+            origem: '0',
+            cfop: '6102'
+          }))
+        }
+
+        const res = await pushOrderToOlist(orderPayload, store)
+        if (res && res.status !== 'error') {
+            erpIdNum = res.tiny_id || res.id
+            await supabaseAdmin.from('invoices').update({ erp_id: erpIdNum }).eq('id', invoice.id)
+            await supabaseAdmin.from('orders').update({ erp_id: erpIdNum }).eq('id', order.id)
+        } else {
+            return NextResponse.json({ error: 'Erro ao injetar no ERP (Verifique CPF/Telefone)' }, { status: 400 })
+        }
+      } else {
+        return NextResponse.json({ error: 'Order not found' }, { status: 400 })
+      }
+    }
 
     const token = invoice.store_origin === 'seven' ? process.env.OLIST_API_KEY_SEVEN : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN)
 

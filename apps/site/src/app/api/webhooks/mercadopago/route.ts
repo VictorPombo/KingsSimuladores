@@ -175,33 +175,11 @@ export async function POST(req: Request) {
           if (store === 'seven') {
             void pushOrderToOlist(orderPayload, store, process.env.OLIST_API_KEY_SEVEN)
               .then(async (res) => {
-                if (res && res.status !== 'error') {
-                  await adminSupabase.from('invoices').insert({
-                    order_id: order.id,
-                    store_origin: store,
-                    erp_id: res.tiny_id || res.id || '',
-                    cnpj_emitente: cnpjEmitente,
-                    nfe_number: '',
-                    nfe_key: '',
-                    status: 'pending',
-                    xml_url: '',
-                    pdf_url: ''
-                  })
-                  if (res.tiny_id) await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
-                  console.log(`[Webhook MP] NF-e do Pedido ${orderId} (Seven) enfileirada assincronamente (PENDING).`)
-                }
-              })
-              .catch(err => console.error('[Olist Async Error]', err))
-          } else {
-            // Kings ou MSU
-            try {
-              const res = await pushOrderToOlist(orderPayload, store, process.env.OLIST_API_KEY_KINGS)
-              if (res && res.status !== 'error') {
-                 if (!nfeResFirst) nfeResFirst = res;
-                 await adminSupabase.from('invoices').insert({
+                const erp_id = (res && res.status !== 'error') ? (res.tiny_id || res.id || '') : ''
+                await adminSupabase.from('invoices').insert({
                   order_id: order.id,
                   store_origin: store,
-                  erp_id: res.tiny_id || res.id || '',
+                  erp_id: erp_id,
                   cnpj_emitente: cnpjEmitente,
                   nfe_number: '',
                   nfe_key: '',
@@ -209,11 +187,38 @@ export async function POST(req: Request) {
                   xml_url: '',
                   pdf_url: ''
                 })
-                if (res.tiny_id) await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
-                console.log(`[Webhook MP] Pedido ${orderId} (${store}) salvo no banco. NFe em processamento (PENDING).`)
-              }
+                if (erp_id) await adminSupabase.from('orders').update({ erp_id }).eq('id', order.id)
+                console.log(`[Webhook MP] NF-e do Pedido ${orderId} (Seven) registrada (ERP ID: ${erp_id || 'vazio'}).`)
+              })
+              .catch(async (err) => {
+                console.error('[Olist Async Error]', err)
+                // Fallback de segurança para garantir que apareça no painel
+                await adminSupabase.from('invoices').insert({ order_id: order.id, store_origin: store, erp_id: '', cnpj_emitente: cnpjEmitente, nfe_number: '', nfe_key: '', status: 'pending', xml_url: '', pdf_url: '' })
+              })
+          } else {
+            // Kings ou MSU
+            try {
+              const res = await pushOrderToOlist(orderPayload, store, process.env.OLIST_API_KEY_KINGS)
+              const erp_id = (res && res.status !== 'error') ? (res.tiny_id || res.id || '') : ''
+              if (!nfeResFirst && erp_id) nfeResFirst = res;
+              
+              await adminSupabase.from('invoices').insert({
+                order_id: order.id,
+                store_origin: store,
+                erp_id: erp_id,
+                cnpj_emitente: cnpjEmitente,
+                nfe_number: '',
+                nfe_key: '',
+                status: 'pending',
+                xml_url: '',
+                pdf_url: ''
+              })
+              if (erp_id) await adminSupabase.from('orders').update({ erp_id }).eq('id', order.id)
+              console.log(`[Webhook MP] Pedido ${orderId} (${store}) salvo no banco com ERP ID: ${erp_id || 'vazio'}.`)
             } catch (err) {
               console.error(`[Olist Sync Error] Falha ao injetar pedido ${orderId} na loja ${store}:`, err)
+              // Fallback de segurança para garantir que apareça no painel
+              await adminSupabase.from('invoices').insert({ order_id: order.id, store_origin: store, erp_id: '', cnpj_emitente: cnpjEmitente, nfe_number: '', nfe_key: '', status: 'pending', xml_url: '', pdf_url: '' })
             }
           }
         }
