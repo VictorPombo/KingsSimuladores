@@ -30,6 +30,7 @@ type Order = {
   } | null
   profiles: { full_name: string; email: string; phone: string; cpf_cnpj?: string | null } | null
   notes?: string | null
+  erp_id?: string | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
@@ -94,6 +95,27 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
       }
     } catch {
       alert('Erro de conexão ao tentar excluir')
+    }
+  }
+
+  const handleGenerateInvoice = async (orderId: string) => {
+    if (!confirm('Deseja enviar este pedido para o ERP (Tiny/Olist) para gerar a Nota Fiscal?')) return
+    
+    try {
+      const res = await fetch('/api/admin/pedidos/sync-erp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+      if (res.ok) {
+        alert('Enviado com sucesso! A Nota Fiscal ficará com status Pendente até ser emitida pelo ERP.')
+        router.refresh()
+      } else {
+        const data = await res.json()
+        alert('Erro ao gerar Nota: ' + (data.error || 'Erro desconhecido'))
+      }
+    } catch {
+      alert('Erro de conexão ao tentar gerar a nota')
     }
   }
 
@@ -549,6 +571,23 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                 </a>
                               )}
                               
+                              {!order.erp_id && ['paid', 'shipped', 'delivered'].includes(order.status) && (
+                                <button
+                                  onClick={() => handleGenerateInvoice(order.id)}
+                                  style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                    background: '#10b981', color: '#fff', border: 'none',
+                                    padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem',
+                                    cursor: 'pointer', transition: 'all 0.2s',
+                                  }}
+                                  onMouseEnter={(e: any) => { e.currentTarget.style.background = '#059669'; }}
+                                  onMouseLeave={(e: any) => { e.currentTarget.style.background = '#10b981'; }}
+                                >
+                                  <Package size={18} />
+                                  Gerar NF-e (ERP)
+                                </button>
+                              )}
+
                               <button
                                 onClick={() => handleDeleteOrder(order.id)}
                                 style={{
