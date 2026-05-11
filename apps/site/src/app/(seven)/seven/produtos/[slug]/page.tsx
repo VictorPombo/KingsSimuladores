@@ -69,6 +69,8 @@ function ProductJsonLd({ product }: { product: any }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 }
 
+import { ViewContentTracker } from '@/components/store/product/ViewContentTracker'
+
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   let product = await getProduct(params.slug)
   if (!product) notFound()
@@ -88,6 +90,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   return (
     <div className="kings-product-page-wrapper" style={{ background: '#0a0e1a' }}>
       <ProductJsonLd product={product} />
+      <ViewContentTracker product={product} />
       <Container>
         <div className="kings-product-grid">
           

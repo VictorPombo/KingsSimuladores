@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
     // 1. Authenticate user from session
     const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await (supabase.auth as any).getUser()
 
     if (!user) {
       console.error('[Checkout API] Unauthorized error. Auth Error:', authError)
@@ -22,9 +22,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 403 })
     }
 
+    const updateData: any = {}
+    if (customer?.telefone) updateData.phone = customer.telefone
+    if (customer?.cpf) updateData.cpf_cnpj = customer.cpf
+    if (customer?.nome) updateData.full_name = customer.nome
+
+    if (Object.keys(updateData).length > 0) {
+      const adminSupabase = createAdminClient()
+      await adminSupabase.from('profiles').update(updateData).eq('id', profile.id)
+    }
+
     // 2. Validate input minimally
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: 'Cart empty' }, { status: 400 })
+      return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 })
+    }
+
+    if (!customer?.cpf || customer.cpf.replace(/\D/g, '').length < 11) {
+      return NextResponse.json({ error: 'CPF é obrigatório e deve ser válido para a emissão da Nota Fiscal.' }, { status: 400 })
+    }
+
+    if (!customer?.telefone || customer.telefone.replace(/\D/g, '').length < 10) {
+      return NextResponse.json({ error: 'Telefone/WhatsApp é obrigatório para contato logístico.' }, { status: 400 })
     }
 
     // Permite itens misturados livremente. A lógica define o storeContext com base no primeiro item.

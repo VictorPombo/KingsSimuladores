@@ -164,20 +164,28 @@ export async function POST(req: Request) {
             })
           }
 
+          // Determinar CNPJ emitente por loja
+          const cnpjPorLoja: Record<string, string> = {
+            kings: '29.688.089/0001-02',
+            seven: '61.219.783/0001-93',
+            msu: '29.688.089/0001-02' // MSU emite pela Kings
+          }
+          const cnpjEmitente = cnpjPorLoja[store] || cnpjPorLoja.kings
+
           if (store === 'seven') {
-            void pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
+            void pushOrderToOlist(orderPayload, store, process.env.OLIST_API_KEY_SEVEN)
               .then(async (res) => {
                 if (res && res.status !== 'error') {
                   await adminSupabase.from('invoices').insert({
                     order_id: order.id,
                     store_origin: store,
                     erp_id: res.tiny_id || res.id || '',
-                    cnpj_emitente: '',
+                    cnpj_emitente: cnpjEmitente,
                     nfe_number: '',
                     nfe_key: '',
-                    status: 'pending', // Deixamos como pending para o sync buscar depois
-                    xml_url: '', // Vazio de forma intencional (processamento assíncrono)
-                    pdf_url: ''  // Vazio de forma intencional
+                    status: 'pending',
+                    xml_url: '',
+                    pdf_url: ''
                   })
                   if (res.tiny_id) await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
                   console.log(`[Webhook MP] NF-e do Pedido ${orderId} (Seven) enfileirada assincronamente (PENDING).`)
@@ -185,26 +193,21 @@ export async function POST(req: Request) {
               })
               .catch(err => console.error('[Olist Async Error]', err))
           } else {
-            // Kings ou MSU mantêm síncrono no disparo, mas assíncrono na NFe
-            console.log('============= DEBUG WEBHOOK =============')
-            console.log('API KEY IN NEXTJS:', process.env.OLIST_API_KEY_KINGS)
-            console.log('Store:', store)
-            console.log('OrderPayload:', JSON.stringify(orderPayload, null, 2))
-            
+            // Kings ou MSU
             try {
-              const res = await pushOrderToOlist(orderPayload, store, store === 'seven' ? process.env.OLIST_API_KEY_SEVEN : process.env.OLIST_API_KEY_KINGS)
+              const res = await pushOrderToOlist(orderPayload, store, process.env.OLIST_API_KEY_KINGS)
               if (res && res.status !== 'error') {
                  if (!nfeResFirst) nfeResFirst = res;
                  await adminSupabase.from('invoices').insert({
                   order_id: order.id,
                   store_origin: store,
                   erp_id: res.tiny_id || res.id || '',
-                  cnpj_emitente: '',
+                  cnpj_emitente: cnpjEmitente,
                   nfe_number: '',
                   nfe_key: '',
-                  status: 'pending', // Deixamos como pending
-                  xml_url: '', // Vazio intencionalmente
-                  pdf_url: ''  // Vazio intencionalmente
+                  status: 'pending',
+                  xml_url: '',
+                  pdf_url: ''
                 })
                 if (res.tiny_id) await adminSupabase.from('orders').update({ erp_id: res.tiny_id }).eq('id', order.id)
                 console.log(`[Webhook MP] Pedido ${orderId} (${store}) salvo no banco. NFe em processamento (PENDING).`)
