@@ -13,11 +13,11 @@ export async function importProducts(rows: CsvRow[]) {
 
   // 1. Buscar brands existentes para mapear nomes → IDs
   const { data: brands } = await supabase.from('brands').select('id, name')
-  const brandMap = new Map((brands || []).map(b => [b.name.toLowerCase(), b.id]))
+  const brandMap = new Map((brands || []).map((b: any) => [b.name.toLowerCase(), b.id]))
 
   // 2. Buscar categories existentes
   const { data: categories } = await supabase.from('categories').select('id, name')
-  const catMap = new Map((categories || []).map(c => [c.name.toLowerCase(), c.id]))
+  const catMap = new Map((categories || []).map((c: any) => [c.name.toLowerCase(), c.id]))
 
   const results: { row: number; title: string; status: 'ok' | 'updated' | 'error'; msg?: string }[] = []
 
