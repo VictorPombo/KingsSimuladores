@@ -45,8 +45,8 @@ export default async function ComissoesAdminPage() {
   const pendentes = commissions?.filter((c: any) => c.payout_status === 'pending') || []
   const pagas = commissions?.filter((c: any) => c.payout_status === 'paid') || []
 
-  const totalRetidoKings = pendentes.reduce((acc, curr) => acc + curr.commission_amount, 0)
-  const totalDevidoVendedores = pendentes.reduce((acc, curr) => acc + curr.seller_payout, 0)
+  const totalRetidoKings = pendentes.reduce((acc: number, curr: any) => acc + curr.commission_amount, 0)
+  const totalDevidoVendedores = pendentes.reduce((acc: number, curr: any) => acc + curr.seller_payout, 0)
 
   // 3. Resgatar Taxa de Comissão Atual
   const { data: currentRateData } = await supabase.from('platform_settings').select('value').eq('key', 'msu_commission_rate').single()
