@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from './database.types'
 
-export async function createServerSupabaseClient() {
+export async function createServerSupabaseClient(): Promise<any> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -40,7 +40,7 @@ export async function createServerSupabaseClient() {
   })
 }
 
-export function createAdminClient() {
+export function createAdminClient(): any {
   return createClient<any>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,

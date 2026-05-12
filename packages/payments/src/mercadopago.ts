@@ -56,7 +56,15 @@ export async function createPreference(items: any[], customer: any, orderId?: st
 
   const payload: any = {
     items: mpItems,
-    payer: customer,
+    payer: {
+      name: customer.nome || customer.name || '',
+      email: customer.email || '',
+      identification: customer.cpf ? { type: 'CPF', number: customer.cpf.replace(/\D/g, '') } : undefined,
+      phone: customer.telefone ? { 
+        area_code: customer.telefone.replace(/\D/g, '').substring(0, 2), 
+        number: customer.telefone.replace(/\D/g, '').substring(2) 
+      } : undefined
+    },
     external_reference: orderId || undefined,
     back_urls: {
       success: `${process.env.NEXT_PUBLIC_URL_KINGS}/account?success=true`,

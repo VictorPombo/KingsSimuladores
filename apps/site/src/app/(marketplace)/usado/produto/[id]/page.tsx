@@ -43,6 +43,8 @@ export async function generateMetadata({ params }: Props) {
   }
 }
 
+import { ViewContentTracker } from '@/components/store/product/ViewContentTracker'
+
 export default async function ListingDetailPage({ params }: Props) {
   const supabase = await createServerSupabaseClient()
   
@@ -94,6 +96,7 @@ export default async function ListingDetailPage({ params }: Props) {
   return (
     <div className="msu-product-page-wrapper">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ViewContentTracker product={listing} />
       <Container>
         <div className="msu-detail-grid">
           

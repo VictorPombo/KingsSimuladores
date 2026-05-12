@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 import { createPreference } from '@kings/payments'
+import { sendEmailMessage } from '@kings/notifications'
 
 export async function POST(req: Request) {
   try {
@@ -9,22 +10,64 @@ export async function POST(req: Request) {
 
     // 1. Authenticate user from session
     const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await (supabase.auth as any).getUser()
 
     if (!user) {
       console.error('[Checkout API] Unauthorized error. Auth Error:', authError)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: profile } = await supabase.from('profiles').select('id').eq('auth_id', user.id).single()
+    const { data: profile } = await supabase.from('profiles').select('id, addresses').eq('auth_id', user.id).single()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 403 })
     }
 
+    const updateData: any = {}
+    if (customer?.telefone) updateData.phone = customer.telefone
+    if (customer?.cpf) updateData.cpf_cnpj = customer.cpf
+    if (customer?.nome) updateData.full_name = customer.nome
+
+    // Salvar o endereço no perfil se ele não existir
+    if (address && address.cep) {
+      const currentAddresses = Array.isArray(profile.addresses) ? profile.addresses : []
+      const addressExists = currentAddresses.some((a: any) => a.zip_code === address.cep && a.number === address.numero)
+      
+      if (!addressExists) {
+        updateData.addresses = [
+          ...currentAddresses,
+          {
+            id: crypto.randomUUID(),
+            is_default: currentAddresses.length === 0,
+            zip_code: address.cep,
+            street: address.logradouro,
+            number: address.numero,
+            neighborhood: address.bairro,
+            city: address.cidade,
+            complement: address.complemento,
+            reference: address.referencia,
+            created_at: new Date().toISOString()
+          }
+        ]
+      }
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      const adminSupabase = createAdminClient()
+      await adminSupabase.from('profiles').update(updateData).eq('id', profile.id)
+    }
+
     // 2. Validate input minimally
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: 'Cart empty' }, { status: 400 })
+      return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 })
+    }
+
+    if (!customer?.cpf || customer.cpf.replace(/\D/g, '').length < 11) {
+      return NextResponse.json({ error: 'CPF é obrigatório e deve ser válido para a emissão da Nota Fiscal.' }, { status: 400 })
+    }
+
+    if (!customer?.telefone || customer.telefone.replace(/\D/g, '').length < 10) {
+      return NextResponse.json({ error: 'Telefone/WhatsApp é obrigatório para contato logístico.' }, { status: 400 })
     }
 
     // Permite itens misturados livremente. A lógica define o storeContext com base no primeiro item.
@@ -121,6 +164,30 @@ export async function POST(req: Request) {
       }
     }
 
+    // 7. Enviar notificação por e-mail para o administrador
+    try {
+      const itemsListHtml = items.map((i: any) => `<li>${i.quantity}x ${i.title || 'Item'} - R$ ${Number(i.price).toFixed(2)}</li>`).join('')
+      await sendEmailMessage({
+        to: 'contato@kingssimuladores.com.br',
+        subject: `Novo Pedido Iniciado - ${customer?.nome || 'Cliente'}`,
+        html: `
+          <div style="font-family: sans-serif; color: #111;">
+            <h2>Um novo pedido foi iniciado na Kings!</h2>
+            <p><strong>Cliente:</strong> ${customer?.nome || 'Não informado'} (${customer?.email || 'Sem e-mail'} / ${customer?.telefone || 'Sem telefone'})</p>
+            <p><strong>ID do Pedido:</strong> ${newOrder.id}</p>
+            <p><strong>Valor Total:</strong> R$ ${Number(total).toFixed(2)}</p>
+            <h3>Itens do Pedido:</h3>
+            <ul>
+              ${itemsListHtml}
+            </ul>
+            <p><strong>Status:</strong> Aguardando Pagamento (Mercado Pago)</p>
+          </div>
+        `
+      })
+    } catch (emailErr) {
+      console.error('[Notificação] Falha ao enviar email do novo pedido:', emailErr)
+    }
+
     // Return the real session/order
     return NextResponse.json({
       ok: true,
@@ -131,6 +198,12 @@ export async function POST(req: Request) {
     })
 
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    console.error('🚨 [CRITICAL CHECKOUT ERROR] 🚨 Falha na rota de checkout:', {
+      message: err?.message || 'Unknown error',
+      stack: err?.stack,
+      name: err?.name,
+      err_object: err
+    });
+    return NextResponse.json({ error: err?.message || 'Erro interno no checkout' }, { status: 500 })
   }
 }

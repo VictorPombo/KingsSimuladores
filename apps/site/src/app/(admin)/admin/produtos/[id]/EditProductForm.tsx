@@ -22,6 +22,7 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   display: 'block', fontSize: '0.72rem', fontWeight: 600, color: '#94a3b8',
   textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px',
+  whiteSpace: 'nowrap',
 }
 
 export function EditProductForm({ product, allCategories = [] }: { product: ProductData, allCategories?: Array<{id: string, name: string, brand_scope: string}> }) {

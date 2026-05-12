@@ -24,10 +24,11 @@ import {
   CreditCard
 } from 'lucide-react'
 import { ProfileForm, AddressManager, SecurityForm, LogoutButton } from './ClientForms'
+import { PurchaseTracker } from '@/components/store/account/PurchaseTracker'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AccountPage({ searchParams }: { searchParams: { order?: string, tab?: string } }) {
+export default async function AccountPage({ searchParams }: { searchParams: { order?: string, tab?: string, success?: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -108,6 +109,9 @@ export default async function AccountPage({ searchParams }: { searchParams: { or
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px', color: '#fff' }}>
       <Container>
+        {searchParams.success === 'true' && displayOrders.length > 0 && (
+          <PurchaseTracker order={displayOrders[0]} />
+        )}
         
         <style dangerouslySetInnerHTML={{__html: `
           .nav-item {

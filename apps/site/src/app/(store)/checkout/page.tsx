@@ -17,6 +17,7 @@ export default function CheckoutPage() {
   
   // Form Info
   const [email, setEmail] = useState('')
+  const [telefone, setTelefone] = useState('')
   const [nome, setNome] = useState('')
   const [cpf, setCpf] = useState('')
   const [cep, setCep] = useState('')
@@ -35,13 +36,29 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
   const [checkoutError, setCheckoutError] = useState('')
+  const [trackedCheckout, setTrackedCheckout] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([])
+
+  const applyAddress = (addr: any) => {
+    if (addr.zip_code) {
+      const cleanCep = addr.zip_code.replace(/\D/g, '')
+      setCep(cleanCep)
+    }
+    if (addr.street) setLogradouro(addr.street)
+    if (addr.number) setNumero(addr.number)
+    if (addr.neighborhood) setBairro(addr.neighborhood)
+    if (addr.city) setCidade(addr.city)
+    if (addr.complement) setComplemento(addr.complement)
+    if (addr.reference) setReferencia(addr.reference)
+  }
 
   useEffect(() => {
     async function loadProfile() {
       // Lazy load the client only when mounting the component
       const { createClient } = await import('@kings/db/client')
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user } } = await (supabase.auth as any).getUser()
       
       if (user) {
         setEmail(user.email || '')
@@ -50,20 +67,19 @@ export default function CheckoutPage() {
         if (profile) {
           if (profile.full_name) setNome(profile.full_name)
           if (profile.cpf_cnpj) setCpf(profile.cpf_cnpj)
+          if (profile.phone) setTelefone(profile.phone)
           
           if (profile.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
-            const defaultAddr = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0]
-            if (defaultAddr.zip_code) {
-              const cleanCep = defaultAddr.zip_code.replace(/\D/g, '')
-              setCep(cleanCep)
+            setSavedAddresses(profile.addresses)
+            const defaultAddr = profile.addresses.find((a: any) => a.is_default) || profile.addresses[0]
+            if (defaultAddr) {
+              applyAddress(defaultAddr)
             }
-            if (defaultAddr.street) setLogradouro(defaultAddr.street)
-            if (defaultAddr.number) setNumero(defaultAddr.number)
-            if (defaultAddr.neighborhood) setBairro(defaultAddr.neighborhood)
-            if (defaultAddr.city) setCidade(defaultAddr.city)
-            if (defaultAddr.complement) setComplemento(defaultAddr.complement)
           }
         }
+      } else {
+        // Usuário não está logado
+        setShowAuthModal(true)
       }
     }
     loadProfile()
@@ -85,6 +101,19 @@ export default function CheckoutPage() {
       router.push('/')
     }
   }, [items, router, step])
+
+  // Track InitiateCheckout
+  useEffect(() => {
+    if (items.length > 0 && !trackedCheckout && typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'InitiateCheckout', {
+        content_ids: items.map(i => i.id),
+        value: totalPrice,
+        currency: 'BRL',
+        num_items: items.reduce((acc, i) => acc + i.quantity, 0)
+      })
+      setTrackedCheckout(true)
+    }
+  }, [items, trackedCheckout, totalPrice])
 
   const preencherCep = async (overrideCep?: string) => {
     const targetCep = overrideCep || cep
@@ -231,7 +260,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: storeGroupItems,
-          customer: { nome, email, cpf },
+          customer: { nome, email, cpf, telefone },
           address: { cep, logradouro, numero, bairro, cidade, complemento, referencia },
           shipping: storeShipping,
           total: storeTotal,
@@ -260,6 +289,23 @@ export default function CheckoutPage() {
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
 
+      {showAuthModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(10, 14, 26, 0.95)', backdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: '#111827', border: '1px solid rgba(0, 229, 255, 0.3)', borderRadius: '16px', padding: '40px', maxWidth: '450px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0, 229, 255, 0.1)' }}>
+            <div style={{ width: '64px', height: '64px', background: 'rgba(0, 229, 255, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <h2 style={{ color: '#fff', marginBottom: '16px', fontSize: '1.5rem', fontWeight: 700 }}>Identificação Necessária</h2>
+            <p style={{ color: '#94a3b8', marginBottom: '32px', lineHeight: 1.6, fontSize: '0.95rem' }}>
+              Para simular o frete e finalizar sua compra de forma segura, faça um rápido login ou crie sua conta.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <Button onClick={() => router.push('/login?redirect=/checkout')} style={{ width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 600 }}>Fazer Login / Criar Conta</Button>
+              <button onClick={() => router.push('/')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500, transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>Continuar Comprando</button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <Container style={{ position: 'relative', zIndex: 1, paddingBottom: '100px' }}>
         <div className="kings-checkout-grid">
@@ -272,10 +318,17 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>1. Seus Dados</h2>
                 <div className="kings-checkout-form-grid">
-                  <input type="text" placeholder="Nome Completo" value={nome} onChange={e => setNome(e.target.value)} style={{...inputStyle, flex: 1}} />
-                  <input type="text" placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} style={{...inputStyle, flex: 1}} />
+                  <input type="text" placeholder="Nome Completo *" value={nome} onChange={e => setNome(e.target.value)} style={{...inputStyle, flex: 1, border: (!nome || nome.trim().length < 3) ? '1px solid #ef4444' : inputStyle.border }} />
+                  <input type="text" placeholder="CPF *" value={cpf} onChange={e => setCpf(e.target.value)} style={{...inputStyle, flex: 1, border: (!cpf || cpf.trim().length < 11) ? '1px solid #ef4444' : inputStyle.border }} />
                 </div>
-                <input type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
+                <div className="kings-checkout-form-grid">
+                  <input type="email" placeholder="E-mail *" value={email} onChange={e => setEmail(e.target.value)} style={{...inputStyle, flex: 1, border: (!email || email.trim().length < 5) ? '1px solid #ef4444' : inputStyle.border }} />
+                  <input type="tel" placeholder="Telefone / WhatsApp *" value={telefone} onChange={e => setTelefone(e.target.value)} style={{...inputStyle, flex: 1, border: (!telefone || telefone.trim().length < 10) ? '1px solid #ef4444' : inputStyle.border }} />
+                </div>
+                
+                {(!nome || !cpf || !email || !telefone || cpf.trim().length < 11 || telefone.trim().length < 10) && (
+                  <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '-8px' }}>Preencha corretamente os campos obrigatórios (*) destacados em vermelho para gerar a Nota Fiscal.</p>
+                )}
                 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
                   <h2 style={{ fontSize: '1.2rem', color: '#00e5ff', margin: 0 }}>Endereço de Entrega</h2>
@@ -290,6 +343,25 @@ export default function CheckoutPage() {
                   </label>
                 </div>
                 
+                {!isRetirada && savedAddresses.length > 0 && (
+                  <div style={{ marginBottom: '1rem', marginTop: '-0.5rem' }}>
+                    <select 
+                      onChange={(e) => {
+                        const addr = savedAddresses.find(a => a.id === e.target.value)
+                        if (addr) applyAddress(addr)
+                      }}
+                      style={{...inputStyle, background: 'rgba(0, 229, 255, 0.05)', border: '1px solid rgba(0, 229, 255, 0.3)', color: '#00e5ff', cursor: 'pointer', appearance: 'none' }}
+                    >
+                      <option value="" disabled selected>Usar endereço salvo...</option>
+                      {savedAddresses.map(addr => (
+                        <option key={addr.id} value={addr.id} style={{ color: '#000' }}>
+                          {addr.street}, {addr.number} - {addr.neighborhood || addr.city}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 {!isRetirada && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div className="kings-checkout-form-row">
@@ -314,7 +386,17 @@ export default function CheckoutPage() {
                   </div>
                 )}
                 
-                <Button onClick={() => calcularFretes()} style={{ marginTop: '1rem' }} disabled={!isRetirada && cep.length < 8}>
+                <Button 
+                  onClick={() => {
+                    if (nome.trim().length < 3) return alert('Por favor, informe seu Nome Completo.');
+                    if (cpf.trim().length < 11) return alert('Por favor, informe um CPF válido para a Nota Fiscal.');
+                    if (email.trim().length < 5) return alert('Por favor, informe um E-mail válido.');
+                    if (telefone.trim().length < 10) return alert('Por favor, informe um Telefone/WhatsApp válido com DDD.');
+                    if (!isRetirada && cep.length < 8) return alert('Por favor, informe o CEP de entrega corretamente.');
+                    calcularFretes();
+                  }} 
+                  style={{ marginTop: '1rem' }}
+                >
                   {isRetirada ? 'Continuar para Pagamento' : 'Continuar para Frete'}
                 </Button>
               </div>

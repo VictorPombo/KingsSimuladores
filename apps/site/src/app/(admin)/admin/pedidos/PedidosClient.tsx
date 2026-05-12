@@ -30,6 +30,7 @@ type Order = {
   } | null
   profiles: { full_name: string; email: string; phone: string; cpf_cnpj?: string | null } | null
   notes?: string | null
+  erp_id?: string | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
@@ -76,6 +77,48 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
     }
   }
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm('Tem certeza absoluta que deseja EXCLUIR este pedido permanentemente? Esta ação não pode ser desfeita.')) return
+    
+    try {
+      const res = await fetch('/api/admin/pedidos/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+      if (res.ok) {
+        alert('Pedido removido com sucesso!')
+        router.refresh()
+      } else {
+        const data = await res.json()
+        alert('Erro ao excluir pedido: ' + (data.error || 'Erro desconhecido'))
+      }
+    } catch {
+      alert('Erro de conexão ao tentar excluir')
+    }
+  }
+
+  const handleGenerateInvoice = async (orderId: string) => {
+    if (!confirm('Deseja enviar este pedido para o ERP (Tiny/Olist) para gerar a Nota Fiscal?')) return
+    
+    try {
+      const res = await fetch('/api/admin/pedidos/sync-erp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+      if (res.ok) {
+        alert('Enviado com sucesso! A Nota Fiscal ficará com status Pendente até ser emitida pelo ERP.')
+        router.refresh()
+      } else {
+        const data = await res.json()
+        alert('Erro ao gerar Nota: ' + (data.error || 'Erro desconhecido'))
+      }
+    } catch {
+      alert('Erro de conexão ao tentar gerar a nota')
+    }
+  }
+
   const handleExpand = async (orderId: string) => {
     if (expandedOrder === orderId) {
       setExpandedOrder(null)
@@ -89,7 +132,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
         const supabase = createClient()
         const { data: items } = await supabase
           .from('order_items')
-          .select('id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, images)')
+          .select('id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, images, dimensions_cm, weight_kg)')
           .eq('order_id', orderId)
         setOrderItems(prev => ({ ...prev, [orderId]: items || [] }))
       } catch (err) {
@@ -323,6 +366,16 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                         {item.product?.sku && <span style={{ fontFamily: 'monospace' }}>{item.product.sku}</span>}
                                         {item.product?.sku && ' · '}
                                         {item.quantity}x R$ {Number(item.unit_price).toFixed(2)}
+                                        {item.product?.dimensions_cm && (
+                                          <span style={{ marginLeft: '8px', padding: '2px 6px', background: '#3f424d', borderRadius: '4px', fontSize: '0.65rem', color: '#e2e8f0' }}>
+                                            {item.product.dimensions_cm.width}x{item.product.dimensions_cm.height}x{item.product.dimensions_cm.length}cm
+                                          </span>
+                                        )}
+                                        {item.product?.weight_kg && (
+                                          <span style={{ marginLeft: '4px', padding: '2px 6px', background: '#3f424d', borderRadius: '4px', fontSize: '0.65rem', color: '#e2e8f0' }}>
+                                            {item.product.weight_kg}kg
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
                                     <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 'bold', color: '#00e5ff', flexShrink: 0 }}>
@@ -360,44 +413,88 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>ID Completo</div>
                               <div style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{order.id}</div>
                             </div>
-                            <div>
-                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Envio</div>
-                              <div style={{ color: '#e2e8f0', fontSize: '0.8rem' }}>{order.notes || 'Não informado'}</div>
-                              {order.tracking_code ? (
-                                <a
-                                  href={`https://rastreio.frenet.com.br/COR/${order.tracking_code}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ color: '#3b82f6', fontSize: '0.75rem', textDecoration: 'underline', marginTop: '4px', display: 'inline-block' }}
-                                >
-                                  🔗 {order.tracking_code}
-                                </a>
-                              ) : (
-                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '6px' }}>
-                                  <input
-                                    type="text"
-                                    placeholder="Cód. rastreio"
-                                    value={expandedOrder === order.id ? trackingInput : ''}
-                                    onChange={(e) => setTrackingInput(e.target.value)}
-                                    onClick={(e) => e.stopPropagation()}
-                                    style={{
-                                      background: '#2a2d35', border: '1px solid #3f424d', borderRadius: '4px',
-                                      padding: '4px 8px', color: '#e2e8f0', fontSize: '0.75rem', width: '140px'
-                                    }}
-                                  />
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); handleSaveTracking(order.id); }}
-                                    disabled={!trackingInput || savingTracking === order.id}
-                                    style={{
-                                      background: trackingInput ? '#3b82f6' : '#3f424d', color: '#fff',
-                                      border: 'none', borderRadius: '4px', padding: '4px 10px', cursor: trackingInput ? 'pointer' : 'default',
-                                      fontSize: '0.7rem', fontWeight: 'bold', whiteSpace: 'nowrap'
-                                    }}
-                                  >
-                                    {savingTracking === order.id ? '...' : 'Salvar'}
-                                  </button>
+                            <div style={{ gridColumn: '1 / -1' }}>
+                              <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Truck size={13} /> Informações de Envio (Frenet)
+                              </div>
+                              <div style={{ background: '#1a1c23', borderRadius: '8px', border: '1px solid #3f424d', padding: '14px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px' }}>
+                                <div>
+                                  <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Modalidade</div>
+                                  <div style={{ color: '#e2e8f0', fontSize: '0.8rem', fontWeight: 500 }}>
+                                    {order.notes
+                                      ? order.notes.replace('Frete: ', '')
+                                      : Number(order.shipping_cost) > 0
+                                        ? 'Via Frenet'
+                                        : 'Retirada no Local'}
+                                  </div>
                                 </div>
-                              )}
+                                <div>
+                                  <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Preço do Frete</div>
+                                  <div style={{ color: Number(order.shipping_cost) > 0 ? '#22d3ee' : '#10b981', fontSize: '0.85rem', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                    {Number(order.shipping_cost) > 0 ? `R$ ${Number(order.shipping_cost).toFixed(2)}` : 'Grátis'}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Destino</div>
+                                  <div style={{ color: '#e2e8f0', fontSize: '0.8rem' }}>
+                                    {order.shipping_address?.cidade || order.shipping_address?.bairro || '—'}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Status do Envio</div>
+                                  {(() => {
+                                    if (order.status === 'delivered') return <span style={{ color: '#10b981', fontSize: '0.8rem', fontWeight: 600 }}>● Entregue</span>;
+                                    if (order.status === 'shipped') return <span style={{ color: '#3b82f6', fontSize: '0.8rem', fontWeight: 600 }}>● {order.tracking_code ? 'Postado / Em trânsito' : 'Enviado'}</span>;
+                                    if (order.status === 'cancelled') return <span style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 600 }}>● Cancelado</span>;
+                                    if (order.status === 'paid') return <span style={{ color: '#f59e0b', fontSize: '0.8rem', fontWeight: 600 }}>● Aguardando Envio</span>;
+                                    return <span style={{ color: '#64748b', fontSize: '0.8rem' }}>● {order.status}</span>;
+                                  })()}
+                                </div>
+                                <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px' }}>
+                                  <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '6px' }}>Código de Rastreio</div>
+                                  {order.tracking_code ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                      <code style={{ color: '#22d3ee', fontSize: '0.85rem', fontWeight: 'bold', background: 'rgba(34,211,238,0.08)', padding: '4px 10px', borderRadius: '4px' }}>
+                                        {order.tracking_code}
+                                      </code>
+                                      <a
+                                        href={`https://rastreio.frenet.com.br/COR/${order.tracking_code}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ color: '#3b82f6', fontSize: '0.75rem', textDecoration: 'underline' }}
+                                      >
+                                        Rastrear na Frenet →
+                                      </a>
+                                    </div>
+                                  ) : (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                      <input
+                                        type="text"
+                                        placeholder="Cole o código de rastreio aqui..."
+                                        value={expandedOrder === order.id ? trackingInput : ''}
+                                        onChange={(e) => setTrackingInput(e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{
+                                          background: '#2a2d35', border: '1px solid #3f424d', borderRadius: '6px',
+                                          padding: '6px 12px', color: '#e2e8f0', fontSize: '0.8rem', width: '260px',
+                                          fontFamily: 'monospace'
+                                        }}
+                                      />
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleSaveTracking(order.id); }}
+                                        disabled={!trackingInput || savingTracking === order.id}
+                                        style={{
+                                          background: trackingInput ? '#3b82f6' : '#3f424d', color: '#fff',
+                                          border: 'none', borderRadius: '6px', padding: '6px 16px', cursor: trackingInput ? 'pointer' : 'default',
+                                          fontSize: '0.75rem', fontWeight: 'bold', whiteSpace: 'nowrap', transition: 'all 0.2s'
+                                        }}
+                                      >
+                                        {savingTracking === order.id ? 'Salvando...' : '📦 Salvar Rastreio'}
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                             <div>
                               <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Tipo</div>
@@ -452,29 +549,60 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                             </div>
                           </div>
                           
-                          {/* Botão do WhatsApp */}
-                          {order.profiles?.phone && (
-                            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed #3f424d' }}>
-                              <a
-                                href={`https://wa.me/55${order.profiles.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Fala ${order.profiles.full_name?.split(' ')[0] || 'Cliente'}! Passando para avisar que seu pedido #${order.id.split('-')[0]} foi despachado. ${order.tracking_code ? `Acompanhe o rastreio: ${order.tracking_code}` : 'O código de rastreio será enviado em breve.'}`)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed #3f424d', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                              {order.profiles?.phone && (
+                                <a
+                                  href={`https://wa.me/55${order.profiles.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Fala ${order.profiles.full_name?.split(' ')[0] || 'Cliente'}! Passando para avisar que seu pedido #${order.id.split('-')[0]} foi despachado. ${order.tracking_code ? `Acompanhe o rastreio: ${order.tracking_code}` : 'O código de rastreio será enviado em breve.'}`)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                    background: '#25D366', color: '#fff', textDecoration: 'none',
+                                    padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem',
+                                    boxShadow: '0 4px 12px rgba(37, 211, 102, 0.2)', transition: 'transform 0.2s, background 0.2s'
+                                  }}
+                                  onMouseEnter={(e: any) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = '#22c35e'; }}
+                                  onMouseLeave={(e: any) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#25D366'; }}
+                                >
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                  </svg>
+                                  Notificar Envio no WhatsApp
+                                </a>
+                              )}
+                              
+                              {!order.erp_id && ['paid', 'shipped', 'delivered'].includes(order.status) && (
+                                <button
+                                  onClick={() => handleGenerateInvoice(order.id)}
+                                  style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                    background: '#10b981', color: '#fff', border: 'none',
+                                    padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem',
+                                    cursor: 'pointer', transition: 'all 0.2s',
+                                  }}
+                                  onMouseEnter={(e: any) => { e.currentTarget.style.background = '#059669'; }}
+                                  onMouseLeave={(e: any) => { e.currentTarget.style.background = '#10b981'; }}
+                                >
+                                  <Package size={18} />
+                                  Gerar NF-e (ERP)
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => handleDeleteOrder(order.id)}
                                 style={{
                                   display: 'inline-flex', alignItems: 'center', gap: '8px',
-                                  background: '#25D366', color: '#fff', textDecoration: 'none',
+                                  background: 'transparent', color: '#ef4444', border: '1px solid #ef4444',
                                   padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem',
-                                  boxShadow: '0 4px 12px rgba(37, 211, 102, 0.2)', transition: 'transform 0.2s, background 0.2s'
+                                  cursor: 'pointer', transition: 'all 0.2s', marginLeft: 'auto'
                                 }}
-                                onMouseEnter={(e: any) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = '#22c35e'; }}
-                                onMouseLeave={(e: any) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#25D366'; }}
+                                onMouseEnter={(e: any) => { e.currentTarget.style.background = '#ef444410'; }}
+                                onMouseLeave={(e: any) => { e.currentTarget.style.background = 'transparent'; }}
                               >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                </svg>
-                                Notificar Envio no WhatsApp
-                              </a>
+                                <XCircle size={18} />
+                                Excluir Pedido
+                              </button>
                             </div>
-                          )}
                         </td>
                       </tr>
                     )}

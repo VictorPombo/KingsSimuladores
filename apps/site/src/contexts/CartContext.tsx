@@ -70,6 +70,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...current, newItem]
     })
     setIsOpen(true)
+
+    // Meta Pixel Tracking
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'AddToCart', {
+        content_ids: [newItem.id],
+        content_name: newItem.title,
+        value: newItem.price,
+        currency: 'BRL'
+      })
+    }
   }
 
   const removeItem = (id: string) => {
