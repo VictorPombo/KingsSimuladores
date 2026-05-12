@@ -38,7 +38,7 @@ export async function updateSession(request: NextRequest) {
         return fetch(url, { ...options, cache: 'no-store' } as any)
       }
     }
-  })
+  }) as any
 
   // Refresh session — important for Server Components
   const {

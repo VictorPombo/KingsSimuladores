@@ -149,6 +149,12 @@ export async function POST(req: Request) {
     })
 
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    console.error('🚨 [CRITICAL CHECKOUT ERROR] 🚨 Falha na rota de checkout:', {
+      message: err?.message || 'Unknown error',
+      stack: err?.stack,
+      name: err?.name,
+      err_object: err
+    });
+    return NextResponse.json({ error: err?.message || 'Erro interno no checkout' }, { status: 500 })
   }
 }

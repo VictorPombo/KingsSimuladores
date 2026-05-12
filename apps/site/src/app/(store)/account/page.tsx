@@ -28,7 +28,7 @@ import { PurchaseTracker } from '@/components/store/account/PurchaseTracker'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AccountPage({ searchParams }: { searchParams: { order?: string, tab?: string } }) {
+export default async function AccountPage({ searchParams }: { searchParams: { order?: string, tab?: string, success?: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 

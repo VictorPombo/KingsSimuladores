@@ -37,6 +37,7 @@ export default function CheckoutPage() {
   const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
   const [checkoutError, setCheckoutError] = useState('')
   const [trackedCheckout, setTrackedCheckout] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
     async function loadProfile() {
@@ -67,6 +68,9 @@ export default function CheckoutPage() {
             if (defaultAddr.complement) setComplemento(defaultAddr.complement)
           }
         }
+      } else {
+        // Usuário não está logado
+        setShowAuthModal(true)
       }
     }
     loadProfile()
@@ -276,6 +280,23 @@ export default function CheckoutPage() {
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
 
+      {showAuthModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(10, 14, 26, 0.95)', backdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: '#111827', border: '1px solid rgba(0, 229, 255, 0.3)', borderRadius: '16px', padding: '40px', maxWidth: '450px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0, 229, 255, 0.1)' }}>
+            <div style={{ width: '64px', height: '64px', background: 'rgba(0, 229, 255, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <h2 style={{ color: '#fff', marginBottom: '16px', fontSize: '1.5rem', fontWeight: 700 }}>Identificação Necessária</h2>
+            <p style={{ color: '#94a3b8', marginBottom: '32px', lineHeight: 1.6, fontSize: '0.95rem' }}>
+              Para simular o frete e finalizar sua compra de forma segura, faça um rápido login ou crie sua conta.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <Button onClick={() => router.push('/login?redirect=/checkout')} style={{ width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 600 }}>Fazer Login / Criar Conta</Button>
+              <button onClick={() => router.push('/')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500, transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>Continuar Comprando</button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <Container style={{ position: 'relative', zIndex: 1, paddingBottom: '100px' }}>
         <div className="kings-checkout-grid">
