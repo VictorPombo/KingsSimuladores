@@ -42,8 +42,8 @@ export default async function ComissoesAdminPage() {
     console.error('Erro ao buscar sub-ledgers:', error)
   }
 
-  const pendentes = commissions?.filter(c => c.payout_status === 'pending') || []
-  const pagas = commissions?.filter(c => c.payout_status === 'paid') || []
+  const pendentes = commissions?.filter((c: any) => c.payout_status === 'pending') || []
+  const pagas = commissions?.filter((c: any) => c.payout_status === 'paid') || []
 
   const totalRetidoKings = pendentes.reduce((acc, curr) => acc + curr.commission_amount, 0)
   const totalDevidoVendedores = pendentes.reduce((acc, curr) => acc + curr.seller_payout, 0)
