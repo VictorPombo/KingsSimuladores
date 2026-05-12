@@ -38,6 +38,20 @@ export default function CheckoutPage() {
   const [checkoutError, setCheckoutError] = useState('')
   const [trackedCheckout, setTrackedCheckout] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([])
+
+  const applyAddress = (addr: any) => {
+    if (addr.zip_code) {
+      const cleanCep = addr.zip_code.replace(/\D/g, '')
+      setCep(cleanCep)
+    }
+    if (addr.street) setLogradouro(addr.street)
+    if (addr.number) setNumero(addr.number)
+    if (addr.neighborhood) setBairro(addr.neighborhood)
+    if (addr.city) setCidade(addr.city)
+    if (addr.complement) setComplemento(addr.complement)
+    if (addr.reference) setReferencia(addr.reference)
+  }
 
   useEffect(() => {
     async function loadProfile() {
@@ -56,16 +70,11 @@ export default function CheckoutPage() {
           if (profile.phone) setTelefone(profile.phone)
           
           if (profile.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
-            const defaultAddr = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0]
-            if (defaultAddr.zip_code) {
-              const cleanCep = defaultAddr.zip_code.replace(/\D/g, '')
-              setCep(cleanCep)
+            setSavedAddresses(profile.addresses)
+            const defaultAddr = profile.addresses.find((a: any) => a.is_default) || profile.addresses[0]
+            if (defaultAddr) {
+              applyAddress(defaultAddr)
             }
-            if (defaultAddr.street) setLogradouro(defaultAddr.street)
-            if (defaultAddr.number) setNumero(defaultAddr.number)
-            if (defaultAddr.neighborhood) setBairro(defaultAddr.neighborhood)
-            if (defaultAddr.city) setCidade(defaultAddr.city)
-            if (defaultAddr.complement) setComplemento(defaultAddr.complement)
           }
         }
       } else {
@@ -334,6 +343,25 @@ export default function CheckoutPage() {
                   </label>
                 </div>
                 
+                {!isRetirada && savedAddresses.length > 0 && (
+                  <div style={{ marginBottom: '1rem', marginTop: '-0.5rem' }}>
+                    <select 
+                      onChange={(e) => {
+                        const addr = savedAddresses.find(a => a.id === e.target.value)
+                        if (addr) applyAddress(addr)
+                      }}
+                      style={{...inputStyle, background: 'rgba(0, 229, 255, 0.05)', border: '1px solid rgba(0, 229, 255, 0.3)', color: '#00e5ff', cursor: 'pointer', appearance: 'none' }}
+                    >
+                      <option value="" disabled selected>Usar endereço salvo...</option>
+                      {savedAddresses.map(addr => (
+                        <option key={addr.id} value={addr.id} style={{ color: '#000' }}>
+                          {addr.street}, {addr.number} - {addr.neighborhood || addr.city}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 {!isRetirada && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div className="kings-checkout-form-row">

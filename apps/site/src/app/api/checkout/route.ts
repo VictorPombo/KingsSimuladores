@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 import { createPreference } from '@kings/payments'
+import { sendEmailMessage } from '@kings/notifications'
 
 export async function POST(req: Request) {
   try {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: profile } = await supabase.from('profiles').select('id').eq('auth_id', user.id).single()
+    const { data: profile } = await supabase.from('profiles').select('id, addresses').eq('auth_id', user.id).single()
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 403 })
@@ -26,6 +27,30 @@ export async function POST(req: Request) {
     if (customer?.telefone) updateData.phone = customer.telefone
     if (customer?.cpf) updateData.cpf_cnpj = customer.cpf
     if (customer?.nome) updateData.full_name = customer.nome
+
+    // Salvar o endereço no perfil se ele não existir
+    if (address && address.cep) {
+      const currentAddresses = Array.isArray(profile.addresses) ? profile.addresses : []
+      const addressExists = currentAddresses.some((a: any) => a.zip_code === address.cep && a.number === address.numero)
+      
+      if (!addressExists) {
+        updateData.addresses = [
+          ...currentAddresses,
+          {
+            id: crypto.randomUUID(),
+            is_default: currentAddresses.length === 0,
+            zip_code: address.cep,
+            street: address.logradouro,
+            number: address.numero,
+            neighborhood: address.bairro,
+            city: address.cidade,
+            complement: address.complemento,
+            reference: address.referencia,
+            created_at: new Date().toISOString()
+          }
+        ]
+      }
+    }
 
     if (Object.keys(updateData).length > 0) {
       const adminSupabase = createAdminClient()
@@ -137,6 +162,30 @@ export async function POST(req: Request) {
           })
         }
       }
+    }
+
+    // 7. Enviar notificação por e-mail para o administrador
+    try {
+      const itemsListHtml = items.map((i: any) => `<li>${i.quantity}x ${i.title || 'Item'} - R$ ${Number(i.price).toFixed(2)}</li>`).join('')
+      await sendEmailMessage({
+        to: 'contato@kingssimuladores.com.br',
+        subject: `Novo Pedido Iniciado - ${customer?.nome || 'Cliente'}`,
+        html: `
+          <div style="font-family: sans-serif; color: #111;">
+            <h2>Um novo pedido foi iniciado na Kings!</h2>
+            <p><strong>Cliente:</strong> ${customer?.nome || 'Não informado'} (${customer?.email || 'Sem e-mail'} / ${customer?.telefone || 'Sem telefone'})</p>
+            <p><strong>ID do Pedido:</strong> ${newOrder.id}</p>
+            <p><strong>Valor Total:</strong> R$ ${Number(total).toFixed(2)}</p>
+            <h3>Itens do Pedido:</h3>
+            <ul>
+              ${itemsListHtml}
+            </ul>
+            <p><strong>Status:</strong> Aguardando Pagamento (Mercado Pago)</p>
+          </div>
+        `
+      })
+    } catch (emailErr) {
+      console.error('[Notificação] Falha ao enviar email do novo pedido:', emailErr)
     }
 
     // Return the real session/order
