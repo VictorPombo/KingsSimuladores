@@ -1,7 +1,7 @@
 'use client'
 
 import { formatPrice } from '@kings/utils'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { Users, ShoppingBag, TrendingUp, DollarSign, Calendar, Eye, MoveRight, Filter } from 'lucide-react'
 
 function formatCompact(number: number) {
@@ -149,13 +149,7 @@ export function MetricasCardClient({ data }: { data: any }) {
           <div style={{ height: '350px', width: '100%' }}>
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorVisitas" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.6}/>
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barCategoryGap="30%">
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.3} />
                   <XAxis 
                     dataKey="name" 
@@ -173,15 +167,19 @@ export function MetricasCardClient({ data }: { data: any }) {
                     dx={-10}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area 
-                    type="monotone" 
-                    dataKey="Visitas" 
-                    stroke="#ef4444" 
-                    strokeWidth={4}
-                    fillOpacity={1} 
-                    fill="url(#colorVisitas)" 
-                  />
-                </AreaChart>
+                  <Bar
+                    dataKey="Visitas"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={48}
+                  >
+                    {chartData.map((_: any, index: number) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index === chartData.length - 1 ? '#ef4444' : 'rgba(239,68,68,0.45)'}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             ) : (
               <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '0.85rem' }}>

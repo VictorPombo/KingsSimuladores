@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts'
 import { createClient } from '@kings/db/client'
 
@@ -93,13 +93,7 @@ export function RevenueChart({ currentStore }: { currentStore: string }) {
         </div>
       ) : (
         <ResponsiveContainer width="100%" height="85%">
-          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={strokeColor} stopOpacity={0.4}/>
-                <stop offset="95%" stopColor={strokeColor} stopOpacity={0}/>
-              </linearGradient>
-            </defs>
+          <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barCategoryGap="30%">
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
             <XAxis 
               dataKey="name" 
@@ -120,15 +114,19 @@ export function RevenueChart({ currentStore }: { currentStore: string }) {
               itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
               formatter={(value: any) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0), 'Faturamento']}
             />
-            <Area 
-              type="monotone" 
-              dataKey="revenue" 
-              stroke={strokeColor} 
-              strokeWidth={3}
-              fillOpacity={1} 
-              fill="url(#colorRevenue)" 
-            />
-          </AreaChart>
+            <Bar
+              dataKey="revenue"
+              radius={[6, 6, 0, 0]}
+              maxBarSize={48}
+            >
+              {data.map((_: any, index: number) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={index === data.length - 1 ? strokeColor : strokeColor + '70'}
+                />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       )}
     </div>
