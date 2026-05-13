@@ -1,7 +1,7 @@
 import { Card, Container, Badge } from '@kings/ui'
 import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 import Link from 'next/link'
-import { RevenueChart } from './components/AdminCharts'
+import { MetricasCard } from './components/MetricasCard'
 import { TrendingUp, Clock, MoveRight, ShoppingBag, ShieldCheck, Zap } from 'lucide-react'
 
 
@@ -148,109 +148,8 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
             <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Atualizado em tempo real</div>
           </div>
 
-          {/* KPIs ENTERPRISE */}
-          <div className="admin-kpi-grid" style={{ marginBottom: '32px' }}>
-            <div style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '24px', border: `1px solid ${isMsuTab ? 'rgba(6, 182, 212, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                {isMsuTab ? 'GMV Transacionado' : 'Faturamento Próprio'}
-                <TrendingUp size={16} color={isMsuTab ? '#06b6d4' : '#10b981'} />
-              </div>
-              <div style={{ fontSize: '2.2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: '#f8fafc' }}>
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.revenue)}
-              </div>
-              <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                Acumulado total
-              </div>
-            </div>
-
-            <div style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                {isMsuTab ? 'Vendas P2P' : 'Pedidos (Hub)'}
-              </div>
-              <div style={{ fontSize: '2.2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: '#f8fafc' }}>{stats.orders}</div>
-              <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                Todas as transações registradas
-              </div>
-            </div>
-
-            <div style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                {isMsuTab ? 'Total de Anúncios' : 'SKUs Cadastrados'}
-                <ShoppingBag size={16} color="#64748b" />
-              </div>
-              <div style={{ fontSize: '2.2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: '#f8fafc' }}>{stats.productsOrListings}</div>
-              <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                Inventário Ativo Automático
-              </div>
-            </div>
-
-            {isMsuTab ? (
-              <div style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(245, 158, 11, 0.3)', boxShadow: '0 0 20px rgba(245,158,11,0.05)' }}>
-                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                  Aguardando Moderação
-                  <ShieldCheck size={16} color="#f59e0b" />
-                </div>
-                <div style={{ fontSize: '2.2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: '#f59e0b' }}>
-                  {stats.metric4} <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 500 }}>itens</span>
-                </div>
-                <Link href="/admin/moderacao" style={{ textDecoration: 'none' }}>
-                  <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                    Revisar Agora <MoveRight size={12} />
-                  </div>
-                </Link>
-              </div>
-            ) : (
-              <div style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '8px' }}>Clientes na Base</div>
-                <div style={{ fontSize: '2.2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: '#f8fafc' }}>{stats.users}</div>
-                <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                  <TrendingUp size={12} /> SSO Unificado
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* GRÁFICOS E AÇÕES RÁPIDAS (SPLIT VIEW) */}
-          <div className="admin-grid-2-1" style={{ marginBottom: '40px' }}>
-            <div>
-              <RevenueChart currentStore={currentStore} />
-            </div>
-            
-            <div>
-              <h3 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-display)', color: '#f8fafc', marginBottom: '16px' }}>🚀 Ações Rápidas</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <Link href={isMsuTab ? '/admin/moderacao' : '/admin/produtos'} style={{ textDecoration: 'none' }}>
-                  <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s' }} className="hover:border-[#00e5ff] hover:-translate-y-1">
-                    <div style={{ background: 'rgba(0,229,255,0.1)', padding: '10px', borderRadius: '8px' }}><Zap size={20} color="#00e5ff" /></div>
-                    <div>
-                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{isMsuTab ? 'Moderar Anúncios' : 'Gerenciar Catálogo'}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isMsuTab ? 'Aprove listagens da comunidade' : 'Acesse o inventário sincronizado do ERP'}</div>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link href={isMsuTab ? '/admin/msu-chat' : '/admin/pedidos'} style={{ textDecoration: 'none' }}>
-                  <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s' }} className="hover:border-[#8b5cf6] hover:-translate-y-1">
-                    <div style={{ background: 'rgba(139,92,246,0.1)', padding: '10px', borderRadius: '8px' }}><ShoppingBag size={20} color="#8b5cf6" /></div>
-                    <div>
-                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{isMsuTab ? 'Chat & Negociações' : 'Painel de Pedidos'}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isMsuTab ? 'Acompanhe as mensagens C2C' : 'Acompanhe e despache pedidos recentes'}</div>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link href={isMsuTab ? '/admin/msu-comissoes' : '/admin/aplicativos'} style={{ textDecoration: 'none' }}>
-                  <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s' }} className="hover:border-[#f59e0b] hover:-translate-y-1">
-                    <div style={{ background: 'rgba(245,158,11,0.1)', padding: '10px', borderRadius: '8px' }}><ShieldCheck size={20} color="#f59e0b" /></div>
-                    <div>
-                      <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{isMsuTab ? 'Extrato de Comissões' : 'Configurações de Integração'}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isMsuTab ? 'Verifique as taxas de repasse' : 'Gerencie chaves de API, Bling e Olist'}</div>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            </div>
-          </div>
+          {/* NOVA VISÃO DE MÉTRICAS */}
+          <MetricasCard />
 
 
           {/* CRM LATEST ORDERS */}

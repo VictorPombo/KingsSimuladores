@@ -1,0 +1,56 @@
+
+> @kings/site@0.0.0 type-check
+> tsc --noEmit
+
+src/app/(admin)/admin/components/MarketplaceChat.tsx(59,19): error TS2339: Property 'getUser' does not exist on type 'SupabaseAuthClient'.
+src/app/(admin)/admin/components/MarketplaceChat.tsx(59,37): error TS7031: Binding element 'data' implicitly has an 'any' type.
+src/app/(admin)/admin/components/MarketplaceEscrow.tsx(40,19): error TS2339: Property 'getUser' does not exist on type 'SupabaseAuthClient'.
+src/app/(admin)/admin/components/MarketplaceEscrow.tsx(40,37): error TS7031: Binding element 'data' implicitly has an 'any' type.
+src/app/(admin)/admin/login/page.tsx(28,56): error TS2339: Property 'signInWithPassword' does not exist on type 'SupabaseAuthClient'.
+src/app/(admin)/admin/msu/financeiro/page.tsx(26,45): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/(admin)/admin/msu/financeiro/page.tsx(39,39): error TS7006: Parameter 'payout' implicitly has an 'any' type.
+src/app/(admin)/admin/msu/moderacao/page.tsx(23,46): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/(admin)/admin/msu/moderacao/page.tsx(38,41): error TS7006: Parameter 'product' implicitly has an 'any' type.
+src/app/(admin)/admin/page.tsx(37,53): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/app/(admin)/admin/page.tsx(37,58): error TS7006: Parameter 'order' implicitly has an 'any' type.
+src/app/(admin)/admin/page.tsx(53,45): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/app/(admin)/admin/page.tsx(88,53): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/app/(admin)/admin/page.tsx(88,58): error TS7006: Parameter 'order' implicitly has an 'any' type.
+src/app/(admin)/admin/page.tsx(100,45): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/app/(marketplace)/usado/account/GarageClient.tsx(97,25): error TS2339: Property 'signOut' does not exist on type 'SupabaseAuthClient'.
+src/app/(marketplace)/usado/account/GarageClient.tsx(517,45): error TS2339: Property 'updateUser' does not exist on type 'SupabaseAuthClient'.
+src/app/(marketplace)/usado/dashboard/page.tsx(52,57): error TS2339: Property 'getSession' does not exist on type 'SupabaseAuthClient'.
+src/app/(marketplace)/usado/login/page.tsx(29,43): error TS2339: Property 'signInWithPassword' does not exist on type 'SupabaseAuthClient'.
+src/app/(marketplace)/usado/login/page.tsx(54,49): error TS2339: Property 'signUp' does not exist on type 'SupabaseAuthClient'.
+src/app/(marketplace)/usado/vendedor/[id]/page.tsx(41,35): error TS7006: Parameter 'acc' implicitly has an 'any' type.
+src/app/(marketplace)/usado/vendedor/[id]/page.tsx(41,40): error TS7006: Parameter 'curr' implicitly has an 'any' type.
+src/app/(marketplace)/usado/vendedor/[id]/page.tsx(85,26): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/app/(marketplace)/usado/vendedor/[id]/page.tsx(108,37): error TS7006: Parameter 'rev' implicitly has an 'any' type.
+src/app/(marketplace)/usado/vendedor/[id]/page.tsx(108,42): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/app/(marketplace)/usado/vender/page.tsx(40,57): error TS2339: Property 'getSession' does not exist on type 'SupabaseAuthClient'.
+src/app/(marketplace)/usado/vender/page.tsx(64,55): error TS2339: Property 'getSession' does not exist on type 'SupabaseAuthClient'.
+src/app/(marketplace)/usado/vender/page.tsx(124,57): error TS2339: Property 'getSession' does not exist on type 'SupabaseAuthClient'.
+src/app/(seven)/seven/login/page.tsx(29,43): error TS2339: Property 'signInWithPassword' does not exist on type 'SupabaseAuthClient'.
+src/app/(seven)/seven/login/page.tsx(54,43): error TS2339: Property 'signUp' does not exist on type 'SupabaseAuthClient'.
+src/app/(store)/account/ClientForms.tsx(15,25): error TS2339: Property 'signOut' does not exist on type 'SupabaseAuthClient'.
+src/app/(store)/login/page.tsx(61,43): error TS2339: Property 'signInWithPassword' does not exist on type 'SupabaseAuthClient'.
+src/app/(store)/login/page.tsx(93,49): error TS2339: Property 'signUp' does not exist on type 'SupabaseAuthClient'.
+src/app/api/admin/mirror-erp/route.ts(99,27): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/api/admin/mirror-erp/route.ts(192,54): error TS7006: Parameter 'kingsProd' implicitly has an 'any' type.
+src/app/api/reviews/route.ts(25,26): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/app/api/reviews/route.ts(25,31): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/app/api/upsell/route.ts(75,15): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/api/upsell/route.ts(76,15): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/api/upsell/route.ts(78,12): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/api/webhooks/mercadopago/route.ts(112,25): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/app/sitemap.ts(26,69): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/sitemap.ts(39,69): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/components/marketplace/ChatModal.tsx(43,57): error TS2339: Property 'getSession' does not exist on type 'SupabaseAuthClient'.
+src/components/store/shipping/ShippingSimulator.tsx(29,56): error TS2339: Property 'getUser' does not exist on type 'SupabaseAuthClient'.
+npm error Lifecycle script `type-check` failed with error:
+npm error code 1
+npm error path /Users/hadi/Documents/KingsSimuladores/apps/site
+npm error workspace @kings/site@0.0.0
+npm error location /Users/hadi/Documents/KingsSimuladores/apps/site
+npm error command failed
+npm error command sh -c tsc --noEmit

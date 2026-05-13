@@ -5,6 +5,7 @@ import { CartDrawer } from '@/components/store/cart/CartDrawer'
 import { ToastProvider } from '@kings/ui'
 
 import { WhatsappFloat } from '@/components/store/layout/WhatsappFloat'
+import { VisitTracker } from '@/components/shared/VisitTracker'
 
 export default function StoreLayout({
   children,
@@ -14,6 +15,7 @@ export default function StoreLayout({
   return (
     <ToastProvider>
       <CartProvider>
+        <VisitTracker origin="kings" />
         <CartDrawer />
         <Header />
         {children}

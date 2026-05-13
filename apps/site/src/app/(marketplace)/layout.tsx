@@ -3,6 +3,7 @@ import { Footer } from '@/components/marketplace/layout/Footer'
 import { ToastProvider } from '@kings/ui'
 import { CartProvider } from '@/contexts/CartContext'
 import { CartDrawer } from '@/components/store/cart/CartDrawer'
+import { VisitTracker } from '@/components/shared/VisitTracker'
 
 export default function MarketplaceLayout({
   children,
@@ -12,6 +13,7 @@ export default function MarketplaceLayout({
   return (
     <ToastProvider>
       <CartProvider>
+        <VisitTracker origin="msu" />
         <CartDrawer />
         <div className="theme-msu" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Header />
