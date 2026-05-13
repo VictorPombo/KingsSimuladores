@@ -72,10 +72,10 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     // 4. Filtrar: remover itens que já estão no carrinho e sem imagem
     const suggestions = products
-      .filter(p => !cartIds.has(p.id))
-      .filter(p => p.images && p.images.length > 0 && p.images[0])
+      .filter((p: any) => !cartIds.has(p.id))
+      .filter((p: any) => p.images && p.images.length > 0 && p.images[0])
       .slice(0, limit)
-      .map(p => ({
+      .map((p: any) => ({
         id: p.id,
         title: p.title,
         slug: p.slug,

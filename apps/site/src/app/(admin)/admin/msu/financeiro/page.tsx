@@ -23,7 +23,7 @@ export default async function AdminFinanceiroMSUPage() {
   const payouts = payoutsData || []
 
   // 2. Busca os dados dos Vendedores (Nome, Email e PIX) para evitar erros de FK cruzada
-  const sellerIds = [...new Set(payouts.map(p => p.seller_id).filter(Boolean))]
+  const sellerIds = [...new Set(payouts.map((p: any) => p.seller_id).filter(Boolean))]
   
   let profiles: any[] = []
   if (sellerIds.length > 0) {
@@ -36,7 +36,7 @@ export default async function AdminFinanceiroMSUPage() {
   }
 
   // 3. Mescla tudo no Node.js
-  const enrichedPayouts = payouts.map(payout => {
+  const enrichedPayouts = payouts.map((payout: any) => {
     const seller = profiles.find(p => p.id === payout.seller_id || p.auth_id === payout.seller_id)
     return {
       ...payout,

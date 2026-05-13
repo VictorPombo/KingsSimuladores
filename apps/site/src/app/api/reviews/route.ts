@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     // Calcular stats
     const totalReviews = reviews?.length || 0
     const avgRating = totalReviews > 0
-      ? reviews!.reduce((sum, r) => sum + (r.rating_general || 0), 0) / totalReviews
+      ? reviews!.reduce((sum: number, r: any) => sum + (r.rating_general || 0), 0) / totalReviews
       : 0
 
     return NextResponse.json({

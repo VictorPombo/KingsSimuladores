@@ -96,7 +96,7 @@ export async function POST() {
     }
 
     const kingsSkuMap = new Map<string, any>()
-    kingsProducts.forEach(p => {
+    kingsProducts.forEach((p: any) => {
       if (p.sku) kingsSkuMap.set(p.sku, p)
     })
 
@@ -189,7 +189,7 @@ export async function POST() {
     await Promise.all(creationPromises)
 
     // 4. Processar Arquivamentos (KingsHub -> Olist)
-    const archivePromises = kingsProducts.map(async (kingsProd) => {
+    const archivePromises = kingsProducts.map(async (kingsProd: any) => {
       if (kingsProd.sku && !olistProducts.has(kingsProd.sku)) {
         // Cenário B: Órfão
         if (kingsProd.status === 'active') {

@@ -34,7 +34,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
         supabase.from('marketplace_orders').select('total_price')
       ])
       
-      const totalRevenue = revenueRes.data?.reduce((sum, order) => sum + (order.total_price || 0), 0) || 0
+      const totalRevenue = revenueRes.data?.reduce((sum: number, order: any) => sum + (order.total_price || 0), 0) || 0
 
       stats = {
         orders: mOrdersRes.count || 0,
@@ -50,7 +50,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
         .order('created_at', { ascending: false })
         .limit(5)
         
-      if (latest) recentOrders = latest.map(o => ({
+      if (latest) recentOrders = latest.map((o: any) => ({
         id: o.id,
         total: o.total_price,
         status: o.status,
@@ -85,7 +85,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
         revenueQuery
       ])
       
-      const totalRevenue = revenueRes.data?.reduce((sum, order) => sum + (order.total || 0), 0) || 0
+      const totalRevenue = revenueRes.data?.reduce((sum: number, order: any) => sum + (order.total || 0), 0) || 0
 
       stats = {
         orders: ordersRes.count || 0,
@@ -97,7 +97,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
 
       const { data: latest } = await latestQuery
         
-      if (latest) recentOrders = latest.map(o => ({
+      if (latest) recentOrders = latest.map((o: any) => ({
         id: o.id,
         total: o.total,
         status: o.status,

@@ -23,7 +23,7 @@ export function ViewContentTracker({ product }: { product: any }) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
       
-      supabase.rpc('increment_product_views', { p_id: product.id }).catch(console.error)
+      Promise.resolve(supabase.rpc('increment_product_views', { p_id: product.id })).catch(console.error)
 
       setTracked(true)
     }

@@ -20,7 +20,7 @@ export default async function ModeracaoPage() {
   const products = pendingProducts || []
 
   // 2. Buscar os perfis dos vendedores para cruzar os dados (Join seguro)
-  const sellerIds = [...new Set(products.map(p => p.seller_id).filter(Boolean))]
+  const sellerIds = [...new Set(products.map((p: any) => p.seller_id).filter(Boolean))]
   
   let profiles: any[] = []
   if (sellerIds.length > 0) {
@@ -35,7 +35,7 @@ export default async function ModeracaoPage() {
   }
 
   // 3. Mesclar os dados para enviar ao Client Component
-  const enrichedProducts = products.map(product => {
+  const enrichedProducts = products.map((product: any) => {
     // Tenta casar pelo id ou auth_id, dependendo de como a tabela profiles está estruturada
     const seller = profiles.find(p => p.id === product.seller_id || p.auth_id === product.seller_id)
     return {

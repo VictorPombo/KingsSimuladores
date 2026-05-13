@@ -38,7 +38,7 @@ export default async function VendedorProfilePage({ params }: { params: { id: st
 
   let averageRating = 0
   if (reviews && reviews.length > 0) {
-    const total = reviews.reduce((acc, curr) => acc + curr.rating, 0)
+    const total = reviews.reduce((acc: number, curr: any) => acc + curr.rating, 0)
     averageRating = total / reviews.length
   }
 
@@ -82,7 +82,7 @@ export default async function VendedorProfilePage({ params }: { params: { id: st
       
       {listings && listings.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {listings.map((item) => (
+          {listings.map((item: any) => (
             <Link href={`/usado/produtos/${item.id}`} key={item.id} className="block">
               <ProductCard 
                 id={item.id}
@@ -105,7 +105,7 @@ export default async function VendedorProfilePage({ params }: { params: { id: st
 
       {reviews && reviews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {reviews.slice(0, 8).map((rev, idx) => (
+          {reviews.slice(0, 8).map((rev: any, idx: number) => (
             <Card key={idx} className="bg-gray-900 border-gray-800">
               <div className="pt-6 p-6">
                 <div className="flex justify-between mb-2">

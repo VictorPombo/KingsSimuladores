@@ -109,7 +109,7 @@ export async function POST(req: Request) {
         // Agrupar itens por loja
         const storeGroups: Record<string, any[]> = {}
         if (items) {
-          items.forEach(item => {
+          items.forEach((item: any) => {
             const origin = item.store_origin || order.brand_origin || 'kings'
             if (!storeGroups[origin]) storeGroups[origin] = []
             storeGroups[origin].push(item)

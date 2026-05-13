@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('id, updated_at')
     .gt('stock_quantity', 0)
 
-  const productPages: MetadataRoute.Sitemap = (products || []).map((p) => ({
+  const productPages: MetadataRoute.Sitemap = (products || []).map((p: any) => ({
     url: `${BASE_URL}/produtos/${p.id}`,
     lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
     changeFrequency: 'weekly' as const,
@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('id, updated_at')
     .eq('status', 'approved')
 
-  const listingPages: MetadataRoute.Sitemap = (listings || []).map((l) => ({
+  const listingPages: MetadataRoute.Sitemap = (listings || []).map((l: any) => ({
     url: `${BASE_URL}/usado/produto/${l.id}`,
     lastModified: l.updated_at ? new Date(l.updated_at) : new Date(),
     changeFrequency: 'daily' as const,
