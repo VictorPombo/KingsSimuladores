@@ -1,10 +1,10 @@
 'use server'
 
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createAdminClient } from '@kings/db'
 import { redirect } from 'next/navigation'
 
 export async function searchProducts(query: string) {
-  const supabase = await createServerSupabaseClient()
+  const supabase = createAdminClient()
   const { data } = await supabase
     .from('products')
     .select('id, title, sku, price, stock, images, status, weight_kg, attributes')
@@ -15,7 +15,7 @@ export async function searchProducts(query: string) {
 }
 
 export async function searchClients(query: string) {
-  const supabase = await createServerSupabaseClient()
+  const supabase = createAdminClient()
   const { data } = await supabase
     .from('profiles')
     .select('id, full_name, email, phone, cpf_cnpj, addresses')
@@ -50,7 +50,7 @@ export async function createOrder(formData: {
   discount: number
   generatePaymentLink: boolean
 }) {
-  const supabase = await createServerSupabaseClient()
+  const supabase = createAdminClient()
 
   // Validações básicas
   if (!formData.email || !formData.name) throw new Error('Dados do cliente obrigatórios.')
