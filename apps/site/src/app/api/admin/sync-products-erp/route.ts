@@ -102,10 +102,10 @@ export async function POST(req: Request) {
             sku: product.sku,
             status: 'ok', 
             erp_id: regId,
-            message: regId ? `Produto sincronizado com Tiny (ID: ${regId})` : `Produto sincronizado com Tiny com sucesso`
+            message: regId ? `Produto sincronizado com Olist (ID: ${regId})` : `Produto sincronizado com Olist com sucesso`
           })
           
-          console.log(`[Sync ERP] ✅ ${product.title} → Tiny ID: ${reg?.id}`)
+          console.log(`[Sync ERP] ✅ ${product.title} → Olist ID: ${reg?.id}`)
         } else if (data.retorno?.status === 'Erro') {
           const erros = data.retorno?.registros?.registro?.erros || data.retorno?.erros || []
           const errorMsg = Array.isArray(erros) 
@@ -163,9 +163,9 @@ export async function POST(req: Request) {
                   sku: product.sku,
                   status: 'updated', 
                   erp_id: existingId,
-                  message: `Produto atualizado no Tiny (ID: ${existingId})`
+                  message: `Produto atualizado no Olist (ID: ${existingId})`
                 })
-                console.log(`[Sync ERP] 🔄 ${product.title} atualizado no Tiny (ID: ${existingId})`)
+                console.log(`[Sync ERP] 🔄 ${product.title} atualizado no Olist (ID: ${existingId})`)
                 wasUpdated = true
               }
             }

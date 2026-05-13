@@ -291,7 +291,7 @@ export function ProdutosClient({ products }: { products: Product[] }) {
           <button
             disabled={isSyncing}
             onClick={async () => {
-              if (!confirm('Deseja CLONAR o catálogo da Olist para o site?\n\n- Produtos faltando no site serão CRIADOS (como Rascunho).\n- Preços defasados serão ATUALIZADOS.\n- Produtos que não existem mais na Olist serão ARQUIVADOS.\n\nEsta é uma ação completa de espelhamento.')) return
+              if (!confirm('Deseja CLONAR o catálogo da Olist para o site?\n\n- Produtos faltando no site serão CRIADOS (como Rascunho).\n- Preços defasados serão ATUALIZADOS.\n- Produtos da loja oficial que não existem mais na Olist serão EXCLUÍDOS DEFINITIVAMENTE.\n\nEsta é uma ação completa de espelhamento.')) return
               
               setIsSyncing(true)
               setSyncResults(null)

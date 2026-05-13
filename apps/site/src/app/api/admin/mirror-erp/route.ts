@@ -9,7 +9,7 @@ import { createAdminClient } from '@kings/db'
  * 2. Busca todos os produtos ativos/rascunhos no KingsHub.
  * 3. Cruza os dados:
  *    - Se existe na Olist e NÃO no KingsHub -> CRIA no KingsHub (como Rascunho).
- *    - Se existe no KingsHub e NÃO na Olist -> ARQUIVA no KingsHub.
+ *    - Se existe no KingsHub e NÃO na Olist -> EXCLUI no KingsHub (Apenas loja oficial).
  *    - Se existe em ambos -> Atualiza o preço no KingsHub.
  */
 function slugify(text: string) {
@@ -88,7 +88,7 @@ export async function POST() {
     // 2. Buscar produtos no KingsHub
     const { data: kingsProducts, error } = await supabase
       .from('products')
-      .select('id, title, sku, status, price')
+      .select('id, title, sku, status, price, brand_id, brands!brand_id(name)')
       .neq('status', 'archived') // Busca ativos e rascunhos
 
     if (error || !kingsProducts) {
@@ -103,11 +103,11 @@ export async function POST() {
     const results: any[] = []
     let createdCount = 0
     let updatedCount = 0
-    let archivedCount = 0
+    let deletedCount = 0
     let skippedCount = 0
 
     // 3. Processar Criações e Atualizações (Olist -> KingsHub)
-    const creationPromises = Array.from(olistProducts.values()).map(async (olistProd) => {
+    for (const olistProd of Array.from(olistProducts.values())) {
       const kingsProd = kingsSkuMap.get(olistProd.sku)
 
       if (!kingsProd) {
@@ -184,42 +184,47 @@ export async function POST() {
           skippedCount++
         }
       }
-    })
+      
+      // Delay to respect Olist API rate limits
+      await new Promise(r => setTimeout(r, 600))
+    }
 
-    await Promise.all(creationPromises)
-
-    // 4. Processar Arquivamentos (KingsHub -> Olist)
-    const archivePromises = kingsProducts.map(async (kingsProd: any) => {
+    // 4. Processar Exclusões (KingsHub -> Olist)
+    for (const kingsProd of kingsProducts) {
       if (kingsProd.sku && !olistProducts.has(kingsProd.sku)) {
         // Cenário B: Órfão
-        if (kingsProd.status === 'active') {
-          const { error: archiveErr } = await supabase.from('products').update({ status: 'draft' }).eq('id', kingsProd.id)
+        const brandName = (kingsProd as any).brands?.name || 'kings'
+        const isOfficialStore = brandName === 'Kings Simuladores' || brandName === 'kings' || brandName === 'Seven Sim Racing' || brandName === 'seven'
+        
+        if (isOfficialStore) {
+          const { error: deleteErr } = await supabase.from('products').delete().eq('id', kingsProd.id)
           
-          if (archiveErr) {
-            results.push({ sku: kingsProd.sku, title: kingsProd.title, status: 'error', message: `Erro ao arquivar: ${archiveErr.message}` })
+          if (deleteErr) {
+            results.push({ sku: kingsProd.sku, title: kingsProd.title, status: 'error', message: `Erro ao excluir: ${deleteErr.message}` })
           } else {
-            archivedCount++
-            results.push({ sku: kingsProd.sku, title: kingsProd.title, status: 'ok', message: 'Órfão ARQUIVADO (movido para Rascunho).' })
-            console.log(`[Mirror ERP] 🧹 Arquivado: ${kingsProd.title}`)
+            deletedCount++
+            results.push({ sku: kingsProd.sku, title: kingsProd.title, status: 'ok', message: 'Órfão EXCLUÍDO definitivamente.' })
+            console.log(`[Mirror ERP] 🗑️ Excluído: ${kingsProd.title}`)
           }
         } else {
-          // Já é rascunho
+          // Mantém produtos do MSU intocados
           skippedCount++
         }
       }
-    })
-
-    await Promise.all(archivePromises)
+      
+      // Delay
+      await new Promise(r => setTimeout(r, 200))
+    }
 
     const errorCount = results.filter(r => r.status === 'error').length
 
     return NextResponse.json({
-      total: createdCount + updatedCount + archivedCount + skippedCount + errorCount,
-      success: createdCount + updatedCount + archivedCount,
+      total: createdCount + updatedCount + deletedCount + skippedCount + errorCount,
+      success: createdCount + updatedCount + deletedCount,
       errors: errorCount,
       created: createdCount,
       updated: updatedCount,
-      archived: archivedCount,
+      deleted: deletedCount,
       alreadyClean: skippedCount,
       isCloneResult: true,
       results
