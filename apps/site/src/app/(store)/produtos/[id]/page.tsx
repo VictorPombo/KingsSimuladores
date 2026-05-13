@@ -180,6 +180,49 @@ export default async function ProductPage({ params }: { params: { id: string } }
                   }
                 }} 
               />
+
+
+              {/* Aviso de preço inválido */}
+              {finalPrice <= 0 && (
+                <div style={{
+                  marginTop: '12px', padding: '14px 18px',
+                  background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.4)',
+                  borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px'
+                }}>
+                  <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                  <div>
+                    <div style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.9rem' }}>Produto temporariamente indisponível</div>
+                    <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '2px' }}>Entre em contato para verificar disponibilidade e preço.</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Banner de prazo de disponibilidade */}
+              {(() => {
+                const behavior = (product.attributes as any)?.out_of_stock_behavior
+                if (!behavior || behavior === 'unavailable' || behavior === 'immediate' || product.stock > 0) return null
+                const match = behavior.match(/^(\d+)_days?$/)
+                const days = match ? match[1] : null
+                if (!days) return null
+                return (
+                  <div style={{
+                    marginTop: '12px', padding: '14px 18px',
+                    background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.35)',
+                    borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '12px'
+                  }}>
+                    <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>⏳</span>
+                    <div>
+                      <div style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.9rem' }}>
+                        Disponível em até {days} dia{Number(days) > 1 ? 's' : ''} útil{Number(days) > 1 ? 'eis' : ''}
+                      </div>
+                      <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '2px' }}>
+                        Produto sob encomenda — entregue após confirmação do pagamento.
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+
           </div>
         </div>
 
