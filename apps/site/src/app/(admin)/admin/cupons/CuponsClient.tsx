@@ -460,19 +460,34 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {ordersHistory.map(order => {
-                        const comissao = historyCoupon.affiliate_percentage ? (Number(order.total) * (historyCoupon.affiliate_percentage / 100)) : 0;
-                        return (
-                          <tr key={order.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={{ padding: '12px', color: '#cbd5e1' }}>{new Date(order.created_at).toLocaleDateString('pt-BR')}</td>
-                            <td style={{ padding: '12px', color: '#fff', fontWeight: 500 }}>{order.profiles?.full_name || 'Desconhecido'}</td>
-                            <td style={{ padding: '12px', color: '#10b981', fontWeight: 600 }}>R$ {Number(order.total).toFixed(2)}</td>
-                            {historyCoupon.affiliate_percentage ? (
-                              <td style={{ padding: '12px', color: '#f59e0b', fontWeight: 600 }}>+ R$ {comissao.toFixed(2)}</td>
-                            ) : null}
-                          </tr>
-                        )
-                      })}
+                        {ordersHistory.map(order => {
+                          const comissao = historyCoupon.affiliate_percentage ? (Number(order.total) * (historyCoupon.affiliate_percentage / 100)) : 0;
+                          const clientName = Array.isArray(order.profiles)
+                            ? order.profiles[0]?.full_name
+                            : (order.profiles as any)?.full_name
+                          return (
+                            <tr 
+                              key={order.id} 
+                              style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'background 0.15s' }}
+                              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                              onClick={() => window.open(`/admin/pedidos?pedido=${order.order_number}`, '_blank')}
+                              title={`Abrir pedido #${order.order_number}`}
+                            >
+                              <td style={{ padding: '12px', color: '#cbd5e1' }}>
+                                <div>{new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
+                                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>#{order.order_number}</div>
+                              </td>
+                              <td style={{ padding: '12px', color: '#fff', fontWeight: 500 }}>
+                                {clientName || 'Desconhecido'}
+                              </td>
+                              <td style={{ padding: '12px', color: '#10b981', fontWeight: 600 }}>R$ {Number(order.total).toFixed(2)}</td>
+                              {historyCoupon.affiliate_percentage ? (
+                                <td style={{ padding: '12px', color: '#f59e0b', fontWeight: 600 }}>+ R$ {comissao.toFixed(2)}</td>
+                              ) : null}
+                            </tr>
+                          )
+                        })}
                     </tbody>
                   </table>
                 </>

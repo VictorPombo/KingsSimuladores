@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerSupabaseClient } from '@kings/db/server'
+import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 import { revalidatePath } from 'next/cache'
 
 export async function createCoupon(formData: FormData) {
@@ -109,13 +109,14 @@ export async function editCoupon(id: string, formData: FormData) {
 }
 
 export async function getCouponOrders(couponId: string) {
-  const supabase = await createServerSupabaseClient()
+  const supabase = createAdminClient()
   
   // Buscar pedidos que usaram o cupom e têm status pago, enviado ou entregue
   const { data, error } = await supabase
     .from('orders')
     .select(`
       id,
+      order_number,
       created_at,
       total,
       status,
