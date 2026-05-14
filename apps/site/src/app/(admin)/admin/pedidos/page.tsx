@@ -24,8 +24,7 @@ export default async function AdminPedidosPage() {
       .select(`
         id, order_number, brand_origin, order_type, status, subtotal, shipping_cost, discount, total,
         payment_method, tracking_code, coupon_id, created_at, shipping_address, notes, erp_id,
-        profiles!customer_id ( full_name, email, phone, cpf_cnpj ),
-        coupons ( code )
+        profiles!customer_id ( full_name, email, phone, cpf_cnpj )
       `)
       .order('created_at', { ascending: false })
 
@@ -33,15 +32,34 @@ export default async function AdminPedidosPage() {
       query = query.eq('brand_origin', storeCookie)
     }
 
-    const { data: orders, error } = await query
+    const { data: ordersData, error } = await query
 
     if (error) {
       return <div style={{ padding: '2rem', color: 'red' }}>Erro do Banco: {error.message} (Dica: Verificar o nome da chave profiles!customer_id)</div>
     }
 
+    let finalOrders = ordersData || [];
+
+    // Busca os códigos dos cupons manualmente pois não há foreign key
+    const couponIds = Array.from(new Set(finalOrders.map(o => o.coupon_id).filter(Boolean)));
+    if (couponIds.length > 0) {
+      const { data: couponsData } = await supabase
+        .from('coupons')
+        .select('id, code')
+        .in('id', couponIds);
+      
+      if (couponsData) {
+        finalOrders = finalOrders.map(o => {
+          if (!o.coupon_id) return o;
+          const coupon = couponsData.find(c => c.id === o.coupon_id);
+          return { ...o, coupons: coupon ? { code: coupon.code } : null };
+        });
+      }
+    }
+
     return (
       <div style={{ padding: '2rem', minHeight: '100vh', color: '#fff', background: '#1e1e1e' }}>
-        <PedidosClient orders={(orders as any) || []} />
+        <PedidosClient orders={(finalOrders as any) || []} />
       </div>
     )
   } catch (err: any) {
