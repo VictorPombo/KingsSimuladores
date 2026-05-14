@@ -1,14 +1,15 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
-import { Ticket, Plus, Trash2, Power, PowerOff, Copy, CheckCircle, Tag, Truck, DollarSign, Clock, Users, Zap } from 'lucide-react'
-import { toggleCouponStatus, deleteCoupon, createCoupon } from './actions'
+import React, { useState, useTransition, useEffect } from 'react'
+import { Ticket, Plus, Trash2, Power, PowerOff, Copy, CheckCircle, Tag, Truck, DollarSign, Clock, Users, Zap, Edit, Activity, X } from 'lucide-react'
+import { toggleCouponStatus, deleteCoupon, createCoupon, editCoupon, getCouponOrders } from './actions'
 
 type Coupon = {
   id: string; code: string; type: 'percent' | 'fixed' | 'shipping'
   value: number; brand_scope: string | null; is_active: boolean
   usage_count: number; usage_limit: number | null
   expires_at: string | null; created_at: string
+  influencer_name?: string | null; affiliate_percentage?: number | null
 }
 
 const inputStyle: React.CSSProperties = { width: '100%', background: '#1f2025', border: '1px solid #3f424d', borderRadius: '8px', padding: '12px 16px', color: '#fff', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }
@@ -17,6 +18,10 @@ const labelStyle: React.CSSProperties = { display: 'block', color: '#cbd5e1', fo
 export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
   const [isPending, startTransition] = useTransition()
   const [showForm, setShowForm] = useState(false)
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
+  const [historyCoupon, setHistoryCoupon] = useState<Coupon | null>(null)
+  const [ordersHistory, setOrdersHistory] = useState<any[]>([])
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const coupons = initialCoupons
 
@@ -54,8 +59,24 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
     return { label: 'Todas', color: '#94a3b8' }
   }
 
+  const handleOpenEdit = (coupon: Coupon) => {
+    setEditingCoupon(coupon)
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleOpenHistory = async (coupon: Coupon) => {
+    setHistoryCoupon(coupon)
+    setIsLoadingHistory(true)
+    const { orders, error } = await getCouponOrders(coupon.id)
+    if (!error && orders) {
+      setOrdersHistory(orders)
+    }
+    setIsLoadingHistory(false)
+  }
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '60px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
         <div>
@@ -65,7 +86,7 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
           <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Códigos promocionais que os clientes digitam no checkout</p>
         </div>
         <button 
-          onClick={() => setShowForm(!showForm)} 
+          onClick={() => { setShowForm(!showForm); if (showForm) setEditingCoupon(null); }} 
           style={{
             display: 'flex', alignItems: 'center', gap: '8px',
             background: showForm ? '#ef444420' : 'linear-gradient(135deg, #f59e0b, #d97706)',
@@ -75,8 +96,7 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
             cursor: 'pointer', boxShadow: showForm ? 'none' : '0 4px 16px rgba(245,158,11,0.3)',
             transition: 'all 0.3s'
           }}>
-          <Plus size={16} style={{ transform: showForm ? 'rotate(45deg)' : 'none', transition: 'transform 0.3s' }} /> 
-          {showForm ? 'Cancelar' : 'Novo Cupom'}
+          {showForm ? <><X size={16} /> Cancelar</> : <><Plus size={16} /> Novo Cupom</>}
         </button>
       </div>
 
@@ -86,8 +106,8 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
         <div>
           <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, margin: '0 0 6px' }}>Como funciona?</h3>
           <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
-            Cupons são <strong style={{ color: '#cbd5e1' }}>códigos secretos</strong> que o cliente digita na hora de pagar para ganhar desconto. Você controla a validade, o limite de usos e o tipo de abatimento. <br/>
-            <span style={{ color: '#64748b' }}>Exemplo: Crie o cupom <code style={{ color: '#22d3ee', background: '#22d3ee10', padding: '2px 6px', borderRadius: '4px' }}>BEMVINDO10</code> com 10% OFF para novos clientes. Envie por WhatsApp ou redes sociais.</span>
+            Cupons são <strong style={{ color: '#cbd5e1' }}>códigos secretos</strong> que o cliente digita na hora de pagar para ganhar desconto. Você pode atrelar um cupom a um influenciador definindo uma <strong style={{ color: '#f59e0b' }}>% de repasse</strong>. <br/>
+            <span style={{ color: '#64748b' }}>Exemplo: Crie o cupom <code style={{ color: '#22d3ee', background: '#22d3ee10', padding: '2px 6px', borderRadius: '4px' }}>BEMVINDO10</code> com 10% OFF para novos clientes e 5% de repasse para o Afiliado X.</span>
           </p>
         </div>
       </div>
@@ -127,17 +147,27 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
           boxShadow: '0 0 30px rgba(245, 158, 11, 0.05)'
         }}>
           <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: 700, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Zap size={18} color="#f59e0b" /> Criar novo cupom
+            {editingCoupon ? <><Edit size={18} color="#f59e0b" /> Editar Cupom: {editingCoupon.code}</> : <><Zap size={18} color="#f59e0b" /> Criar novo cupom</>}
           </h3>
-          <form action={async (formData: FormData) => { startTransition(async () => { await createCoupon(formData); setShowForm(false) }) }}>
+          <form action={async (formData: FormData) => { 
+            startTransition(async () => { 
+              if (editingCoupon) {
+                await editCoupon(editingCoupon.id, formData);
+              } else {
+                await createCoupon(formData); 
+              }
+              setShowForm(false);
+              setEditingCoupon(null);
+            }) 
+          }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div>
                 <label style={labelStyle}>Código do Cupom *</label>
-                <input name="code" type="text" required placeholder="BEMVINDO10" style={{ ...inputStyle, textTransform: 'uppercase', fontFamily: 'monospace', fontWeight: 700, letterSpacing: '1px' }} />
+                <input name="code" type="text" required defaultValue={editingCoupon?.code} placeholder="BEMVINDO10" style={{ ...inputStyle, textTransform: 'uppercase', fontFamily: 'monospace', fontWeight: 700, letterSpacing: '1px' }} />
               </div>
               <div>
                 <label style={labelStyle}>Tipo de Desconto *</label>
-                <select name="type" style={{ ...inputStyle, cursor: 'pointer' }}>
+                <select name="type" defaultValue={editingCoupon?.type || 'percent'} style={{ ...inputStyle, cursor: 'pointer' }}>
                   <option value="percent">Porcentagem (%)</option>
                   <option value="fixed">Valor Fixo (R$)</option>
                   <option value="shipping">Frete Grátis</option>
@@ -145,14 +175,14 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
               </div>
               <div>
                 <label style={labelStyle}>Valor *</label>
-                <input name="value" type="number" step="0.01" required placeholder="10.00" style={inputStyle} />
+                <input name="value" type="number" step="0.01" required defaultValue={editingCoupon?.value} placeholder="10.00" style={inputStyle} />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div>
                 <label style={labelStyle}>Abrangência</label>
-                <select name="brand_scope" style={{ ...inputStyle, cursor: 'pointer' }}>
+                <select name="brand_scope" defaultValue={editingCoupon?.brand_scope || 'all'} style={{ ...inputStyle, cursor: 'pointer' }}>
                   <option value="all">Todas as Lojas (Kings + MSU)</option>
                   <option value="kings">Apenas Kings Simuladores</option>
                   <option value="msu">Apenas Meu Simulador Usado</option>
@@ -160,25 +190,39 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
               </div>
               <div>
                 <label style={labelStyle}>Validade (Opcional)</label>
-                <input name="expires_at" type="date" style={{ ...inputStyle, colorScheme: 'dark' }} />
+                <input name="expires_at" type="date" defaultValue={editingCoupon?.expires_at ? new Date(editingCoupon.expires_at).toISOString().split('T')[0] : ''} style={{ ...inputStyle, colorScheme: 'dark' }} />
               </div>
               <div>
                 <label style={labelStyle}>Limite de Usos (Opcional)</label>
-                <input name="usage_limit" type="number" placeholder="Ilimitado" style={inputStyle} />
+                <input name="usage_limit" type="number" defaultValue={editingCoupon?.usage_limit || ''} placeholder="Ilimitado" style={inputStyle} />
               </div>
             </div>
 
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', borderTop: '1px dashed #3f424d', paddingTop: '16px' }}>
+              <div>
+                <label style={labelStyle}>Nome do Influenciador / Afiliado (Opcional)</label>
+                <input name="influencer_name" type="text" defaultValue={editingCoupon?.influencer_name || ''} placeholder="Ex: João Silva" style={inputStyle} />
+              </div>
+              <div>
+                <label style={{...labelStyle, color: '#f59e0b'}}>% de Repasse (Comissão)</label>
+                <input name="affiliate_percentage" type="number" step="0.01" defaultValue={editingCoupon?.affiliate_percentage || ''} placeholder="Ex: 5.0" style={{...inputStyle, borderColor: '#f59e0b50'}} />
+              </div>
+            </div>
+
+            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button type="button" onClick={() => { setShowForm(false); setEditingCoupon(null); }} style={{
+                background: 'transparent', border: '1px solid #64748b', borderRadius: '10px',
+                padding: '12px 24px', color: '#cbd5e1', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer'
+              }}>Cancelar</button>
               <button type="submit" style={{
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', borderRadius: '10px',
                 padding: '12px 32px', color: '#000', fontWeight: 700, fontSize: '0.9rem',
-                cursor: 'pointer', boxShadow: '0 4px 16px rgba(245,158,11,0.3)',
-                transition: 'transform 0.2s'
+                cursor: 'pointer', boxShadow: '0 4px 16px rgba(245,158,11,0.3)', transition: 'transform 0.2s'
               }}
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
               >
-                Criar Cupom
+                {editingCoupon ? 'Salvar Alterações' : 'Criar Cupom'}
               </button>
             </div>
           </form>
@@ -188,10 +232,10 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
       {/* Table */}
       <div style={{ background: '#2c2e36', borderRadius: '12px', border: '1px solid #3f424d', overflow: 'hidden' }}>
         <div className="admin-overflow-table">
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
             <thead>
               <tr>
-                {['Código', 'Desconto', 'Abrangência', 'Uso', 'Validade', 'Status', 'Ações'].map(h => (
+                {['Código', 'Desconto', 'Repasse', 'Uso', 'Validade', 'Status', 'Ações'].map(h => (
                   <th key={h} style={{ 
                     padding: '14px 20px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 700, 
                     color: '#64748b', textTransform: 'uppercase', background: '#1f2025', letterSpacing: '0.5px'
@@ -210,7 +254,6 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
                 </td></tr>
               ) : coupons.map(coupon => {
                 const typeColor = getTypeColor(coupon.type)
-                const scope = getScopeLabel(coupon.brand_scope)
                 const isExpired = coupon.expires_at && new Date(coupon.expires_at) < new Date()
                 const usagePercent = coupon.usage_limit ? Math.min(100, (coupon.usage_count / coupon.usage_limit) * 100) : 0
 
@@ -249,14 +292,16 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
                       </div>
                     </td>
 
-                    {/* Abrangência */}
+                    {/* Repasse Afiliado */}
                     <td style={{ padding: '16px 20px' }}>
-                      <span style={{ 
-                        fontSize: '0.75rem', fontWeight: 600, color: scope.color,
-                        background: `${scope.color}15`, padding: '4px 10px', borderRadius: '6px'
-                      }}>
-                        {scope.label}
-                      </span>
+                      {coupon.affiliate_percentage ? (
+                        <div>
+                          <div style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.85rem' }}>{coupon.affiliate_percentage}%</div>
+                          <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>{coupon.influencer_name || 'Anônimo'}</div>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#64748b', fontSize: '0.75rem' }}>-</span>
+                      )}
                     </td>
 
                     {/* Uso */}
@@ -302,20 +347,39 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
 
                     {/* Ações */}
                     <td style={{ padding: '16px 20px' }}>
-                      <button 
-                        onClick={() => { if (confirm('Excluir este cupom permanentemente?')) startTransition(() => { deleteCoupon(coupon.id); }); }}
-                        disabled={isPending}
-                        title="Excluir permanentemente" style={{ 
-                          background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)',
-                          color: '#ef4444', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)' }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                          onClick={() => handleOpenHistory(coupon)}
+                          title="Histórico de Uso e Comissões" style={{ 
+                            background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)',
+                            color: '#3b82f6', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <Activity size={14} />
+                        </button>
+                        <button 
+                          onClick={() => handleOpenEdit(coupon)}
+                          title="Editar" style={{ 
+                            background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)',
+                            color: '#f59e0b', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button 
+                          onClick={() => { if (confirm('Excluir este cupom permanentemente?')) startTransition(() => { deleteCoupon(coupon.id); }); }}
+                          disabled={isPending}
+                          title="Excluir" style={{ 
+                            background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)',
+                            color: '#ef4444', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -324,6 +388,91 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
           </table>
         </div>
       </div>
+
+      {/* History Modal */}
+      {historyCoupon && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px'
+        }}>
+          <div style={{
+            background: '#1e1e24', border: '1px solid #3f424d', borderRadius: '16px',
+            width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ padding: '24px', borderBottom: '1px solid #3f424d', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#1e1e24', zIndex: 10 }}>
+              <div>
+                <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Activity color="#3b82f6" size={20} /> Histórico: {historyCoupon.code}
+                </h3>
+                {historyCoupon.affiliate_percentage ? (
+                  <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0 }}>
+                    Afiliado: <strong style={{color: '#f59e0b'}}>{historyCoupon.influencer_name || 'N/A'}</strong> | Repasse: <strong style={{color: '#f59e0b'}}>{historyCoupon.affiliate_percentage}%</strong>
+                  </p>
+                ) : (
+                  <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0 }}>Nenhum repasse configurado para este cupom.</p>
+                )}
+              </div>
+              <button onClick={() => setHistoryCoupon(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={24} /></button>
+            </div>
+
+            <div style={{ padding: '24px' }}>
+              {isLoadingHistory ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>Carregando histórico...</div>
+              ) : ordersHistory.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>Nenhuma venda confirmada com este cupom.</div>
+              ) : (
+                <>
+                  {historyCoupon.affiliate_percentage ? (() => {
+                    const totalVendido = ordersHistory.reduce((acc, order) => acc + Number(order.total), 0);
+                    const totalComissao = totalVendido * (historyCoupon.affiliate_percentage / 100);
+                    return (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '16px', borderRadius: '12px' }}>
+                          <p style={{ margin: 0, fontSize: '0.75rem', color: '#10b981', fontWeight: 700, textTransform: 'uppercase' }}>Total Vendido (Aprovado)</p>
+                          <p style={{ margin: '4px 0 0', fontSize: '1.5rem', color: '#10b981', fontWeight: 800 }}>R$ {totalVendido.toFixed(2)}</p>
+                        </div>
+                        <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '16px', borderRadius: '12px' }}>
+                          <p style={{ margin: 0, fontSize: '0.75rem', color: '#f59e0b', fontWeight: 700, textTransform: 'uppercase' }}>Comissão a Repassar</p>
+                          <p style={{ margin: '4px 0 0', fontSize: '1.5rem', color: '#f59e0b', fontWeight: 800 }}>R$ {totalComissao.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    )
+                  })() : null}
+
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Data</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Cliente</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Valor Total</th>
+                        {historyCoupon.affiliate_percentage ? <th style={{ padding: '12px', textAlign: 'left', color: '#f59e0b', borderBottom: '1px solid #3f424d' }}>Comissão</th> : null}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ordersHistory.map(order => {
+                        const comissao = historyCoupon.affiliate_percentage ? (Number(order.total) * (historyCoupon.affiliate_percentage / 100)) : 0;
+                        return (
+                          <tr key={order.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <td style={{ padding: '12px', color: '#cbd5e1' }}>{new Date(order.created_at).toLocaleDateString('pt-BR')}</td>
+                            <td style={{ padding: '12px', color: '#fff', fontWeight: 500 }}>{order.profiles?.full_name || 'Desconhecido'}</td>
+                            <td style={{ padding: '12px', color: '#10b981', fontWeight: 600 }}>R$ {Number(order.total).toFixed(2)}</td>
+                            {historyCoupon.affiliate_percentage ? (
+                              <td style={{ padding: '12px', color: '#f59e0b', fontWeight: 600 }}>+ R$ {comissao.toFixed(2)}</td>
+                            ) : null}
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
