@@ -119,7 +119,7 @@ export async function getCouponOrders(couponId: string) {
       created_at,
       total,
       status,
-      profiles:customer_id ( full_name )
+      profiles!customer_id ( full_name )
     `)
     .eq('coupon_id', couponId)
     .in('status', ['paid', 'shipped', 'delivered'])
