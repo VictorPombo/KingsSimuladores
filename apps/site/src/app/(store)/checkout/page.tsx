@@ -475,23 +475,6 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
-                    <div style={{
-                      padding: '14px 18px', borderRadius: '8px',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                    }}>
-                      <div>
-                        <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '0.9rem' }}>
-                          {selectedFrete?.company?.name || ''} {selectedFrete?.name}
-                        </div>
-                        <div style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '2px' }}>
-                          Chega em até {selectedFrete?.delivery_time || selectedFrete?.custom_delivery_time} dias úteis
-                        </div>
-                      </div>
-                      <div style={{ color: '#06d6a0', fontWeight: 700, fontSize: '1rem' }}>Grátis</div>
-                    </div>
-
                     <div className="kings-btn-row">
                       <Button variant="secondary" onClick={() => setStep(1)}>Voltar</Button>
                       <Button onClick={() => setStep(3)} style={{ flex: 1 }}>Continuar para Pagamento</Button>
