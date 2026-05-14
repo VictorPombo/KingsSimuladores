@@ -12,7 +12,7 @@ import { CouponInput } from '@/components/store/cart/CouponInput'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, discount, totalPrice, clearCart, coupon, removeItem } = useCart()
+  const { items, subtotal, discount, totalPrice, clearCart, coupon, removeItem, freeShipping } = useCart()
   const [step, setStep] = useState(1) // 1: Info, 2: Entrega, 3: Pagamento
   
   // Form Info
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
 
   if (items.length === 0 && step === 1) return null
 
-  const valorFrete = selectedFrete ? parseFloat(selectedFrete.price) : 0
+  const valorFrete = freeShipping ? 0 : (selectedFrete ? parseFloat(selectedFrete.price) : 0)
   const totalGeral = totalPrice + valorFrete
 
   const handleMultistepPayment = async () => {
@@ -526,9 +526,9 @@ export default function CheckoutPage() {
                   <span>- {formatPrice(discount)}</span>
                 </div>
               )}
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a1a1aa' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: freeShipping ? '#06d6a0' : '#a1a1aa' }}>
                 <span>Frete</span>
-                <span>{valorFrete > 0 ? formatPrice(valorFrete) : '--'}</span>
+                <span>{freeShipping ? '🎉 Grátis' : (valorFrete > 0 ? formatPrice(valorFrete) : '--')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 700, fontSize: '1.2rem', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <span>Total</span>

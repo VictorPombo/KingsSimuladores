@@ -32,6 +32,7 @@ interface CartContextData {
   discount: number
   coupon: CouponState | null
   applyCoupon: (c: CouponState | null) => void
+  freeShipping: boolean
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
 }
@@ -100,11 +101,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
   
   let discount = 0
+  let freeShipping = false
   if (coupon) {
     if (coupon.type === 'percent') {
       discount = subtotal * (coupon.value / 100)
     } else if (coupon.type === 'fixed') {
       discount = Math.min(coupon.value, subtotal)
+    } else if (coupon.type === 'shipping') {
+      freeShipping = true
     }
   }
   
@@ -115,7 +119,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return (
     <CartContext.Provider value={{
       items, addItem, removeItem, updateQuantity, clearCart, 
-      totalItems, subtotal, discount, totalPrice, coupon, applyCoupon, isOpen, setIsOpen
+      totalItems, subtotal, discount, totalPrice, coupon, applyCoupon, isOpen, setIsOpen,
+      freeShipping
     }}>
       {children}
     </CartContext.Provider>
