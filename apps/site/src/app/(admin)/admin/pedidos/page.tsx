@@ -24,7 +24,8 @@ export default async function AdminPedidosPage() {
       .select(`
         id, order_number, brand_origin, order_type, status, subtotal, shipping_cost, discount, total,
         payment_method, tracking_code, coupon_id, created_at, shipping_address, notes, erp_id,
-        profiles!customer_id ( full_name, email, phone, cpf_cnpj )
+        profiles!customer_id ( full_name, email, phone, cpf_cnpj ),
+        coupons ( code )
       `)
       .order('created_at', { ascending: false })
 

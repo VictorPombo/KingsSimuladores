@@ -19,6 +19,7 @@ type Order = {
   coupon_id: string | null
   created_at: string
   order_number?: number | null
+  coupons?: { code: string } | null
   shipping_address?: {
     cep?: string
     bairro?: string
@@ -520,7 +521,12 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                         R$ {Number(order.shipping_cost).toFixed(2)}
                       </td>
                       <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontSize: '0.85rem', color: Number(order.discount) > 0 ? '#ef4444' : '#64748b' }}>
-                        {Number(order.discount) > 0 ? `-R$ ${Number(order.discount).toFixed(2)}` : '-'}
+                        <div>{Number(order.discount) > 0 ? `-R$ ${Number(order.discount).toFixed(2)}` : '-'}</div>
+                        {order.coupons?.code && (
+                          <div style={{ marginTop: '4px', fontSize: '0.65rem', color: '#22d3ee', background: '#22d3ee15', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', fontWeight: 'bold' }}>
+                            🎟️ {order.coupons.code}
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontSize: '0.9rem', fontWeight: 'bold', color: '#e2e8f0' }}>
                         R$ {Number(order.total).toFixed(2)}
