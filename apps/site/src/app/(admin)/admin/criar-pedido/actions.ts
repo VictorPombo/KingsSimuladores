@@ -57,13 +57,14 @@ export async function createOrder(formData: {
   if (formData.items.length === 0) throw new Error('Adicione pelo menos um produto.')
 
   let customerId = formData.customerId
+  let generatedPassword = null
 
   // Criar cliente novo se necessário
   if (formData.customerType === 'new') {
-    const randomPassword = 'K' + Math.random().toString(36).substring(2, 10) + 'A@!';
+    generatedPassword = 'kings123'
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: formData.email,
-      password: randomPassword,
+      password: generatedPassword,
       email_confirm: true,
     });
 
@@ -138,5 +139,5 @@ export async function createOrder(formData: {
     }
   }
 
-  return { orderId: order.id }
+  return { orderId: order.id, generatedPassword }
 }

@@ -22,11 +22,18 @@ type Order = {
   shipping_address?: {
     cep?: string
     bairro?: string
+    neighborhood?: string
     cidade?: string
+    city?: string
+    estado?: string
+    state?: string
     numero?: string
+    number?: string
     logradouro?: string
+    street?: string
     referencia?: string
     complemento?: string
+    complement?: string
   } | null
   profiles: { full_name: string; email: string; phone: string; cpf_cnpj?: string | null } | null
   notes?: string | null
@@ -192,7 +199,40 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
         alert('Erro ao gerar Nota: ' + (data.error || 'Erro desconhecido'))
       }
     } catch {
-      alert('Erro de conexão ao tentar gerar a nota')
+    }
+  }
+
+  const handleApproveAndSync = async (orderId: string) => {
+    if (!confirm('Deseja marcar este pedido como PAGO e já enviar para o ERP?')) return;
+    try {
+      const res1 = await fetch('/api/admin/pedidos/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: orderId,
+          newStatus: 'paid',
+          sendWhatsapp: false,
+          customMessage: 'Seu pagamento foi aprovado manualmente.',
+          customerName: 'Cliente'
+        })
+      })
+      if (!res1.ok) throw new Error('Falha ao atualizar status para pago');
+
+      const res2 = await fetch('/api/admin/pedidos/sync-erp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+      if (res2.ok) {
+        alert('Pedido marcado como PAGO e enviado ao ERP com sucesso!');
+        router.refresh();
+      } else {
+        const data = await res2.json();
+        alert('Status atualizado, mas erro ao enviar ao ERP: ' + (data.error || 'Erro desconhecido'));
+        router.refresh();
+      }
+    } catch (err: any) {
+      alert('Erro de conexão: ' + err.message);
     }
   }
 
@@ -598,7 +638,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                 <div>
                                   <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Destino</div>
                                   <div style={{ color: '#e2e8f0', fontSize: '0.8rem' }}>
-                                    {order.shipping_address?.cidade || order.shipping_address?.bairro || '—'}
+                                    {order.shipping_address?.cidade || order.shipping_address?.city || order.shipping_address?.bairro || order.shipping_address?.neighborhood || '—'}
                                   </div>
                                 </div>
                                 <div>
@@ -675,8 +715,8 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                   <div style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px', textTransform: 'uppercase', fontSize: '0.7rem' }}>Endereço de Entrega</div>
                                   {order.shipping_address ? (
                                     <div style={{ color: '#e2e8f0', fontSize: '0.75rem', lineHeight: '1.4' }}>
-                                      {order.shipping_address.logradouro}, {order.shipping_address.numero} {order.shipping_address.complemento ? ` - ${order.shipping_address.complemento}` : ''}<br />
-                                      {order.shipping_address.bairro} - {order.shipping_address.cidade}<br />
+                                      {order.shipping_address.logradouro || order.shipping_address.street}, {order.shipping_address.numero || order.shipping_address.number} {(order.shipping_address.complemento || order.shipping_address.complement) ? ` - ${order.shipping_address.complemento || order.shipping_address.complement}` : ''}<br />
+                                      {order.shipping_address.bairro || order.shipping_address.neighborhood} - {order.shipping_address.cidade || order.shipping_address.city} - {order.shipping_address.estado || order.shipping_address.state || 'SP'}<br />
                                       CEP: {order.shipping_address.cep}
                                     </div>
                                   ) : (
@@ -779,6 +819,23 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                     >
                                       <Package size={18} />
                                       Gerar NF-e (ERP)
+                                    </button>
+                                  )}
+
+                                  {order.status === 'pending' && !order.erp_id && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleApproveAndSync(order.id); }}
+                                      style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                        background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', border: 'none',
+                                        padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem',
+                                        cursor: 'pointer', transition: 'all 0.2s',
+                                      }}
+                                      onMouseEnter={(e: any) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                                      onMouseLeave={(e: any) => { e.currentTarget.style.transform = 'translateY(0)'; }}
+                                    >
+                                      <CheckCircle size={18} />
+                                      Aprovar Pagamento e Enviar ERP
                                     </button>
                                   )}
 

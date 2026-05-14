@@ -245,8 +245,13 @@ export default function CriarPedidoPage() {
           notes: (applyDiscount && couponCode.trim()) ? (notes ? `${notes}\n\n[Cupom Aplicado: ${couponCode.trim()}]` : `[Cupom Aplicado: ${couponCode.trim()}]`) : notes,
           discount: finalDiscount, generatePaymentLink,
         })
-        setSuccess(`Pedido #${result.orderId.split('-')[0]} criado com sucesso!`)
-        setTimeout(() => router.push('/admin/pedidos'), 2000)
+        if ((result as any).generatedPassword) {
+          setSuccess(`Pedido #${result.orderId.split('-')[0]} criado! Senha provisória: ${(result as any).generatedPassword}`)
+          setTimeout(() => router.push('/admin/pedidos'), 8000)
+        } else {
+          setSuccess(`Pedido #${result.orderId.split('-')[0]} criado com sucesso!`)
+          setTimeout(() => router.push('/admin/pedidos'), 2000)
+        }
       } catch (err: any) {
         setError(err.message || 'Erro desconhecido.')
       }
