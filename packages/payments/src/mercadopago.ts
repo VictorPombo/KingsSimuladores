@@ -29,7 +29,7 @@ export function getMPPublicKey(storeSlug: string): string {
   return PUBLIC_KEYS[storeSlug] ?? process.env.NEXT_PUBLIC_MP_PUBLIC_KEY ?? ''
 }
 
-export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number, storeContext?: 'kings' | 'msu' | 'seven', shippingCost?: number) {
+export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number, storeContext?: 'kings' | 'msu' | 'seven', shippingCost?: number, pixOnly?: boolean) {
   // Em Produção, você usará o token de vendedor (Oauth) para criar a preferência na conta dele,
   // mas aplicando a 'marketplace_fee' (nossa comissão) pra conta da Kings.
   // Seleção dinâmica do Token baseada no contexto da loja
@@ -73,7 +73,18 @@ export async function createPreference(items: any[], customer: any, orderId?: st
     },
     auto_return: 'approved',
     payment_methods: {
-      installments: 12,
+      installments: pixOnly ? 1 : 12,
+      // Quando pixOnly=true, bloqueia cartão crédito, débito, boleto e pré-pago
+      ...(pixOnly ? {
+        excluded_payment_types: [
+          { id: 'credit_card' },
+          { id: 'debit_card' },
+          { id: 'ticket' },
+          { id: 'prepaid_card' },
+          { id: 'atm' },
+          { id: 'digital_currency' },
+        ]
+      } : {})
     },
     // IMPORTANTE: Forçar www para evitar redirect 301 da Vercel que quebra o webhook do MP
     notification_url: `https://www.kingssimuladores.com.br/api/webhooks/mercadopago?store=${storeContext || 'kings'}`

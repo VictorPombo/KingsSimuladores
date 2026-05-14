@@ -6,7 +6,7 @@ import { sendEmailMessage } from '@kings/notifications'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { items, customer, address, shipping, total, coupon_id } = body
+    const { items, customer, address, shipping, total, coupon_id, pix_discount } = body
 
     // 1. Authenticate user from session
     const supabase = await createServerSupabaseClient()
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
     }
 
     // 4. Mercado Pago Preference Creation with External Reference
-    const preference = await createPreference(items, customer, newOrder.id, undefined, storeContext, orderData.shipping_cost)
+    const preference = await createPreference(items, customer, newOrder.id, undefined, storeContext, orderData.shipping_cost, !!pix_discount)
 
     const adminSupabase = createAdminClient()
 
