@@ -244,6 +244,7 @@ export default function CriarPedidoPage() {
           shippingMethod, shippingCost, deliveryDays, 
           notes: (applyDiscount && couponCode.trim()) ? (notes ? `${notes}\n\n[Cupom Aplicado: ${couponCode.trim()}]` : `[Cupom Aplicado: ${couponCode.trim()}]`) : notes,
           discount: finalDiscount, generatePaymentLink,
+          couponCode: (applyDiscount && couponCode.trim()) ? couponCode.trim() : null
         })
         if ((result as any).generatedPassword) {
           setSuccess(`Pedido #${result.orderId.split('-')[0]} criado! Senha provisória: ${(result as any).generatedPassword}`)

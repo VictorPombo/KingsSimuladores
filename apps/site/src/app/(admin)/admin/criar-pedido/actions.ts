@@ -49,6 +49,7 @@ export async function createOrder(formData: {
   notes: string
   discount: number
   generatePaymentLink: boolean
+  couponCode?: string | null
 }) {
   const supabase = createAdminClient()
 
@@ -98,6 +99,16 @@ export async function createOrder(formData: {
   const subtotal = formData.items.reduce((a, i) => a + i.unitPrice * i.quantity, 0)
   const total = subtotal + formData.shippingCost - formData.discount
 
+  // Tratar cupom
+  let couponId = null;
+  if (formData.couponCode) {
+    const { data: coupon } = await supabase.from('coupons').select('id, usage_count').eq('code', formData.couponCode).single()
+    if (coupon) {
+      couponId = coupon.id;
+      await supabase.from('coupons').update({ usage_count: coupon.usage_count + 1 }).eq('id', coupon.id)
+    }
+  }
+
   // Criar pedido
   const { data: order, error: orderError } = await supabase
     .from('orders')
@@ -113,6 +124,7 @@ export async function createOrder(formData: {
       payment_method: formData.generatePaymentLink ? 'link' : 'manual',
       shipping_address: formData.address,
       notes: formData.notes || null,
+      coupon_id: couponId,
     })
     .select('id')
     .single()
