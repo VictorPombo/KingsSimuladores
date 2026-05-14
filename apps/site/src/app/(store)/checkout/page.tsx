@@ -285,6 +285,54 @@ export default function CheckoutPage() {
     }
   }
 
+  const handlePixPayment = async () => {
+    setIsProcessing(true)
+    const currentStore = storeNames[currentStoreIdx]
+    const storeGroupItems = groups[currentStore]
+
+    const storeShipping = currentStoreIdx === 0 ? selectedFrete : null
+    const shippingPrice = currentStoreIdx === 0 ? valorFrete : 0
+
+    // Aplica 10% de desconto em CADA item para o Pix
+    const pixItems = storeGroupItems.map(i => ({
+      ...i,
+      price: parseFloat((i.price * 0.9).toFixed(2))
+    }))
+
+    const storeSubtotal = pixItems.reduce((acc, i) => acc + (i.price * i.quantity), 0)
+    const storeDiscount = currentStoreIdx === 0 ? discount : 0
+    const storeTotal = storeSubtotal + shippingPrice - storeDiscount
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: pixItems,
+          customer: { nome, email, cpf, telefone },
+          address: { cep, logradouro, numero, bairro, cidade, complemento, referencia },
+          shipping: storeShipping,
+          total: storeTotal,
+          coupon_id: currentStoreIdx === 0 && coupon ? coupon.id : null,
+          pix_discount: true
+        })
+      })
+
+      const session = await res.json()
+
+      if (session.ok && session.init_point) {
+        clearCart()
+        window.location.href = session.init_point
+      } else {
+        setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')
+        setIsProcessing(false)
+      }
+    } catch (err) {
+      console.error(err)
+      setCheckoutError('Erro de comunicação com o servidor.')
+      setIsProcessing(false)
+    }
+  }
 
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
@@ -463,30 +511,76 @@ export default function CheckoutPage() {
             {step === 3 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>3. Pagamento Seguro</h2>
-                
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid rgba(0, 229, 255, 0.2)', textAlign: 'center' }}>
-                  <div style={{ display: 'inline-block', marginBottom: '16px', background: '#fff', padding: '8px 16px', borderRadius: '8px' }}>
-                    <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.19.1/mercadopago/logo__large.png" alt="Mercado Pago" style={{ height: '32px' }} />
-                  </div>
-                  <h3 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '8px' }}>Ambiente Seguro</h3>
-                  <p style={{ fontSize: '0.9rem', color: '#a1a1aa', lineHeight: 1.5 }}>
-                    O pagamento é processado pelo <strong>Mercado Pago</strong>.<br/>
-                    Você poderá escolher pagar via <strong>PIX, Boleto ou Cartão de Crédito</strong> na próxima tela.
-                  </p>
-                </div>
 
                 {checkoutError && (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '0.5rem', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{ color: '#f87171', fontWeight: 600, fontSize: '0.95rem' }}>⚠️ {checkoutError}</div>
                     <button onClick={() => setCheckoutError('')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem', textAlign: 'left', padding: 0 }}>Fechar</button>
                   </div>
                 )}
 
-                <div className="kings-btn-row">
+                {/* Botão Pix com desconto */}
+                <button
+                  disabled={isProcessing}
+                  onClick={handlePixPayment}
+                  style={{
+                    width: '100%', padding: '18px', borderRadius: '12px', border: '2px solid rgba(0,229,255,0.5)',
+                    background: 'linear-gradient(135deg, rgba(0,229,255,0.12), rgba(0,229,255,0.05))',
+                    color: '#fff', cursor: isProcessing ? 'wait' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    transition: 'all 0.2s', opacity: isProcessing ? 0.7 : 1
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '1.8rem' }}>⚡</span>
+                    <div style={{ textAlign: 'left' }}>
+                      <div style={{ fontWeight: 700, fontSize: '1rem', color: '#00e5ff' }}>Pagar com Pix</div>
+                      <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>10% de desconto — aprovado na hora</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#00e5ff' }}>{(totalGeral * 0.9).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', textDecoration: 'line-through' }}>{totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                  </div>
+                </button>
+
+                {/* Separador */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                  <span style={{ color: '#64748b', fontSize: '0.8rem' }}>ou</span>
+                  <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                </div>
+
+                {/* Botão Cartão/Boleto */}
+                <button
+                  disabled={isProcessing}
+                  onClick={handleMultistepPayment}
+                  style={{
+                    width: '100%', padding: '16px', borderRadius: '12px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.04)',
+                    color: '#cbd5e1', cursor: isProcessing ? 'wait' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    transition: 'all 0.2s', opacity: isProcessing ? 0.7 : 1
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '1.8rem' }}>💳</span>
+                    <div style={{ textAlign: 'left' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Cartão ou Boleto</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Até 12x sem juros no cartão</div>
+                    </div>
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                  <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.19.1/mercadopago/logo__large.png" alt="Mercado Pago" style={{ height: '20px', background: '#fff', padding: '2px 6px', borderRadius: '4px' }} />
+                  <span style={{ color: '#64748b', fontSize: '0.78rem' }}>Pagamento 100% seguro via Mercado Pago</span>
+                </div>
+
+                <div className="kings-btn-row" style={{ marginTop: '4px' }}>
                   <Button variant="secondary" onClick={() => setStep(2)}>Voltar</Button>
-                  <Button onClick={handleMultistepPayment} style={{ flex: 1, background: storeNames[currentStoreIdx] === 'seven' ? '#ea580c' : '#00B1EA' }} disabled={isProcessing}>
-                    {isProcessing ? 'Redirecionando para o Mercado Pago...' : (storeNames.length > 1 ? `Ir para o Pagamento (${storeNames[currentStoreIdx].toUpperCase()}) - ${currentStoreIdx + 1}/${storeNames.length}` : 'Ir para o Pagamento Seguro ➔')}
-                  </Button>
                 </div>
               </div>
             )}

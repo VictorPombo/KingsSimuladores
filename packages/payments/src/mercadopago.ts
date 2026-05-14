@@ -54,10 +54,6 @@ export async function createPreference(items: any[], customer: any, orderId?: st
     })
   }
 
-  // Calcular total bruto dos itens para aplicar desconto Pix em cima
-  const totalBruto = mpItems.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
-  const pixDiscountValue = parseFloat((totalBruto * 0.10).toFixed(2))
-
   const payload: any = {
     items: mpItems,
     payer: {
@@ -76,20 +72,9 @@ export async function createPreference(items: any[], customer: any, orderId?: st
       failure: `${process.env.NEXT_PUBLIC_URL_KINGS}/checkout?error=payment_failed`
     },
     auto_return: 'approved',
-    // Desconto de 10% exclusivo para pagamento via Pix
     payment_methods: {
-      default_installments: 1,
       installments: 12,
-      excluded_payment_types: [],
-      excluded_payment_methods: [],
     },
-    // Campo nativo do MP para desconto exclusivo por método de pagamento
-    discounts: [
-      {
-        coupon_amount: pixDiscountValue,
-        payment_method_id: 'pix',
-      }
-    ],
     // IMPORTANTE: Forçar www para evitar redirect 301 da Vercel que quebra o webhook do MP
     notification_url: `https://www.kingssimuladores.com.br/api/webhooks/mercadopago?store=${storeContext || 'kings'}`
   }
