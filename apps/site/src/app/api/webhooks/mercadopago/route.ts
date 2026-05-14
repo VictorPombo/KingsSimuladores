@@ -284,19 +284,39 @@ export async function POST(req: Request) {
             </div>
             <div style="padding: 30px;">
               <p style="font-size: 16px;">Uma nova compra foi aprovada no sistema!</p>
-              <ul style="font-size: 15px; background: #f9f9f9; padding: 15px; border-radius: 8px;">
-                <li><strong>Pedido:</strong> #${orderId.split('-')[0]}</li>
-                <li><strong>Cliente:</strong> ${profile?.full_name || 'Desconhecido'}</li>
-                <li><strong>Telefone:</strong> ${profile?.phone || 'Não informado'}</li>
-                <li><strong>Loja:</strong> ${(order.brand_origin || 'KINGS').toUpperCase()}</li>
+              
+              <h3 style="color: #444; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 25px;">📄 Dados da Compra</h3>
+              <ul style="font-size: 15px; background: #f9f9f9; padding: 15px; border-radius: 8px; list-style-type: none; margin: 0;">
+                <li style="margin-bottom: 8px;"><strong>ID do Pedido:</strong> #${orderId.split('-')[0]}</li>
+                <li style="margin-bottom: 8px;"><strong>Loja Origem:</strong> ${(order.brand_origin || 'KINGS').toUpperCase()}</li>
+                <li style="margin-bottom: 8px;"><strong>Valor Total Pago:</strong> R$ ${order.total?.toFixed(2) || '0.00'}</li>
+                <li style="margin-bottom: 8px;"><strong>Cupom:</strong> ${order.coupon_id ? 'Sim' : 'Não'}</li>
+                <li><strong>Gateway:</strong> Mercado Pago</li>
               </ul>
-              <p style="font-size: 15px;">Acesse o painel administrativo para verificar a separação e envio.</p>
+              
+              <h3 style="color: #444; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 25px;">👤 Dados do Cliente</h3>
+              <ul style="font-size: 15px; background: #f9f9f9; padding: 15px; border-radius: 8px; list-style-type: none; margin: 0;">
+                <li style="margin-bottom: 8px;"><strong>Nome:</strong> ${profile?.full_name || 'Desconhecido'}</li>
+                <li style="margin-bottom: 8px;"><strong>E-mail:</strong> ${profile?.email || 'Não informado'}</li>
+                <li style="margin-bottom: 8px;"><strong>Documento (CPF/CNPJ):</strong> ${profile?.cpf_cnpj || 'Não informado'}</li>
+                <li><strong>Telefone:</strong> ${profile?.phone || 'Não informado'}</li>
+              </ul>
+
+              <h3 style="color: #444; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 25px;">📍 Endereço de Entrega</h3>
+              <ul style="font-size: 15px; background: #f9f9f9; padding: 15px; border-radius: 8px; list-style-type: none; margin: 0;">
+                <li style="margin-bottom: 8px;"><strong>CEP:</strong> ${order.shipping_address?.cep || 'Não informado'}</li>
+                <li style="margin-bottom: 8px;"><strong>Logradouro:</strong> ${order.shipping_address?.street || order.shipping_address?.logradouro || 'Não informado'}, ${order.shipping_address?.number || order.shipping_address?.numero || 'S/N'}</li>
+                <li style="margin-bottom: 8px;"><strong>Bairro:</strong> ${order.shipping_address?.neighborhood || order.shipping_address?.bairro || 'Não informado'}</li>
+                <li><strong>Cidade/UF:</strong> ${order.shipping_address?.city || order.shipping_address?.cidade || 'Não informado'} / ${order.shipping_address?.state || order.shipping_address?.estado || 'Não informado'}</li>
+              </ul>
+
+              <p style="font-size: 15px; margin-top: 30px;">Acesse o painel administrativo para verificar os itens completos, fazer a separação e gerar a etiqueta de envio.</p>
             </div>
           </div>
         `
         
         await sendEmailMessage({
-          to: 'contato@kingssimuladores.com.br',
+          to: ['contato@kingssimuladores.com.br', 'Fernando.Albertoni@kingssimuladores.com.br'],
           subject: `💰 Nova Venda! Pedido #${orderId.split('-')[0]} aprovado`,
           html: adminEmailHtml
         })

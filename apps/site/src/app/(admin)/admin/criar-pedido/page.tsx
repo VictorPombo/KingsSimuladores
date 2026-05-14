@@ -62,6 +62,7 @@ export default function CriarPedidoPage() {
   const [generatePaymentLink, setGeneratePaymentLink] = useState(false)
   const [applyDiscount, setApplyDiscount] = useState(false)
   const [discount, setDiscount] = useState(0)
+  const [couponCode, setCouponCode] = useState('')
 
   // Resultado
   const [error, setError] = useState('')
@@ -240,7 +241,8 @@ export default function CriarPedidoPage() {
           email, name, cpfCnpj, phone, personType,
           address: { cep, receiver: receiver || name, street, number, complement, neighborhood, city, state },
           items: cart.map(i => ({ productId: i.id, quantity: i.quantity, unitPrice: i.price, title: i.title })),
-          shippingMethod, shippingCost, deliveryDays, notes,
+          shippingMethod, shippingCost, deliveryDays, 
+          notes: (applyDiscount && couponCode.trim()) ? (notes ? `${notes}\n\n[Cupom Aplicado: ${couponCode.trim()}]` : `[Cupom Aplicado: ${couponCode.trim()}]`) : notes,
           discount: finalDiscount, generatePaymentLink,
         })
         setSuccess(`Pedido #${result.orderId.split('-')[0]} criado com sucesso!`)
@@ -565,10 +567,17 @@ export default function CriarPedidoPage() {
         </label>
 
         {applyDiscount && (
-          <div style={{ marginBottom: '16px', maxWidth: '250px' }}>
-            <label style={labelStyle}>Valor do desconto (R$)</label>
-            <input type="number" step="0.01" value={discount} onChange={e => setDiscount(Number(e.target.value))} style={inputStyle}
-              onFocus={(e: any) => e.currentTarget.style.borderColor = '#10b981'} onBlur={(e: any) => e.currentTarget.style.borderColor = '#3f424d'} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', maxWidth: '500px' }}>
+            <div>
+              <label style={labelStyle}>Valor do desconto (R$)</label>
+              <input type="number" step="0.01" value={discount} onChange={e => setDiscount(Number(e.target.value))} style={inputStyle}
+                onFocus={(e: any) => e.currentTarget.style.borderColor = '#10b981'} onBlur={(e: any) => e.currentTarget.style.borderColor = '#3f424d'} />
+            </div>
+            <div>
+              <label style={labelStyle}>Código do Cupom (Opcional)</label>
+              <input type="text" placeholder="Ex: PIANA10" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())} style={inputStyle}
+                onFocus={(e: any) => e.currentTarget.style.borderColor = '#10b981'} onBlur={(e: any) => e.currentTarget.style.borderColor = '#3f424d'} />
+            </div>
           </div>
         )}
 

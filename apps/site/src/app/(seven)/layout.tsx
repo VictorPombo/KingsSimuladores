@@ -23,6 +23,7 @@ import { ToastProvider } from '@kings/ui'
 import { AuthAction } from '@/components/store/layout/AuthAction'
 import { StoreSwitcher } from '@/components/store/layout/StoreSwitcher'
 import Script from 'next/script'
+import { MaintenanceBanner } from '@/components/shared/MaintenanceBanner'
 
 export default async function SevenLayout({
   children,
@@ -46,6 +47,7 @@ export default async function SevenLayout({
       <CartProvider>
         <div className="theme-seven" style={{ minHeight: '100vh', color: '#f8fafc', position: 'relative', fontFamily: 'var(--font-sans)', zIndex: 1 }}>
         <CartDrawer />
+        <MaintenanceBanner />
       {/* Background Effect */}
       <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(249,115,22,0.05) 0%, rgba(0,0,0,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
       

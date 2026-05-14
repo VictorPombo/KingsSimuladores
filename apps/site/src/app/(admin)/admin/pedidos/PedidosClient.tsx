@@ -147,17 +147,22 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
     }
   }
 
-  const handleDeleteOrder = async (orderId: string) => {
-    if (!confirm('Tem certeza absoluta que deseja EXCLUIR este pedido permanentemente? Esta ação não pode ser desfeita.')) return
+  const [deleteModal, setDeleteModal] = useState<string | null>(null)
+  const [deletingOrder, setDeletingOrder] = useState(false)
+
+  const confirmDeleteOrder = async () => {
+    if (!deleteModal) return
+    setDeletingOrder(true)
     
     try {
       const res = await fetch('/api/admin/pedidos/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId })
+        body: JSON.stringify({ orderId: deleteModal })
       })
       if (res.ok) {
-        alert('Pedido removido com sucesso!')
+        setDeleteModal(null)
+        setExpandedOrder(null)
         router.refresh()
       } else {
         const data = await res.json()
@@ -165,6 +170,8 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
       }
     } catch {
       alert('Erro de conexão ao tentar excluir')
+    } finally {
+      setDeletingOrder(false)
     }
   }
 
@@ -256,6 +263,33 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+
+      {/* ── Delete Modal ── */}
+      {deleteModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: '#1e2030', border: '1px solid #ef444450', borderRadius: '16px', padding: '28px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.5)', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+              <div style={{ background: '#ef444420', padding: '16px', borderRadius: '50%', color: '#ef4444' }}>
+                <AlertCircle size={32} />
+              </div>
+            </div>
+            <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 700, margin: '0 0 12px 0' }}>Excluir Pedido</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '24px' }}>
+              Tem certeza absoluta que deseja excluir este pedido permanentemente? Esta ação não pode ser desfeita.
+            </p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setDeleteModal(null)} style={{ flex: 1, background: 'transparent', border: '1px solid #3f424d', borderRadius: '8px', padding: '11px', color: '#94a3b8', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>Cancelar</button>
+              <button
+                onClick={confirmDeleteOrder}
+                disabled={deletingOrder}
+                style={{ flex: 1, background: deletingOrder ? '#3f424d' : '#ef4444', border: 'none', borderRadius: '8px', padding: '11px', color: '#fff', cursor: deletingOrder ? 'wait' : 'pointer', fontWeight: 700, fontSize: '0.85rem', transition: 'all 0.2s' }}
+              >
+                {deletingOrder ? 'Excluindo...' : 'Sim, Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Status Change Modal ── */}
       {statusModal && (
@@ -766,7 +800,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                   )}
 
                                   <button
-                                    onClick={() => handleDeleteOrder(order.id)}
+                                    onClick={(e) => { e.stopPropagation(); setDeleteModal(order.id); }}
                                     style={{
                                       display: 'inline-flex', alignItems: 'center', gap: '8px',
                                       background: 'transparent', color: '#64748b', border: '1px solid #3f424d',

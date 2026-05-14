@@ -3,7 +3,7 @@
  * Envia E-mails transacionais. Se sem credencial, loga aviso e retorna success: false.
  */
 
-export const sendEmailMessage = async (data: { to: string, subject: string, html: string }) => {
+export const sendEmailMessage = async (data: { to: string | string[], subject: string, html: string }) => {
   const apiKey = process.env.RESEND_API_KEY
   
   if (!apiKey || apiKey.includes('preencher')) {
@@ -22,7 +22,7 @@ export const sendEmailMessage = async (data: { to: string, subject: string, html
       },
       body: JSON.stringify({
         from: 'KingsHub <contato@kingssimuladores.com.br>',
-        to: [data.to],
+        to: Array.isArray(data.to) ? data.to : [data.to],
         subject: data.subject,
         html: data.html
       })

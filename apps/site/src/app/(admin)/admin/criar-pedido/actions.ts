@@ -60,21 +60,35 @@ export async function createOrder(formData: {
 
   // Criar cliente novo se necessário
   if (formData.customerType === 'new') {
-    const { data: newProfile, error: profileError } = await supabase
+    const randomPassword = 'K' + Math.random().toString(36).substring(2, 10) + 'A@!';
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: formData.email,
+      password: randomPassword,
+      email_confirm: true,
+    });
+
+    if (authError) {
+      if (authError.message.includes('already registered') || authError.message.includes('exists')) {
+        throw new Error('Já existe um cliente com este e-mail. Por favor, selecione "Cliente existente".')
+      }
+      throw new Error('Erro ao criar autenticação do cliente: ' + authError.message)
+    }
+
+    customerId = authData.user.id;
+
+    // A trigger no banco cria um profile automaticamente, então só precisamos fazer o update
+    const { error: profileError } = await supabase
       .from('profiles')
-      .insert({
-        email: formData.email,
+      .update({
         full_name: formData.name,
         cpf_cnpj: formData.cpfCnpj,
         phone: formData.phone,
         role: 'client',
         addresses: [formData.address],
       })
-      .select('id')
-      .single()
+      .eq('auth_id', customerId);
 
-    if (profileError) throw new Error('Erro ao criar cliente: ' + profileError.message)
-    customerId = newProfile.id
+    if (profileError) throw new Error('Erro ao atualizar perfil do cliente: ' + profileError.message)
   }
 
   if (!customerId) throw new Error('Cliente não selecionado.')
