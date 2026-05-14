@@ -46,7 +46,8 @@ const MENU_SECTIONS = [
           { label: 'Produtos', href: '/admin/produtos' },
           { label: 'Categorias', href: '/admin/categorias' },
           { label: 'Marcas', href: '/admin/marcas' },
-          { label: 'Grades', href: '/admin/grades' }
+          { label: 'Grades', href: '/admin/grades' },
+          { label: 'Cupons', href: '/admin/cupons' }
         ]
       }
     ]
