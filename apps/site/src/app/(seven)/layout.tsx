@@ -24,6 +24,7 @@ import { AuthAction } from '@/components/store/layout/AuthAction'
 import { StoreSwitcher } from '@/components/store/layout/StoreSwitcher'
 import Script from 'next/script'
 import { MaintenanceBanner } from '@/components/shared/MaintenanceBanner'
+import { UnderDevelopmentPopup } from '@/components/shared/UnderDevelopmentPopup'
 
 export default async function SevenLayout({
   children,
@@ -45,6 +46,14 @@ export default async function SevenLayout({
         `}
       </Script>
       <CartProvider>
+        <UnderDevelopmentPopup
+          store="seven"
+          redirectUrl="https://www.sevensimracing.com.br/"
+          redirectLabel="Ir para Seven Sim Racing"
+          accentColor="#ea580c"
+          logoSrc="/logo-seven.svg"
+          storeName="Seven Sim Racing"
+        />
         <div className="theme-seven" style={{ minHeight: '100vh', color: '#f8fafc', position: 'relative', fontFamily: 'var(--font-sans)', zIndex: 1 }}>
         <CartDrawer />
         <MaintenanceBanner />
