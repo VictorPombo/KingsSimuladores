@@ -19,6 +19,7 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
   const [isPending, startTransition] = useTransition()
   const [showForm, setShowForm] = useState(false)
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
+  const [formType, setFormType] = useState<Coupon['type']>('percent')
   const [historyCoupon, setHistoryCoupon] = useState<Coupon | null>(null)
   const [ordersHistory, setOrdersHistory] = useState<any[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
@@ -61,6 +62,7 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
 
   const handleOpenEdit = (coupon: Coupon) => {
     setEditingCoupon(coupon)
+    setFormType(coupon.type)
     setShowForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -86,7 +88,7 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
           <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px' }}>Códigos promocionais que os clientes digitam no checkout</p>
         </div>
         <button 
-          onClick={() => { setShowForm(!showForm); if (showForm) setEditingCoupon(null); }} 
+          onClick={() => { setShowForm(!showForm); if (!showForm) setFormType('percent'); if (showForm) setEditingCoupon(null); }} 
           style={{
             display: 'flex', alignItems: 'center', gap: '8px',
             background: showForm ? '#ef444420' : 'linear-gradient(135deg, #f59e0b, #d97706)',
@@ -167,15 +169,22 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
               </div>
               <div>
                 <label style={labelStyle}>Tipo de Desconto *</label>
-                <select name="type" defaultValue={editingCoupon?.type || 'percent'} style={{ ...inputStyle, cursor: 'pointer' }}>
+                <select name="type" value={formType} onChange={e => setFormType(e.target.value as any)} style={{ ...inputStyle, cursor: 'pointer' }}>
                   <option value="percent">Porcentagem (%)</option>
                   <option value="fixed">Valor Fixo (R$)</option>
                   <option value="shipping">Frete Grátis</option>
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Valor *</label>
-                <input name="value" type="number" step="0.01" required defaultValue={editingCoupon?.value} placeholder="10.00" style={inputStyle} />
+                <label style={{...labelStyle, opacity: formType === 'shipping' ? 0.5 : 1}}>Valor *</label>
+                {formType === 'shipping' ? (
+                  <div style={{...inputStyle, background: 'rgba(255,255,255,0.02)', color: '#64748b', borderStyle: 'dashed'}}>
+                    100% do Frete
+                    <input type="hidden" name="value" value="100" />
+                  </div>
+                ) : (
+                  <input name="value" type="number" step="0.01" required defaultValue={editingCoupon?.value} placeholder="10.00" style={inputStyle} />
+                )}
               </div>
             </div>
 
