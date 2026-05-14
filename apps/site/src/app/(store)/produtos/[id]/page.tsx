@@ -99,6 +99,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
   const finalPrice = product.price
   const discountPct = hasDiscount ? Math.round((1 - finalPrice / originalPrice) * 100) : 0
   const installmentValue = finalPrice / 12
+  const pixPrice = finalPrice * 0.9
   const brandName = product.attributes?.brand || 'Kings Simuladores'
   const imageUrl = product.images?.[0] || 'https://placehold.co/800x800/131928/e8ecf4?text=Kings'
 
@@ -150,8 +151,16 @@ export default async function ProductPage({ params }: { params: { id: string } }
               <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                 Em até <strong>12x sem juros de {formatPrice(installmentValue)}</strong> no cartão de crédito.
               </div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                10% de desconto via Pix.
+              <div style={{
+                fontSize: '0.9rem', marginTop: '10px', padding: '10px 14px',
+                background: 'rgba(0, 229, 255, 0.07)', border: '1px solid rgba(0, 229, 255, 0.25)',
+                borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px'
+              }}>
+                <span style={{ fontSize: '1.1rem' }}>⚡</span>
+                <span>
+                  <strong style={{ color: '#00e5ff', fontSize: '1rem' }}>{formatPrice(pixPrice)}</strong>
+                  {' '}<span style={{ color: 'var(--text-secondary)' }}>no Pix — 10% de desconto</span>
+                </span>
               </div>
             </div>
 
