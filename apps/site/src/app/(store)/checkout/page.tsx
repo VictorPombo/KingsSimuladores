@@ -454,8 +454,50 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>2. Opções de Entrega</h2>
                 {!isRetirada && <p style={{ color: '#a1a1aa', fontSize: '0.9rem' }}>Enviando para: {logradouro}, {numero} - {cep}</p>}
-                
-                {fretes.length > 0 ? (
+
+                {freeShipping && fretes.length > 0 ? (
+                  // Frete grátis por cupom: loja escolhe o modal, cliente não pode alterar
+                  <>
+                    <div style={{
+                      padding: '16px 20px', borderRadius: '10px',
+                      background: 'linear-gradient(135deg, rgba(6,214,160,0.12), rgba(6,214,160,0.05))',
+                      border: '1px solid rgba(6,214,160,0.4)',
+                      display: 'flex', alignItems: 'center', gap: '14px'
+                    }}>
+                      <span style={{ fontSize: '1.8rem' }}>🎁</span>
+                      <div>
+                        <div style={{ color: '#06d6a0', fontWeight: 700, fontSize: '0.95rem' }}>
+                          Frete Grátis — Cortesia da Kings!
+                        </div>
+                        <div style={{ color: '#94a3b8', fontSize: '0.82rem', marginTop: '4px', lineHeight: 1.4 }}>
+                          Seu cupom cobre o custo do envio. A modalidade de entrega será definida pela loja para garantir o melhor custo-benefício.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{
+                      padding: '14px 18px', borderRadius: '8px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                    }}>
+                      <div>
+                        <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '0.9rem' }}>
+                          {selectedFrete?.company?.name || ''} {selectedFrete?.name}
+                        </div>
+                        <div style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '2px' }}>
+                          Chega em até {selectedFrete?.delivery_time || selectedFrete?.custom_delivery_time} dias úteis
+                        </div>
+                      </div>
+                      <div style={{ color: '#06d6a0', fontWeight: 700, fontSize: '1rem' }}>Grátis</div>
+                    </div>
+
+                    <div className="kings-btn-row">
+                      <Button variant="secondary" onClick={() => setStep(1)}>Voltar</Button>
+                      <Button onClick={() => setStep(3)} style={{ flex: 1 }}>Continuar para Pagamento</Button>
+                    </div>
+                  </>
+                ) : fretes.length > 0 ? (
                   <>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       {fretes.map(f => (
