@@ -159,6 +159,9 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
                 ? `/seven/produtos/${product.slug}` 
                 : `/produtos/${product.slug}`
             
+            const behavior = (product.attributes as any)?.out_of_stock_behavior
+            const isOutOfStock = product.stock <= 0 && (!behavior || behavior === 'unavailable' || behavior === 'immediate')
+            
             return (
               <div key={product.id} className="carousel-item" style={{ 
                 scrollSnapAlign: 'start', 
@@ -175,7 +178,8 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
                     cursor: 'pointer',
                     height: '100%',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    opacity: isOutOfStock ? 0.75 : 1
                   }}
                   onMouseOver={(e) => e.currentTarget.style.borderColor = themeColor}
                   onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
@@ -184,22 +188,39 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
                       <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
                         <Image src={imgUrl} alt={title} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw" style={{ objectFit: 'contain' }} />
                       </div>
-                      {hasDiscount && tenant !== 'msu' && (
+                      
+                      {isOutOfStock && (
+                        <div style={{
+                          position: 'absolute', top: '0', left: '0', right: '0', bottom: '0',
+                          background: 'rgba(255,255,255,0.4)', zIndex: 1,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                          <div style={{
+                            background: '#1e293b', color: '#fff', padding: '6px 12px',
+                            borderRadius: '6px', fontSize: '0.8rem', fontWeight: 800,
+                            textTransform: 'uppercase', boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                          }}>
+                            Indisponível
+                          </div>
+                        </div>
+                      )}
+
+                      {!isOutOfStock && hasDiscount && tenant !== 'msu' && (
                         <div style={{
                           position: 'absolute', top: '12px', left: '12px',
                           background: '#ef4444', color: '#fff', padding: '4px 8px',
                           borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800,
-                          textTransform: 'uppercase'
+                          textTransform: 'uppercase', zIndex: 2
                         }}>
                           Sale
                         </div>
                       )}
-                      {tenant === 'msu' && (
+                      {!isOutOfStock && tenant === 'msu' && (
                         <div style={{
                           position: 'absolute', top: '12px', right: '12px',
                           background: 'rgba(139, 92, 246, 0.1)', border: '1px solid #8b5cf6',
                           color: '#8b5cf6', padding: '4px 8px',
-                          borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800,
+                          borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800, zIndex: 2
                         }}>
                           {theme.badgeText}
                         </div>

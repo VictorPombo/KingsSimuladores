@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download, ShoppingBag, MessageSquare, Edit2 } from 'lucide-react'
+import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download, ShoppingBag, MessageSquare, Edit2, FileText, Mail, UploadCloud } from 'lucide-react'
 import { createClient } from '@kings/db/client'
 
 type Order = {
@@ -36,6 +36,7 @@ type Order = {
     complemento?: string
     complement?: string
   } | null
+  invoices?: { id: string, pdf_url: string, status: string }[]
   profiles: { full_name: string; email: string; phone: string; cpf_cnpj?: string | null } | null
   notes?: string | null
   erp_id?: string | null
@@ -74,6 +75,10 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
     sendWhatsapp: boolean
   } | null>(null)
   const [savingStatus, setSavingStatus] = useState(false)
+  const [feedback, setFeedback] = useState<{type: 'success'|'error', message: string} | null>(null)
+  const [sendingNfe, setSendingNfe] = useState<string | null>(null)
+  const [uploadingNfe, setUploadingNfe] = useState<string | null>(null)
+  const [syncingNfe, setSyncingNfe] = useState<string | null>(null)
 
   const handleSaveTracking = async (orderId: string) => {
     setSavingTracking(orderId)
@@ -237,6 +242,109 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
     }
   }
 
+  const handleSendNfeEmail = async (order: Order) => {
+    const pdfUrl = order.invoices?.[0]?.pdf_url
+    if (!pdfUrl) return
+    
+    setSendingNfe(order.id)
+    try {
+      const res = await fetch('/api/admin/pedidos/send-nfe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: order.id,
+          order_number: order.order_number,
+          pdf_url: pdfUrl,
+          customer_email: order.profiles?.email,
+          customer_name: order.profiles?.full_name || 'Cliente'
+        })
+      })
+      
+      const data = await res.json()
+      if (res.ok) {
+        setFeedback({ type: 'success', message: 'E-mail com a Nota Fiscal enviado com sucesso!' })
+        setTimeout(() => setFeedback(null), 4000)
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Falha ao enviar e-mail' })
+        setTimeout(() => setFeedback(null), 4000)
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: 'Erro de conexão ao tentar enviar a nota fiscal' })
+      setTimeout(() => setFeedback(null), 4000)
+    } finally {
+      setSendingNfe(null)
+    }
+  }
+
+  const handleUploadNfe = async (orderId: string, file: File) => {
+    setUploadingNfe(orderId)
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('order_id', orderId)
+    
+    try {
+      const res = await fetch('/api/admin/pedidos/upload-nfe', {
+        method: 'POST',
+        body: formData
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setFeedback({ type: 'success', message: 'Upload de NF-e concluído com sucesso!' })
+        setTimeout(() => setFeedback(null), 4000)
+        router.refresh()
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Erro ao subir NF-e' })
+        setTimeout(() => setFeedback(null), 4000)
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: 'Erro de conexão no upload' })
+      setTimeout(() => setFeedback(null), 4000)
+    } finally {
+      setUploadingNfe(null)
+    }
+  }
+
+  const handleDownloadNfe = async (pdfUrl: string) => {
+    if (pdfUrl.startsWith('http')) {
+      window.open(pdfUrl, '_blank')
+      return
+    }
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.storage.from('invoices').createSignedUrl(pdfUrl, 300) // 5 min
+      if (error || !data) throw error
+      window.open(data.signedUrl, '_blank')
+    } catch (err) {
+      alert('Falha ao gerar link seguro para download. Tente novamente.')
+    }
+  }
+
+  const handleSyncNfe = async (orderId: string) => {
+    setSyncingNfe(orderId)
+    try {
+      const res = await fetch('/api/invoices/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+      const data = await res.json()
+      
+      if (data.pdf_url) {
+        setFeedback({ type: 'success', message: 'Nota Fiscal puxada do ERP com sucesso!' })
+        setTimeout(() => setFeedback(null), 4000)
+        router.refresh()
+      } else {
+        setFeedback({ type: 'error', message: data.message || data.error || 'A Nota Fiscal ainda não foi emitida no ERP.' })
+        setTimeout(() => setFeedback(null), 4000)
+      }
+    } catch (err) {
+      setFeedback({ type: 'error', message: 'Erro ao comunicar com o ERP.' })
+      setTimeout(() => setFeedback(null), 4000)
+    } finally {
+      setSyncingNfe(null)
+    }
+  }
+
   const handleExpand = async (orderId: string) => {
     if (expandedOrder === orderId) {
       setExpandedOrder(null)
@@ -388,6 +496,23 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
           </div>
         </div>
       )}
+      
+      {/* Feedback Toast Inline */}
+      {feedback && (
+        <div style={{
+          position: 'fixed', top: '20px', right: '20px', zIndex: 9999,
+          display: 'flex', alignItems: 'center', gap: '10px', padding: '16px 24px', borderRadius: '8px',
+          background: feedback.type === 'success' ? '#064e3b' : '#7f1d1d', // fundo escuro sólido
+          border: `1px solid ${feedback.type === 'success' ? '#10b981' : '#ef4444'}`,
+          color: feedback.type === 'success' ? '#34d399' : '#fca5a5',
+          fontSize: '0.9rem', fontWeight: 600,
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+        }}>
+          {feedback.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />} 
+          {feedback.message}
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
@@ -784,6 +909,105 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                           {React.createElement(v.icon, { size: 12 })} {v.label}
                                         </button>
                                     ))}
+                                  </div>
+                                </div>
+
+                                {/* Linha 1.5: Gestão de Nota Fiscal */}
+                                <div style={{ marginBottom: '12px' }}>
+                                  <div style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <FileText size={12} /> Gestão de Nota Fiscal
+                                  </div>
+                                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                    {!order.invoices?.[0]?.pdf_url ? (
+                                      <>
+                                        {order.erp_id ? (
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); handleSyncNfe(order.id); }}
+                                            disabled={syncingNfe === order.id}
+                                            style={{
+                                              display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                              background: syncingNfe === order.id ? '#3f424d' : 'rgba(34, 211, 238, 0.1)', 
+                                              color: syncingNfe === order.id ? '#94a3b8' : '#22d3ee',
+                                              border: `1px solid ${syncingNfe === order.id ? '#3f424d' : 'rgba(34, 211, 238, 0.3)'}`,
+                                              padding: '8px 16px', borderRadius: '8px',
+                                              fontWeight: 600, fontSize: '0.8rem', cursor: syncingNfe === order.id ? 'wait' : 'pointer',
+                                              transition: 'all 0.2s'
+                                            }}
+                                            onMouseEnter={(e: any) => { if (syncingNfe !== order.id) e.currentTarget.style.background = 'rgba(34, 211, 238, 0.2)'; }}
+                                            onMouseLeave={(e: any) => { if (syncingNfe !== order.id) e.currentTarget.style.background = 'rgba(34, 211, 238, 0.1)'; }}
+                                          >
+                                            <RefreshCw size={14} className={syncingNfe === order.id ? "spin" : ""} /> 
+                                            {syncingNfe === order.id ? 'Buscando...' : 'Buscar NF-e no ERP'}
+                                          </button>
+                                        ) : (
+                                          <span style={{ fontSize: '0.8rem', color: '#64748b', padding: '6px 12px', background: '#3f424d30', borderRadius: '8px', border: '1px solid #3f424d50' }}>
+                                            Aguardando envio ao ERP
+                                          </span>
+                                        )}
+                                        <span style={{ color: '#64748b', fontSize: '0.8rem' }}>ou</span>
+                                        <label style={{
+                                          display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                          background: uploadingNfe === order.id ? '#3f424d' : 'rgba(245, 158, 11, 0.1)', 
+                                          color: uploadingNfe === order.id ? '#94a3b8' : '#f59e0b',
+                                          border: `1px solid ${uploadingNfe === order.id ? '#3f424d' : 'rgba(245, 158, 11, 0.3)'}`,
+                                          padding: '8px 16px', borderRadius: '8px',
+                                          fontWeight: 600, fontSize: '0.8rem', cursor: uploadingNfe === order.id ? 'wait' : 'pointer',
+                                          transition: 'all 0.2s'
+                                        }}>
+                                          <UploadCloud size={14} />
+                                          {uploadingNfe === order.id ? 'Subindo...' : 'Fazer Upload Manual'}
+                                          <input 
+                                            type="file" 
+                                            accept="application/pdf" 
+                                            style={{ display: 'none' }} 
+                                            disabled={uploadingNfe === order.id}
+                                            onChange={(e) => {
+                                              if (e.target.files && e.target.files[0]) {
+                                                handleUploadNfe(order.id, e.target.files[0])
+                                              }
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                          />
+                                        </label>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); handleDownloadNfe(order.invoices![0].pdf_url); }}
+                                          style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                            background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6',
+                                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                                            padding: '8px 16px', borderRadius: '8px',
+                                            fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                          }}
+                                          onMouseEnter={(e: any) => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)'; }}
+                                          onMouseLeave={(e: any) => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'; }}
+                                        >
+                                          <Download size={14} /> Download da NF-e
+                                        </button>
+
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); handleSendNfeEmail(order); }}
+                                          disabled={sendingNfe === order.id}
+                                          style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                            background: sendingNfe === order.id ? '#3f424d' : 'rgba(16, 185, 129, 0.1)', 
+                                            color: sendingNfe === order.id ? '#94a3b8' : '#10b981',
+                                            border: `1px solid ${sendingNfe === order.id ? '#3f424d' : 'rgba(16, 185, 129, 0.3)'}`,
+                                            padding: '8px 16px', borderRadius: '8px',
+                                            fontWeight: 600, fontSize: '0.8rem', cursor: sendingNfe === order.id ? 'wait' : 'pointer',
+                                            transition: 'all 0.2s'
+                                          }}
+                                          onMouseEnter={(e: any) => { if (sendingNfe !== order.id) e.currentTarget.style.background = 'rgba(16, 185, 129, 0.2)'; }}
+                                          onMouseLeave={(e: any) => { if (sendingNfe !== order.id) e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)'; }}
+                                        >
+                                          <Mail size={14} /> 
+                                          {sendingNfe === order.id ? 'Enviando...' : 'Enviar NF-e por E-mail'}
+                                        </button>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
 

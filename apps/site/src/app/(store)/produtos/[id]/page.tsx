@@ -1,5 +1,6 @@
 import { Container, Badge } from '@kings/ui'
 import { AddToCartButton } from '@/components/store/cart/AddToCartButton'
+import { NotifyMeForm } from '@/components/store/product/NotifyMeForm'
 import { ShippingSimulator } from '@/components/store/shipping/ShippingSimulator'
 import { formatPrice } from '@kings/utils'
 import { createServerSupabaseClient } from '@kings/db'
@@ -102,6 +103,9 @@ export default async function ProductPage({ params }: { params: { id: string } }
   const pixPrice = finalPrice * 0.9
   const brandName = product.attributes?.brand || 'Kings Simuladores'
   const imageUrl = product.images?.[0] || 'https://placehold.co/800x800/131928/e8ecf4?text=Kings'
+  
+  const behavior = (product.attributes as any)?.out_of_stock_behavior
+  const isOutOfStock = product.stock <= 0 && (!behavior || behavior === 'unavailable' || behavior === 'immediate')
 
   return (
     <div className="kings-product-page-wrapper">
@@ -164,31 +168,37 @@ export default async function ProductPage({ params }: { params: { id: string } }
               </div>
             </div>
 
-            <ShippingSimulator 
-              dimensions={[{ 
-                weight: product.weight_kg || 2, 
-                width: product.dimensions_cm?.width || 20, 
-                height: product.dimensions_cm?.height || 20, 
-                length: product.dimensions_cm?.length || 20 
-              }]} 
-            />
+            {isOutOfStock ? (
+              <NotifyMeForm productId={product.id} />
+            ) : (
+              <>
+                <ShippingSimulator 
+                  dimensions={[{ 
+                    weight: product.weight_kg || 2, 
+                    width: product.dimensions_cm?.width || 20, 
+                    height: product.dimensions_cm?.height || 20, 
+                    length: product.dimensions_cm?.length || 20 
+                  }]} 
+                />
 
-              <AddToCartButton 
-                product={{
-                  id: product.id,
-                  title: product.title,
-                  price: finalPrice,
-                  imageUrl,
-                  brand: brandName,
-                  storeOrigin: 'kings',
-                  dimensions: {
-                    weight: product.weight_kg || 2,
-                    width: product.dimensions_cm?.width || 20,
-                    height: product.dimensions_cm?.height || 20,
-                    length: product.dimensions_cm?.length || 20
-                  }
-                }} 
-              />
+                <AddToCartButton 
+                  product={{
+                    id: product.id,
+                    title: product.title,
+                    price: finalPrice,
+                    imageUrl,
+                    brand: brandName,
+                    storeOrigin: 'kings',
+                    dimensions: {
+                      weight: product.weight_kg || 2,
+                      width: product.dimensions_cm?.width || 20,
+                      height: product.dimensions_cm?.height || 20,
+                      length: product.dimensions_cm?.length || 20
+                    }
+                  }} 
+                />
+              </>
+            )}
 
 
               {/* Aviso de preço inválido */}

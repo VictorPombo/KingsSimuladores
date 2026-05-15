@@ -3,7 +3,7 @@
  * Envia E-mails transacionais. Se sem credencial, loga aviso e retorna success: false.
  */
 
-export const sendEmailMessage = async (data: { to: string | string[], subject: string, html: string }) => {
+export const sendEmailMessage = async (data: { to: string | string[], subject: string, html: string, attachments?: Array<{ filename: string, content?: string | Buffer, path?: string }> }) => {
   const apiKey = process.env.RESEND_API_KEY
   
   if (!apiKey || apiKey.includes('preencher')) {
@@ -14,18 +14,24 @@ export const sendEmailMessage = async (data: { to: string | string[], subject: s
   try {
     console.log(`[Resend] Disparando e-mail para: ${data.to}`)
     
+    const payload: any = {
+      from: 'KingsHub <contato@kingssimuladores.com.br>',
+      to: Array.isArray(data.to) ? data.to : [data.to],
+      subject: data.subject,
+      html: data.html
+    }
+
+    if (data.attachments && data.attachments.length > 0) {
+      payload.attachments = data.attachments
+    }
+
     const res = await fetch(`https://api.resend.com/emails`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        from: 'KingsHub <contato@kingssimuladores.com.br>',
-        to: Array.isArray(data.to) ? data.to : [data.to],
-        subject: data.subject,
-        html: data.html
-      })
+      body: JSON.stringify(payload)
     })
 
     if (res.ok) {

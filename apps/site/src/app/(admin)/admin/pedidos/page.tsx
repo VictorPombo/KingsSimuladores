@@ -24,7 +24,8 @@ export default async function AdminPedidosPage() {
       .select(`
         id, order_number, brand_origin, order_type, status, subtotal, shipping_cost, discount, total,
         payment_method, tracking_code, coupon_id, created_at, shipping_address, notes, erp_id,
-        profiles!customer_id ( full_name, email, phone, cpf_cnpj )
+        profiles!customer_id ( full_name, email, phone, cpf_cnpj ),
+        invoices ( id, pdf_url, status )
       `)
       .order('created_at', { ascending: false })
 
@@ -41,17 +42,16 @@ export default async function AdminPedidosPage() {
     let finalOrders = ordersData || [];
 
     // Busca os códigos dos cupons manualmente pois não há foreign key
-    const couponIds = Array.from(new Set(finalOrders.map(o => o.coupon_id).filter(Boolean)));
+    const couponIds = Array.from(new Set(finalOrders.map((o: any) => o.coupon_id).filter(Boolean)));
     if (couponIds.length > 0) {
       const { data: couponsData } = await supabase
         .from('coupons')
         .select('id, code')
         .in('id', couponIds);
-      
       if (couponsData) {
-        finalOrders = finalOrders.map(o => {
+        finalOrders = finalOrders.map((o: any) => {
           if (!o.coupon_id) return o;
-          const coupon = couponsData.find(c => c.id === o.coupon_id);
+          const coupon = couponsData.find((c: any) => c.id === o.coupon_id);
           return { ...o, coupons: coupon ? { code: coupon.code } : null };
         });
       }

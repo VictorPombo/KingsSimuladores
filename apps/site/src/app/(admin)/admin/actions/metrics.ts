@@ -11,12 +11,14 @@ export async function getAdminMetrics() {
     .select('*', { count: 'exact', head: true })
 
   // 2. Total Orders and Revenue
-  const { data: orders } = await supabase
+  const { data: orders, error: orderErr } = await supabase
     .from('orders')
-    .select('total_amount, status, created_at')
+    .select('total, status, created_at')
+
+  if (orderErr) console.error("Metrics Orders Query Error:", orderErr)
 
   const paidOrders = orders?.filter((o: any) => o.status === 'paid' || o.status === 'shipped' || o.status === 'completed') || []
-  const revenue = paidOrders.reduce((acc: number, o: any) => acc + (o.total_amount || 0), 0)
+  const revenue = paidOrders.reduce((acc: number, o: any) => acc + (o.total || 0), 0)
   
   // 3. Valor em Estoque
   const { data: stockData } = await supabase

@@ -44,6 +44,7 @@ const MENU_SECTIONS = [
         icon: Package,
         subItems: [
           { label: 'Produtos', href: '/admin/produtos' },
+          { label: 'Fila de Espera', href: '/admin/waitlist' },
           { label: 'Categorias', href: '/admin/categorias' },
           { label: 'Marcas', href: '/admin/marcas' },
           { label: 'Grades', href: '/admin/grades' },
