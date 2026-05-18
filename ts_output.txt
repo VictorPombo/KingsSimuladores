@@ -1,0 +1,19 @@
+apps/site/src/app/(marketplace)/usado/avaliar/[orderId]/page.tsx(72,141): error TS2339: Property 'full_name' does not exist on type '{ full_name: any; }[]'.
+apps/site/src/app/(marketplace)/usado/vendedor/[id]/page.tsx(65,37): error TS2322: Type '{ children: (string | number)[]; variant: "info"; className: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+apps/site/src/app/(marketplace)/usado/vendedor/[id]/page.tsx(69,37): error TS2322: Type '{ children: (string | number)[]; variant: "info"; className: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+apps/site/src/app/(marketplace)/usado/vendedor/[id]/page.tsx(73,41): error TS2322: Type '{ children: string; variant: "danger"; className: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+apps/site/src/app/(marketplace)/usado/vendedor/[id]/page.tsx(90,15): error TS2322: Type '{ key: any; product: { id: any; name: any; price: any; images: string[]; brand: string; }; href: string; }' is not assignable to type 'IntrinsicAttributes & ProductCardProps'.
+  Property 'product' does not exist on type 'IntrinsicAttributes & ProductCardProps'.
+apps/site/src/app/(marketplace)/usado/vendedor/[id]/page.tsx(116,80): error TS2339: Property 'full_name' does not exist on type '{ full_name: any; }[]'.
+apps/site/src/app/(store)/produtos/page.tsx(70,30): error TS18048: 'product.discount' is possibly 'undefined'.
+apps/site/src/app/(store)/produtos/page.tsx(70,74): error TS18048: 'product.discount' is possibly 'undefined'.
+apps/site/src/app/api/webhooks/mercadopago/route.ts(82,35): error TS2339: Property 'full_name' does not exist on type '{ full_name: any; email: any; phone: any; }[]'.
+apps/site/src/app/api/webhooks/mercadopago/route.ts(83,36): error TS2339: Property 'email' does not exist on type '{ full_name: any; email: any; phone: any; }[]'.
+apps/site/src/app/api/webhooks/mercadopago/route.ts(105,45): error TS2339: Property 'full_name' does not exist on type '{ full_name: any; email: any; phone: any; }[]'.
+apps/site/src/app/api/webhooks/mercadopago/route.ts(106,46): error TS2339: Property 'phone' does not exist on type '{ full_name: any; email: any; phone: any; }[]'.
+apps/site/src/app/api/webhooks/mercadopago/route.ts(118,46): error TS2339: Property 'email' does not exist on type '{ full_name: any; email: any; phone: any; }[]'.
+apps/site/src/app/api/webhooks/mercadopago/route.ts(151,64): error TS2345: Argument of type '{ product_id: any; quantity: any; }[] | null' is not assignable to parameter of type 'any[]'.
+  Type 'null' is not assignable to type 'any[]'.

@@ -1,0 +1,43 @@
+{
+  "name": "@kings/site",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3015",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kings/db": "*",
+    "@kings/notifications": "*",
+    "@kings/payments": "*",
+    "@kings/shipping": "*",
+    "@kings/ui": "*",
+    "@kings/utils": "*",
+    "browser-image-compression": "^2.0.2",
+    "ffmpeg-static": "^5.3.0",
+    "lucide-react": "^1.14.0",
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "recharts": "^3.8.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.4.0",
+    "date-fns": "^4.1.0",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.59.1",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.5.0",
+    "vitest": "^4.1.5"
+  }
+}

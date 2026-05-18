@@ -109,6 +109,9 @@ export function ProductCard({
           <div style={{ fontSize: '0.7rem', color: 'var(--accent)', marginTop: '0px', fontWeight: 600 }}>
             {installments}x de {formatPrice(installmentValue)} sem juros
           </div>
+          <div style={{ fontSize: '0.75rem', color: '#06d6a0', marginTop: '4px', fontWeight: 600 }}>
+            {formatPrice(finalPrice * 0.9)} no Pix (10% OFF)
+          </div>
         </div>
       </div>
     </Card>
