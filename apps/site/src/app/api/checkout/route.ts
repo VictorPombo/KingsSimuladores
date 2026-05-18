@@ -75,18 +75,46 @@ export async function POST(req: Request) {
 
     const storeContext = firstStore === 'seven' ? 'seven' : (firstStore === 'msu' ? 'msu' : 'kings')
 
+    // 2.5 Interceptar o Cupom para Frete Grátis
+    let isFreeShipping = false;
+    let validCouponId = coupon_id || null;
+
+    if (coupon_id) {
+      const adminClient = createAdminClient();
+      const { data: couponData } = await adminClient.from('coupons').select('id, code, type, is_active').eq('id', coupon_id).single();
+      
+      let couponRecord = couponData;
+      if (!couponRecord) {
+        // Fallback: caso o frontend mande o código do cupom ao invés do ID
+        const { data: couponByCode } = await adminClient.from('coupons').select('id, code, type, is_active').eq('code', coupon_id).single();
+        couponRecord = couponByCode;
+        if (couponRecord) validCouponId = couponRecord.id;
+      }
+
+      if (couponRecord && couponRecord.is_active) {
+        const isFreeShippingType = couponRecord.type === 'shipping';
+        const isSpecificCode = ['PIANA', 'POKIZ', 'CONRAZ'].includes(couponRecord.code?.toUpperCase());
+        if (isFreeShippingType || isSpecificCode) {
+          isFreeShipping = true;
+        }
+      }
+    }
+
+    const finalShippingCost = isFreeShipping ? 0 : (shipping ? parseFloat(shipping.price) : 0);
+    const calculatedSubtotal = total - finalShippingCost;
+
     // 3. Native Order Creation in Database FIRST to get an ID
     const orderData = {
       customer_id: profile.id,
       brand_origin: storeContext,
       order_type: 'direct',
       status: 'pending',
-      subtotal: total - (shipping ? parseFloat(shipping.price) : 0),
-      shipping_cost: shipping ? parseFloat(shipping.price) : 0,
+      subtotal: calculatedSubtotal,
+      shipping_cost: finalShippingCost,
       total: total,
       shipping_address: address,
       preference_id: null,
-      coupon_id: coupon_id || null,
+      coupon_id: validCouponId,
       notes: shipping?.name ? `Frete: ${shipping.name}` : null,
     }
 
