@@ -114,8 +114,8 @@ export default function LoginPage() {
       setError('Informe um telefone válido.')
       return
     }
-    if (!cep || !logradouro || !numero || !bairro || !cidade) {
-      setError('Preencha todos os campos obrigatórios do endereço.')
+    if (!cep || !logradouro.trim() || !numero.trim() || !bairro.trim() || !cidade.trim()) {
+      setError('Preencha todos os campos obrigatórios do endereço (incluindo número e rua).')
       return
     }
 

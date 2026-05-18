@@ -445,7 +445,13 @@ export default function CheckoutPage() {
                     if (cpf.trim().length < 11) return alert('Por favor, informe um CPF válido para a Nota Fiscal.');
                     if (email.trim().length < 5) return alert('Por favor, informe um E-mail válido.');
                     if (telefone.trim().length < 10) return alert('Por favor, informe um Telefone/WhatsApp válido com DDD.');
-                    if (!isRetirada && cep.length < 8) return alert('Por favor, informe o CEP de entrega corretamente.');
+                    if (!isRetirada) {
+                      if (cep.length < 8) return alert('Por favor, informe o CEP de entrega corretamente.');
+                      if (!logradouro || logradouro.trim().length < 3) return alert('Por favor, informe o Endereço de entrega (Logradouro).');
+                      if (!numero || numero.trim().length === 0) return alert('Por favor, informe o Número do endereço.');
+                      if (!bairro || bairro.trim().length < 2) return alert('Por favor, informe o Bairro.');
+                      if (!cidade || cidade.trim().length < 3) return alert('Por favor, informe a Cidade/UF.');
+                    }
                     calcularFretes();
                   }} 
                   style={{ marginTop: '1rem' }}
