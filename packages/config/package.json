@@ -1,0 +1,13 @@
+{
+  "name": "@kings/config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./tailwind": "./tailwind.config.ts",
+    "./typescript": "./tsconfig.json",
+    "./typescript/nextjs": "./tsconfig.nextjs.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

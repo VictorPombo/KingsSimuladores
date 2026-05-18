@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "jsx": "preserve",
+    "allowJs": true,
+    "module": "ESNext",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

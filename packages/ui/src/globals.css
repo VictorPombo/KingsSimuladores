@@ -1,0 +1,277 @@
+/**
+ * @kings/ui — Design System Globals
+ *
+ * Tokens de design para Kings Hub.
+ * Importar em cada app: import '@kings/ui/globals.css'
+ */
+
+/* ═══════════ CSS Custom Properties (Design Tokens) ═══════════ */
+/* ═══════════ CSS Custom Properties (Design Tokens) ═══════════ */
+:root {
+  /* Backgrounds */
+  --bg-primary: #06080f;
+  --bg-secondary: #0c1018;
+  --bg-card: #0f1420;
+  --bg-card-hover: #131928;
+  --bg-elevated: #161d2e;
+
+  /* Borders */
+  --border: #1a2035;
+  --border-accent: #1e2a45;
+  --border-focus: #00e5ff;
+
+  /* Text */
+  --text-primary: #e8ecf4;
+  --text-secondary: #8892a8;
+  --text-muted: #556078;
+  --text-inverse: #06080f;
+
+  /* Brand Colors */
+  --kings-primary: #00b4f5;
+  --kings-primary-hover: #0093c8;
+  --kings-secondary: #00e896;
+  --msu-primary: #00b4f5;
+  --msu-primary-hover: #0093c8;
+  --msu-secondary: #00e896;
+
+  /* Accent */
+  --accent: #00e896;
+  --accent-glow: rgba(0, 232, 150, 0.15);
+  --accent-dim: rgba(0, 232, 150, 0.08);
+
+  /* Semantic */
+  --success: #00e896;
+  --warning: #ffd166;
+  --danger: #ff3b5c;
+  --info: #00b4f5;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #00b4f5, #00e896);
+  --gradient-kings: linear-gradient(135deg, #00b4f5 0%, #00e896 100%);
+  --gradient-msu: linear-gradient(135deg, #00b4f5 0%, #00e896 100%);
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(0, 180, 245, 0.4);
+
+  /* Typography */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Z-Index Scale */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+}
+
+/* ═══════════ Kings Theme Overrides (For nested contexts) ═══════════ */
+.theme-kings {
+  --accent: #00e896;
+  --accent-glow: rgba(0, 232, 150, 0.15);
+  --accent-dim: rgba(0, 232, 150, 0.08);
+  --gradient-primary: linear-gradient(135deg, #00b4f5, #00e896);
+  --info: #00b4f5;
+  --success: #00e896;
+}
+
+/* ═══════════ MSU Theme Overrides ═══════════ */
+.theme-msu {
+  /* Accent: Purple */
+  --accent: #8b5cf6;
+  --accent-glow: rgba(139, 92, 246, 0.15);
+  --accent-dim: rgba(139, 92, 246, 0.08);
+
+  /* Gradients: Purple to Pink */
+  --gradient-primary: linear-gradient(135deg, #8b5cf6, #d946ef);
+  
+  /* Semantic adaptation */
+  --info: #8b5cf6;
+  --success: #06d6a0;
+}
+
+/* ═══════════ Seven Theme Overrides ═══════════ */
+.theme-seven {
+  /* Accent: Orange */
+  --accent: #ff6b00;
+  --accent-glow: rgba(255, 107, 0, 0.15);
+  --accent-dim: rgba(255, 107, 0, 0.08);
+
+  /* Gradients: Orange to Yellow */
+  --gradient-primary: linear-gradient(135deg, #ff6b00, #facc15);
+  
+  /* Semantic adaptation */
+  --info: #ff6b00;
+  --success: #10b981;
+}
+
+/* ═══════════ Base Reset ═══════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-body);
+  background: transparent;
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--kings-primary-hover);
+}
+
+/* ═══════════ Typography ═══════════ */
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════ Utility Classes ═══════════ */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass {
+  background: rgba(15, 20, 32, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+/* ═══════════ Animations ═══════════ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-pulse { animation: pulse 2s infinite; }
+
+/* ═══════════ Scrollbar ═══════════ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ═══════════ Responsive Hybrid Engine ═══════════ */
+.desktop-only { display: block; }
+.desktop-flex { display: flex; }
+.mobile-only { display: none !important; }
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .desktop-flex { display: none !important; }
+  .mobile-only { display: block !important; }
+  .mobile-only-flex { display: flex !important; }
+}
+
+.app-container {
+  min-height: 100vh;
+}
+@media (max-width: 768px) {
+  .app-container {
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+    padding-bottom: 90px;
+    background: var(--bg-primary);
+    border-left: 1px solid rgba(255,255,255,0.03);
+    border-right: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 0 40px rgba(0, 180, 245, 0.05);
+    overflow-x: hidden;
+  }
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Admin & MSU Layout */
+.admin-body { display: flex; min-height: 100vh; background: #030509; margin: 0; padding: 0; }
+.admin-main { flex: 1; padding: 2rem; position: relative; }
+.msu-main { flex: 1; }
+
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 0;
+    padding-bottom: 90px;
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+  .msu-main {
+    padding-bottom: 90px;
+  }
+}
