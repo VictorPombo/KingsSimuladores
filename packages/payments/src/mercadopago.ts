@@ -74,7 +74,8 @@ export async function createPreference(items: any[], customer: any, orderId?: st
     auto_return: 'approved',
     payment_methods: {
       installments: pixOnly ? 1 : 12,
-      // Quando pixOnly=true, bloqueia cartão crédito, débito, boleto e pré-pago
+      // Quando pixOnly=true, bloqueia cartão de crédito, débito, boleto e pré-pago.
+      // Quando pixOnly=false (fluxo de cartão), bloqueia o Pix para obrigar o cliente a usar o botão nativo de Pix com 10% de desconto.
       ...(pixOnly ? {
         excluded_payment_types: [
           { id: 'credit_card' },
@@ -84,7 +85,14 @@ export async function createPreference(items: any[], customer: any, orderId?: st
           { id: 'atm' },
           { id: 'digital_currency' },
         ]
-      } : {})
+      } : {
+        excluded_payment_types: [
+          { id: 'bank_transfer' }
+        ],
+        excluded_payment_methods: [
+          { id: 'pix' }
+        ]
+      })
     },
     // IMPORTANTE: Forçar www para evitar redirect 301 da Vercel que quebra o webhook do MP
     notification_url: `https://www.kingssimuladores.com.br/api/webhooks/mercadopago?store=${storeContext || 'kings'}`
