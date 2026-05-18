@@ -22,6 +22,16 @@ export function PurchaseTracker({ order }: { order: any }) {
       })
       
       localStorage.setItem(trackedKey, 'true')
+      
+      // Limpar o carrinho apenas aqui (Página de Sucesso), para não perder caso volte do checkout
+      try {
+        const kingsCart = localStorage.getItem('kings_cart')
+        if (kingsCart) {
+          localStorage.removeItem('kings_cart')
+          window.dispatchEvent(new Event('cartUpdated'))
+        }
+      } catch(e) {}
+
       setTracked(true)
     }
   }, [order, tracked])

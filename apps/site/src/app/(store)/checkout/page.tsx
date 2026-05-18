@@ -272,7 +272,7 @@ export default function CheckoutPage() {
       
       if (session.ok && session.init_point) {
         // Redireciona o cliente para o checkout real do Mercado Pago
-        clearCart()
+        // NÃO limpa o carrinho aqui, para evitar perda se ele fechar a janela.
         window.location.href = session.init_point
       } else {
         setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')
@@ -321,7 +321,8 @@ export default function CheckoutPage() {
       const session = await res.json()
 
       if (session.ok && session.init_point) {
-        clearCart()
+        // Redireciona o cliente para o checkout real do Mercado Pago
+        // NÃO limpa o carrinho aqui, para evitar perda se ele fechar a janela.
         window.location.href = session.init_point
       } else {
         setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')

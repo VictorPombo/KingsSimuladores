@@ -239,8 +239,11 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
                         <div style={{ fontSize: '1.1rem', fontWeight: 800, color: themeColor }}>
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)}
                         </div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--success)', fontWeight: 700, marginTop: '4px' }}>
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price * 0.9)} no Pix (10% off)
+                        </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                          12x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price / 12)} s/ juros
+                          ou 12x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price / 12)} s/ juros
                         </div>
                       </div>
                     </div>
