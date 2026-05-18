@@ -27,6 +27,3 @@ build/
 .turbo/
 supabase/.temp/
 apps/site/public/*.MOV.bak
-
-# Scratch and testing scripts
-_scratch/

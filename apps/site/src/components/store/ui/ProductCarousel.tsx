@@ -242,9 +242,6 @@ export function ProductCarousel({ title, prods, tenant = 'kings' }: { title: str
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                           12x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price / 12)} s/ juros
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#06d6a0', marginTop: '4px', fontWeight: 600 }}>
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price * 0.9)} à vista no Pix (10% OFF)
-                        </div>
                       </div>
                     </div>
                   </div>

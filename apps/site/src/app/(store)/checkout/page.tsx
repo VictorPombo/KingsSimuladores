@@ -272,7 +272,7 @@ export default function CheckoutPage() {
       
       if (session.ok && session.init_point) {
         // Redireciona o cliente para o checkout real do Mercado Pago
-        // O carrinho agora só será limpo na página de sucesso, permitindo que o usuário volte e tente outro método.
+        clearCart()
         window.location.href = session.init_point
       } else {
         setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')
@@ -321,7 +321,7 @@ export default function CheckoutPage() {
       const session = await res.json()
 
       if (session.ok && session.init_point) {
-        // O carrinho será limpo na página de sucesso
+        clearCart()
         window.location.href = session.init_point
       } else {
         setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')
