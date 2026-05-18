@@ -247,7 +247,9 @@ export default function CheckoutPage() {
     const storeGroupItems = groups[currentStore]
     
     // Simplificação: apenas cobra o frete e aplica desconto no PRIMEIRO pagamento
-    const storeShipping = currentStoreIdx === 0 ? selectedFrete : null
+    const storeShipping = currentStoreIdx === 0 
+      ? (freeShipping && selectedFrete ? { ...selectedFrete, price: '0.00' } : selectedFrete) 
+      : null
     const shippingPrice = currentStoreIdx === 0 ? valorFrete : 0
     
     const storeSubtotal = storeGroupItems.reduce((acc, i) => acc + (i.price * i.quantity), 0)
@@ -290,7 +292,9 @@ export default function CheckoutPage() {
     const currentStore = storeNames[currentStoreIdx]
     const storeGroupItems = groups[currentStore]
 
-    const storeShipping = currentStoreIdx === 0 ? selectedFrete : null
+    const storeShipping = currentStoreIdx === 0 
+      ? (freeShipping && selectedFrete ? { ...selectedFrete, price: '0.00' } : selectedFrete) 
+      : null
     const shippingPrice = currentStoreIdx === 0 ? valorFrete : 0
 
     // Aplica 10% de desconto em CADA item para o Pix
