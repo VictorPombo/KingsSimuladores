@@ -32,10 +32,10 @@ export async function validateCouponCode(code: string, brand?: 'kings' | 'msu') 
     return { success: false, error: 'Limite de uso esgotado' }
   }
 
-  if (brand && coupon.brand_scope && coupon.brand_scope !== brand) {
-    const scopeName = coupon.brand_scope === 'kings' ? 'Kings Simuladores' : 'Meu Simulador Usado'
-    return { success: false, error: `Cupom válido apenas para produtos ${scopeName}` }
-  }
+  // if (brand && coupon.brand_scope && coupon.brand_scope !== brand) {
+  //   const scopeName = coupon.brand_scope === 'kings' ? 'Kings Simuladores' : 'Meu Simulador Usado'
+  //   return { success: false, error: `Cupom válido apenas para produtos ${scopeName}` }
+  // }
 
   return { success: true, coupon }
 }
