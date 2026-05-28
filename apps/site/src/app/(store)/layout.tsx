@@ -6,7 +6,6 @@ import { ToastProvider } from '@kings/ui'
 
 import { WhatsappFloat } from '@/components/store/layout/WhatsappFloat'
 import { VisitTracker } from '@/components/shared/VisitTracker'
-import { MaintenanceBanner } from '@/components/shared/MaintenanceBanner'
 
 export default function StoreLayout({
   children,
@@ -18,7 +17,6 @@ export default function StoreLayout({
       <CartProvider>
         <VisitTracker origin="kings" />
         <CartDrawer />
-        <MaintenanceBanner />
         <Header />
         {children}
         <Footer />

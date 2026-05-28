@@ -23,7 +23,7 @@ import { ToastProvider } from '@kings/ui'
 import { AuthAction } from '@/components/store/layout/AuthAction'
 import { StoreSwitcher } from '@/components/store/layout/StoreSwitcher'
 import Script from 'next/script'
-import { MaintenanceBanner } from '@/components/shared/MaintenanceBanner'
+
 import { UnderDevelopmentPopup } from '@/components/shared/UnderDevelopmentPopup'
 
 export default async function SevenLayout({
@@ -33,18 +33,6 @@ export default async function SevenLayout({
 }) {
   return (
     <ToastProvider>
-      <Script 
-        src="https://www.googletagmanager.com/gtag/js?id=AW-11399026698" 
-        strategy="afterInteractive" 
-      />
-      <Script id="google-analytics-seven" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'AW-11399026698');
-        `}
-      </Script>
       <CartProvider>
         <UnderDevelopmentPopup
           store="seven"
@@ -56,7 +44,7 @@ export default async function SevenLayout({
         />
         <div className="theme-seven" style={{ minHeight: '100vh', color: '#f8fafc', position: 'relative', fontFamily: 'var(--font-sans)', zIndex: 1 }}>
         <CartDrawer />
-        <MaintenanceBanner />
+
       {/* Background Effect */}
       <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(249,115,22,0.05) 0%, rgba(0,0,0,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
       

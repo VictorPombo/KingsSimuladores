@@ -1,4 +1,5 @@
 import { Container } from '@kings/ui'
+import Link from 'next/link'
 
 export function Footer() {
   return (
@@ -83,19 +84,18 @@ export function Footer() {
           <div>
             <h4 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Navegação</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="/produtos" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Todos os Produtos</a></li>
-              <li><a href="/categorias/cockpits" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Cockpits</a></li>
-              <li><a href="/categorias/volantes" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Volantes</a></li>
+              <li><Link href="/produtos" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Todos os Produtos</Link></li>
+              <li><Link href="/categorias/cockpits" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Cockpits</Link></li>
+              <li><Link href="/categorias/volantes" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Volantes</Link></li>
             </ul>
           </div>
           <div>
             <h4 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Institucional</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="https://www.kingssimuladores.com.br/pagina/quem-somos.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Quem Somos</a></li>
-              <li><a href="https://www.kingssimuladores.com.br/pagina/politica-de-trocas-e-devolucoes.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Trocas e Devoluções</a></li>
-              <li><a href="https://www.kingssimuladores.com.br/pagina/politica-de-privacidade.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Política de Privacidade</a></li>
-              <li><a href="https://www.kingssimuladores.com.br/pagina/meios-de-pagamento-e-de-frete.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Pagamento e Frete</a></li>
-              <li><a href="https://www.kingssimuladores.com.br/pagina/divulgue-na-kings.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Divulgue na Kings</a></li>
+              <li><Link href="/quem-somos" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Quem Somos</Link></li>
+              <li><Link href="/politica-de-trocas" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Trocas e Devoluções</Link></li>
+              <li><Link href="/politica-de-privacidade" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Política de Privacidade</Link></li>
+              <li><Link href="/termos" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textDecoration: 'none' }}>Termos de Uso</Link></li>
             </ul>
           </div>
           <div>
@@ -124,13 +124,14 @@ export function Footer() {
               .security-badge {
                 display: flex;
                 align-items: center;
-                gap: 4px;
-                padding: 6px;
-                border-radius: 4px;
+                justify-content: center;
+                gap: 6px;
+                padding: 8px;
+                border-radius: 6px;
                 min-width: 0;
                 overflow: hidden;
               }
-              .security-badge svg { flex-shrink: 0; width: 16px; height: 16px; }
+              .security-badge svg { flex-shrink: 0; width: 18px; height: 18px; }
               .security-badge .badge-label { font-size: 0.55rem !important; line-height: 1; }
               .security-badge .badge-value { font-size: 0.6rem !important; font-weight: bold; }
               @media (min-width: 768px) {
@@ -139,7 +140,7 @@ export function Footer() {
                   flex-direction: column;
                   gap: 10px; 
                 }
-                .security-badge { padding: 8px; gap: 6px; }
+                .security-badge { padding: 10px 12px; gap: 8px; justify-content: center; }
                 .security-badge svg { width: 20px; height: 20px; }
                 .security-badge .badge-label { font-size: 0.65rem !important; }
                 .security-badge .badge-value { font-size: 0.75rem !important; }
