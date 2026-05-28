@@ -54,9 +54,28 @@ export default function CheckoutPage() {
   }
 
   useEffect(() => {
-    async function loadProfile() {
+    async function loadProfileOrGuest() {
+      // 1. Tentar recuperar dados de convidado do localStorage primeiro
       try {
-        // Lazy load the client only when mounting the component
+        const guestData = localStorage.getItem('@kings/guest_checkout')
+        if (guestData) {
+          const parsed = JSON.parse(guestData)
+          if (parsed.email) setEmail(parsed.email)
+          if (parsed.telefone) setTelefone(parsed.telefone)
+          if (parsed.nome) setNome(parsed.nome)
+          if (parsed.cpf) setCpf(parsed.cpf)
+          if (parsed.cep) setCep(parsed.cep)
+          if (parsed.logradouro) setLogradouro(parsed.logradouro)
+          if (parsed.numero) setNumero(parsed.numero)
+          if (parsed.bairro) setBairro(parsed.bairro)
+          if (parsed.cidade) setCidade(parsed.cidade)
+          if (parsed.complemento) setComplemento(parsed.complemento)
+          if (parsed.referencia) setReferencia(parsed.referencia)
+        }
+      } catch (err) {}
+
+      // 2. Sobrepor com dados do perfil (se logado)
+      try {
         const { createClient } = await import('@kings/db/client')
         const supabase = createClient()
         const { data: { user } } = await (supabase.auth as any).getUser()
@@ -79,15 +98,22 @@ export default function CheckoutPage() {
             }
           }
         }
-        // Usuário não logado: checkout continua normalmente como convidado
-        // Os campos obrigatórios (nome, CPF, e-mail, telefone) são validados no formulário
       } catch (err) {
-        // Se der erro de auth, continua como convidado sem bloquear
-        console.warn('Auth check failed, continuing as guest:', err)
+        // Ignora erro se não logado
       }
     }
-    loadProfile()
+    loadProfileOrGuest()
   }, [])
+
+  // 3. Salvar dados de convidado a cada alteração
+  useEffect(() => {
+    // Só salva se pelo menos um campo tiver algo digitado
+    if (nome || email || cpf || telefone || cep || logradouro || numero) {
+      localStorage.setItem('@kings/guest_checkout', JSON.stringify({
+        nome, email, cpf, telefone, cep, logradouro, numero, bairro, cidade, complemento, referencia
+      }))
+    }
+  }, [nome, email, cpf, telefone, cep, logradouro, numero, bairro, cidade, complemento, referencia])
 
   // Auto-fill address fields when CEP is loaded from profile or typed
   // NÃO avança de step — apenas preenche rua/bairro/cidade
