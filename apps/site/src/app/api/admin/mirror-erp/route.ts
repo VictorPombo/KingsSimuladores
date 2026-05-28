@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@kings/db'
+import { requireAdmin } from '@/lib/require-admin'
 
 /**
  * POST /api/admin/mirror-erp
@@ -27,6 +28,9 @@ function slugify(text: string) {
 
 export async function POST() {
   try {
+    const admin = await requireAdmin()
+    if (admin.error) return admin.error
+
     const supabase = createAdminClient()
     const token = process.env.OLIST_API_KEY_KINGS
     

@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@kings/db/server'
+import { createRateLimiter } from '@/lib/rate-limit'
+
+const emailCheckLimiter = createRateLimiter({ windowMs: 60_000, max: 5, message: 'Muitas verificações. Tente novamente em 1 minuto.' })
 
 export async function POST(req: Request) {
   try {
+    // Rate limiting contra email enumeration
+    const rateLimited = emailCheckLimiter.check(req)
+    if (rateLimited) return rateLimited
+
     const { email } = await req.json()
     if (!email) return NextResponse.json({ exists: false }, { status: 400 })
 

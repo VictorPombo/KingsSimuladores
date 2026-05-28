@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@kings/db'
-import { createServerSupabaseClient } from '@kings/db/server'
 import { sendEmailMessage } from '@kings/notifications'
+import { requireAdmin } from '@/lib/require-admin'
 
 export async function POST(req: Request) {
   try {
+    const admin = await requireAdmin()
+    if (admin.error) return admin.error
+
     const { productId, action } = await req.json()
     if (!productId || !action) {
       return NextResponse.json({ error: 'Faltam parâmetros (productId, action)' }, { status: 400 })
@@ -14,22 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Ação inválida. Use "approve" ou "reject"' }, { status: 400 })
     }
 
-    const supabase = await createServerSupabaseClient()
     const supabaseAdmin = createAdminClient()
-
-    // 1. Validar Sessão
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-    }
-
-    // 2. Checagem de privilégios de Admin
-    const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('auth_id', user.id).single()
-    
-    // Suportando a possível estrutura de 'role' do projeto
-    if (profile?.role !== 'admin' && profile?.role !== 'superadmin') {
-       return NextResponse.json({ error: 'Acesso negado. Apenas administradores podem moderar anúncios.' }, { status: 403 })
-    }
 
     // 3. Executar o UPDATE
     const newStatus = action === 'approve' ? 'active' : 'rejected'

@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@kings/db'
+import { requireAdmin } from '@/lib/require-admin'
 
 export async function POST(req: Request) {
   try {
+    // Apenas admins podem fazer upload de imagens
+    const admin = await requireAdmin()
+    if (admin.error) return admin.error
+
     const formData = await req.formData()
     const file = formData.get('file') as File | null
 

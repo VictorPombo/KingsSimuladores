@@ -2,59 +2,124 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient, createAdminClient } from '@kings/db/server'
 import { createPreference } from '@kings/payments'
 import { sendEmailMessage } from '@kings/notifications'
+import { createRateLimiter } from '@/lib/rate-limit'
+
+const checkoutLimiter = createRateLimiter({ windowMs: 60_000, max: 5, message: 'Muitas tentativas de checkout. Aguarde 1 minuto.' })
 
 export async function POST(req: Request) {
   try {
+    // Rate limiting — máximo 5 checkouts por minuto por IP
+    const rateLimited = checkoutLimiter.check(req)
+    if (rateLimited) return rateLimited
+
     const body = await req.json()
     const { items, customer, address, shipping, total, coupon_id, pix_discount } = body
 
-    // 1. Authenticate user from session
+    // 1. Identify user — supports both logged-in and guest checkout
     const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await (supabase.auth as any).getUser()
+    const adminSupabase = createAdminClient()
+    const { data: { user } } = await (supabase.auth as any).getUser()
 
-    if (!user) {
-      console.error('[Checkout API] Unauthorized error. Auth Error:', authError)
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    let profileId: string
 
-    const { data: profile } = await supabase.from('profiles').select('id, addresses').eq('auth_id', user.id).single()
+    if (user) {
+      // Logged-in user: use their existing profile
+      const { data: profile } = await supabase.from('profiles').select('id, addresses').eq('auth_id', user.id).single()
 
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 403 })
-    }
-
-    const updateData: any = {}
-    if (customer?.telefone) updateData.phone = customer.telefone
-    if (customer?.cpf) updateData.cpf_cnpj = customer.cpf
-    if (customer?.nome) updateData.full_name = customer.nome
-
-    // Salvar o endereço no perfil se ele não existir
-    if (address && address.cep) {
-      const currentAddresses = Array.isArray(profile.addresses) ? profile.addresses : []
-      const addressExists = currentAddresses.some((a: any) => a.zip_code === address.cep && a.number === address.numero)
-      
-      if (!addressExists) {
-        updateData.addresses = [
-          ...currentAddresses,
-          {
-            id: crypto.randomUUID(),
-            is_default: currentAddresses.length === 0,
-            zip_code: address.cep,
-            street: address.logradouro,
-            number: address.numero,
-            neighborhood: address.bairro,
-            city: address.cidade,
-            complement: address.complemento,
-            reference: address.referencia,
-            created_at: new Date().toISOString()
-          }
-        ]
+      if (!profile) {
+        return NextResponse.json({ error: 'Profile not found' }, { status: 403 })
       }
-    }
 
-    if (Object.keys(updateData).length > 0) {
-      const adminSupabase = createAdminClient()
-      await adminSupabase.from('profiles').update(updateData).eq('id', profile.id)
+      profileId = profile.id
+
+      // Update profile with latest customer data
+      const updateData: any = {}
+      if (customer?.telefone) updateData.phone = customer.telefone
+      if (customer?.cpf) updateData.cpf_cnpj = customer.cpf
+      if (customer?.nome) updateData.full_name = customer.nome
+
+      // Save address to profile if new
+      if (address && address.cep) {
+        const currentAddresses = Array.isArray(profile.addresses) ? profile.addresses : []
+        const addressExists = currentAddresses.some((a: any) => a.zip_code === address.cep && a.number === address.numero)
+        
+        if (!addressExists) {
+          updateData.addresses = [
+            ...currentAddresses,
+            {
+              id: crypto.randomUUID(),
+              is_default: currentAddresses.length === 0,
+              zip_code: address.cep,
+              street: address.logradouro,
+              number: address.numero,
+              neighborhood: address.bairro,
+              city: address.cidade,
+              complement: address.complemento,
+              reference: address.referencia,
+              created_at: new Date().toISOString()
+            }
+          ]
+        }
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await adminSupabase.from('profiles').update(updateData).eq('id', profileId)
+      }
+
+    } else {
+      // Guest checkout: create or reuse a guest profile by email
+      if (!customer?.email || !customer?.nome) {
+        return NextResponse.json({ error: 'Nome e e-mail são obrigatórios para compras como convidado.' }, { status: 400 })
+      }
+
+      // Check if a guest profile with this email already exists
+      const { data: existingProfile } = await adminSupabase
+        .from('profiles')
+        .select('id')
+        .eq('email', customer.email.toLowerCase().trim())
+        .maybeSingle()
+
+      if (existingProfile) {
+        profileId = existingProfile.id
+        // Update with latest info
+        await adminSupabase.from('profiles').update({
+          full_name: customer.nome,
+          cpf_cnpj: customer.cpf,
+          phone: customer.telefone,
+        }).eq('id', profileId)
+      } else {
+        // Create new guest profile
+        const newProfileId = crypto.randomUUID()
+        const guestAddress = address && address.cep ? [{
+          id: crypto.randomUUID(),
+          is_default: true,
+          zip_code: address.cep,
+          street: address.logradouro,
+          number: address.numero,
+          neighborhood: address.bairro,
+          city: address.cidade,
+          complement: address.complemento,
+          reference: address.referencia,
+          created_at: new Date().toISOString()
+        }] : []
+
+        const { error: insertErr } = await adminSupabase.from('profiles').insert({
+          id: newProfileId,
+          full_name: customer.nome,
+          email: customer.email.toLowerCase().trim(),
+          cpf_cnpj: customer.cpf,
+          phone: customer.telefone,
+          role: 'customer',
+          addresses: guestAddress,
+        })
+
+        if (insertErr) {
+          console.error('[Checkout] Failed to create guest profile:', insertErr)
+          return NextResponse.json({ error: 'Falha ao registrar dados do cliente.' }, { status: 500 })
+        }
+
+        profileId = newProfileId
+      }
     }
 
     // 2. Validate input minimally
@@ -77,7 +142,7 @@ export async function POST(req: Request) {
 
     // 3. Native Order Creation in Database FIRST to get an ID
     const orderData = {
-      customer_id: profile.id,
+      customer_id: profileId,
       brand_origin: storeContext,
       order_type: 'direct',
       status: 'pending',
@@ -90,7 +155,7 @@ export async function POST(req: Request) {
       notes: shipping?.name ? `Frete: ${shipping.name}` : null,
     }
 
-    const { data: newOrder, error: orderErr } = await supabase
+    const { data: newOrder, error: orderErr } = await adminSupabase
       .from('orders')
       .insert(orderData as any)
       .select('id')
@@ -101,10 +166,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Database failed to create order' }, { status: 500 })
     }
 
-    // 4. Mercado Pago Preference Creation with External Reference
     const preference = await createPreference(items, customer, newOrder.id, undefined, storeContext, orderData.shipping_cost, !!pix_discount)
-
-    const adminSupabase = createAdminClient()
 
     // 4.5. Update Order with Preference ID
     if (preference.id) {
@@ -132,7 +194,7 @@ export async function POST(req: Request) {
 
     // 6. MSU Marketplace Segregation (Escrow Model)
     if (storeContext === 'msu') {
-      const { data: brand } = await supabase.from('brands').select('settings').eq('name', 'msu').single()
+      const { data: brand } = await adminSupabase.from('brands').select('settings').eq('name', 'msu').single()
       // Fallback para 15% conforme regra de negócio oficial, se não houver na tabela
       let commissionRate = 15; 
       if (brand?.settings?.commission_rate !== undefined) {
@@ -141,7 +203,7 @@ export async function POST(req: Request) {
 
       for (const item of items) {
         // Obter seller_id do produto anunciado
-        const { data: listing } = await supabase.from('marketplace_listings').select('seller_id').eq('id', item.id).single()
+        const { data: listing } = await adminSupabase.from('marketplace_listings').select('seller_id').eq('id', item.id).single()
         
         if (listing?.seller_id) {
           const itemTotal = item.price * item.quantity
@@ -149,7 +211,7 @@ export async function POST(req: Request) {
           const sellerNet = itemTotal - kingsFee
 
           await adminSupabase.from('marketplace_orders').insert({
-            buyer_id: profile.id,
+            buyer_id: profileId,
             seller_id: listing.seller_id,
             listing_id: item.id,
             total_price: itemTotal,

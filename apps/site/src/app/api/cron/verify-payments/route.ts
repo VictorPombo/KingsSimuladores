@@ -11,11 +11,16 @@ import { verifyPaymentStatus } from '@kings/payments'
  * GET /api/cron/verify-payments?secret=SEU_CRON_SECRET
  */
 export async function GET(req: Request) {
-  // Proteção básica: só executa se o secret estiver correto
+  // Proteção: aceita CRON_SECRET via query param ou Authorization header (Vercel Cron)
   const { searchParams } = new URL(req.url)
   const secret = searchParams.get('secret')
+  const authHeader = req.headers.get('authorization')
   
-  if (secret !== process.env.CRON_SECRET && secret !== 'kings2026') {
+  const isAuthorized = 
+    (process.env.CRON_SECRET && secret === process.env.CRON_SECRET) ||
+    (process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`)
+
+  if (!isAuthorized) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

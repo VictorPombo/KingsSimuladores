@@ -12,7 +12,7 @@ import { CouponInput } from '@/components/store/cart/CouponInput'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, discount, totalPrice, clearCart, coupon, removeItem, freeShipping } = useCart()
+  const { items, subtotal, discount, totalPrice, clearCart, coupon, removeItem, freeShipping, isLoaded } = useCart()
   const [step, setStep] = useState(1) // 1: Info, 2: Entrega, 3: Pagamento
   
   // Form Info
@@ -55,52 +55,54 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     async function loadProfile() {
-      // Lazy load the client only when mounting the component
-      const { createClient } = await import('@kings/db/client')
-      const supabase = createClient()
-      const { data: { user } } = await (supabase.auth as any).getUser()
-      
-      if (user) {
-        setEmail(user.email || '')
-        const { data: profile } = await supabase.from('profiles').select('*').or(`id.eq.${user.id},auth_id.eq.${user.id}`).maybeSingle()
+      try {
+        // Lazy load the client only when mounting the component
+        const { createClient } = await import('@kings/db/client')
+        const supabase = createClient()
+        const { data: { user } } = await (supabase.auth as any).getUser()
         
-        if (profile) {
-          if (profile.full_name) setNome(profile.full_name)
-          if (profile.cpf_cnpj) setCpf(profile.cpf_cnpj)
-          if (profile.phone) setTelefone(profile.phone)
+        if (user) {
+          setEmail(user.email || '')
+          const { data: profile } = await supabase.from('profiles').select('*').or(`id.eq.${user.id},auth_id.eq.${user.id}`).maybeSingle()
           
-          if (profile.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
-            setSavedAddresses(profile.addresses)
-            const defaultAddr = profile.addresses.find((a: any) => a.is_default) || profile.addresses[0]
-            if (defaultAddr) {
-              applyAddress(defaultAddr)
+          if (profile) {
+            if (profile.full_name) setNome(profile.full_name)
+            if (profile.cpf_cnpj) setCpf(profile.cpf_cnpj)
+            if (profile.phone) setTelefone(profile.phone)
+            
+            if (profile.addresses && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
+              setSavedAddresses(profile.addresses)
+              const defaultAddr = profile.addresses.find((a: any) => a.is_default) || profile.addresses[0]
+              if (defaultAddr) {
+                applyAddress(defaultAddr)
+              }
             }
           }
         }
-      } else {
-        // Usuário não está logado
-        setShowAuthModal(true)
+        // Usuário não logado: checkout continua normalmente como convidado
+        // Os campos obrigatórios (nome, CPF, e-mail, telefone) são validados no formulário
+      } catch (err) {
+        // Se der erro de auth, continua como convidado sem bloquear
+        console.warn('Auth check failed, continuing as guest:', err)
       }
     }
     loadProfile()
   }, [])
 
-  // Auto-fill address and calculate shipping when CEP is loaded from profile
+  // Auto-fill address fields when CEP is loaded from profile or typed
+  // NÃO avança de step — apenas preenche rua/bairro/cidade
   useEffect(() => {
-    if (cep && cep.length >= 8 && step === 1) {
+    if (cep && cep.replace(/\D/g, '').length >= 8 && step === 1) {
       preencherCep(cep)
-      if (items.length > 0) {
-        calcularFretes(cep)
-      }
     }
-  }, [cep, items])
+  }, [cep])
 
-  // Redirect to home if empty cart
+  // Redirect to home if empty cart (only AFTER localStorage has been loaded)
   useEffect(() => {
-    if (items.length === 0 && step === 1) {
+    if (isLoaded && items.length === 0 && step === 1) {
       router.push('/')
     }
-  }, [items, router, step])
+  }, [items, router, step, isLoaded])
 
   // Track InitiateCheckout
   useEffect(() => {
@@ -236,6 +238,15 @@ export default function CheckoutPage() {
     }
   }
 
+  // Aguarda o carrinho carregar do localStorage antes de renderizar
+  if (!isLoaded) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#64748b', fontSize: '1rem' }}>Carregando carrinho...</div>
+      </div>
+    )
+  }
+
   if (items.length === 0 && step === 1) return null
 
   const valorFrete = freeShipping ? 0 : (selectedFrete ? parseFloat(selectedFrete.price) : 0)
@@ -297,10 +308,10 @@ export default function CheckoutPage() {
       : null
     const shippingPrice = currentStoreIdx === 0 ? valorFrete : 0
 
-    // Aplica 10% de desconto em CADA item para o Pix
+    // Aplica o desconto de Pix em CADA item dinamicamente (10% padrão)
     const pixItems = storeGroupItems.map(i => ({
       ...i,
-      price: parseFloat((i.price * 0.9).toFixed(2))
+      price: parseFloat((i.price * ((100 - (i.pixDiscount ?? 10)) / 100)).toFixed(2))
     }))
 
     const storeSubtotal = pixItems.reduce((acc, i) => acc + (i.price * i.quantity), 0)
@@ -342,25 +353,37 @@ export default function CheckoutPage() {
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'transparent', paddingTop: '100px' }}>
 
-      {showAuthModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(10, 14, 26, 0.95)', backdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: '#111827', border: '1px solid rgba(0, 229, 255, 0.3)', borderRadius: '16px', padding: '40px', maxWidth: '450px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0, 229, 255, 0.1)' }}>
-            <div style={{ width: '64px', height: '64px', background: 'rgba(0, 229, 255, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </div>
-            <h2 style={{ color: '#fff', marginBottom: '16px', fontSize: '1.5rem', fontWeight: 700 }}>Identificação Necessária</h2>
-            <p style={{ color: '#94a3b8', marginBottom: '32px', lineHeight: 1.6, fontSize: '0.95rem' }}>
-              Para simular o frete e finalizar sua compra de forma segura, faça um rápido login ou crie sua conta.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <Button onClick={() => router.push('/login?redirect=/checkout')} style={{ width: '100%', padding: '14px', fontSize: '1.05rem', fontWeight: 600 }}>Fazer Login / Criar Conta</Button>
-              <button onClick={() => router.push('/')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500, transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>Continuar Comprando</button>
-            </div>
-          </div>
-        </div>
-      )}
-      
+
       <Container style={{ position: 'relative', zIndex: 1, paddingBottom: '100px' }}>
+        
+        {/* Banner convidado — informativo, não bloqueante */}
+        {showAuthModal && (
+          <div style={{ 
+            background: 'rgba(0, 229, 255, 0.05)', 
+            border: '1px solid rgba(0, 229, 255, 0.2)', 
+            borderRadius: '12px', 
+            padding: '16px 20px', 
+            marginBottom: '24px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '1.3rem' }}>👤</span>
+              <div>
+                <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>Comprando como convidado</div>
+                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Preencha os dados abaixo. Ou <a href="/login?redirect=/checkout" style={{ color: '#00e5ff', textDecoration: 'underline' }}>faça login</a> para preencher automaticamente.</div>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowAuthModal(false)} 
+              style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.2rem', padding: '4px' }}
+            >✕</button>
+          </div>
+        )}
+
         <div className="kings-checkout-grid">
           
           {/* Coluna Esquerda: Fluxo */}
@@ -439,25 +462,46 @@ export default function CheckoutPage() {
                   </div>
                 )}
                 
-                <Button 
-                  onClick={() => {
-                    if (nome.trim().length < 3) return alert('Por favor, informe seu Nome Completo.');
-                    if (cpf.trim().length < 11) return alert('Por favor, informe um CPF válido para a Nota Fiscal.');
-                    if (email.trim().length < 5) return alert('Por favor, informe um E-mail válido.');
-                    if (telefone.trim().length < 10) return alert('Por favor, informe um Telefone/WhatsApp válido com DDD.');
-                    if (!isRetirada) {
-                      if (cep.length < 8) return alert('Por favor, informe o CEP de entrega corretamente.');
-                      if (!logradouro || logradouro.trim().length < 3) return alert('Por favor, informe o Endereço de entrega (Logradouro).');
-                      if (!numero || numero.trim().length === 0) return alert('Por favor, informe o Número do endereço.');
-                      if (!bairro || bairro.trim().length < 2) return alert('Por favor, informe o Bairro.');
-                      if (!cidade || cidade.trim().length < 3) return alert('Por favor, informe a Cidade/UF.');
-                    }
-                    calcularFretes();
-                  }} 
-                  style={{ marginTop: '1rem' }}
-                >
-                  {isRetirada ? 'Continuar para Pagamento' : 'Continuar para Frete'}
-                </Button>
+                {(() => {
+                  const dadosOk = nome.trim().length >= 3 && cpf.replace(/\D/g, '').length >= 11 && email.includes('@') && telefone.replace(/\D/g, '').length >= 10
+                  const enderecoOk = isRetirada || (cep.replace(/\D/g, '').length >= 8 && logradouro.trim().length >= 3 && numero.trim().length > 0 && bairro.trim().length >= 2 && cidade.trim().length >= 3)
+                  const isFormValid = dadosOk && enderecoOk
+
+                  const camposFaltando: string[] = []
+                  if (nome.trim().length < 3) camposFaltando.push('Nome Completo')
+                  if (cpf.replace(/\D/g, '').length < 11) camposFaltando.push('CPF')
+                  if (!email.includes('@')) camposFaltando.push('E-mail')
+                  if (telefone.replace(/\D/g, '').length < 10) camposFaltando.push('Telefone')
+                  if (!isRetirada) {
+                    if (cep.replace(/\D/g, '').length < 8) camposFaltando.push('CEP')
+                    if (logradouro.trim().length < 3) camposFaltando.push('Endereço')
+                    if (numero.trim().length === 0) camposFaltando.push('Número')
+                    if (bairro.trim().length < 2) camposFaltando.push('Bairro')
+                    if (cidade.trim().length < 3) camposFaltando.push('Cidade/UF')
+                  }
+
+                  return (
+                    <>
+                      {!isFormValid && camposFaltando.length > 0 && (nome.length > 0 || cpf.length > 0 || email.length > 0) && (
+                        <p style={{ color: '#f87171', fontSize: '0.82rem', marginTop: '4px', lineHeight: 1.5 }}>
+                          ⚠️ Preencha: <strong>{camposFaltando.join(', ')}</strong>
+                        </p>
+                      )}
+                      <Button 
+                        onClick={() => calcularFretes()}
+                        disabled={!isFormValid}
+                        style={{ 
+                          marginTop: '1rem', 
+                          opacity: isFormValid ? 1 : 0.4, 
+                          cursor: isFormValid ? 'pointer' : 'not-allowed',
+                          pointerEvents: isFormValid ? 'auto' : 'none'
+                        }}
+                      >
+                        {isRetirada ? 'Continuar para Pagamento' : 'Continuar para Frete'}
+                      </Button>
+                    </>
+                  )
+                })()}
               </div>
             )}
 
@@ -556,29 +600,48 @@ export default function CheckoutPage() {
                 )}
 
                 {/* Botão Pix com desconto */}
-                <button
-                  disabled={isProcessing}
-                  onClick={handlePixPayment}
-                  style={{
-                    width: '100%', padding: '18px', borderRadius: '12px', border: '2px solid rgba(0,229,255,0.5)',
-                    background: 'linear-gradient(135deg, rgba(0,229,255,0.12), rgba(0,229,255,0.05))',
-                    color: '#fff', cursor: isProcessing ? 'wait' : 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    transition: 'all 0.2s', opacity: isProcessing ? 0.7 : 1
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '1.8rem' }}>⚡</span>
-                    <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 700, fontSize: '1rem', color: '#00e5ff' }}>Pagar com Pix</div>
-                      <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>10% de desconto — aprovado na hora</div>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#00e5ff' }}>{(totalGeral * 0.9).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', textDecoration: 'line-through' }}>{totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
-                  </div>
-                </button>
+                {(() => {
+                  const currentStore = storeNames[currentStoreIdx]
+                  const storeGroupItems = groups[currentStore] || []
+                  
+                  const pixItems = storeGroupItems.map(i => ({
+                    ...i,
+                    price: parseFloat((i.price * ((100 - (i.pixDiscount ?? 10)) / 100)).toFixed(2))
+                  }))
+                  const storeSubtotalPix = pixItems.reduce((acc, i) => acc + (i.price * i.quantity), 0)
+                  const shippingPrice = currentStoreIdx === 0 ? valorFrete : 0
+                  const storeDiscount = currentStoreIdx === 0 ? discount : 0
+                  const totalGeralPix = storeSubtotalPix + shippingPrice - storeDiscount
+
+                  // Calculamos o desconto médio para mostrar ao usuário de forma aproximada
+                  const mediaDesconto = storeGroupItems.length > 0 ? Math.round(storeGroupItems.reduce((acc, i) => acc + (i.pixDiscount ?? 10), 0) / storeGroupItems.length) : 10
+
+                  return (
+                    <button
+                      disabled={isProcessing}
+                      onClick={handlePixPayment}
+                      style={{
+                        width: '100%', padding: '18px', borderRadius: '12px', border: '2px solid rgba(0,229,255,0.5)',
+                        background: 'linear-gradient(135deg, rgba(0,229,255,0.12), rgba(0,229,255,0.05))',
+                        color: '#fff', cursor: isProcessing ? 'wait' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        transition: 'all 0.2s', opacity: isProcessing ? 0.7 : 1
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '1.8rem' }}>⚡</span>
+                        <div style={{ textAlign: 'left' }}>
+                          <div style={{ fontWeight: 700, fontSize: '1rem', color: '#00e5ff' }}>Pagar com Pix</div>
+                          <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Até {Math.max(...storeGroupItems.map(i => i.pixDiscount ?? 10), 10)}% de desconto — aprovado na hora</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#00e5ff' }}>{totalGeralPix.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', textDecoration: 'line-through' }}>{totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                      </div>
+                    </button>
+                  )
+                })()}
 
                 {/* Separador */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

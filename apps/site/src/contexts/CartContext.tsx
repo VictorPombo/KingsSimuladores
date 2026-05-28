@@ -11,6 +11,7 @@ export interface CartItem {
   storeOrigin: 'kings' | 'msu' | 'seven'
   quantity: number
   dimensions?: { weight: number, width: number, height: number, length: number }
+  pixDiscount?: number
 }
 
 export interface CouponState {
@@ -35,6 +36,7 @@ interface CartContextData {
   freeShipping: boolean
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
+  isLoaded: boolean
 }
 
 const CartContext = createContext<CartContextData>({} as CartContextData)
@@ -120,7 +122,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider value={{
       items, addItem, removeItem, updateQuantity, clearCart, 
       totalItems, subtotal, discount, totalPrice, coupon, applyCoupon, isOpen, setIsOpen,
-      freeShipping
+      freeShipping, isLoaded
     }}>
       {children}
     </CartContext.Provider>
