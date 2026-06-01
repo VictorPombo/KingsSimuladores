@@ -86,7 +86,11 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
           fone: orderPayload.customer.phone || '',
           ...enderecoObj
         },
-        endereco_entrega: enderecoObj,
+        endereco_entrega: {
+          nome_destinatario: orderPayload.customer.name || 'Cliente Avulso',
+          cpf_cnpj: cpfCnpj,
+          ...enderecoObj
+        },
         itens: (orderPayload.items || []).map(item => ({
           item: {
             codigo: item.product_id,
