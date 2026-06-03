@@ -124,7 +124,7 @@ export async function POST(req: Request) {
           email: customer.email.toLowerCase().trim(),
           cpf_cnpj: customer.cpf,
           phone: customer.telefone,
-          role: 'customer',
+          role: 'client',
           addresses: guestAddress,
         })
 
