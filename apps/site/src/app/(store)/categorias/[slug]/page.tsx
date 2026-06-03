@@ -149,7 +149,7 @@ export default async function CategoryShowcasePage({ params }: { params: { slug:
                           {formatPrice(product.price)}
                         </div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--success)', fontWeight: 700, marginTop: '4px' }}>
-                          {formatPrice(product.price * 0.9)} no Pix (10% off)
+                          {formatPrice(product.price * 0.88)} no Pix (12% off)
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                           ou 12x de {formatPrice(product.price / 12)} s/ juros

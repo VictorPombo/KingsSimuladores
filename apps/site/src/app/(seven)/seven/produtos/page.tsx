@@ -218,7 +218,7 @@ export default async function SevenProductsPage({
                           </span>
                         </div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--success)', fontWeight: 700, marginTop: '2px' }}>
-                          {formatPrice(product.price * 0.9)} no Pix (10% off)
+                          {formatPrice(product.price * 0.88)} no Pix (12% off)
                         </div>
                         <div className="seven-card-installments">
                           ou 12x de {formatPrice(product.price / 12)} sem juros
