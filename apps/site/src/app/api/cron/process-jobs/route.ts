@@ -220,6 +220,16 @@ export async function GET(req: Request) {
 
   const supabase = createAdminClient()
 
+  // Rescue: jobs presos em 'processing' há mais de 5 minutos são devolvidos para 'pending'.
+  // Isso acontece quando o Cron é reiniciado (novo deploy, timeout da Vercel) antes de um
+  // job lento (ex: Olist) terminar — sem este rescue, eles ficam presos para sempre.
+  const staleThreshold = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+  await supabase
+    .from('order_jobs')
+    .update({ status: 'pending' })
+    .eq('status', 'processing')
+    .lt('updated_at', staleThreshold)
+
   // Puxar batch de jobs pendentes, os mais antigos primeiro
   const { data: jobs, error } = await supabase
     .from('order_jobs')
@@ -237,11 +247,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: true, processed: 0 })
   }
 
-  // Marcar todos como 'processing' em lote antes de executar (evita duplo-processamento)
+  // Marcar todos como 'processing' em lote antes de executar (evita duplo-processamento).
+  // updated_at é atualizado aqui para que o rescue saiba quando este lock foi adquirido.
   const jobIds = jobs.map((j: any) => j.id)
   await supabase
     .from('order_jobs')
-    .update({ status: 'processing' })
+    .update({ status: 'processing', updated_at: new Date().toISOString() })
     .in('id', jobIds)
 
   const results = { done: 0, failed: 0, dead: 0 }
@@ -263,7 +274,7 @@ export async function GET(req: Request) {
       await handler(job.payload, supabase)
       await supabase
         .from('order_jobs')
-        .update({ status: 'done', processed_at: new Date().toISOString() })
+        .update({ status: 'done', processed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
         .eq('id', job.id)
       results.done++
       console.log(`[Cron Jobs] ✅ ${job.job_type} | Pedido ${job.order_id}`)

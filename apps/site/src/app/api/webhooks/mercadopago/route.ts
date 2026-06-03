@@ -1,12 +1,52 @@
 import { NextResponse } from 'next/server'
+import { createHmac, timingSafeEqual } from 'crypto'
 import { verifyPaymentStatus } from '@kings/payments'
 import { createAdminClient } from '@kings/db'
+
+// Verifica a assinatura HMAC-SHA256 enviada pelo Mercado Pago no header x-signature.
+// Documentação: https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks
+// Retorna true se válida, false se inválida. Se MP_WEBHOOK_SECRET não estiver configurado,
+// passa sem bloquear (compatibilidade com ambiente de desenvolvimento).
+function verifyMPSignature(req: Request, rawBody: string): boolean {
+  const secret = process.env.MP_WEBHOOK_SECRET
+  if (!secret) return true
+
+  const xSignature = req.headers.get('x-signature')
+  const xRequestId = req.headers.get('x-request-id')
+  const searchParams = new URL(req.url).searchParams
+  const dataId = searchParams.get('data.id') || ''
+
+  if (!xSignature) return false
+
+  // O MP envia: "ts=<timestamp>,v1=<hash>"
+  const parts = Object.fromEntries(xSignature.split(',').map(p => p.split('=')))
+  const ts = parts['ts']
+  const v1 = parts['v1']
+  if (!ts || !v1) return false
+
+  // Template de assinatura conforme documentação oficial do MP
+  const signedTemplate = `id:${dataId};request-id:${xRequestId || ''};ts:${ts};`
+  const expectedHash = createHmac('sha256', secret).update(signedTemplate).digest('hex')
+
+  try {
+    return timingSafeEqual(Buffer.from(v1, 'hex'), Buffer.from(expectedHash, 'hex'))
+  } catch {
+    return false
+  }
+}
 
 export async function POST(req: Request) {
   try {
     const searchParams = new URL(req.url).searchParams
     const topic = searchParams.get('topic') || searchParams.get('type')
     const body = await req.json()
+
+    // Verificação de assinatura HMAC-SHA256 — executada antes de qualquer I/O no banco.
+    // Bloqueia requisições forjadas sem custo de query ao Supabase.
+    if (!verifyMPSignature(req, JSON.stringify(body))) {
+      console.warn('[Webhook MP] Assinatura inválida rejeitada.')
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    }
 
     const action = body.action || topic
 

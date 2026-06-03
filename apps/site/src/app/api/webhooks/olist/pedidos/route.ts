@@ -154,7 +154,7 @@ export async function POST(req: Request) {
         } else if (authError?.message?.includes('already exists')) {
             // Caso raro onde existe no auth mas não no profiles, fazemos fallback buscando de novo
             const { data: fallbackUser } = await supabase.auth.admin.listUsers()
-            const found = fallbackUser.users.find(u => u.email === clienteEmail)
+            const found = fallbackUser.users.find((u: any) => u.email === clienteEmail)
             if (found) {
                const { data: fp } = await supabase.from('profiles').select('id').eq('auth_id', found.id).maybeSingle()
                customerId = fp?.id || null
