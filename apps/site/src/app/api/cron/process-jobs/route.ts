@@ -161,6 +161,45 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
     })
   },
 
+  async msu_split(payload, supabase) {
+    const { order, items } = payload
+    if (!order.preference_id) return
+
+    for (const item of items) {
+      const origin = item.store_origin || order.brand_origin
+      if (origin !== 'msu' || !item.product?.seller_id) continue
+
+      // Buscar registro de marketplace_orders criado no checkout
+      const { data: mpOrder } = await supabase
+        .from('marketplace_orders')
+        .select('id, kings_fee, seller_net, seller_id')
+        .eq('listing_id', item.product_id)
+        .eq('mp_preference_id', order.preference_id)
+        .single()
+
+      if (!mpOrder) continue
+
+      // 1. Marcar marketplace_order como pago
+      await supabase
+        .from('marketplace_orders')
+        .update({ status: 'paid', mp_payment_id: payload.paymentId })
+        .eq('id', mpOrder.id)
+
+      // 2. Registrar comissão no subledger contábil
+      await supabase.from('commissions').insert({
+        marketplace_order_id: mpOrder.id,
+        seller_id: mpOrder.seller_id,
+        sale_amount: item.total_price,
+        commission_rate: 15,
+        commission_amount: mpOrder.kings_fee,
+        seller_payout: mpOrder.seller_net,
+        payout_status: 'pending',
+      })
+
+      console.log(`[msu_split] Marketplace order ${mpOrder.id} marcado como pago. Taxa Kings: R$${mpOrder.kings_fee}, Líquido vendedor: R$${mpOrder.seller_net}`)
+    }
+  },
+
   async msu_seller_email(payload, supabase) {
     const { order, items } = payload
     const MSU_URL = process.env.NEXT_PUBLIC_URL_MSU || 'https://meusimuladorusado.com.br'

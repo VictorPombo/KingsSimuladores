@@ -193,7 +193,7 @@ export async function POST(req: Request) {
       'notify_customer_whatsapp',
       'notify_customer_email',
       'notify_admin_email',
-      ...(items?.some((i: any) => (i.store_origin || order.brand_origin) === 'msu') ? ['msu_seller_email'] : []),
+      ...(items?.some((i: any) => (i.store_origin || order.brand_origin) === 'msu') ? ['msu_split', 'msu_seller_email'] : []),
     ]
 
     const { error: jobsErr } = await supabase.from('order_jobs').insert(

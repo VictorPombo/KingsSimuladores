@@ -181,9 +181,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Database failed to create order' }, { status: 500 })
     }
 
+    // Para MSU: calcular a taxa Kings antecipadamente para passar ao MP como marketplace_fee
+    let msuMarketplaceFee: number | undefined
+    if (storeContext === 'msu') {
+      const { data: brand } = await adminSupabase.from('brands').select('settings').eq('name', 'msu').single()
+      const commissionRate = brand?.settings?.commission_rate !== undefined ? Number(brand.settings.commission_rate) : 15
+      const itemsTotal = items.reduce((acc: number, i: any) => acc + (i.price * i.quantity), 0)
+      msuMarketplaceFee = Math.round((itemsTotal * commissionRate) / 100 * 100) / 100
+    }
+
     let preference: any;
     try {
-      preference = await createPreference(items, customer, newOrder.id, undefined, storeContext, orderData.shipping_cost, !!pix_discount)
+      preference = await createPreference(items, customer, newOrder.id, msuMarketplaceFee, storeContext, orderData.shipping_cost, !!pix_discount)
     } catch (prefErr: any) {
       console.error('[Checkout] Falha ao gerar preferência no Mercado Pago:', prefErr)
       const maskedCpf = customer?.cpf ? customer.cpf.replace(/\d(?=\d{4})/g, '*') : 'N/A'
