@@ -27,3 +27,5 @@ build/
 .turbo/
 supabase/.temp/
 apps/site/public/*.MOV.bak
+.env.test
+tests/reports/

@@ -416,14 +416,37 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
   const totalPendente = orders.filter(o => o.status === 'pending').reduce((a, o) => a + Number(o.total), 0)
   const totalCancelado = orders.filter(o => o.status === 'cancelled').length
 
-  function exportCSV() {
+  async function exportCSV() {
     if (!filtered.length) return
-    const headers = ['Pedido', 'Data', 'Cliente', 'Email', 'Marca', 'Status', 'Subtotal', 'Frete', 'Desconto', 'Total', 'Pagamento', 'Rastreio']
+    // Buscar itens de todos os pedidos filtrados para incluir nome dos produtos
+    const supabase = createClient()
+    const orderIds = filtered.map(o => o.id)
+    const { data: allItems } = await supabase
+      .from('order_items')
+      .select('order_id, quantity, unit_price, product:product_id(title)')
+      .in('order_id', orderIds)
+
+    // Agrupar itens por pedido
+    const itemsByOrder: Record<string, string> = {}
+    if (allItems) {
+      for (const item of allItems) {
+        const title = (item.product as any)?.title || 'Produto'
+        const line = `${item.quantity}x ${title}`
+        if (itemsByOrder[item.order_id]) {
+          itemsByOrder[item.order_id] += ' | ' + line
+        } else {
+          itemsByOrder[item.order_id] = line
+        }
+      }
+    }
+
+    const headers = ['Pedido', 'Data', 'Cliente', 'Email', 'Produtos', 'Marca', 'Status', 'Subtotal', 'Frete', 'Desconto', 'Total', 'Pagamento', 'Rastreio']
     const rows = filtered.map(o => [
       o.order_number ? '#' + o.order_number : '#' + o.id.split('-')[0],
       new Date(o.created_at).toLocaleDateString('pt-BR'),
       o.profiles?.full_name || '-',
       o.profiles?.email || '-',
+      itemsByOrder[o.id] || '-',
       o.brand_origin === 'kings' ? 'Kings' : o.brand_origin === 'seven' ? 'Seven' : 'MSU',
       STATUS_CONFIG[o.status]?.label || o.status,
       Number(o.subtotal).toFixed(2),
