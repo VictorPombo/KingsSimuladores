@@ -8,6 +8,10 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.kingssimuladores.com.br'),
+  alternates: {
+    canonical: '/',
+  },
   title: 'Kings Simuladores — Simuladores de Corrida Premium',
   description:
     'A maior loja de simuladores de corrida do Brasil. Cockpits, volantes, pedais e acessórios das melhores marcas com até 12x sem juros.',
@@ -22,9 +26,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Kings Simuladores',
     description: 'Simuladores de Corrida Premium',
-    url: 'https://kingssimuladores.com.br',
+    url: 'https://www.kingssimuladores.com.br',
     siteName: 'Kings Simuladores',
     type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Kings Simuladores',
+      },
+    ],
   },
   appleWebApp: {
     capable: true,

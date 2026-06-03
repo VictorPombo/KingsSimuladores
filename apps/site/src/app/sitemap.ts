@@ -21,13 +21,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data: products } = await supabase
     .from('products')
     .select('id, updated_at')
-    .gt('stock_quantity', 0)
 
   const productPages: MetadataRoute.Sitemap = (products || []).map((p: any) => ({
     url: `${BASE_URL}/produtos/${p.id}`,
     lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
+  }))
+
+  // ── Categorias ──
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('slug')
+
+  const categoryPages: MetadataRoute.Sitemap = (categories || []).map((c: any) => ({
+    url: `${BASE_URL}/categorias/${c.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.9,
   }))
 
   // ── Listings MSU (Marketplace de Usados) ──
@@ -43,5 +54,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticPages, ...productPages, ...listingPages]
+  return [...staticPages, ...categoryPages, ...productPages, ...listingPages]
 }

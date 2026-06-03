@@ -48,12 +48,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const price = product.price_compare && product.price_compare > product.price
     ? product.price : product.price
 
+  const cleanDesc = getShortDescription(product.description || '');
+
   return {
     title: `${product.title} | Kings Simuladores`,
-    description: `${product.title} por ${formatPrice(price)} em até 12x sem juros. ${(product.description || '').slice(0, 150)}`,
+    description: `${product.title} por ${formatPrice(price)} em até 12x sem juros. ${cleanDesc.slice(0, 150)}`,
     openGraph: {
       title: product.title,
-      description: product.description || product.title,
+      description: cleanDesc || product.title,
       url: `${BASE_URL}/produtos/${product.slug}`,
       siteName: 'Kings Simuladores',
       images: product.images?.[0] ? [{ url: product.images[0], width: 800, height: 800, alt: product.title }] : [],

@@ -37,6 +37,23 @@ const UI_METADATA: Record<string, { desc: string, color: string }> = {
   }
 }
 
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const meta = UI_METADATA[params.slug] || { desc: "Equipamentos de simracing de alta performance na Kings Simuladores.", color: "#00e5ff" }
+  let title = 'Categorias'
+  
+  if (params.slug) {
+    const cleanName = params.slug.replace('kings-', '').replace(/-/g, ' ')
+    title = cleanName.charAt(0).toUpperCase() + cleanName.slice(1)
+  }
+
+  return {
+    title: `${title} | Kings Simuladores`,
+    description: meta.desc,
+  }
+}
+
 export default async function CategoryShowcasePage({ params }: { params: { slug: string } }) {
   let products: any[] = []
   let category: any = null
