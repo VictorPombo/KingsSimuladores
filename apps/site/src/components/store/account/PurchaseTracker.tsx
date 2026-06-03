@@ -6,7 +6,7 @@ export function PurchaseTracker({ order }: { order: any }) {
   const [tracked, setTracked] = useState(false)
 
   useEffect(() => {
-    if (order && !tracked && typeof window !== 'undefined' && (window as any).fbq) {
+    if (order && !tracked && typeof window !== 'undefined') {
       // Avoid tracking the same order multiple times if they refresh
       const trackedKey = `kings_tracked_order_${order.id}`
       if (localStorage.getItem(trackedKey)) {
@@ -14,12 +14,32 @@ export function PurchaseTracker({ order }: { order: any }) {
         return
       }
 
-      (window as any).fbq('track', 'Purchase', {
-        content_ids: order.items?.map((i: any) => i.id) || [order.id],
+      // Track on Facebook Pixel
+      if ((window as any).fbq) {
+        (window as any).fbq('track', 'Purchase', {
+          content_ids: order.items?.map((i: any) => i.id) || [order.id],
+          value: order.total,
+          currency: 'BRL',
+          num_items: order.items?.reduce((acc: number, i: any) => acc + (i.quantity || 1), 0) || 1
+        })
+      }
+
+      // Track on Google Ads
+      const gtag = (window as any).gtag || function(...args: any[]) {
+        (window as any).dataLayer = (window as any).dataLayer || [];
+        (window as any).dataLayer.push(args);
+      };
+      gtag('event', 'purchase', {
+        transaction_id: order.id,
         value: order.total,
         currency: 'BRL',
-        num_items: order.items?.reduce((acc: number, i: any) => acc + (i.quantity || 1), 0) || 1
-      })
+        items: order.items?.map((i: any) => ({
+          item_id: i.id,
+          item_name: i.title,
+          price: i.price,
+          quantity: i.quantity
+        }))
+      });
       
       localStorage.setItem(trackedKey, 'true')
       

@@ -279,20 +279,25 @@ export function EditProductForm({ product, allCategories = [] }: { product: Prod
               <h3 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: '16px' }}>💰 Preços & Estoque</h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={labelStyle}>Preço de Custo (R$)</label>
                     <input name="cost_price" type="number" step="0.01" defaultValue={product.cost_price || ''} style={{ ...inputStyle, background: 'rgba(239, 68, 68, 0.05)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
                       onFocus={e => e.currentTarget.style.borderColor = '#ef4444'} onBlur={e => e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'} title="Visível apenas para Administradores" />
                   </div>
                   <div>
-                    <label style={labelStyle}>Preço de Venda (R$) *</label>
+                    <label style={labelStyle}>Preço Venda (R$) *</label>
                     <input name="price" type="number" step="0.01" defaultValue={product.price} required style={inputStyle}
                       onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Preço Promocional (De)</label>
+                    <label style={labelStyle}>Preço Prom. (De)</label>
                     <input name="price_compare" type="number" step="0.01" defaultValue={product.price_compare || ''} style={inputStyle}
+                      onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Desconto Pix (%)</label>
+                    <input name="pix_discount" type="number" step="0.1" defaultValue={(product.attributes as any)?.pix_discount ?? 10} style={inputStyle}
                       onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
                   </div>
                 </div>

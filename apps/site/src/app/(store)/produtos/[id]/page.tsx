@@ -100,7 +100,9 @@ export default async function ProductPage({ params }: { params: { id: string } }
   const finalPrice = product.price
   const discountPct = hasDiscount ? Math.round((1 - finalPrice / originalPrice) * 100) : 0
   const installmentValue = finalPrice / 12
-  const pixPrice = finalPrice * 0.9
+  const pixDiscountPercent = (product.attributes as any)?.pix_discount ?? 10
+  const pixMultiplier = (100 - pixDiscountPercent) / 100
+  const pixPrice = finalPrice * pixMultiplier
   const brandName = product.attributes?.brand || 'Kings Simuladores'
   const imageUrl = product.images?.[0] || 'https://placehold.co/800x800/131928/e8ecf4?text=Kings'
   
@@ -163,7 +165,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 <span style={{ fontSize: '1.1rem' }}>⚡</span>
                 <span>
                   <strong style={{ color: '#00e5ff', fontSize: '1rem' }}>{formatPrice(pixPrice)}</strong>
-                  {' '}<span style={{ color: 'var(--text-secondary)' }}>no Pix — 10% de desconto</span>
+                  {' '}<span style={{ color: 'var(--text-secondary)' }}>no Pix — {pixDiscountPercent}% de desconto</span>
                 </span>
               </div>
             </div>
@@ -194,7 +196,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
                       width: product.dimensions_cm?.width || 20,
                       height: product.dimensions_cm?.height || 20,
                       length: product.dimensions_cm?.length || 20
-                    }
+                    },
+                    pixDiscount: pixDiscountPercent
                   }} 
                 />
               </>
@@ -247,27 +250,27 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
         {/* Full Description Section (Premium HTML Rendering) */}
         {product.description && !product.description.startsWith('Produto importado da Tray') && (
-          <div style={{ marginTop: '64px', padding: '0', background: 'transparent' }}>
+          <div style={{ marginTop: '64px' }}>
             {/<[a-z][\s\S]*>/i.test(product.description) ? (
-              <div 
-                className="kings-rich-description"
-                style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.1rem' }}
-                dangerouslySetInnerHTML={{ 
-                  __html: `<style>
-                    .kings-rich-description { max-width: 100%; overflow: hidden; font-family: var(--font-sans); }
-                    .kings-rich-description img { max-width: 100%; height: auto; border-radius: 16px; margin: 32px auto; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-                    .kings-rich-description h2 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-top: 64px; margin-bottom: 24px; text-align: center; letter-spacing: -0.5px; }
-                    .kings-rich-description h3 { font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-top: 48px; margin-bottom: 16px; text-align: center; }
-                    .kings-rich-description p { margin-bottom: 24px; text-align: center; max-width: 900px; margin-left: auto; margin-right: auto; color: #cbd5e1; }
-                    .kings-rich-description ul { max-width: 900px; margin: 0 auto 32px auto; padding-left: 20px; color: #cbd5e1; display: flex; flex-direction: column; gap: 8px; }
-                    .kings-rich-description li { margin-bottom: 8px; }
-                    @media (max-width: 768px) {
-                      .kings-rich-description h2 { font-size: 1.8rem; }
-                      .kings-rich-description p, .kings-rich-description ul { text-align: left; padding: 0 16px; }
-                    }
-                  </style>` + product.description 
-                }}
-              />
+              <div style={{ padding: '32px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                <h2 className="font-display" style={{ fontSize: '1.5rem', marginBottom: '24px', color: 'var(--text)' }}>Descrição do Produto</h2>
+                <div 
+                  className="kings-rich-description"
+                  style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.05rem' }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: `<style>
+                      .kings-rich-description { width: 100%; overflow: hidden; font-family: var(--font-sans); }
+                      .kings-rich-description img { max-width: 100%; height: auto; border-radius: 12px; margin: 24px 0; display: block; }
+                      .kings-rich-description h1, .kings-rich-description h2, .kings-rich-description h3, .kings-rich-description h4 { font-weight: 700; color: #fff; margin-top: 32px; margin-bottom: 16px; text-align: left !important; }
+                      .kings-rich-description p { margin-bottom: 16px; text-align: left !important; color: #cbd5e1; }
+                      .kings-rich-description ul, .kings-rich-description ol { margin: 0 0 24px 0; padding-left: 24px; color: #cbd5e1; display: flex; flex-direction: column; gap: 8px; }
+                      .kings-rich-description li { text-align: left !important; }
+                      .kings-rich-description a { color: #00e5ff; text-decoration: underline; }
+                      .kings-rich-description strong, .kings-rich-description b { color: #fff; font-weight: 700; }
+                    </style>` + product.description 
+                  }}
+                />
+              </div>
             ) : (
               <div style={{ padding: '32px', background: 'var(--bg-card)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                 <h2 className="font-display" style={{ fontSize: '1.5rem', marginBottom: '24px', color: 'var(--text)' }}>Descrição do Produto</h2>

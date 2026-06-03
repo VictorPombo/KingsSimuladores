@@ -73,11 +73,26 @@ export async function POST(req: Request) {
       }
 
       // Check if a guest profile with this email already exists
-      const { data: existingProfile } = await adminSupabase
+      const { data: existingProfile, error: profileErr } = await adminSupabase
         .from('profiles')
         .select('id')
         .eq('email', customer.email.toLowerCase().trim())
+        .limit(1)
         .maybeSingle()
+
+      if (profileErr) {
+        console.error('[Checkout] Falha ao verificar perfil existente:', profileErr)
+        const maskedCpf = customer?.cpf ? customer.cpf.replace(/\d(?=\d{4})/g, '*') : 'N/A'
+        await adminSupabase.from('failed_checkouts').insert({
+          customer_email: customer?.email,
+          customer_phone: customer?.telefone,
+          customer_cpf_masked: maskedCpf,
+          error_message: 'Erro ao verificar perfil existente (Possível duplicata de email guest)',
+          error_details: profileErr,
+          cart_total: total
+        })
+        return NextResponse.json({ error: 'Erro de segurança ao verificar seu e-mail. Tente fazer login ou usar outro e-mail.' }, { status: 500 })
+      }
 
       if (existingProfile) {
         profileId = existingProfile.id
@@ -166,10 +181,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Database failed to create order' }, { status: 500 })
     }
 
-    const preference = await createPreference(items, customer, newOrder.id, undefined, storeContext, orderData.shipping_cost, !!pix_discount)
+    let preference: any;
+    try {
+      preference = await createPreference(items, customer, newOrder.id, undefined, storeContext, orderData.shipping_cost, !!pix_discount)
+    } catch (prefErr: any) {
+      console.error('[Checkout] Falha ao gerar preferência no Mercado Pago:', prefErr)
+      const maskedCpf = customer?.cpf ? customer.cpf.replace(/\d(?=\d{4})/g, '*') : 'N/A'
+      await adminSupabase.from('failed_checkouts').insert({
+        customer_email: customer?.email,
+        customer_phone: customer?.telefone,
+        customer_cpf_masked: maskedCpf,
+        error_message: 'Mercado Pago rejeitou dados do cliente (Ex: CPF/Telefone mal formatado)',
+        error_details: { message: prefErr?.message },
+        cart_total: total
+      })
+      return NextResponse.json({ error: 'Dados de pagamento rejeitados. Verifique se o CPF e Telefone estão corretos e tente novamente.' }, { status: 400 })
+    }
 
     // 4.5. Update Order with Preference ID
-    if (preference.id) {
+    if (preference?.id) {
        await adminSupabase.from('orders').update({ preference_id: preference.id }).eq('id', newOrder.id)
     }
 
@@ -226,7 +256,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 7. Enviar notificação por e-mail para o administrador
+    // 7. Enviar notificação por e-mail para o administrador (Agora SEGURO: após inserção dos itens)
     try {
       const itemsListHtml = items.map((i: any) => `<li>${i.quantity}x ${i.title || 'Item'} - R$ ${Number(i.price).toFixed(2)}</li>`).join('')
       await sendEmailMessage({

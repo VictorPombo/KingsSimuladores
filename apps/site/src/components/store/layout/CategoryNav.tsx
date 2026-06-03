@@ -36,7 +36,7 @@ export function CategoryNav({ categories = [] }: { categories?: Array<{id: strin
   )
 
   return (
-    <nav 
+    <nav
       style={{ 
         background: 'rgba(6, 8, 15, 0.6)', 
         backdropFilter: 'blur(10px)',
@@ -55,21 +55,7 @@ export function CategoryNav({ categories = [] }: { categories?: Array<{id: strin
         gap: '32px',
         flexWrap: 'nowrap',
       }}>
-        <style dangerouslySetInnerHTML={{__html: `
-          @keyframes pulseGlowConsultoria {
-            0% { box-shadow: 0 0 5px rgba(0, 229, 255, 0.2); filter: brightness(1); }
-            50% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.8), inset 0 0 10px rgba(0, 229, 255, 0.4); filter: brightness(1.2); }
-            100% { box-shadow: 0 0 5px rgba(0, 229, 255, 0.2); filter: brightness(1); }
-          }
-          .btn-consultoria-pulse {
-            animation: pulseGlowConsultoria 2s infinite ease-in-out;
-            background: rgba(0, 229, 255, 0.15) !important;
-            border: 1px solid rgba(0, 229, 255, 0.5) !important;
-            border-radius: 8px !important;
-            color: #fff !important;
-            text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
-          }
-        `}} />
+
         {menuItems.map((item, idx) => {
           const isConsultoria = item.label === 'CONSULTORIA';
           return (

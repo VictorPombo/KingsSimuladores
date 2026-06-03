@@ -64,7 +64,6 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
   const [savingTracking, setSavingTracking] = useState<string | null>(null)
   const [router] = [useRouter()]
 
-  // Status change modal state
   const [statusModal, setStatusModal] = useState<{
     orderId: string
     currentStatus: string
@@ -76,6 +75,33 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
   } | null>(null)
   const [savingStatus, setSavingStatus] = useState(false)
   const [feedback, setFeedback] = useState<{type: 'success'|'error', message: string} | null>(null)
+  
+  // Dead Letter Queue State
+  const [deadJobsCount, setDeadJobsCount] = useState<number>(0)
+  const [retryingDeadJobs, setRetryingDeadJobs] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/admin/pedidos/dead-jobs')
+      .then(r => r.json())
+      .then(d => { if (d.count) setDeadJobsCount(d.count) })
+      .catch(() => {})
+  }, [])
+
+  const handleRetryDeadJobs = async () => {
+    setRetryingDeadJobs(true)
+    try {
+      const res = await fetch('/api/admin/pedidos/dead-jobs', { method: 'POST' })
+      if (res.ok) {
+        alert('Tarefas reenviadas para a fila com sucesso!')
+        setDeadJobsCount(0)
+      } else {
+        alert('Falha ao reenviar tarefas.')
+      }
+    } catch {
+      alert('Erro de conexão')
+    } finally {
+      setRetryingDeadJobs(false)
+    }
   const [sendingNfe, setSendingNfe] = useState<string | null>(null)
   const [uploadingNfe, setUploadingNfe] = useState<string | null>(null)
   const [syncingNfe, setSyncingNfe] = useState<string | null>(null)
@@ -375,7 +401,11 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
       (o.order_number && String(o.order_number).includes(searchString)) ||
       (o.profiles?.full_name || '').toLowerCase().includes(searchString) ||
       (o.profiles?.email || '').toLowerCase().includes(searchString)
-    const matchStatus = statusFilter === 'all' || o.status === statusFilter
+    
+    const matchStatus = statusFilter === 'all' 
+      || (statusFilter === 'completed' && ['paid', 'shipped', 'delivered'].includes(o.status))
+      || o.status === statusFilter
+      
     const matchBrand = brandFilter === 'all' || o.brand_origin === brandFilter
     return matchSearch && matchStatus && matchBrand
   })
@@ -406,12 +436,45 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url; a.download = `pedidos_${new Date().toISOString().split('T')[0]}.csv`; a.click()
+    const fileNameStatus = statusFilter === 'completed' ? 'faturamento' : statusFilter
+    a.href = url; a.download = `pedidos_${fileNameStatus}_${new Date().toISOString().split('T')[0]}.csv`; a.click()
     URL.revokeObjectURL(url)
   }
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+
+      {/* ── Dead Jobs Alert ── */}
+      {deadJobsCount > 0 && (
+        <div style={{
+          marginBottom: '24px', padding: '16px 24px', background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '8px', display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ background: '#ef4444', color: '#fff', borderRadius: '50%', padding: '8px' }}>
+              <AlertCircle size={24} />
+            </div>
+            <div>
+              <h3 style={{ color: '#ef4444', margin: '0 0 4px 0', fontSize: '1.1rem', fontWeight: 700 }}>Atenção: Falha de Integração!</h3>
+              <p style={{ color: '#fca5a5', margin: 0, fontSize: '0.85rem' }}>
+                Existem <strong>{deadJobsCount} tarefas (Notas Fiscais/Etiquetas)</strong> que falharam repetidas vezes.
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={handleRetryDeadJobs} disabled={retryingDeadJobs}
+            style={{
+              background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', 
+              borderRadius: '6px', fontWeight: 'bold', cursor: retryingDeadJobs ? 'wait' : 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px', opacity: retryingDeadJobs ? 0.7 : 1
+            }}
+          >
+            <RefreshCw size={16} style={{ animation: retryingDeadJobs ? 'spin 1s linear infinite' : 'none' }} /> 
+            {retryingDeadJobs ? 'Reenviando...' : 'Forçar Re-tentativa'}
+          </button>
+        </div>
+      )}
 
       {/* ── Delete Modal ── */}
       {deleteModal && (
@@ -572,6 +635,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
             style={{ background: '#1f2025', border: '1px solid #3f424d', borderRadius: '6px', padding: '9px 12px', color: '#fff', fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}>
             <option value="all">Todos os Status</option>
+            <option value="completed">Vendas Concluídas (Pago + Enviado + Entregue)</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
           <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)}

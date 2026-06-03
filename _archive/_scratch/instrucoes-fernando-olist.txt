@@ -1,0 +1,66 @@
+═══════════════════════════════════════════════════════════════
+  KINGS SIMULADORES — Configuração de Webhooks no Tiny ERP
+═══════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANTE:
+O botão "Enviar produtos para o e-commerce" do Olist/Tiny
+NÃO funciona mais. Ele tenta enviar pra plataforma antiga
+(Loja Integrada/Tray) que foi desativada.
+
+O nosso site novo recebe atualizações automaticamente via
+webhooks. Basta alterar no Tiny que reflete no site sozinho.
+
+═══════════════════════════════════════════════════════════════
+  COMO CONFIGURAR OS WEBHOOKS NO TINY
+═══════════════════════════════════════════════════════════════
+
+No painel do Tiny ERP, vá em:
+  Configurações → Integrações → Callbacks (Webhooks)
+
+Cadastre as URLs abaixo para cada tipo de notificação:
+
+───────────────────────────────────────────────────────────────
+1. PRODUTOS (criação/edição/exclusão)
+───────────────────────────────────────────────────────────────
+https://kingssimuladores.com.br/api/webhooks/olist/produtos?token=6e07a55fac48dd209840f15478c4e385810fa8cc0a4c046ba0c8f64341717d8f
+
+───────────────────────────────────────────────────────────────
+2. PREÇOS (alteração de preço/promoção)
+───────────────────────────────────────────────────────────────
+https://kingssimuladores.com.br/api/webhooks/olist/precos?token=6e07a55fac48dd209840f15478c4e385810fa8cc0a4c046ba0c8f64341717d8f
+
+───────────────────────────────────────────────────────────────
+3. ESTOQUE (entrada/saída de estoque)
+───────────────────────────────────────────────────────────────
+https://kingssimuladores.com.br/api/webhooks/olist/estoque?token=6e07a55fac48dd209840f15478c4e385810fa8cc0a4c046ba0c8f64341717d8f
+
+───────────────────────────────────────────────────────────────
+4. PEDIDOS (novos pedidos / mudança de status)
+───────────────────────────────────────────────────────────────
+https://kingssimuladores.com.br/api/webhooks/olist/pedidos?token=6e07a55fac48dd209840f15478c4e385810fa8cc0a4c046ba0c8f64341717d8f
+
+───────────────────────────────────────────────────────────────
+5. NOTA FISCAL (emissão de NF-e)
+───────────────────────────────────────────────────────────────
+https://kingssimuladores.com.br/api/webhooks/olist/nfe?token=6e07a55fac48dd209840f15478c4e385810fa8cc0a4c046ba0c8f64341717d8f
+
+───────────────────────────────────────────────────────────────
+6. RASTREIO (código de rastreamento dos Correios)
+───────────────────────────────────────────────────────────────
+https://kingssimuladores.com.br/api/webhooks/olist/rastreio?token=6e07a55fac48dd209840f15478c4e385810fa8cc0a4c046ba0c8f64341717d8f
+
+
+═══════════════════════════════════════════════════════════════
+  COMO FUNCIONA AGORA
+═══════════════════════════════════════════════════════════════
+
+  ✅ Alterou preço no Tiny → atualiza no site automaticamente
+  ✅ Alterou estoque no Tiny → atualiza no site automaticamente
+  ✅ Editou produto no Tiny → atualiza no site automaticamente
+  ✅ Novo pedido no site → aparece no Tiny automaticamente
+
+  ❌ NÃO usar o botão "Enviar produtos para o e-commerce"
+  ❌ NÃO precisa subir tudo de uma vez — cada alteração
+     individual já dispara o webhook
+
+═══════════════════════════════════════════════════════════════

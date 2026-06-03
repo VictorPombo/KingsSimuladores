@@ -21,7 +21,7 @@ export async function Header() {
       {/* =======================================================
           🖥️ DESKTOP: CÓDIGO ORIGINAL INTACTO
        ========================================================= */}
-      <div className="desktop-only">
+      <div className="desktop-header-kings">
         <header
           style={{
             position: 'sticky',
@@ -53,22 +53,6 @@ export async function Header() {
               <SearchBar />
             </div>
 
-            <style dangerouslySetInnerHTML={{__html: `
-              .kings-nav-hover {
-                display: inline-block;
-                transition: transform 0.3s ease, color 0.3s ease;
-              }
-              .kings-nav-hover:hover {
-                transform: scale(1.1) translateY(-1px);
-                color: #fff !important;
-              }
-              .kings-btn-hover {
-                transition: transform 0.3s ease;
-              }
-              .kings-btn-hover:hover {
-                transform: scale(1.08) translateY(-1px);
-              }
-            `}} />
             <nav style={{ display: 'flex', gap: '24px', alignItems: 'center', flexShrink: 0 }}>
               <StoreSwitcher store="seven" />
               <StoreSwitcher store="msu" />
@@ -88,7 +72,7 @@ export async function Header() {
       {/* =======================================================
           📱 MOBILE: MENU OTIMIZADO PARA CELULAR
        ========================================================= */}
-      <div className="mobile-only">
+      <div className="mobile-header-kings">
         <header
           style={{
             position: 'sticky',

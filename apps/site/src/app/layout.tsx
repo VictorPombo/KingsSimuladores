@@ -74,6 +74,19 @@ export default function RootLayout({
         <noscript>
           <img height="1" width="1" style={{ display: 'none' }} src="https://www.facebook.com/tr?id=1416641970482316&ev=PageView&noscript=1" alt="" />
         </noscript>
+        {/* Google Ads Tag (AW-11399026698) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-11399026698"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-11399026698');
+          `}
+        </Script>
       </head>
       <body className="font-body">
         <StreamingBackground />

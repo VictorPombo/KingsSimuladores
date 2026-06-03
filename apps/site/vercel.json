@@ -1,15 +1,19 @@
 {
   "crons": [
     {
+      "path": "/api/cron/process-jobs",
+      "schedule": "* * * * *"
+    },
+    {
       "path": "/api/cron/recover-carts",
       "schedule": "0 * * * *"
     },
     {
-      "path": "/api/cron/verify-payments?secret=kings2026",
+      "path": "/api/cron/verify-payments",
       "schedule": "*/5 * * * *"
     },
     {
-      "path": "/api/cron/sync-tracking?secret=kings2026",
+      "path": "/api/cron/sync-tracking",
       "schedule": "0 */2 * * *"
     }
   ]

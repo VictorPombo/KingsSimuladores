@@ -201,18 +201,13 @@ export default function LoginPage() {
     const email = formData.get('email') as string
 
     try {
-      const response = await fetch('/api/auth/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+      const supabase = getSupabase()
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/account`,
       })
-      const data = await response.json()
 
-      if (!response.ok) {
-        setError(data.error || 'Erro ao enviar email de recuperação.')
-      } else if (data.fallbackLink) {
-        setSuccess('Redirecionando para redefinição de senha...')
-        window.location.href = data.fallbackLink
+      if (resetError) {
+        setError(resetError.message || 'Erro ao enviar email de recuperação.')
       } else {
         setSuccess('Se o e-mail existir, você receberá um link para redefinir a senha.')
         setMode('login')

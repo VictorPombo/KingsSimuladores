@@ -27,28 +27,6 @@ export async function AuthAction({ store, mobile }: AuthActionProps) {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .auth-action-btn {
-          position: relative;
-          overflow: hidden;
-        }
-        .auth-action-btn::after {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background-color: var(--accent);
-          opacity: 0;
-          transition: opacity 0.2s;
-          z-index: -1;
-        }
-        .auth-action-btn:hover::after {
-          opacity: 0.15;
-        }
-        .auth-action-btn:hover {
-          transform: scale(1.02);
-        }
-      `}} />
       <Link 
         href={href} 
         className="auth-action-btn"

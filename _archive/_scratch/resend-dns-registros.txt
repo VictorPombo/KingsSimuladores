@@ -1,0 +1,28 @@
+═══════════════════════════════════════════════════════════════
+  RESEND — Registros DNS para kingssimuladores.com.br
+  Adicionar estes 3 registros na zona DNS do domínio
+═══════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────
+REGISTRO 1 — DKIM (assinatura digital dos e-mails)
+───────────────────────────────────────────────────────────────
+  Tipo:  TXT
+  Nome:  resend._domainkey
+  Dados: p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDnTMDFHlPGL8S/2KA2T+5ESQm13VjnrZPQKb6MijlsYf2ueEsP73AVRLQ70/NA9IB3F+MyUf4D8DPXYtoZ7cMl9rXHlTgvqFmsoIvEhzGhSZGO4JGC22ALHtYda/1HwVriM1jPWdr68To7YNGuXkoFm81i4NDy3/mzOvuep2tDrwIDAQAB
+
+───────────────────────────────────────────────────────────────
+REGISTRO 2 — MX (recebimento de bounces)
+───────────────────────────────────────────────────────────────
+  Tipo:       MX
+  Nome:       send
+  Dados:      feedback-smtp.us-east-1.amazonses.com
+  Prioridade: 10
+
+───────────────────────────────────────────────────────────────
+REGISTRO 3 — SPF (autorização de envio)
+───────────────────────────────────────────────────────────────
+  Tipo:  TXT
+  Nome:  send
+  Dados: v=spf1 include:amazonses.com ~all
+
+

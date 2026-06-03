@@ -17,6 +17,8 @@ export async function updateProduct(id: string, formData: FormData) {
   const description = (formData.get('description') as string) || null
   const fabricante = (formData.get('fabricante') as string) || null
   const outOfStockBehavior = (formData.get('out_of_stock_behavior') as string) || 'unavailable'
+  const pixDiscountStr = formData.get('pix_discount')
+  const pixDiscount = pixDiscountStr ? parseFloat(pixDiscountStr as string) : 10
   const weightKg = formData.get('weight_kg') ? parseFloat(formData.get('weight_kg') as string) : null
   const ncm = (formData.get('ncm') as string) || null
   const ean = (formData.get('ean') as string) || null
@@ -62,7 +64,8 @@ export async function updateProduct(id: string, formData: FormData) {
     ...existingAttrs,
     ...(fabricante ? { marca: fabricante } : {}),
     ...(costPrice !== null && !isNaN(costPrice) ? { cost_price: costPrice } : { cost_price: null }),
-    out_of_stock_behavior: outOfStockBehavior
+    out_of_stock_behavior: outOfStockBehavior,
+    pix_discount: isNaN(pixDiscount) ? 10 : pixDiscount
   }
 
   if (!fabricante) {
