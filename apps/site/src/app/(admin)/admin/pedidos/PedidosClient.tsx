@@ -102,6 +102,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
     } finally {
       setRetryingDeadJobs(false)
     }
+  }
   const [sendingNfe, setSendingNfe] = useState<string | null>(null)
   const [uploadingNfe, setUploadingNfe] = useState<string | null>(null)
   const [syncingNfe, setSyncingNfe] = useState<string | null>(null)

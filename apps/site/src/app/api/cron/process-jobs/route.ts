@@ -238,7 +238,7 @@ export async function GET(req: Request) {
   }
 
   // Marcar todos como 'processing' em lote antes de executar (evita duplo-processamento)
-  const jobIds = jobs.map(j => j.id)
+  const jobIds = jobs.map((j: any) => j.id)
   await supabase
     .from('order_jobs')
     .update({ status: 'processing' })
