@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@kings/db'
-import { pushOrderToOlist } from '@kings/payments'
+import { pushOrderToOlist, emitNfeTiny, getNfeLinkTiny } from '@kings/payments'
 import { sendWhatsappMessage, sendEmailMessage } from '@kings/notifications'
 import { generateShippingLabel } from '@kings/shipping'
 
@@ -81,18 +81,83 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
 
       if (erp_id) {
         await supabase.from('orders').update({ erp_id }).eq('id', order.id)
+
+        // Enfileirar emissão automática da NFe
+        await supabase.from('order_jobs').insert({
+          order_id: order.id,
+          job_type: 'emit_nfe',
+          status: 'pending',
+          retry_count: 0,
+          payload: { erp_id, order_id: order.id, store },
+        })
       }
     }
   },
 
+  async emit_nfe(payload, supabase) {
+    const { erp_id, order_id, store } = payload
+
+    const apiKey = store === 'seven'
+      ? process.env.OLIST_API_KEY_SEVEN
+      : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN)
+
+    if (!apiKey) {
+      throw new Error(`[emit_nfe] API key não configurada para store "${store}"`)
+    }
+
+    const situacao = await emitNfeTiny(erp_id, apiKey)
+
+    // Sefaz ainda processando — retry automático pelo cron
+    if (!situacao || situacao.toLowerCase().includes('process') || situacao.toLowerCase().includes('pend')) {
+      throw new Error(`[emit_nfe] NFe ainda em processamento (${situacao}). Retry pendente.`)
+    }
+
+    if (!situacao.toLowerCase().includes('aprovad') && !situacao.toLowerCase().includes('autoriza')) {
+      throw new Error(`[emit_nfe] NFe rejeitada ou situação inesperada: ${situacao}`)
+    }
+
+    // Autorizada — buscar link do PDF
+    const pdfUrl = await getNfeLinkTiny(erp_id, apiKey)
+
+    await supabase
+      .from('invoices')
+      .update({
+        status: 'issued',
+        ...(pdfUrl ? { pdf_url: pdfUrl } : {}),
+      })
+      .eq('order_id', order_id)
+
+    console.log(`[emit_nfe] ✅ NFe emitida para pedido ${order_id}. PDF: ${pdfUrl ?? 'n/a'}`)
+  },
+
   async frenet_label(payload, supabase) {
     const { order, items } = payload
-    const labelResult = await generateShippingLabel(order, items)
+
+    // Buscar shipping_service_id diretamente do banco (mais atualizado que o payload)
+    const { data: freshOrder } = await supabase
+      .from('orders')
+      .select('shipping_service_id')
+      .eq('id', order.id)
+      .single()
+
+    const orderWithService = {
+      ...order,
+      shipping_service_id: freshOrder?.shipping_service_id || order.shipping_service_id,
+    }
+
+    // generateShippingLabel lança erro em caso de falha — o cron faz retry automaticamente
+    const labelResult = await generateShippingLabel(orderWithService, items)
+
     if (labelResult.success && labelResult.tracking_code) {
       await supabase
         .from('orders')
-        .update({ tracking_code: labelResult.tracking_code })
+        .update({
+          tracking_code: labelResult.tracking_code,
+          ticket_url: labelResult.ticket_url,
+        })
         .eq('id', order.id)
+
+      console.log(`[frenet_label] Pedido ${order.id} atualizado — Tracking: ${labelResult.tracking_code}`)
     }
   },
 
@@ -196,6 +261,17 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
         payout_status: 'pending',
       })
 
+      // 3. Criar registro de repasse em escrow para o vendedor
+      await supabase.from('payouts').insert({
+        order_item_id: item.id,
+        seller_id: mpOrder.seller_id,
+        gross_amount: item.total_price,
+        platform_fee_percent: 15,
+        platform_fee_amount: mpOrder.kings_fee,
+        net_amount: mpOrder.seller_net,
+        status: 'held',
+      })
+
       console.log(`[msu_split] Marketplace order ${mpOrder.id} marcado como pago. Taxa Kings: R$${mpOrder.kings_fee}, Líquido vendedor: R$${mpOrder.seller_net}`)
     }
   },
@@ -253,7 +329,7 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
 export async function GET(req: Request) {
   // 1. Validar autenticação do Vercel Cron via Header
   const authHeader = req.headers.get('authorization')
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
