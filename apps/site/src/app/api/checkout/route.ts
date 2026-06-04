@@ -14,6 +14,7 @@ export async function POST(req: Request) {
 
     const body = await req.json()
     const { items, customer, address, shipping, total, coupon_id, pix_discount } = body
+    const shipping_service_id: string | undefined = shipping?.service_id || shipping?.id || undefined
 
     // 1. Identify user — supports both logged-in and guest checkout
     const supabase = await createServerSupabaseClient()
@@ -155,6 +156,46 @@ export async function POST(req: Request) {
 
     const storeContext = firstStore === 'seven' ? 'seven' : (firstStore === 'msu' ? 'msu' : 'kings')
 
+    // 2.5. Idempotency check: reutilizar pedido pending dos últimos 30min (mesmo cliente/loja)
+    const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    const { data: existingOrder } = await adminSupabase
+      .from('orders')
+      .select('id, preference_id')
+      .eq('customer_id', profileId)
+      .eq('status', 'pending')
+      .eq('brand_origin', storeContext)
+      .gte('created_at', thirtyMinAgo)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (existingOrder) {
+      let reuseFee: number | undefined
+      if (storeContext === 'msu') {
+        const { data: brand } = await adminSupabase.from('brands').select('settings').eq('name', 'msu').single()
+        const rate = brand?.settings?.commission_rate !== undefined ? Number(brand.settings.commission_rate) : 15
+        const itemsTotal = items.reduce((acc: number, i: any) => acc + (i.price * i.quantity), 0)
+        reuseFee = Math.round((itemsTotal * rate) / 100 * 100) / 100
+      }
+      try {
+        const reusePref = await createPreference(items, customer, existingOrder.id, reuseFee, storeContext, shipping ? parseFloat(shipping.price) : 0, !!pix_discount)
+        if (reusePref?.init_point) {
+          if (reusePref.id) {
+            await adminSupabase.from('orders').update({ preference_id: reusePref.id }).eq('id', existingOrder.id)
+          }
+          return NextResponse.json({
+            ok: true,
+            orderId: existingOrder.id,
+            preferenceId: reusePref.id,
+            init_point: reusePref.init_point,
+            detail: 'Reusing existing pending order'
+          })
+        }
+      } catch {
+        // MP rejeitou regeneração — cria novo pedido abaixo
+      }
+    }
+
     // 3. Native Order Creation in Database FIRST to get an ID
     const orderData = {
       customer_id: profileId,
@@ -168,6 +209,7 @@ export async function POST(req: Request) {
       preference_id: null,
       coupon_id: coupon_id || null,
       notes: shipping?.name ? `Frete: ${shipping.name}` : null,
+      shipping_service_id: shipping_service_id || null,
     }
 
     const { data: newOrder, error: orderErr } = await adminSupabase

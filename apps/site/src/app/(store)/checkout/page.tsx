@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Container } from '@kings/ui'
 
@@ -34,6 +34,7 @@ export default function CheckoutPage() {
   const [isRetirada, setIsRetirada] = useState(false)
   
   const [isProcessing, setIsProcessing] = useState(false)
+  const lastPaymentAttempt = useRef<number>(0)
   const [currentStoreIdx, setCurrentStoreIdx] = useState(0)
   const [checkoutError, setCheckoutError] = useState('')
   const [trackedCheckout, setTrackedCheckout] = useState(false)
@@ -279,6 +280,9 @@ export default function CheckoutPage() {
   const totalGeral = totalPrice + valorFrete
 
   const handleMultistepPayment = async () => {
+    const now = Date.now()
+    if (isProcessing || now - lastPaymentAttempt.current < 3000) return
+    lastPaymentAttempt.current = now
     setIsProcessing(true)
     const currentStore = storeNames[currentStoreIdx]
     const storeGroupItems = groups[currentStore]
@@ -310,8 +314,7 @@ export default function CheckoutPage() {
       const session = await res.json()
       
       if (session.ok && session.init_point) {
-        // Redireciona o cliente para o checkout real do Mercado Pago
-        // NÃO limpa o carrinho aqui, para evitar perda se ele fechar a janela.
+        sessionStorage.setItem('@kings/pending_order_id', session.orderId)
         window.location.href = session.init_point
       } else {
         setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')
@@ -325,6 +328,9 @@ export default function CheckoutPage() {
   }
 
   const handlePixPayment = async () => {
+    const now = Date.now()
+    if (isProcessing || now - lastPaymentAttempt.current < 3000) return
+    lastPaymentAttempt.current = now
     setIsProcessing(true)
     const currentStore = storeNames[currentStoreIdx]
     const storeGroupItems = groups[currentStore]
@@ -362,8 +368,7 @@ export default function CheckoutPage() {
       const session = await res.json()
 
       if (session.ok && session.init_point) {
-        // Redireciona o cliente para o checkout real do Mercado Pago
-        // NÃO limpa o carrinho aqui, para evitar perda se ele fechar a janela.
+        sessionStorage.setItem('@kings/pending_order_id', session.orderId)
         window.location.href = session.init_point
       } else {
         setCheckoutError(session.error || 'Não foi possível iniciar o pagamento. Tente novamente.')
