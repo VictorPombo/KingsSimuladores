@@ -107,6 +107,7 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
         valor_frete: orderPayload.shipping_cost || 0,
         valor_desconto: 0,
         forma_pagamento: 'Pix',
+        forma_recebimento: 'MercadoPago',
         situacao: 'Aprovado'
       }
     }
