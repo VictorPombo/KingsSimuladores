@@ -30,8 +30,16 @@ View `dead_order_jobs` para alertas no painel admin.
 ### Worker — `apps/site/src/app/api/cron/process-jobs/route.ts`
 - Rescue de jobs travados: jobs em `processing` há > 5 min voltam para `pending`
 - `updated_at` atualizado no lock acquisition e no done
-- Handlers implementados: `olist_erp`, `frenet_label`, `notify_customer_whatsapp`, `notify_customer_email`, `notify_admin_email`, `msu_seller_email`, **`msu_split`** (novo)
+- Handlers implementados: `olist_erp`, `frenet_label`, `notify_customer_whatsapp`, `notify_customer_email`, `notify_admin_email`, `msu_seller_email`, `msu_split`, **`emit_nfe`** (novo — 2026-06-03)
 - Retry até 3x; após isso vira `dead` (aparece em `dead_order_jobs`)
+
+### Handler `emit_nfe` (novo — 2026-06-03 NFe Session)
+- Enfileirado automaticamente pelo handler `olist_erp` após injeção bem-sucedida com `erp_id`
+- Payload: `{ erp_id, order_id, store }`
+- Chama `emitNfeTiny(erp_id, apiKey)` — POST para `nota.fiscal.emitir.php`
+- Se situação = "Aprovada/Autorizada": chama `getNfeLinkTiny` e atualiza `invoices` com `status='issued'` + `pdf_url`
+- Se situação = "Processando/Pendente": lança erro → cron faz retry automático
+- Resolve a necessidade de o usuário clicar em "Sincronizar" manualmente no painel
 
 ### Handler `msu_split` (novo — 2026-06-03 War Room)
 - Marca `marketplace_orders.status = 'paid'` com `mp_payment_id`
@@ -64,9 +72,39 @@ Seven já está 100% pronta no código do admin:
 - NF-e Seven usa CNPJ `61.219.783/0001-93` hardcoded no cron
 - Só falta as env vars `OLIST_API_KEY_SEVEN` e `MP_ACCESS_TOKEN_SEVEN`
 
-## Próximos passos (Bloco 3)
+## Wrapper Olist — funções adicionadas (2026-06-03)
+
+`packages/payments/src/olist.ts` — duas novas exportações:
+
+- **`emitNfeTiny(tinyOrderId, apiKey)`** — POST `nota.fiscal.emitir.php`, retorna situação como string. Lança erro se HTTP falhar ou Tiny retornar status != OK. Envia `enviarEmail=S` por padrão.
+- **`getNfeLinkTiny(tinyOrderId, apiKey)`** — busca `id_nota_fiscal` via `pedido.obter.php`, depois URL do PDF via `nota.fiscal.obter.link.php`. Retorna `string | null`.
+
+Ambas exportadas via `export *` no `packages/payments/src/index.ts`.
+
+## Feature: Sync Manual Tiny ERP — implementada em 2026-06-03 (SDD)
+
+Spec: `/Users/hadi/VaultsObisidian/NextHub/wiki/projetos/KingsSimuladores/Spec Admin Sync Tiny.md`
+
+### Arquivos criados/modificados (escopo fechado conforme spec)
+
+**`apps/site/src/app/api/admin/orders/force-tiny-sync/route.ts`** — novo
+- `POST { order_id: string }`
+- Busca pedido com join em `order_items(product: sku, title, ncm, ean)` + `profiles!customer_id`
+- Mapeia para `OlistOrderInput` com CFOP por UF (5102 SP / 6102 outros)
+- Chama `pushOrderToOlist` do `@kings/payments`
+- Erro do Tiny → propaga mensagem exata com status 502
+- Sucesso → `orders.erp_id` atualizado + `upsert` em `invoices` (sem duplicar)
+
+**`apps/site/src/app/(admin)/admin/pedidos/PedidosClient.tsx`** — modificado
+- Estado `forceSyncingErp: string | null`
+- Função `handleForceTinySync` usa `setFeedback` (toast) — zero `alert()` nativos
+- Botão "Sincronizar no ERP" (estilo outline) visível para `paid | shipped | delivered`
+- Loading state: ícone `RefreshCw` com animação `spin`, texto "Sincronizando...", `disabled`, `opacity: 0.6`
+
+## Próximos passos
 - Conectar dashboard financeiro do vendedor MSU com dados reais de `marketplace_orders` + `commissions`
 - Verificar `used/dashboard/page.tsx` e alimentar aba financeira
+- Confirmar se `OLIST_API_KEY_SEVEN` e `OLIST_API_KEY_KINGS` estão configuradas na Vercel para que `emit_nfe` funcione em produção
 
 **Why:** Registrar o estado exato para não reprocessar o que já foi feito.
 **How to apply:** Em próximas sessões, verificar se as env vars foram adicionadas e se migration 024 foi aplicada antes de avançar para dashboard financeiro MSU.

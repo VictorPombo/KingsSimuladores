@@ -1,9 +1,60 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download, ShoppingBag, MessageSquare, Edit2, FileText, Mail, UploadCloud } from 'lucide-react'
+import { Search, Filter, ChevronDown, Eye, Truck, CreditCard, Package, AlertCircle, CheckCircle, Clock, XCircle, RefreshCw, Download, ShoppingBag, MessageSquare, Edit2, FileText, Mail, UploadCloud, HelpCircle } from 'lucide-react'
 import { createClient } from '@kings/db/client'
+
+/**
+ * Tooltip explicativo para botões de ação.
+ * Desktop: aparece ao hover com delay de 300ms.
+ * Mobile: sem bloqueio — todos os botões destrutivos já têm confirm/modal próprio.
+ */
+function ActionTooltip({ text, children }: { text: string; children: React.ReactNode }) {
+  const [show, setShow] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMouseEnter = useCallback(() => {
+    timeoutRef.current = setTimeout(() => setShow(true), 300)
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setShow(false)
+  }, [])
+
+  useEffect(() => {
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }
+  }, [])
+
+  return (
+    <div
+      style={{ position: 'relative', display: 'inline-flex' }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
+      {show && (
+        <div style={{
+          position: 'absolute', bottom: 'calc(100% + 8px)', left: '50%', transform: 'translateX(-50%)',
+          background: '#1a1c28', color: '#e2e8f0', fontSize: '0.75rem', lineHeight: 1.4,
+          padding: '10px 14px', borderRadius: '8px', border: '1px solid #3f424d',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)', whiteSpace: 'normal',
+          width: 'max-content', maxWidth: '280px', zIndex: 50, pointerEvents: 'none',
+          animation: 'tooltipFadeIn 0.15s ease-out',
+        }}>
+          {text}
+          <div style={{
+            position: 'absolute', bottom: '-5px', left: '50%', transform: 'translateX(-50%) rotate(45deg)',
+            width: '10px', height: '10px', background: '#1a1c28', borderRight: '1px solid #3f424d',
+            borderBottom: '1px solid #3f424d',
+          }} />
+        </div>
+      )}
+    </div>
+  )
+}
+
 
 type Order = {
   id: string
@@ -106,6 +157,32 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
   const [sendingNfe, setSendingNfe] = useState<string | null>(null)
   const [uploadingNfe, setUploadingNfe] = useState<string | null>(null)
   const [syncingNfe, setSyncingNfe] = useState<string | null>(null)
+  const [forceSyncingErp, setForceSyncingErp] = useState<string | null>(null)
+
+  const handleForceTinySync = async (orderId: string) => {
+    setForceSyncingErp(orderId)
+    try {
+      const res = await fetch('/api/admin/orders/force-tiny-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setFeedback({ type: 'success', message: 'Pedido sincronizado no ERP com sucesso!' })
+        setTimeout(() => setFeedback(null), 4000)
+        router.refresh()
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Falha ao sincronizar com o ERP.' })
+        setTimeout(() => setFeedback(null), 6000)
+      }
+    } catch {
+      setFeedback({ type: 'error', message: 'Erro de conexão ao tentar sincronizar com o ERP.' })
+      setTimeout(() => setFeedback(null), 4000)
+    } finally {
+      setForceSyncingErp(null)
+    }
+  }
 
   const handleSaveTracking = async (orderId: string) => {
     setSavingTracking(orderId)
@@ -467,6 +544,11 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes tooltipFadeIn { from { opacity: 0; transform: translateX(-50%) translateY(4px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .spin { animation: spin 1s linear infinite; }
+      `}</style>
 
       {/* ── Dead Jobs Alert ── */}
       {deadJobsCount > 0 && (
@@ -1009,6 +1091,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                     {!order.invoices?.[0]?.pdf_url ? (
                                       <>
                                         {order.erp_id ? (
+                                          <ActionTooltip text="Consulta o Tiny ERP para verificar se a Nota Fiscal já foi emitida e puxa o link do PDF automaticamente.">
                                           <button
                                             onClick={(e) => { e.stopPropagation(); handleSyncNfe(order.id); }}
                                             disabled={syncingNfe === order.id}
@@ -1027,12 +1110,14 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                             <RefreshCw size={14} className={syncingNfe === order.id ? "spin" : ""} /> 
                                             {syncingNfe === order.id ? 'Buscando...' : 'Buscar NF-e no ERP'}
                                           </button>
+                                          </ActionTooltip>
                                         ) : (
                                           <span style={{ fontSize: '0.8rem', color: '#64748b', padding: '6px 12px', background: '#3f424d30', borderRadius: '8px', border: '1px solid #3f424d50' }}>
                                             Aguardando envio ao ERP
                                           </span>
                                         )}
                                         <span style={{ color: '#64748b', fontSize: '0.8rem' }}>ou</span>
+                                        <ActionTooltip text="Sobe manualmente um PDF da Nota Fiscal para o Supabase Storage. Use quando a NF-e foi emitida por fora do sistema (ex: contador enviou o PDF).">
                                         <label style={{
                                           display: 'inline-flex', alignItems: 'center', gap: '6px',
                                           background: uploadingNfe === order.id ? '#3f424d' : 'rgba(245, 158, 11, 0.1)', 
@@ -1057,9 +1142,11 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                             onClick={(e) => e.stopPropagation()}
                                           />
                                         </label>
+                                        </ActionTooltip>
                                       </>
                                     ) : (
                                       <>
+                                        <ActionTooltip text="Abre o PDF da Nota Fiscal em uma nova aba para download ou impressão.">
                                         <button
                                           onClick={(e) => { e.stopPropagation(); handleDownloadNfe(order.invoices![0].pdf_url); }}
                                           style={{
@@ -1075,7 +1162,9 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                         >
                                           <Download size={14} /> Download da NF-e
                                         </button>
+                                        </ActionTooltip>
 
+                                        <ActionTooltip text="Dispara um e-mail ao cliente com o PDF da NF-e anexado. O cliente recebe no e-mail cadastrado no pedido.">
                                         <button
                                           onClick={(e) => { e.stopPropagation(); handleSendNfeEmail(order); }}
                                           disabled={sendingNfe === order.id}
@@ -1094,6 +1183,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                           <Mail size={14} /> 
                                           {sendingNfe === order.id ? 'Enviando...' : 'Enviar NF-e por E-mail'}
                                         </button>
+                                        </ActionTooltip>
                                       </>
                                     )}
                                   </div>
@@ -1102,6 +1192,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                 {/* Linha 2: Botões de Ação */}
                                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                                   {order.profiles?.phone && (
+                                    <ActionTooltip text="Abre o WhatsApp com uma mensagem automática de despacho para o cliente, incluindo dados do pedido e rastreio (se disponível).">
                                     <a
                                       href={`https://wa.me/55${order.profiles.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Fala ${order.profiles.full_name?.split(' ')[0] || 'Cliente'}! Passando para avisar que seu pedido ${order.order_number ? '#' + order.order_number : '#' + order.id.split('-')[0]} foi despachado. ${order.tracking_code ? `Acompanhe o rastreio: ${order.tracking_code}` : 'O código de rastreio será enviado em breve.'}`)}`}
                                       target="_blank"
@@ -1121,9 +1212,11 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                       </svg>
                                       Notificar Envio no WhatsApp
                                     </a>
+                                    </ActionTooltip>
                                   )}
 
                                   {!order.erp_id && ['paid', 'shipped', 'delivered'].includes(order.status) && (
+                                    <ActionTooltip text="Envia os dados deste pedido para o Tiny ERP pela primeira vez, gerando o cadastro e disparando a emissão da Nota Fiscal Eletrônica (NF-e).">
                                     <button
                                       onClick={() => handleGenerateInvoice(order.id)}
                                       style={{
@@ -1138,9 +1231,38 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                       <Package size={18} />
                                       Gerar NF-e (ERP)
                                     </button>
+                                    </ActionTooltip>
+                                  )}
+
+                                  {['paid', 'shipped', 'delivered'].includes(order.status) && (
+                                    <ActionTooltip text="Força o reenvio deste pedido ao Tiny ERP. Use quando o envio automático falhou, quando o CPF/CNPJ foi corrigido, ou para pedidos antigos que não foram sincronizados. O pedido será recriado no ERP e a NFe será enfileirada automaticamente.">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleForceTinySync(order.id); }}
+                                      disabled={forceSyncingErp === order.id}
+                                      style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                        background: 'transparent',
+                                        color: forceSyncingErp === order.id ? '#64748b' : '#94a3b8',
+                                        border: `1px solid ${forceSyncingErp === order.id ? '#3f424d' : '#64748b'}`,
+                                        padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '0.85rem',
+                                        cursor: forceSyncingErp === order.id ? 'wait' : 'pointer',
+                                        transition: 'all 0.2s',
+                                        opacity: forceSyncingErp === order.id ? 0.6 : 1,
+                                      }}
+                                      onMouseEnter={(e: any) => { if (forceSyncingErp !== order.id) e.currentTarget.style.background = 'rgba(148,163,184,0.08)'; }}
+                                      onMouseLeave={(e: any) => { e.currentTarget.style.background = 'transparent'; }}
+                                    >
+                                      <RefreshCw
+                                        size={16}
+                                        style={{ animation: forceSyncingErp === order.id ? 'spin 1s linear infinite' : 'none' }}
+                                      />
+                                      {forceSyncingErp === order.id ? 'Sincronizando...' : 'Sincronizar no ERP'}
+                                    </button>
+                                    </ActionTooltip>
                                   )}
 
                                   {order.status === 'pending' && !order.erp_id && (
+                                    <ActionTooltip text="Marca este pedido como PAGO manualmente (sem aguardar o retorno do Mercado Pago) e já envia os dados para o Tiny ERP em sequência. Ideal para pagamentos confirmados por fora (PIX direto, transferência).">
                                     <button
                                       onClick={(e) => { e.stopPropagation(); handleApproveAndSync(order.id); }}
                                       style={{
@@ -1155,10 +1277,12 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                       <CheckCircle size={18} />
                                       Aprovar Pagamento e Enviar ERP
                                     </button>
+                                    </ActionTooltip>
                                   )}
 
                                   {/* Cancelar Pedido (atalho rápido) */}
                                   {order.status !== 'cancelled' && (
+                                    <ActionTooltip text="Cancela este pedido e permite enviar uma mensagem automática ao cliente via WhatsApp informando o cancelamento e o processamento do estorno.">
                                     <button
                                       onClick={(e) => { e.stopPropagation(); openStatusModal(order, 'cancelled'); }}
                                       style={{
@@ -1172,8 +1296,10 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                     >
                                       <XCircle size={18} /> Cancelar Pedido
                                     </button>
+                                    </ActionTooltip>
                                   )}
 
+                                  <ActionTooltip text="Remove este registro permanentemente do banco de dados. CUIDADO: Esta ação é irreversível e apaga o pedido, seus itens e todos os dados associados.">
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setDeleteModal(order.id); }}
                                     style={{
@@ -1187,6 +1313,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                   >
                                     Excluir Registro
                                   </button>
+                                  </ActionTooltip>
                                 </div>
                               </div>
                         </td>

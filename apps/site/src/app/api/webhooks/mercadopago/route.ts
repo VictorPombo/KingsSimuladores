@@ -68,6 +68,15 @@ export async function POST(req: Request) {
     const orderId = paymentData.external_reference
     const supabase = createAdminClient()
 
+    // 1.5 Interceptar pagamento de Upsell de Destaque (MSU Premium)
+    if (orderId.startsWith('bump_')) {
+      const productId = orderId.replace('bump_', '')
+      await supabase.from('products').update({ bumped_at: new Date().toISOString() }).eq('id', productId)
+      await supabase.from('marketplace_listings').update({ bumped_at: new Date().toISOString() }).eq('listing_id', productId)
+      console.log(`[Webhook MP] Destaque (bump) ativado para produto ${productId}`)
+      return NextResponse.json({ received: true })
+    }
+
     // 2. Idempotência: abortar silenciosamente se já processado
     const { data: existingOrder } = await supabase
       .from('orders')

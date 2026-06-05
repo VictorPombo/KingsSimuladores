@@ -111,38 +111,151 @@ export async function calculateShipping(fromPostalCode: string, toPostalCode: st
   return validOptions
 }
 
+const FRENET_BASE = 'https://api.frenet.com.br'
+
+// CEP de origem fixo do armazém Kings
+const SENDER_POSTAL_CODE = process.env.FRENET_SENDER_CEP || '06407120'
+
+// Peso e dimensões padrão por item caso o produto não tenha dados cadastrados
+const DEFAULT_WEIGHT_KG = 5
+const DEFAULT_LENGTH_CM = 60
+const DEFAULT_HEIGHT_CM = 40
+const DEFAULT_WIDTH_CM  = 40
+
 /**
- * Geração de Etiqueta (Frenet)
- * Adiciona ao Carrinho, faz checkout com saldo e gera a URL de impressão logística.
- * 
- * PRODUÇÃO — Se falhar, retorna success: false.
+ * Geração de Etiqueta via Frenet API V2.
+ * Fluxo: POST /cart → POST /shipment/checkout → POST /shipment/generate
+ * Lança erro em caso de falha para que o sistema de retry do cron reprocesse.
  */
 export async function generateShippingLabel(orderData: any, itemsData: any[]) {
   const token = process.env.FRENET_TOKEN
 
   if (!token || token.includes('preencher')) {
-    console.error('[Kings Shipping] FRENET_TOKEN não configurado. Impossível gerar etiqueta.')
-    return { success: false, tracking_code: null, ticket_url: null }
+    throw new Error('[Frenet] FRENET_TOKEN não configurado. Impossível gerar etiqueta.')
   }
 
-  try {
-    console.log(`[Frenet] Gerando etiqueta para pedido #${orderData.id}...`)
-    
-    // TODO: Implementar os 3 passos reais da API Frenet:
-    // 1. POST /api/v2/me/cart (Cria o ticket no carrinho)
-    // 2. POST /api/v2/me/shipment/checkout (Paga com saldo da carteira)
-    // 3. POST /api/v2/me/shipment/generate (Gera a etiqueta pdf)
-    // Por enquanto, a etiqueta será gerada manualmente no painel da Frenet.
-    
-    console.warn(`[Frenet] Geração automática de etiquetas ainda não implementada. Gere manualmente no painel Frenet para o pedido #${orderData.id}.`)
-    
-    return {
-      success: false,
-      tracking_code: null,
-      ticket_url: null
-    }
-  } catch (e) {
-    console.error('[Kings Shipping] Falha ao gerar etiqueta Frenet:', e)
-    return { success: false, tracking_code: null, ticket_url: null }
+  const headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'token': token,
+  }
+
+  const recipientPostalCode = (
+    orderData.shipping_address?.cep ||
+    orderData.shipping_address?.zip_code ||
+    ''
+  ).replace(/\D/g, '')
+
+  if (!recipientPostalCode || recipientPostalCode.length < 8) {
+    throw new Error(`[Frenet] CEP do destinatário inválido para o pedido #${orderData.id}: "${recipientPostalCode}"`)
+  }
+
+  const shippingServiceId = orderData.shipping_service_id
+  if (!shippingServiceId) {
+    throw new Error(`[Frenet] shipping_service_id ausente no pedido #${orderData.id}. Necessário para gerar etiqueta.`)
+  }
+
+  console.log(`[Frenet] Gerando etiqueta para pedido #${orderData.id} | Serviço: ${shippingServiceId}`)
+
+  // — Passo 1: Criar carrinho logístico —
+  const cartPayload = {
+    Shipper: {
+      PostalCode: SENDER_POSTAL_CODE.replace(/\D/g, ''),
+    },
+    Recipient: {
+      PostalCode: recipientPostalCode,
+      Name: orderData.shipping_address?.nome || orderData.shipping_address?.destinatario || 'Destinatário',
+      Document: orderData.shipping_address?.cpf || '',
+      Phone: orderData.shipping_address?.telefone || '',
+      Address: orderData.shipping_address?.logradouro || '',
+      Number: orderData.shipping_address?.numero || 'S/N',
+      Complement: orderData.shipping_address?.complemento || '',
+      Neighborhood: orderData.shipping_address?.bairro || '',
+      City: orderData.shipping_address?.cidade || '',
+      State: orderData.shipping_address?.estado || orderData.shipping_address?.uf || '',
+    },
+    ShipmentInvoiceValue: Number(orderData.total || 0),
+    ShippingServiceCode: shippingServiceId,
+    ShippingItemArray: itemsData.map((item: any, index: number) => ({
+      SKU: item.product?.sku || item.product_id || `ITEM-${index + 1}`,
+      Category: 'Simulador',
+      Description: item.product?.title || 'Item',
+      Quantity: item.quantity || 1,
+      Weight: item.product?.weight_kg || DEFAULT_WEIGHT_KG,
+      Length: item.product?.length_cm || DEFAULT_LENGTH_CM,
+      Height: item.product?.height_cm || DEFAULT_HEIGHT_CM,
+      Width: item.product?.width_cm || DEFAULT_WIDTH_CM,
+      UnitaryValue: item.unit_price || 0,
+    })),
+    OrderNumber: orderData.id,
+  }
+
+  const cartRes = await fetch(`${FRENET_BASE}/api/v2/me/cart`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(cartPayload),
+  })
+
+  if (!cartRes.ok) {
+    const errText = await cartRes.text()
+    throw new Error(`[Frenet] Falha ao criar carrinho logístico (HTTP ${cartRes.status}): ${errText}`)
+  }
+
+  const cartData = await cartRes.json()
+  const cartId = cartData?.CartId || cartData?.cartId || cartData?.id
+  if (!cartId) {
+    throw new Error(`[Frenet] CartId não retornado pela API. Resposta: ${JSON.stringify(cartData)}`)
+  }
+
+  console.log(`[Frenet] Carrinho criado. CartId: ${cartId}`)
+
+  // — Passo 2: Checkout com saldo da carteira Frenet —
+  const checkoutRes = await fetch(`${FRENET_BASE}/api/v2/me/shipment/checkout`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ CartId: cartId }),
+  })
+
+  if (!checkoutRes.ok) {
+    const errText = await checkoutRes.text()
+    // Saldo insuficiente é erro operacional — lança para o retry tratar
+    throw new Error(`[Frenet] Falha no checkout da etiqueta (HTTP ${checkoutRes.status}): ${errText}`)
+  }
+
+  const checkoutData = await checkoutRes.json()
+  console.log(`[Frenet] Checkout concluído. CartId: ${cartId}`)
+
+  // — Passo 3: Gerar etiqueta e obter tracking + PDF —
+  const generateRes = await fetch(`${FRENET_BASE}/api/v2/me/shipment/generate`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ CartId: cartId }),
+  })
+
+  if (!generateRes.ok) {
+    const errText = await generateRes.text()
+    throw new Error(`[Frenet] Falha ao gerar etiqueta (HTTP ${generateRes.status}): ${errText}`)
+  }
+
+  const generateData = await generateRes.json()
+
+  // A Frenet retorna um array de shipments; pegamos o primeiro (pedido com 1 remetente)
+  const shipment = Array.isArray(generateData?.Shipments)
+    ? generateData.Shipments[0]
+    : generateData
+
+  const trackingCode = shipment?.TrackingNumber || shipment?.tracking_number || null
+  const ticketUrl   = shipment?.LabelUrl || shipment?.label_url || shipment?.TicketUrl || null
+
+  if (!trackingCode) {
+    throw new Error(`[Frenet] TrackingNumber não retornado. Resposta: ${JSON.stringify(generateData)}`)
+  }
+
+  console.log(`[Frenet] Etiqueta gerada com sucesso! Tracking: ${trackingCode}`)
+
+  return {
+    success: true,
+    tracking_code: trackingCode as string,
+    ticket_url: ticketUrl as string | null,
   }
 }

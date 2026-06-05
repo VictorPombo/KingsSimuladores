@@ -74,11 +74,11 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Sea
   // Sorting (boosted always first, then sort criteria)
   const sort = searchParams.sort || 'newest'
   if (sort === 'price_asc') {
-    query = query.order('is_boosted', { ascending: false, nullsFirst: false }).order('price', { ascending: true })
+    query = query.order('bumped_at', { ascending: false, nullsFirst: false }).order('price', { ascending: true })
   } else if (sort === 'price_desc') {
-    query = query.order('is_boosted', { ascending: false, nullsFirst: false }).order('price', { ascending: false })
+    query = query.order('bumped_at', { ascending: false, nullsFirst: false }).order('price', { ascending: false })
   } else {
-    query = query.order('is_boosted', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false })
+    query = query.order('bumped_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false })
   }
 
   const { data: listingsData, error } = await query
@@ -137,7 +137,7 @@ export default async function ProdutosPage({ searchParams }: { searchParams: Sea
                 model={listing.model}
                 hasOriginalBox={listing.has_original_box}
                 hasUsageMarks={listing.has_usage_marks}
-                isFeatured={listing.is_boosted}
+                isFeatured={listing.bumped_at}
               />
             ))}
           </div>

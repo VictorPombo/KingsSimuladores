@@ -14,6 +14,7 @@ type Product = {
   status: string
   created_at: string
   images: string[]
+  bumped_at?: string
 }
 
 type Payout = {
@@ -58,7 +59,7 @@ export default function VendedorDashboard() {
       // Fetch Ads
       const { data: adsData } = await supabase
         .from('products')
-        .select('id, title, price, status, created_at, images')
+        .select('id, title, price, status, created_at, images, bumped_at')
         .eq('seller_id', session.user.id)
         .order('created_at', { ascending: false })
 
@@ -99,6 +100,28 @@ export default function VendedorDashboard() {
 
   const handleSaque = () => {
     alert("Solicitação enviada! O PIX será processado em até 2 dias úteis.")
+  }
+
+  const [bumpingId, setBumpingId] = useState<string | null>(null)
+  const handleBump = async (productId: string) => {
+    setBumpingId(productId)
+    try {
+      const res = await fetch('/api/msu/destacar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      })
+      const data = await res.json()
+      if (res.ok && data.init_point) {
+        window.location.href = data.init_point
+      } else {
+        alert('Erro ao gerar cobrança de destaque: ' + (data.error || ''))
+        setBumpingId(null)
+      }
+    } catch (e: any) {
+      alert(e.message)
+      setBumpingId(null)
+    }
   }
 
   const handleSendTracking = async (payoutId: string) => {
@@ -192,10 +215,40 @@ export default function VendedorDashboard() {
                         Adicionado em: {new Date(ad.created_at).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
-                    <div>
-                      {ad.status === 'pending_review' && <span style={{ padding: '6px 12px', borderRadius: '20px', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14}/> Em Análise</span>}
-                      {ad.status === 'active' && <span style={{ padding: '6px 12px', borderRadius: '20px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle size={14}/> Ativo</span>}
-                      {(ad.status === 'sold' || ad.status === 'inactive') && <span style={{ padding: '6px 12px', borderRadius: '20px', background: 'rgba(113, 113, 122, 0.1)', color: '#71717a', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}><Ban size={14}/> {ad.status === 'sold' ? 'Vendido' : 'Inativo'}</span>}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {ad.status === 'pending_review' && <span style={{ padding: '6px 12px', borderRadius: '20px', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14}/> Em Análise</span>}
+                        {ad.status === 'active' && <span style={{ padding: '6px 12px', borderRadius: '20px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle size={14}/> Ativo</span>}
+                        {(ad.status === 'sold' || ad.status === 'inactive') && <span style={{ padding: '6px 12px', borderRadius: '20px', background: 'rgba(113, 113, 122, 0.1)', color: '#71717a', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}><Ban size={14}/> {ad.status === 'sold' ? 'Vendido' : 'Inativo'}</span>}
+                      </div>
+                      
+                      {!ad.bumped_at && ad.status === 'active' && (
+                        <button 
+                          onClick={() => handleBump(ad.id)}
+                          disabled={bumpingId === ad.id}
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid #06b6d4',
+                            color: '#06b6d4',
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: bumpingId === ad.id ? 'wait' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {bumpingId === ad.id ? 'Gerando...' : '🚀 Destacar (R$ 30)'}
+                        </button>
+                      )}
+                      {ad.bumped_at && (
+                        <span style={{ color: '#06b6d4', fontSize: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          🚀 Destaque Ativo
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))

@@ -244,6 +244,10 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
 
       if (!mpOrder) continue
 
+      // Buscar configurações de Split do Fernando
+      const { data: splitSetting } = await supabase.from('system_settings').select('value').eq('key', 'msu_fernando_split').single()
+      const fernandoAccountId = splitSetting?.value?.account_id
+      
       // 1. Marcar marketplace_order como pago
       await supabase
         .from('marketplace_orders')
@@ -272,7 +276,20 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
         status: 'held',
       })
 
-      console.log(`[msu_split] Marketplace order ${mpOrder.id} marcado como pago. Taxa Kings: R$${mpOrder.kings_fee}, Líquido vendedor: R$${mpOrder.seller_net}`)
+      // 4. Criar registro de repasse da taxa para o Fernando (Disponível na hora)
+      if (fernandoAccountId && mpOrder.kings_fee > 0) {
+        await supabase.from('payouts').insert({
+          order_item_id: item.id,
+          seller_id: fernandoAccountId,
+          gross_amount: mpOrder.kings_fee,
+          platform_fee_percent: 0,
+          platform_fee_amount: 0,
+          net_amount: mpOrder.kings_fee,
+          status: 'available', // Taxa da plataforma já fica disponível para o Admin/Fernando
+        })
+      }
+
+      console.log(`[msu_split] Marketplace order ${mpOrder.id} pago. Vendedor: R$${mpOrder.seller_net}. Fernando: R$${mpOrder.kings_fee}`)
     }
   },
 

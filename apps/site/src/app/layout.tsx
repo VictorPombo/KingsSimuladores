@@ -9,9 +9,6 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.kingssimuladores.com.br'),
-  alternates: {
-    canonical: '/',
-  },
   title: 'Kings Simuladores — Simuladores de Corrida Premium',
   description:
     'A maior loja de simuladores de corrida do Brasil. Cockpits, volantes, pedais e acessórios das melhores marcas com até 12x sem juros.',

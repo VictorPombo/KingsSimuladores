@@ -124,6 +124,13 @@ export async function GET(req: Request) {
   }
 
   console.log(`[Cron Verify] Finalizado. ${updated} pedidos corrigidos de ${pendingOrders.length} verificados.`)
+  console.log('[CRON_METRIC]', JSON.stringify({
+    cron: 'verify-payments',
+    ts: new Date().toISOString(),
+    checked: pendingOrders.length,
+    fixed: updated,
+    results,
+  }))
 
   return NextResponse.json({
     checked: pendingOrders.length,

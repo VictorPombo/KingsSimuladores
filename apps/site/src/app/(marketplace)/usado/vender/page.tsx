@@ -22,7 +22,7 @@ export default function VenderPage() {
   const [form, setForm] = useState({
     title: '', price: '', condition: 'good', description: '',
     brand: '', model: '', city: '', state: '', category_id: '',
-    hasOriginalBox: false, hasUsageMarks: false,
+    hasOriginalBox: false, hasUsageMarks: false, highlight: false,
     weight: '', width: '', height: '', length: '', zip: ''
   })
 
@@ -173,6 +173,23 @@ export default function VenderPage() {
         const errData = await res.json()
         throw new Error(errData.error || 'Falha ao anunciar')
       }
+
+      if (form.highlight) {
+        setUploadProgress('Gerando cobrança de destaque (R$ 30,00)...')
+        const highlightRes = await fetch('/api/msu/destacar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId })
+        })
+        const highlightData = await highlightRes.json()
+        if (highlightRes.ok && highlightData.init_point) {
+          window.location.href = highlightData.init_point
+          return
+        } else {
+          alert('Anúncio criado, mas falha ao gerar destaque: ' + (highlightData.error || ''))
+        }
+      }
+
       // Redireciona o vendedor para o novo painel
       router.push('/usado/dashboard?tab=ads')
     } catch (e: any) {
@@ -292,7 +309,6 @@ export default function VenderPage() {
               )}
             </div>
 
-            {/* Checkboxes profissionais */}
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', border: form.hasOriginalBox ? '1px solid #E8002D' : '1px solid rgba(255,255,255,0.1)', background: form.hasOriginalBox ? 'rgba(232, 0, 45, 0.08)' : 'transparent', cursor: 'pointer', transition: 'all 0.2s', flex: 1, minWidth: '200px' }}>
                 <input type="checkbox" checked={form.hasOriginalBox} onChange={e => setForm({...form, hasOriginalBox: e.target.checked})} style={{ accentColor: '#E8002D', width: '18px', height: '18px' }} />
@@ -306,6 +322,20 @@ export default function VenderPage() {
                 <div>
                   <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>⚠️ Marcas de uso visíveis</div>
                   <div style={{ color: '#71717a', fontSize: '0.75rem' }}>Riscos, desgaste ou avarias</div>
+                </div>
+              </label>
+            </div>
+
+            <div style={{ background: form.highlight ? 'rgba(6, 182, 212, 0.1)' : 'rgba(255,255,255,0.02)', border: form.highlight ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '16px', transition: 'all 0.3s' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={form.highlight} onChange={e => setForm({...form, highlight: e.target.checked})} style={{ accentColor: '#06b6d4', width: '20px', height: '20px', marginTop: '4px' }} />
+                <div>
+                  <div style={{ color: form.highlight ? '#06b6d4' : '#fff', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    🚀 Destacar Anúncio <span style={{ background: '#06b6d4', color: '#000', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>+VISITAS</span>
+                  </div>
+                  <div style={{ color: '#a1a1aa', fontSize: '0.85rem', marginTop: '4px', lineHeight: 1.5 }}>
+                    Seu anúncio ficará sempre no <strong>topo do catálogo</strong> por uma taxa única de <strong>R$ 30,00</strong>. Ao clicar em Publicar, você será redirecionado para o pagamento seguro via PIX/Cartão.
+                  </div>
                 </div>
               </label>
             </div>

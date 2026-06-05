@@ -61,6 +61,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       images: product.images?.[0] ? [{ url: product.images[0], width: 800, height: 800, alt: product.title }] : [],
       type: 'website',
     },
+    alternates: {
+      canonical: `${BASE_URL}/produtos/${product.slug}`,
+    },
   }
 }
 
