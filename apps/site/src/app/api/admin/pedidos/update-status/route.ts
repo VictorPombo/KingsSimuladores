@@ -4,7 +4,7 @@ import { sendWhatsappMessage } from '@kings/notifications'
 
 export async function POST(req: Request) {
   try {
-    const { orderId, newStatus, sendWhatsapp, customMessage, phone, customerName } = await req.json()
+    const { orderId, newStatus, sendWhatsapp, customMessage, message, phone, customerName } = await req.json()
 
     if (!orderId || !newStatus) {
       return NextResponse.json({ error: 'orderId e newStatus são obrigatórios' }, { status: 400 })
@@ -22,11 +22,12 @@ export async function POST(req: Request) {
     }
 
     // Enviar WhatsApp se solicitado
-    if (sendWhatsapp && phone && customMessage) {
+    const textToSend = customMessage || message;
+    if (sendWhatsapp && phone && textToSend) {
       const cleanPhone = phone.replace(/\D/g, '')
       await sendWhatsappMessage({
         phone: cleanPhone,
-        message: customMessage,
+        message: textToSend,
       }).catch((err: any) => {
         console.error('[update-status] Erro ao enviar WhatsApp:', err)
       })

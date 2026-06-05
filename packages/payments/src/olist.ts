@@ -9,7 +9,8 @@ export interface OlistOrderInput {
   id: string
   total: number
   customer: {
-    name: string
+    name?: string
+    full_name?: string
     email: string
     cpf_cnpj?: string
     phone?: string
@@ -80,14 +81,14 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
       pedido: {
         data_pedido: new Date().toLocaleDateString('pt-BR'),
         cliente: {
-          nome: orderPayload.customer.name || 'Cliente Avulso',
+          nome: orderPayload.customer.full_name || orderPayload.customer.name || 'Cliente Avulso',
           cpf_cnpj: cpfCnpj,
           email: orderPayload.customer.email || '',
           fone: orderPayload.customer.phone || '',
           ...enderecoObj
         },
         endereco_entrega: {
-          nome_destinatario: orderPayload.customer.name || 'Cliente Avulso',
+          nome_destinatario: orderPayload.customer.full_name || orderPayload.customer.name || 'Cliente Avulso',
           cpf_cnpj: cpfCnpj,
           ...enderecoObj
         },
@@ -153,4 +154,76 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
   // Se chegou aqui, falhou — retorna null (sem dados fictícios)
   console.error(`[Tiny ERP] ❌ Pedido ${orderPayload.id} NÃO foi sincronizado com o ERP.`)
   return null
+}
+
+export const emitNfeTiny = async (tinyOrderId: string, apiKey: string): Promise<string> => {
+  const params = new URLSearchParams()
+  params.append('token', apiKey)
+  params.append('id', tinyOrderId)
+  params.append('enviarEmail', 'S')
+  params.append('formato', 'json')
+
+  const res = await fetch('https://api.tiny.com.br/api2/nota.fiscal.emitir.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  })
+
+  if (!res.ok) {
+    throw new Error(`[emitNfeTiny] HTTP ${res.status}: ${await res.text()}`)
+  }
+
+  const data = await res.json()
+  if (!data.retorno || data.retorno.status !== 'OK') {
+    throw new Error(`[emitNfeTiny] Erro Tiny: ${JSON.stringify(data.retorno?.erros ?? data)}`)
+  }
+
+  const situacao: string = data.retorno.nota_fiscal?.situacao || data.retorno.situacao || ''
+  console.log(`[emitNfeTiny] Situação NFe para pedido Tiny ${tinyOrderId}: ${situacao}`)
+  return situacao
+}
+
+export const getNfeLinkTiny = async (tinyOrderId: string, apiKey: string): Promise<string | null> => {
+  // 1. Obter id_nota_fiscal a partir do pedido
+  const paramsObter = new URLSearchParams()
+  paramsObter.append('token', apiKey)
+  paramsObter.append('id', tinyOrderId)
+  paramsObter.append('formato', 'json')
+
+  const resPedido = await fetch('https://api.tiny.com.br/api2/pedido.obter.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: paramsObter.toString(),
+  })
+
+  const dataPedido = await resPedido.json()
+  if (!dataPedido.retorno || dataPedido.retorno.status !== 'OK') {
+    console.error('[getNfeLinkTiny] pedido.obter falhou:', dataPedido)
+    return null
+  }
+
+  const idNotaFiscal = dataPedido.retorno.pedido?.id_nota_fiscal
+  if (!idNotaFiscal || idNotaFiscal === '0') {
+    return null
+  }
+
+  // 2. Obter link do PDF da nota fiscal
+  const paramsLink = new URLSearchParams()
+  paramsLink.append('token', apiKey)
+  paramsLink.append('id', idNotaFiscal)
+  paramsLink.append('formato', 'json')
+
+  const resLink = await fetch('https://api.tiny.com.br/api2/nota.fiscal.obter.link.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: paramsLink.toString(),
+  })
+
+  const dataLink = await resLink.json()
+  if (!dataLink.retorno || dataLink.retorno.status !== 'OK') {
+    console.error('[getNfeLinkTiny] nota.fiscal.obter.link falhou:', dataLink)
+    return null
+  }
+
+  return dataLink.retorno.link_nfe || null
 }
