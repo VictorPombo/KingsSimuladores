@@ -59,12 +59,22 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
     const rawCep = (orderPayload.shipping.zip || orderPayload.shipping.cep || '').replace(/\D/g, '');
     const cep = rawCep.length === 8 ? rawCep : '00000000'; // Tiny accepts 8 digits
 
-    let cidade = orderPayload.shipping.city || '';
-    let uf = orderPayload.shipping.state || '';
-    if (!cidade && orderPayload.shipping.cidade) {
-      const partes = orderPayload.shipping.cidade.split('/');
-      cidade = partes[0]?.trim() || '';
-      if (!uf && partes[1]) uf = partes[1]?.trim() || '';
+    let cidade = orderPayload.shipping.city || orderPayload.shipping.cidade || '';
+    let uf = orderPayload.shipping.state || orderPayload.shipping.uf || '';
+    
+    // Tratamento para limpar "Belem / PA" ou "Belem - PA" que vem do gateway
+    if (cidade) {
+      if (cidade.includes('/')) {
+        const partes = cidade.split('/');
+        cidade = partes[0]?.trim() || '';
+        if (!uf && partes[1]) uf = partes[1]?.trim() || '';
+      } else if (cidade.includes('-')) {
+        const partes = cidade.split('-');
+        if (partes[1] && partes[1].trim().length === 2) {
+          cidade = partes[0]?.trim() || '';
+          if (!uf) uf = partes[1]?.trim() || '';
+        }
+      }
     }
 
     const enderecoObj = {
