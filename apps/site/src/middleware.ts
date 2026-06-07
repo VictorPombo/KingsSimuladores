@@ -5,8 +5,14 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl
   const hostname = request.headers.get('host') || ''
 
-  // 0. TELA DE BLOQUEIO / MANUTENÇÃO (REMOVIDA)
-  // A tela de "Em Desenvolvimento" foi desativada para liberar o acesso público.
+  // 0. TELA DE BLOQUEIO / MANUTENÇÃO (MSU)
+  // Bloqueio do MSU em produção a pedido do usuário para testes manuais. Liberado apenas para localhost.
+  if (hostname.includes('meusimuladorusado.com.br')) {
+    return new NextResponse(
+      '<html><body style="background:#111;color:#fff;font-family:sans-serif;text-align:center;padding-top:20vh;"><h1>Meu Simulador Usado</h1><p>Em breve a maior pista de desapego do automobilismo virtual.</p></body></html>',
+      { status: 503, headers: { 'Content-Type': 'text/html' } }
+    )
+  }
 
   // 1. REDIRECIONAMENTO DE LEGADO (TRAY)
   // Se o usuário tentar acessar /adm no domínio antigo, enviamos ele direto para o Commerce Suite da Tray
