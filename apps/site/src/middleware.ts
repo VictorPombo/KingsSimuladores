@@ -39,14 +39,23 @@ export async function middleware(request: NextRequest) {
   const SHARED_ROUTES = ['/api', '/admin', '/checkout']
   const isSharedRoute = SHARED_ROUTES.some(route => url.pathname.startsWith(route))
 
+  // FORÇA TENANT VIA URL (Útil para testes no celular com IP local)
+  if (url.searchParams.get('tenant')) {
+    const tenant = url.searchParams.get('tenant')!
+    const res = NextResponse.redirect(new URL(url.pathname, request.url))
+    res.cookies.set('dev_tenant', tenant, { path: '/' })
+    return res
+  }
+  const testTenant = request.cookies.get('dev_tenant')?.value
+
   // Se o domínio for da Seven
-  if (hostname.includes('sevensimracing.com.br') || hostname.includes('seven.localhost')) {
+  if (testTenant === 'seven' || hostname.includes('sevensimracing.com.br') || hostname.includes('seven.localhost')) {
     if (!url.pathname.startsWith('/seven') && !isSharedRoute) {
       rewritePath = `/seven${url.pathname === '/' ? '' : url.pathname}`
     }
   } 
   // Se o domínio for do MSU
-  else if (hostname.includes('meusimuladorusado.com.br') || hostname.includes('msu.localhost')) {
+  else if (testTenant === 'msu' || hostname.includes('meusimuladorusado.com.br') || hostname.includes('msu.localhost')) {
     if (!url.pathname.startsWith('/usado') && !isSharedRoute) {
       rewritePath = `/usado${url.pathname === '/' ? '' : url.pathname}`
     }
