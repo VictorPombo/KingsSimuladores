@@ -113,6 +113,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
   const [loadingItems, setLoadingItems] = useState<string | null>(null)
   const [trackingInput, setTrackingInput] = useState<string>('')
   const [savingTracking, setSavingTracking] = useState<string | null>(null)
+  const [editingTrackingId, setEditingTrackingId] = useState<string | null>(null)
   const [router] = [useRouter()]
 
   const [statusModal, setStatusModal] = useState<{
@@ -954,7 +955,7 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                 </div>
                                 <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px' }}>
                                   <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '6px' }}>Código de Rastreio</div>
-                                  {order.tracking_code ? (
+                                  {order.tracking_code && editingTrackingId !== order.id ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                       <code style={{ color: '#22d3ee', fontSize: '0.85rem', fontWeight: 'bold', background: 'rgba(34,211,238,0.08)', padding: '4px 10px', borderRadius: '4px' }}>
                                         {order.tracking_code}
@@ -967,6 +968,12 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                       >
                                         Rastrear na Frenet →
                                       </a>
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); setTrackingInput(order.tracking_code); setEditingTrackingId(order.id); }}
+                                        style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline' }}
+                                      >
+                                        Editar
+                                      </button>
                                     </div>
                                   ) : (
                                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -983,7 +990,10 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                         }}
                                       />
                                       <button
-                                        onClick={(e) => { e.stopPropagation(); handleSaveTracking(order.id); }}
+                                        onClick={(e) => { 
+                                          e.stopPropagation(); 
+                                          handleSaveTracking(order.id).then(() => setEditingTrackingId(null));
+                                        }}
                                         disabled={!trackingInput || savingTracking === order.id}
                                         style={{
                                           background: trackingInput ? '#3b82f6' : '#3f424d', color: '#fff',
@@ -993,6 +1003,14 @@ export function PedidosClient({ orders }: { orders: Order[] }) {
                                       >
                                         {savingTracking === order.id ? 'Salvando...' : '📦 Salvar Rastreio'}
                                       </button>
+                                      {editingTrackingId === order.id && (
+                                        <button 
+                                          onClick={(e) => { e.stopPropagation(); setEditingTrackingId(null); }}
+                                          style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem' }}
+                                        >
+                                          Cancelar
+                                        </button>
+                                      )}
                                     </div>
                                   )}
                                 </div>
