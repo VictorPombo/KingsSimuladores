@@ -62,6 +62,9 @@ export async function Header() {
                 <Link href="/usado/produtos" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }} className="hover:text-white transition-colors">
                   Explorar Anúncios
                 </Link>
+                <Link href="/usado/minhas-compras" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }} className="hover:text-white transition-colors">
+                  Minhas Compras
+                </Link>
                 <Link href="/usado/account" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }} className="hover:text-white transition-colors">
                   Minha Garagem
                 </Link>
@@ -125,8 +128,11 @@ export async function Header() {
                 <Link href="/usado/produtos" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                   Explorar
                 </Link>
+                <Link href="/usado/minhas-compras" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                  Compras
+                </Link>
                 <Link href="/usado/account" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-                  Minha Garagem
+                  Garagem
                 </Link>
               </div>
               <Link href="/usado/vender" style={{ textDecoration: 'none', marginLeft: '16px' }}>

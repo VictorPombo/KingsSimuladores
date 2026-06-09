@@ -24,6 +24,11 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
   const [ordersHistory, setOrdersHistory] = useState<any[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
+  
+  // Date filters for history
+  const [historyStartDate, setHistoryStartDate] = useState<string>('')
+  const [historyEndDate, setHistoryEndDate] = useState<string>('')
+  
   const coupons = initialCoupons
 
   const activeCount = coupons.filter(c => c.is_active).length
@@ -427,40 +432,67 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
             </div>
 
             <div style={{ padding: '24px' }}>
+              <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div>
+                  <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, marginBottom: '6px' }}>Data Inicial</label>
+                  <input type="date" value={historyStartDate} onChange={e => setHistoryStartDate(e.target.value)} style={{ background: '#1f2025', border: '1px solid #3f424d', borderRadius: '8px', padding: '10px 14px', color: '#fff', fontSize: '0.85rem', outline: 'none', colorScheme: 'dark' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600, marginBottom: '6px' }}>Data Final</label>
+                  <input type="date" value={historyEndDate} onChange={e => setHistoryEndDate(e.target.value)} style={{ background: '#1f2025', border: '1px solid #3f424d', borderRadius: '8px', padding: '10px 14px', color: '#fff', fontSize: '0.85rem', outline: 'none', colorScheme: 'dark' }} />
+                </div>
+                {(historyStartDate || historyEndDate) && (
+                  <button onClick={() => { setHistoryStartDate(''); setHistoryEndDate(''); }} style={{ background: 'transparent', border: '1px solid #ef444450', color: '#ef4444', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#ef444410'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Limpar Filtro</button>
+                )}
+              </div>
+
               {isLoadingHistory ? (
                 <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>Carregando histórico...</div>
-              ) : ordersHistory.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>Nenhuma venda confirmada com este cupom.</div>
-              ) : (
-                <>
-                  {historyCoupon.affiliate_percentage ? (() => {
-                    const totalVendido = ordersHistory.reduce((acc, order) => acc + Number(order.total), 0);
-                    const totalComissao = totalVendido * (historyCoupon.affiliate_percentage / 100);
-                    return (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '16px', borderRadius: '12px' }}>
-                          <p style={{ margin: 0, fontSize: '0.75rem', color: '#10b981', fontWeight: 700, textTransform: 'uppercase' }}>Total Vendido (Aprovado)</p>
-                          <p style={{ margin: '4px 0 0', fontSize: '1.5rem', color: '#10b981', fontWeight: 800 }}>R$ {totalVendido.toFixed(2)}</p>
-                        </div>
-                        <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '16px', borderRadius: '12px' }}>
-                          <p style={{ margin: 0, fontSize: '0.75rem', color: '#f59e0b', fontWeight: 700, textTransform: 'uppercase' }}>Comissão a Repassar</p>
-                          <p style={{ margin: '4px 0 0', fontSize: '1.5rem', color: '#f59e0b', fontWeight: 800 }}>R$ {totalComissao.toFixed(2)}</p>
-                        </div>
-                      </div>
-                    )
-                  })() : null}
+              ) : (() => {
+                const filteredOrders = ordersHistory.filter(order => {
+                  if (!historyStartDate && !historyEndDate) return true;
+                  const orderDate = new Date(order.created_at);
+                  const start = historyStartDate ? new Date(historyStartDate + 'T00:00:00') : new Date(0);
+                  const end = historyEndDate ? new Date(historyEndDate + 'T23:59:59') : new Date();
+                  return orderDate >= start && orderDate <= end;
+                });
 
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                    <thead>
-                      <tr>
-                        <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Data</th>
-                        <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Cliente</th>
-                        <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Valor Total</th>
-                        {historyCoupon.affiliate_percentage ? <th style={{ padding: '12px', textAlign: 'left', color: '#f59e0b', borderBottom: '1px solid #3f424d' }}>Comissão</th> : null}
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {ordersHistory.map(order => {
+                if (filteredOrders.length === 0) {
+                  return <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>Nenhuma venda confirmada neste período.</div>
+                }
+
+                return (
+                  <>
+                    {historyCoupon.affiliate_percentage ? (() => {
+                      const totalVendido = filteredOrders.reduce((acc, order) => acc + Number(order.total), 0);
+                      const totalComissao = totalVendido * (historyCoupon.affiliate_percentage / 100);
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                          <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '16px', borderRadius: '12px' }}>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#10b981', fontWeight: 700, textTransform: 'uppercase' }}>Total Vendido (Aprovado)</p>
+                            <p style={{ margin: '4px 0 0', fontSize: '1.5rem', color: '#10b981', fontWeight: 800 }}>R$ {totalVendido.toFixed(2)}</p>
+                            {(historyStartDate || historyEndDate) && <p style={{ margin: '4px 0 0', fontSize: '0.7rem', color: '#10b98180' }}>No período filtrado</p>}
+                          </div>
+                          <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '16px', borderRadius: '12px' }}>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#f59e0b', fontWeight: 700, textTransform: 'uppercase' }}>Comissão a Repassar</p>
+                            <p style={{ margin: '4px 0 0', fontSize: '1.5rem', color: '#f59e0b', fontWeight: 800 }}>R$ {totalComissao.toFixed(2)}</p>
+                            {(historyStartDate || historyEndDate) && <p style={{ margin: '4px 0 0', fontSize: '0.7rem', color: '#f59e0b80' }}>No período filtrado</p>}
+                          </div>
+                        </div>
+                      )
+                    })() : null}
+
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Data</th>
+                          <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Cliente</th>
+                          <th style={{ padding: '12px', textAlign: 'left', color: '#64748b', borderBottom: '1px solid #3f424d' }}>Valor Total</th>
+                          {historyCoupon.affiliate_percentage ? <th style={{ padding: '12px', textAlign: 'left', color: '#f59e0b', borderBottom: '1px solid #3f424d' }}>Comissão</th> : null}
+                        </tr>
+                      </thead>
+                      <tbody>
+                          {filteredOrders.map(order => {
                           const comissao = historyCoupon.affiliate_percentage ? (Number(order.total) * (historyCoupon.affiliate_percentage / 100)) : 0;
                           const clientName = Array.isArray(order.profiles)
                             ? order.profiles[0]?.full_name
@@ -488,10 +520,11 @@ export function CuponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
                             </tr>
                           )
                         })}
-                    </tbody>
-                  </table>
-                </>
-              )}
+                      </tbody>
+                    </table>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>

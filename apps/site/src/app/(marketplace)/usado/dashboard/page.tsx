@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Container, Button } from '@kings/ui'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Package, DollarSign, Clock, CheckCircle, Ban } from 'lucide-react'
+import { Package, DollarSign, Clock, CheckCircle, Ban, User, Key } from 'lucide-react'
 
 // Typing helpers
 type Product = {
@@ -35,13 +35,19 @@ type Payout = {
 export default function VendedorDashboard() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const defaultTab = searchParams.get('tab') === 'finance' ? 'finance' : 'ads'
+  const tabParam = searchParams.get('tab')
+  const defaultTab = tabParam === 'finance' ? 'finance' : tabParam === 'profile' ? 'profile' : 'ads'
   
-  const [activeTab, setActiveTab] = useState<'ads' | 'finance'>(defaultTab as 'ads' | 'finance')
+  const [activeTab, setActiveTab] = useState<'ads' | 'finance' | 'profile'>(defaultTab as any)
   const [loading, setLoading] = useState(true)
   
   const [ads, setAds] = useState<Product[]>([])
   const [payouts, setPayouts] = useState<Payout[]>([])
+  const [pixKey, setPixKey] = useState('')
+  const [savingPix, setSavingPix] = useState(false)
+  const [profileId, setProfileId] = useState('')
+  const [sellerName, setSellerName] = useState('')
+  const [sellerEmail, setSellerEmail] = useState('')
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -56,11 +62,28 @@ export default function VendedorDashboard() {
         return
       }
 
-      // Fetch Ads
+      // Buscar profile do vendedor
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, pix_key')
+        .eq('auth_id', session.user.id)
+        .single()
+
+      if (!profile) {
+        router.push('/usado/login')
+        return
+      }
+
+      setProfileId(profile.id)
+      setSellerName(profile.full_name || '')
+      setSellerEmail(profile.email || '')
+      setPixKey(profile.pix_key || '')
+
+      // Fetch Ads de marketplace_listings (tabela correta do MSU)
       const { data: adsData } = await supabase
-        .from('products')
+        .from('marketplace_listings')
         .select('id, title, price, status, created_at, images, bumped_at')
-        .eq('seller_id', session.user.id)
+        .eq('seller_id', profile.id)
         .order('created_at', { ascending: false })
 
       if (adsData) setAds(adsData)
@@ -73,7 +96,7 @@ export default function VendedorDashboard() {
           id, gross_amount, platform_fee_amount, net_amount, status, tracking_code, created_at,
           order_item:order_items( product:products(title) )
         `)
-        .eq('seller_id', session.user.id)
+        .eq('seller_id', profile.id)
         .order('created_at', { ascending: false })
 
       if (payoutsData) {
@@ -191,6 +214,16 @@ export default function VendedorDashboard() {
               }}
             >
               <DollarSign size={18} /> Financeiro e Repasses
+            </button>
+            <button 
+              onClick={() => { setActiveTab('profile'); router.replace('/usado/dashboard?tab=profile') }}
+              style={{ 
+                background: 'transparent', border: 'none', padding: '1rem 0', color: activeTab === 'profile' ? '#E8002D' : '#71717a', 
+                fontWeight: 700, borderBottom: activeTab === 'profile' ? '2px solid #E8002D' : '2px solid transparent', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s'
+              }}
+            >
+              <User size={18} /> Meu Perfil
             </button>
           </div>
 
@@ -346,6 +379,87 @@ export default function VendedorDashboard() {
                       ))}
                     </tbody>
                   </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ABA: PERFIL */}
+          {activeTab === 'profile' && (
+            <div style={{ display: 'grid', gap: '1.5rem' }}>
+              {/* Info do vendedor */}
+              <div style={{ background: '#111', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <User size={18} color="#E8002D" /> Dados do Vendedor
+                </h3>
+                <div style={{ display: 'grid', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', marginBottom: '4px' }}>Nome</label>
+                    <div style={{ color: '#fff', fontSize: '0.95rem' }}>{sellerName || '—'}</div>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', marginBottom: '4px' }}>E-mail</label>
+                    <div style={{ color: '#fff', fontSize: '0.95rem' }}>{sellerEmail || '—'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chave PIX */}
+              <div style={{ background: '#111', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Key size={18} color="#10b981" /> Chave PIX para Recebimento
+                </h3>
+                <p style={{ color: '#71717a', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                  Cadastre sua chave PIX para receber os repasses das vendas. Pode ser CPF, e-mail, telefone ou chave aleatória.
+                </p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'stretch' }}>
+                  <input
+                    type="text"
+                    value={pixKey}
+                    onChange={(e) => setPixKey(e.target.value)}
+                    placeholder="Ex: seu@email.com, CPF, ou chave aleatória"
+                    style={{
+                      flex: 1, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '8px', padding: '12px 16px', color: '#fff', fontSize: '0.95rem',
+                      outline: 'none'
+                    }}
+                  />
+                  <Button
+                    onClick={async () => {
+                      setSavingPix(true)
+                      try {
+                        const supabase = createBrowserClient(
+                          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+                        )
+                        const { error } = await supabase
+                          .from('profiles')
+                          .update({ pix_key: pixKey.trim() })
+                          .eq('id', profileId)
+                        
+                        if (error) throw new Error(error.message)
+                        alert('Chave PIX salva com sucesso!')
+                      } catch (e: any) {
+                        alert('Erro ao salvar: ' + e.message)
+                      } finally {
+                        setSavingPix(false)
+                      }
+                    }}
+                    disabled={savingPix}
+                    style={{
+                      background: '#10b981', color: '#fff', border: 'none',
+                      fontWeight: 700, padding: '12px 24px', borderRadius: '8px',
+                      opacity: savingPix ? 0.5 : 1, whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {savingPix ? 'Salvando...' : 'Salvar PIX'}
+                  </Button>
+                </div>
+                {pixKey && (
+                  <div style={{ marginTop: '12px', padding: '10px 16px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <CheckCircle size={16} color="#10b981" />
+                    <span style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 600 }}>Chave PIX cadastrada</span>
+                  </div>
                 )}
               </div>
             </div>

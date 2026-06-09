@@ -19,6 +19,7 @@ import {
   getVendasPorProduto,
   getVendasProdutosPorMes,
   getPedidosProdutosDetalhados,
+  getResumoVendasPorCupom,
 } from './actions'
 
 // ─── Definição dos relatórios ───
@@ -29,7 +30,8 @@ const REPORTS_LIST = [
   { id: 'exportar_clientes', name: 'Exportar todos os clientes', category: 'Clientes', icon: Users, action: getExportarClientes },
   { id: 'tarifas_transacoes', name: 'Tarifas sobre transações', category: 'Financeiro', icon: DollarSign, info: true, action: getTarifasTransacoes },
   { id: 'relatorio_pedidos', name: 'Relatório de pedidos', category: 'Pedidos', icon: Package, info: true, action: getRelatorioPedidos },
-  { id: 'pedidos_cupom', name: 'Pedidos com cupom', category: 'Pedidos', icon: Package, action: getPedidosComCupom },
+  { id: 'pedidos_cupom', name: 'Pedidos com cupom (Detalhado)', category: 'Pedidos', icon: Package, action: getPedidosComCupom },
+  { id: 'resumo_vendas_cupom', name: 'Resumo de vendas por Cupom e Mês', category: 'Pedidos', icon: Package, info: true, action: getResumoVendasPorCupom },
   { id: 'pedidos_envio_desabilitado', name: 'Pedidos com envio desabilitado', category: 'Pedidos', icon: Package, action: getPedidosEnvioDesabilitado },
   { id: 'resumo_vendas', name: 'Resumo de vendas', category: 'Pedidos', icon: Package, action: getResumoVendas },
   { id: 'vendas_produtos_mes', name: 'Vendas de produtos por mês', category: 'Pedidos', icon: Package, action: getVendasProdutosPorMes },

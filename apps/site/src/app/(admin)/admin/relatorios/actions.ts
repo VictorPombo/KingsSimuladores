@@ -179,6 +179,42 @@ export async function getPedidosComCupom(): Promise<ReportRow[]> {
   }))
 }
 
+export async function getResumoVendasPorCupom(): Promise<ReportRow[]> {
+  const supabase = await createServerSupabaseClient()
+  const { data } = await supabase
+    .from('orders')
+    .select('total, coupon_id, status, created_at, coupons!coupon_id(code)')
+    .not('coupon_id', 'is', null)
+    .in('status', ['paid', 'shipped', 'delivered'])
+
+  if (!data || data.length === 0) return [{ info: 'Nenhuma venda com cupom registrada.' }]
+
+  // Agrupar por mês e cupom
+  const map = new Map<string, any>()
+  for (const o of data as any[]) {
+    const d = new Date(o.created_at)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const cupom = o.coupons?.code || 'Desconhecido'
+    const mapKey = `${key}__${cupom}`
+
+    if (!map.has(mapKey)) {
+      map.set(mapKey, { periodo: key, cupom: cupom, vendas: 0, faturamento: 0 })
+    }
+    const e = map.get(mapKey)!
+    e.vendas++
+    e.faturamento += Number(o.total)
+  }
+
+  return Array.from(map.values())
+    .sort((a, b) => b.periodo.localeCompare(a.periodo))
+    .map(e => ({
+      periodo: e.periodo,
+      cupom: e.cupom,
+      vendas: e.vendas,
+      faturamento: `R$ ${e.faturamento.toFixed(2)}`,
+    }))
+}
+
 export async function getResumoVendas(): Promise<ReportRow[]> {
   const supabase = await createServerSupabaseClient()
   const { data } = await supabase
