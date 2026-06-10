@@ -101,7 +101,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const token = invoice.store_origin === 'seven' ? process.env.OLIST_API_KEY_SEVEN : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN)
+    const token = invoice.store_origin === 'seven' ? process.env.OLIST_API_KEY_SEVEN : (invoice.store_origin === 'sabrina_prado' ? process.env.OLIST_API_KEY_SABRINA : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN))
 
     // 2. Fetch pedido.obter.php to get id_nota_fiscal
     const paramsObter = new URLSearchParams()

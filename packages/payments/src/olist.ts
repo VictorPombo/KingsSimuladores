@@ -39,7 +39,7 @@ export interface OlistOrderInput {
 }
 
 export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_origin: string, injectedToken?: string) => {
-  const token = injectedToken || (brand_origin === 'seven' ? process.env.OLIST_API_KEY_SEVEN : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN))
+  const token = injectedToken || (brand_origin === 'seven' ? process.env.OLIST_API_KEY_SEVEN : (brand_origin === 'sabrina_prado' ? process.env.OLIST_API_KEY_SABRINA : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN)))
 
   if (!token || token.includes('preencher')) {
     console.error(`[Tiny ERP] Token não configurado para a marca "${brand_origin}". Pedido ${orderPayload.id} NÃO foi injetado no ERP.`)

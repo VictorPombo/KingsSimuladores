@@ -195,7 +195,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
                     price: finalPrice,
                     imageUrl,
                     brand: brandName,
-                    storeOrigin: 'kings',
+                    storeOrigin: (product.attributes as any)?.fiscal_entity || (product.brand_name === 'seven' ? 'seven' : 'kings'),
                     dimensions: {
                       weight: product.weight_kg || 2,
                       width: product.dimensions_cm?.width || 20,

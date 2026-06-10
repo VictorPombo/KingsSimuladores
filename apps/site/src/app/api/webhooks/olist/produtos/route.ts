@@ -82,7 +82,9 @@ export async function POST(req: Request) {
 
       const tinyToken = store === 'seven' 
         ? process.env.OLIST_API_KEY_SEVEN 
-        : process.env.OLIST_API_KEY_KINGS
+        : store === 'sabrina_prado'
+          ? process.env.OLIST_API_KEY_SABRINA
+          : process.env.OLIST_API_KEY_KINGS
 
       if (!tinyToken || !erpId) {
         log(SCOPE, 'Token do Tiny ou ID do ERP ausente. Não é possível criar o produto automaticamente.')

@@ -15,6 +15,22 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
   const handleAdd = () => {
     // Validação de carrinho misto removida a pedido (agora permite misturar lojas)
 
+    // GA4 add_to_cart event
+    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+      (window as any).gtag('event', 'add_to_cart', {
+        currency: 'BRL',
+        value: product.price,
+        items: [
+          {
+            item_id: product.id,
+            item_name: product.title,
+            price: product.price,
+            quantity: 1
+          }
+        ]
+      })
+    }
+
     setLoading(true)
     setTimeout(() => {
       addItem({ ...product, quantity: 1 })

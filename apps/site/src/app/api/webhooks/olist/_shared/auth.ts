@@ -13,6 +13,7 @@ const LOG_PREFIX = '[Olist Webhook]'
 function getAllowedTokens(): string[] {
   const tokens: string[] = []
   if (process.env.OLIST_API_KEY_KINGS) tokens.push(process.env.OLIST_API_KEY_KINGS)
+  if (process.env.OLIST_API_KEY_SABRINA) tokens.push(process.env.OLIST_API_KEY_SABRINA)
   if (process.env.OLIST_API_KEY_SEVEN) tokens.push(process.env.OLIST_API_KEY_SEVEN)
   if (process.env.OLIST_ACCESS_TOKEN) tokens.push(process.env.OLIST_ACCESS_TOKEN)
   return tokens
@@ -22,9 +23,10 @@ function getAllowedTokens(): string[] {
  * Identifica a loja de origem com base no token recebido.
  * Retorna 'kings' | 'seven' | null (se inválido).
  */
-export function identifyStoreByToken(token: string | null): 'kings' | 'seven' | null {
+export function identifyStoreByToken(token: string | null): 'kings' | 'seven' | 'sabrina_prado' | null {
   if (!token) return null
   if (token === process.env.OLIST_API_KEY_SEVEN) return 'seven'
+  if (token === process.env.OLIST_API_KEY_SABRINA) return 'sabrina_prado'
   if (token === process.env.OLIST_API_KEY_KINGS || token === process.env.OLIST_ACCESS_TOKEN) return 'kings'
   return null
 }
@@ -35,7 +37,7 @@ export function identifyStoreByToken(token: string | null): 'kings' | 'seven' | 
  * O Tiny envia o token como query param `?token=xxx` ou no body como `token`.
  * Se válido, retorna o token. Se inválido, retorna null.
  */
-export function authenticateWebhook(url: string, body?: any): { token: string | null; store: 'kings' | 'seven' | null } {
+export function authenticateWebhook(url: string, body?: any): { token: string | null; store: 'kings' | 'seven' | 'sabrina_prado' | null } {
   const searchParams = new URL(url).searchParams
   
   // Tiny pode enviar o token de diferentes formas

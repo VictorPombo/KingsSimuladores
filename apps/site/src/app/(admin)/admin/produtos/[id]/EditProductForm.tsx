@@ -373,10 +373,20 @@ export function EditProductForm({ product, allCategories = [] }: { product: Prod
                       onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
                   </div>
                 </div>
-                <div>
-                  <label style={labelStyle}>CNPJ Emitente</label>
-                  <input name="cnpj_emitente" defaultValue={product.cnpj_emitente || (product.brand_name === 'seven' ? '61.219.783/0001-93' : '29.688.089/0001-02')} placeholder="00.000.000/0000-00" style={inputStyle}
-                    onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={labelStyle}>CNPJ Emitente</label>
+                    <input name="cnpj_emitente" defaultValue={product.cnpj_emitente || (product.brand_name === 'seven' ? '61.219.783/0001-93' : '29.688.089/0001-02')} placeholder="00.000.000/0000-00" style={inputStyle}
+                      onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Faturar Nota Por (Olist/Frenet)</label>
+                    <select name="fiscal_entity" defaultValue={(product.attributes as any)?.fiscal_entity || (product.brand_name === 'seven' ? 'seven' : 'kings')} style={{ ...inputStyle, cursor: 'pointer' }}>
+                      <option value="kings">Kings Matriz</option>
+                      <option value="sabrina_prado">Sabrina Prado</option>
+                      {product.brand_name === 'seven' && <option value="seven">Seven (Felipe)</option>}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>

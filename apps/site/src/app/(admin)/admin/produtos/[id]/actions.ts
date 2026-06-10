@@ -23,6 +23,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const ncm = (formData.get('ncm') as string) || null
   const ean = (formData.get('ean') as string) || null
   const cnpj_emitente = (formData.get('cnpj_emitente') as string) || null
+  const fiscal_entity = (formData.get('fiscal_entity') as string) || 'kings'
   const width = formData.get('width') ? parseFloat(formData.get('width') as string) : null
   const height = formData.get('height') ? parseFloat(formData.get('height') as string) : null
   const length = formData.get('length') ? parseFloat(formData.get('length') as string) : null
@@ -65,7 +66,8 @@ export async function updateProduct(id: string, formData: FormData) {
     ...(fabricante ? { marca: fabricante } : {}),
     ...(costPrice !== null && !isNaN(costPrice) ? { cost_price: costPrice } : { cost_price: null }),
     out_of_stock_behavior: outOfStockBehavior,
-    pix_discount: isNaN(pixDiscount) ? 10 : pixDiscount
+    pix_discount: isNaN(pixDiscount) ? 10 : pixDiscount,
+    fiscal_entity: fiscal_entity
   }
 
   if (!fabricante) {

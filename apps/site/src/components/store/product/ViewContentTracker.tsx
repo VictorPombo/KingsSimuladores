@@ -17,6 +17,22 @@ export function ViewContentTracker({ product }: { product: any }) {
           currency: 'BRL'
         })
       }
+
+      // GA4 view_item event
+      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'view_item', {
+          currency: 'BRL',
+          value: product.price,
+          items: [
+            {
+              item_id: product.id || product.sku,
+              item_name: product.title,
+              price: product.price,
+              quantity: 1
+            }
+          ]
+        })
+      }
       
       const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,

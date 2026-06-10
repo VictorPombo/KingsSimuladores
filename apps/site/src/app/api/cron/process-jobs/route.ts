@@ -60,7 +60,9 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
 
       const apiKey = store === 'seven'
         ? process.env.OLIST_API_KEY_SEVEN
-        : process.env.OLIST_API_KEY_KINGS
+        : store === 'sabrina_prado'
+          ? process.env.OLIST_API_KEY_SABRINA
+          : process.env.OLIST_API_KEY_KINGS
 
       const cnpjEmitente = cnpjPorLoja[store] || cnpjPorLoja.kings
 
@@ -99,7 +101,9 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
 
     const apiKey = store === 'seven'
       ? process.env.OLIST_API_KEY_SEVEN
-      : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN)
+      : store === 'sabrina_prado'
+        ? process.env.OLIST_API_KEY_SABRINA
+        : (process.env.OLIST_API_KEY_KINGS || process.env.OLIST_ACCESS_TOKEN)
 
     if (!apiKey) {
       throw new Error(`[emit_nfe] API key não configurada para store "${store}"`)

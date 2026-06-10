@@ -30,6 +30,20 @@ export function CartDrawer() {
   }
 
   const handleCheckout = () => {
+    // GA4 begin_checkout event
+    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+      (window as any).gtag('event', 'begin_checkout', {
+        currency: 'BRL',
+        value: totalPrice,
+        items: items.map(item => ({
+          item_id: item.id,
+          item_name: item.title,
+          price: item.price,
+          quantity: item.quantity
+        }))
+      })
+    }
+
     if (items.length === 1 && !sessionStorage.getItem('kings_upsell_shown')) {
       setShowUpsellPopup(true)
     } else {
