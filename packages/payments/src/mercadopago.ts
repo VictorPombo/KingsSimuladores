@@ -9,12 +9,14 @@ const ACCESS_TOKENS: Record<string, string | undefined> = {
   kings: process.env.MP_ACCESS_TOKEN_KINGS || process.env.MP_ACCESS_TOKEN,
   usado: process.env.MP_ACCESS_TOKEN_MSU || process.env.MP_ACCESS_TOKEN,
   seven: process.env.MP_ACCESS_TOKEN_SEVEN,
+  sabrina_prado: process.env.MP_ACCESS_TOKEN_KINGS || process.env.MP_ACCESS_TOKEN,
 }
 
 const PUBLIC_KEYS: Record<string, string | undefined> = {
   kings: process.env.MP_PUBLIC_KEY_KINGS || process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
   usado: process.env.MP_PUBLIC_KEY_MSU || process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
   seven: process.env.NEXT_PUBLIC_MP_PUBLIC_KEY_SEVEN || process.env.MP_PUBLIC_KEY_SEVEN,
+  sabrina_prado: process.env.MP_PUBLIC_KEY_KINGS || process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
 }
 
 export function getMPAccessToken(storeSlug: string): string {
@@ -29,7 +31,7 @@ export function getMPPublicKey(storeSlug: string): string {
   return PUBLIC_KEYS[storeSlug] ?? process.env.NEXT_PUBLIC_MP_PUBLIC_KEY ?? ''
 }
 
-export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number, storeContext?: 'kings' | 'msu' | 'seven', shippingCost?: number, pixOnly?: boolean) {
+export async function createPreference(items: any[], customer: any, orderId?: string, marketplaceFee?: number, storeContext?: 'kings' | 'msu' | 'seven' | 'sabrina_prado', shippingCost?: number, pixOnly?: boolean) {
   // Em Produção, você usará o token de vendedor (Oauth) para criar a preferência na conta dele,
   // mas aplicando a 'marketplace_fee' (nossa comissão) pra conta da Kings.
   // Seleção dinâmica do Token baseada no contexto da loja

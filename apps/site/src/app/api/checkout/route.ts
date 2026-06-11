@@ -154,7 +154,7 @@ export async function POST(req: Request) {
     // Permite itens misturados livremente. A lógica define o storeContext com base no primeiro item.
     const firstStore = items[0].storeOrigin || 'kings'
 
-    const storeContext = firstStore === 'seven' ? 'seven' : (firstStore === 'msu' ? 'msu' : 'kings')
+    const storeContext = firstStore === 'seven' ? 'seven' : (firstStore === 'msu' ? 'msu' : (firstStore === 'sabrina_prado' ? 'sabrina_prado' : 'kings'))
 
     // 2.5. Idempotency check: reutilizar pedido pending dos últimos 30min (mesmo cliente/loja)
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()

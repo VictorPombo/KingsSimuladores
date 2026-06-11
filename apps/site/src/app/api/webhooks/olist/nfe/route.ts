@@ -114,7 +114,7 @@ export async function POST(req: Request) {
           order_id: order.id,
           store_origin: store || 'kings',
           erp_id: erpPedidoId || '',
-          cnpj_emitente: store === 'seven' ? '61.219.783/0001-93' : '29.688.089/0001-02',
+          cnpj_emitente: store === 'seven' ? '61.219.783/0001-93' : (store === 'sabrina_prado' ? '59.851.612/0001-30' : '29.688.089/0001-02'),
           ...invoiceUpdates
         })
 

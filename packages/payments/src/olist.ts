@@ -168,9 +168,61 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
 }
 
 export const emitNfeTiny = async (tinyOrderId: string, apiKey: string): Promise<string> => {
+  console.log(`[Tiny ERP] Buscando dados do pedido Tiny ${tinyOrderId} para obter ID da Nota Fiscal...`)
+  // 1. Obter os dados do pedido para ver se já existe nota fiscal gerada
+  const paramsObter = new URLSearchParams()
+  paramsObter.append('token', apiKey)
+  paramsObter.append('id', tinyOrderId)
+  paramsObter.append('formato', 'json')
+
+  const resPedido = await fetch('https://api.tiny.com.br/api2/pedido.obter.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: paramsObter.toString(),
+  })
+
+  let idNotaFiscal: string | null = null
+  if (resPedido.ok) {
+    const dataPedido = await resPedido.json()
+    if (dataPedido.retorno && dataPedido.retorno.status === 'OK') {
+      idNotaFiscal = dataPedido.retorno.pedido?.id_nota_fiscal || null
+    }
+  }
+
+  // 2. Se não existir nota fiscal gerada (id_nota_fiscal === '0' ou nulo), gerar a nota fiscal a partir do pedido
+  if (!idNotaFiscal || idNotaFiscal === '0') {
+    console.log(`[Tiny ERP] NFe não encontrada para o pedido ${tinyOrderId}. Gerando nota fiscal...`)
+    const paramsGerar = new URLSearchParams()
+    paramsGerar.append('token', apiKey)
+    paramsGerar.append('id', tinyOrderId)
+    paramsGerar.append('formato', 'json')
+
+    const resGerar = await fetch('https://api.tiny.com.br/api2/gerar.nota.fiscal.pedido.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: paramsGerar.toString(),
+    })
+
+    if (resGerar.ok) {
+      const dataGerar = await resGerar.json()
+      if (dataGerar.retorno && dataGerar.retorno.status === 'OK') {
+        idNotaFiscal = dataGerar.retorno.idNotaFiscal?.toString() || dataGerar.retorno.notaFiscal?.id?.toString() || null
+        console.log(`[Tiny ERP] NFe gerada com sucesso. ID NF-e: ${idNotaFiscal}`)
+      } else {
+        throw new Error(`[emitNfeTiny] Falha ao gerar nota fiscal do pedido: ${JSON.stringify(dataGerar.retorno?.erros ?? dataGerar)}`)
+      }
+    } else {
+      throw new Error(`[emitNfeTiny] HTTP ${resGerar.status} ao gerar nota fiscal`)
+    }
+  }
+
+  // Se mesmo assim não tivermos idNotaFiscal, usamos o tinyOrderId como fallback
+  const finalId = idNotaFiscal || tinyOrderId
+  console.log(`[Tiny ERP] Emitindo/Enviando NF-e ID ${finalId} para o pedido Tiny ${tinyOrderId}...`)
+
   const params = new URLSearchParams()
   params.append('token', apiKey)
-  params.append('id', tinyOrderId)
+  params.append('id', finalId)
   params.append('enviarEmail', 'S')
   params.append('formato', 'json')
 
@@ -190,7 +242,7 @@ export const emitNfeTiny = async (tinyOrderId: string, apiKey: string): Promise<
   }
 
   const situacao: string = data.retorno.nota_fiscal?.situacao || data.retorno.situacao || ''
-  console.log(`[emitNfeTiny] Situação NFe para pedido Tiny ${tinyOrderId}: ${situacao}`)
+  console.log(`[emitNfeTiny] Situação NFe para ID ${finalId}: ${situacao}`)
   return situacao
 }
 

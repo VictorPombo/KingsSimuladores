@@ -8,6 +8,7 @@ const CNPJ_POR_LOJA: Record<string, string> = {
   kings: '29.688.089/0001-02',
   seven: '61.219.783/0001-93',
   msu: '29.688.089/0001-02',
+  sabrina_prado: '59.851.612/0001-30',
 }
 
 export async function POST(req: Request) {

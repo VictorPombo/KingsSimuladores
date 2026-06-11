@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const customerProfile = Array.isArray(profilesData) ? profilesData[0] : profilesData
 
     const store = order.brand_origin || 'kings'
-    const cnpjEmitente = store === 'seven' ? '61.219.783/0001-93' : '29.688.089/0001-02'
+    const cnpjEmitente = store === 'seven' ? '61.219.783/0001-93' : (store === 'sabrina_prado' ? '59.851.612/0001-30' : '29.688.089/0001-02')
 
     // Evitar duplicidade se já existir invoice (apenas atualiza o status se falhou antes)
     const { data: existingInvoice } = await adminSupabase.from('invoices').select('id').eq('order_id', orderId).maybeSingle()
