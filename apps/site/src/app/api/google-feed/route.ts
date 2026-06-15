@@ -68,7 +68,7 @@ export async function GET() {
       <g:id>${product.id}</g:id>
       <title>${escapeXml(product.title)}</title>
       <description>${escapeXml(product.description || product.title)}</description>
-      <link>https://www.kingssimuladores.com.br/produto/${product.slug}</link>
+      <link>https://www.kingssimuladores.com.br/produtos/${product.slug}</link>
       <g:image_link>${escapeXml(mainImage)}</g:image_link>${priceXml}
       <g:availability>${availability}</g:availability>
       <g:condition>${condition}</g:condition>
