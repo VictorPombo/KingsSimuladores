@@ -30,6 +30,15 @@ export function EditProductForm({ product, allCategories = [] }: { product: Prod
   const [isPending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
+  const [cnpjEmitente, setCnpjEmitente] = useState(product.cnpj_emitente || (product.brand_name === 'seven' ? '61.219.783/0001-93' : '29.688.089/0001-02'))
+
+  const handleFiscalEntityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value
+    if (val === 'sabrina_prado') setCnpjEmitente('59.851.612/0001-30')
+    else if (val === 'kings') setCnpjEmitente('29.688.089/0001-02')
+    else if (val === 'seven') setCnpjEmitente('61.219.783/0001-93')
+  }
+
   const [images, setImages] = useState<Array<{type: 'existing', url: string} | {type: 'new', file: File, preview: string}>>(
     (product.images || []).map(url => ({ type: 'existing', url }))
   )
@@ -376,12 +385,12 @@ export function EditProductForm({ product, allCategories = [] }: { product: Prod
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={labelStyle}>CNPJ Emitente</label>
-                    <input name="cnpj_emitente" defaultValue={product.cnpj_emitente || (product.brand_name === 'seven' ? '61.219.783/0001-93' : '29.688.089/0001-02')} placeholder="00.000.000/0000-00" style={inputStyle}
+                    <input name="cnpj_emitente" value={cnpjEmitente} onChange={e => setCnpjEmitente(e.target.value)} placeholder="00.000.000/0000-00" style={inputStyle}
                       onFocus={e => e.currentTarget.style.borderColor = '#8b5cf6'} onBlur={e => e.currentTarget.style.borderColor = '#3f424d'} />
                   </div>
                   <div>
                     <label style={labelStyle}>Faturar Nota Por (Olist/Frenet)</label>
-                    <select name="fiscal_entity" defaultValue={(product.attributes as any)?.fiscal_entity || (product.brand_name === 'seven' ? 'seven' : 'kings')} style={{ ...inputStyle, cursor: 'pointer' }}>
+                    <select name="fiscal_entity" defaultValue={(product.attributes as any)?.fiscal_entity || (product.brand_name === 'seven' ? 'seven' : 'kings')} onChange={handleFiscalEntityChange} style={{ ...inputStyle, cursor: 'pointer' }}>
                       <option value="kings">Kings Matriz</option>
                       <option value="sabrina_prado">Sabrina Prado</option>
                       {product.brand_name === 'seven' && <option value="seven">Seven (Felipe)</option>}
