@@ -425,7 +425,7 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.2rem', color: '#00e5ff' }}>1. Seus Dados</h2>
                 <div className="kings-checkout-form-grid">
-                  <input type="text" placeholder="Nome Completo *" value={nome} onChange={e => setNome(e.target.value)} style={{...inputStyle, flex: 1, border: (!nome || nome.trim().length < 3) ? '1px solid #ef4444' : inputStyle.border }} />
+                  <input type="text" placeholder="Nome Completo *" value={nome} onChange={e => setNome(e.target.value)} style={{...inputStyle, flex: 1, border: (!nome || nome.trim().split(/\\s+/).length < 2) ? '1px solid #ef4444' : inputStyle.border }} />
                   <input type="text" placeholder="CPF *" value={cpf} onChange={e => setCpf(e.target.value)} style={{...inputStyle, flex: 1, border: (!cpf || cpf.trim().length < 11) ? '1px solid #ef4444' : inputStyle.border }} />
                 </div>
                 <div className="kings-checkout-form-grid">
@@ -433,7 +433,7 @@ export default function CheckoutPage() {
                   <input type="tel" placeholder="Telefone / WhatsApp *" value={telefone} onChange={e => setTelefone(e.target.value)} style={{...inputStyle, flex: 1, border: (!telefone || telefone.trim().length < 10) ? '1px solid #ef4444' : inputStyle.border }} />
                 </div>
                 
-                {(!nome || !cpf || !email || !telefone || cpf.trim().length < 11 || telefone.trim().length < 10) && (
+                {(!nome || nome.trim().split(/\\s+/).length < 2 || !cpf || !email || !telefone || cpf.trim().length < 11 || telefone.trim().length < 10) && (
                   <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '-8px' }}>Preencha corretamente os campos obrigatórios (*) destacados em vermelho para gerar a Nota Fiscal.</p>
                 )}
                 
@@ -494,12 +494,12 @@ export default function CheckoutPage() {
                 )}
                 
                 {(() => {
-                  const dadosOk = nome.trim().length >= 3 && cpf.replace(/\D/g, '').length >= 11 && email.includes('@') && telefone.replace(/\D/g, '').length >= 10
+                  const dadosOk = nome.trim().split(/\s+/).length >= 2 && cpf.replace(/\D/g, '').length >= 11 && email.includes('@') && telefone.replace(/\D/g, '').length >= 10
                   const enderecoOk = isRetirada || (cep.replace(/\D/g, '').length >= 8 && logradouro.trim().length >= 3 && numero.trim().length > 0 && bairro.trim().length >= 2 && cidade.trim().length >= 3)
                   const isFormValid = dadosOk && enderecoOk
 
                   const camposFaltando: string[] = []
-                  if (nome.trim().length < 3) camposFaltando.push('Nome Completo')
+                  if (nome.trim().split(/\s+/).length < 2) camposFaltando.push('Nome Completo (com sobrenome)')
                   if (cpf.replace(/\D/g, '').length < 11) camposFaltando.push('CPF')
                   if (!email.includes('@')) camposFaltando.push('E-mail')
                   if (telefone.replace(/\D/g, '').length < 10) camposFaltando.push('Telefone')
