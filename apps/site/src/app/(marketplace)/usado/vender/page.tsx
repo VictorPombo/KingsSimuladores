@@ -58,6 +58,9 @@ export default function VenderPage() {
   // Imagens já recortadas e prontas para upload
   const [croppedFiles, setCroppedFiles] = useState<CroppedFile[]>([])
 
+  // Fila de imagens para recortar
+  const [cropQueue, setCropQueue] = useState<File[]>([])
+
   // Estado do modal de crop
   const [cropModal, setCropModal] = useState<{
     open: boolean
@@ -96,6 +99,32 @@ export default function VenderPage() {
     init()
   }, [router])
 
+  // Processa a fila de crop
+  useEffect(() => {
+    if (cropQueue.length > 0 && !cropModal.open) {
+      // Limite de 5 fotos (contando as já recortadas e a fila)
+      if (croppedFiles.length >= 5) {
+        alert('Limite máximo de 5 fotos atingido.')
+        setCropQueue([])
+        return
+      }
+
+      const file = cropQueue[0]
+      const reader = new FileReader()
+      reader.onload = () => {
+        setCropModal({
+          open: true,
+          src: reader.result as string,
+          originalName: file.name,
+          crop: { x: 0, y: 0 },
+          zoom: 1,
+          croppedAreaPixels: null
+        })
+      }
+      reader.readAsDataURL(file)
+    }
+  }, [cropQueue, cropModal.open, croppedFiles.length])
+
   const handleAcceptTerms = async () => {
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -120,34 +149,25 @@ export default function VenderPage() {
     }
   }
 
-  // Abre o modal de crop para a foto selecionada
+  // Adiciona arquivos à fila de crop
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = Array.from(e.target.files || [])[0]
-    if (!file) return
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
 
-    if (!file.type.startsWith('image/')) {
-      alert(`${file.name} não é uma imagem válida.`)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-      return
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      alert(`Imagem muito grande. Máximo: 10MB.`)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-      return
+    const validFiles = files.filter(f => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024)
+    
+    if (validFiles.length < files.length) {
+      alert('Algumas imagens eram inválidas ou maiores que 10MB e foram ignoradas.')
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      setCropModal({
-        open: true,
-        src: reader.result as string,
-        originalName: file.name,
-        crop: { x: 0, y: 0 },
-        zoom: 1,
-        croppedAreaPixels: null
-      })
+    if (validFiles.length + croppedFiles.length > 5) {
+      alert(`Você só pode adicionar mais ${5 - croppedFiles.length} foto(s).`)
+      const allowedFiles = validFiles.slice(0, 5 - croppedFiles.length)
+      setCropQueue(prev => [...prev, ...allowedFiles])
+    } else {
+      setCropQueue(prev => [...prev, ...validFiles])
     }
-    reader.readAsDataURL(file)
+
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -161,10 +181,19 @@ export default function VenderPage() {
       const blob = await getCroppedImageBlob(cropModal.src, cropModal.croppedAreaPixels)
       const previewUrl = URL.createObjectURL(blob)
       setCroppedFiles(prev => [...prev, { previewUrl, blob, originalName: cropModal.originalName }])
+      
+      // Fecha o modal e remove da fila para puxar o próximo
       setCropModal(prev => ({ ...prev, open: false, src: '' }))
+      setCropQueue(prev => prev.slice(1))
     } catch (err) {
       alert('Erro ao recortar imagem. Tente novamente.')
     }
+  }
+
+  const handleCancelCrop = () => {
+    // Fecha o modal e remove da fila (ignora essa imagem)
+    setCropModal(prev => ({ ...prev, open: false, src: '' }))
+    setCropQueue(prev => prev.slice(1))
   }
 
   const removeImage = (index: number) => {
@@ -271,7 +300,7 @@ export default function VenderPage() {
   if (showTerms) return <TermsModal onAccept={handleAcceptTerms} onCancel={() => router.push('/usado')} />
 
   return (
-    <div style={{ background: '#0A0A0A', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px' }}>
+    <div style={{ background: '#0A0A0A', minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px', position: 'relative' }}>
       <style dangerouslySetInnerHTML={{__html: `
         .vender-title { font-size: 2.5rem; }
         .vender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -279,7 +308,32 @@ export default function VenderPage() {
           .vender-title { font-size: 2rem !important; }
           .vender-grid { grid-template-columns: 1fr !important; }
         }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
       `}} />
+
+      {/* Overlay de Loading (Bloqueia a tela inteira durante o envio) */}
+      {isSubmitting && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '60px', height: '60px', border: '4px solid rgba(232, 0, 45, 0.2)',
+            borderTopColor: '#E8002D', borderRadius: '50%',
+            animation: 'spin 1s linear infinite', marginBottom: '24px'
+          }} />
+          <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, marginBottom: '8px' }}>
+            Processando seu anúncio...
+          </h2>
+          <p style={{ color: '#06b6d4', fontSize: '1.1rem', fontWeight: 600 }}>
+            {uploadProgress || 'Enviando dados...'}
+          </p>
+          <p style={{ color: '#a1a1aa', fontSize: '0.9rem', marginTop: '16px' }}>
+            Por favor, não feche esta página.
+          </p>
+        </div>
+      )}
 
       {/* Modal de Crop */}
       {cropModal.open && (
@@ -299,7 +353,7 @@ export default function VenderPage() {
                 <Crop size={18} color="#E8002D" />
                 <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>Enquadrar Foto</span>
               </div>
-              <button onClick={() => setCropModal(p => ({ ...p, open: false }))} style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer' }}>
+              <button onClick={handleCancelCrop} style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
@@ -332,6 +386,7 @@ export default function VenderPage() {
                 Arraste para reposicionar · Deslize o zoom para ajustar
               </p>
               <button
+                type="button"
                 onClick={handleConfirmCrop}
                 style={{
                   width: '100%', padding: '14px', background: '#E8002D',
@@ -363,9 +418,9 @@ export default function VenderPage() {
             <div>
               <label style={labelStyle}>
                 Fotos Reais do Equipamento *{' '}
-                <span style={{ color: '#71717a', fontWeight: 400 }}>({croppedFiles.length}/5) — Clique para enquadrar</span>
+                <span style={{ color: '#71717a', fontWeight: 400 }}>({croppedFiles.length}/5) — Selecione várias fotos</span>
               </label>
-              <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
+              <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '10px' }}>
                 {croppedFiles.map((cf, i) => (

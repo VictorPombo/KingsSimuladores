@@ -22,6 +22,9 @@
     "apps",
     "packages",
     "dist",
-    "build"
+    "build",
+    "tests",
+    ".claude",
+    ".turbo"
   ]
 }

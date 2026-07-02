@@ -12,7 +12,12 @@ export async function POST(req: Request) {
     const rateLimited = checkoutLimiter.check(req)
     if (rateLimited) return rateLimited
 
-    const body = await req.json()
+    let body;
+    try {
+      body = await req.json()
+    } catch (parseErr) {
+      return NextResponse.json({ error: 'Payload json inválido ou vazio' }, { status: 400 })
+    }
     const { items, customer, address, shipping, total, coupon_id, pix_discount } = body
     const shipping_service_id: string | undefined = shipping?.service_id || shipping?.id || undefined
 

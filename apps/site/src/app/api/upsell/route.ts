@@ -22,7 +22,7 @@ function detectCategory(title: string): string {
   const t = title.toLowerCase()
   
   // Acessórios e partes (capturar antes para não classificar "Mola de Pedal" como "Pedal")
-  if (t.includes('mola') || t.includes('acessório') || t.includes('kit') || t.includes('cabo') || t.includes('adaptador') || t.includes('performance') || t.includes('borracha') || t.includes('plate')) {
+  if (t.includes('mola') || t.includes('acessório') || t.includes('acessorio') || t.includes('kit') || t.includes('cabo') || t.includes('adaptador') || t.includes('performance') || t.includes('borracha') || t.includes('plate')) {
     if (t.includes('suporte para volante')) return 'cockpit'
     if (t.includes('suporte')) return 'suporte'
     return 'acessorio'

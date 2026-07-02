@@ -2,6 +2,7 @@
 const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
+  // transpilePackages: ['@kings/ui', '@kings/db', '@kings/utils', '@kings/payments', '@kings/shipping', '@kings/notifications'],
   transpilePackages: ['@kings/ui', '@kings/db', '@kings/utils', '@kings/payments', '@kings/shipping', '@kings/notifications'],
   images: {
     remotePatterns: [
