@@ -25,6 +25,11 @@ export interface OlistOrderInput {
     state: string
     [key: string]: any
   }
+  paymentData?: {
+    payment_method_id?: string
+    payment_type_id?: string
+    installments?: number
+  }
   shipping_cost?: number
   items?: Array<{
     product_id: string
@@ -87,6 +92,17 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
       uf
     };
 
+    let forma_pagamento = 'Pix'
+    const paymentType = orderPayload.paymentData?.payment_type_id
+    if (paymentType === 'credit_card') forma_pagamento = 'Cartão de Crédito'
+    else if (paymentType === 'debit_card') forma_pagamento = 'Cartão de Débito'
+    else if (paymentType === 'ticket') forma_pagamento = 'Boleto'
+    else if (paymentType === 'bank_transfer') forma_pagamento = 'Transferência Bancária'
+
+    const parcelas = Number(orderPayload.paymentData?.installments) || 1
+    const totalOrderValue = orderPayload.total || 0;
+    const parcelValue = Number((totalOrderValue / parcelas).toFixed(2))
+
     const tinyPedido = {
       pedido: {
         data_pedido: new Date().toLocaleDateString('pt-BR'),
@@ -116,9 +132,16 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
         })),
         valor_frete: orderPayload.shipping_cost || 0,
         valor_desconto: 0,
-        forma_pagamento: 'Pix',
+        forma_pagamento: forma_pagamento,
         forma_recebimento: 'Mercado Pago',
-        situacao: 'Aprovado'
+        situacao: 'Aprovado',
+        parcelas: Array.from({ length: parcelas }).map((_, i) => ({
+          parcela: {
+            dias: paymentType === 'credit_card' ? 30 * (i + 1) : 0,
+            valor: parcelValue,
+            forma_pagamento: forma_pagamento
+          }
+        }))
       }
     }
 

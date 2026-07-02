@@ -153,6 +153,8 @@ export async function verifyPaymentStatus(paymentId: string, storeContext?: stri
   return {
     status: data.status,
     external_reference: data.external_reference,
-    payment_method_id: data.payment_method_id
+    payment_method_id: data.payment_method_id,
+    payment_type_id: data.payment_type_id,
+    installments: data.installments
   }
 }

@@ -39,6 +39,7 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
         id: `${order.id}-${store}`,
         total: storeSubtotal + shippingVal,
         customer: payload.profile,
+        paymentData: payload.paymentData,
         shipping: order.shipping_address,
         shipping_cost: shippingVal,
         items: storeItems.map((i: any) => {

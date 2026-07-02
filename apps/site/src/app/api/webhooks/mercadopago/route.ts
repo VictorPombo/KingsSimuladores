@@ -171,6 +171,11 @@ export async function POST(req: Request) {
     const sharedPayload = {
       paymentId,
       storeContext,
+      paymentData: {
+        payment_method_id: paymentData.payment_method_id,
+        payment_type_id: (paymentData as any).payment_type_id,
+        installments: (paymentData as any).installments || 1
+      },
       profile: {
         full_name: profile?.full_name,
         email: profile?.email,
