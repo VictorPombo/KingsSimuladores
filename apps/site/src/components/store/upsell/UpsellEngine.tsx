@@ -3,6 +3,7 @@
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@kings/utils'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 /**
  * Motor de Recomendação Inteligente — Kings Simuladores
@@ -60,19 +61,13 @@ export function UpsellEngine({ variant = 'compact', maxItems = 2, storeContext =
     fetchSuggestions()
   }, [items.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const router = useRouter()
+
   if (items.length === 0 || suggestions.length === 0) return null
   if (loading) return null
 
-  const handleAdd = (product: Suggestion) => {
-    addItem({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      brand: product.brand,
-      storeOrigin: 'kings',
-      quantity: 1,
-    })
+  const handleGoToProduct = (product: Suggestion) => {
+    router.push(`/produtos/${product.slug}`)
   }
 
   // ── VERSÃO COMPACTA (CartDrawer) ──
@@ -114,7 +109,7 @@ export function UpsellEngine({ variant = 'compact', maxItems = 2, storeContext =
                 transition: 'border-color 0.2s, transform 0.15s',
                 cursor: 'pointer',
               }}
-              onClick={() => handleAdd(product)}
+              onClick={() => handleGoToProduct(product)}
               onMouseOver={(e) => {
                 e.currentTarget.style.borderColor = 'var(--accent)'
                 e.currentTarget.style.transform = 'translateX(4px)'
@@ -141,8 +136,8 @@ export function UpsellEngine({ variant = 'compact', maxItems = 2, storeContext =
                 <div className="font-display" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent)' }}>
                   {formatPrice(product.price)}
                 </div>
-                <div style={{ fontSize: '0.6rem', color: 'var(--green)', fontWeight: 600 }}>
-                  + ADICIONAR
+                <div style={{ fontSize: '0.6rem', color: 'var(--accent)', fontWeight: 600 }}>
+                  VER PRODUTO
                 </div>
               </div>
             </div>
@@ -197,7 +192,7 @@ export function UpsellEngine({ variant = 'compact', maxItems = 2, storeContext =
               transition: 'border-color 0.2s, transform 0.2s',
               cursor: 'pointer',
             }}
-            onClick={() => handleAdd(product)}
+            onClick={() => handleGoToProduct(product)}
             onMouseOver={(e) => {
               e.currentTarget.style.borderColor = '#00e5ff'
               e.currentTarget.style.transform = 'translateY(-2px)'
@@ -232,7 +227,7 @@ export function UpsellEngine({ variant = 'compact', maxItems = 2, storeContext =
               borderRadius: '6px',
               display: 'inline-block',
             }}>
-              + Adicionar ao Carrinho
+              Ver Produto
             </div>
           </div>
         ))}
