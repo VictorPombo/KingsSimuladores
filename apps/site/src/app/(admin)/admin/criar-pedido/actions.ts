@@ -54,8 +54,8 @@ export async function createOrder(formData: {
   const supabase = createAdminClient()
 
   // Validações básicas
-  if (!formData.email || !formData.name) throw new Error('Dados do cliente obrigatórios.')
-  if (formData.items.length === 0) throw new Error('Adicione pelo menos um produto.')
+  if (!formData.email || !formData.name) return { error: 'Dados do cliente obrigatórios.' }
+  if (formData.items.length === 0) return { error: 'Adicione pelo menos um produto.' }
 
   let customerId = formData.customerId
   let generatedPassword = null
@@ -71,9 +71,9 @@ export async function createOrder(formData: {
 
     if (authError) {
       if (authError.message.includes('already registered') || authError.message.includes('exists')) {
-        throw new Error('Já existe um cliente com este e-mail. Por favor, selecione "Cliente existente".')
+        return { error: 'Já existe um cliente com este e-mail. Por favor, selecione "Cliente existente".' }
       }
-      throw new Error('Erro ao criar autenticação do cliente: ' + authError.message)
+      return { error: 'Erro ao criar autenticação do cliente: ' + authError.message }
     }
 
     customerId = authData.user.id;
@@ -90,10 +90,10 @@ export async function createOrder(formData: {
       })
       .eq('auth_id', customerId);
 
-    if (profileError) throw new Error('Erro ao atualizar perfil do cliente: ' + profileError.message)
+    if (profileError) return { error: 'Erro ao atualizar perfil do cliente: ' + profileError.message }
   }
 
-  if (!customerId) throw new Error('Cliente não selecionado.')
+  if (!customerId) return { error: 'Cliente não selecionado.' }
 
   // Calcular totais
   const subtotal = formData.items.reduce((a, i) => a + i.unitPrice * i.quantity, 0)
@@ -129,7 +129,7 @@ export async function createOrder(formData: {
     .select('id')
     .single()
 
-  if (orderError) throw new Error('Erro ao criar pedido: ' + orderError.message)
+  if (orderError) return { error: 'Erro ao criar pedido: ' + orderError.message }
 
   // Inserir itens
   const orderItems = formData.items.map(item => ({
@@ -141,7 +141,7 @@ export async function createOrder(formData: {
   }))
 
   const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
-  if (itemsError) throw new Error('Erro ao adicionar itens: ' + itemsError.message)
+  if (itemsError) return { error: 'Erro ao adicionar itens: ' + itemsError.message }
 
   // Atualizar estoque
   for (const item of formData.items) {

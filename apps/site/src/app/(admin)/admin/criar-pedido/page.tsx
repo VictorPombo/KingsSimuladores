@@ -246,11 +246,14 @@ export default function CriarPedidoPage() {
           discount: finalDiscount, generatePaymentLink,
           couponCode: (applyDiscount && couponCode.trim()) ? couponCode.trim() : null
         })
-        if ((result as any).generatedPassword) {
-          setSuccess(`Pedido #${result.orderId.split('-')[0]} criado! Senha provisória: ${(result as any).generatedPassword}`)
+
+        if ((result as any).error) {
+          setError((result as any).error)
+        } else if ((result as any).generatedPassword) {
+          setSuccess(`Pedido #${(result as any).orderId.split('-')[0]} criado! Senha provisória: ${(result as any).generatedPassword}`)
           setTimeout(() => router.push('/admin/pedidos'), 8000)
         } else {
-          setSuccess(`Pedido #${result.orderId.split('-')[0]} criado com sucesso!`)
+          setSuccess(`Pedido #${(result as any).orderId.split('-')[0]} criado com sucesso!`)
           setTimeout(() => router.push('/admin/pedidos'), 2000)
         }
       } catch (err: any) {
