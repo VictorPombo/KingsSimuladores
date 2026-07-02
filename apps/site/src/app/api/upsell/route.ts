@@ -9,22 +9,62 @@ import { createServerSupabaseClient } from '@kings/db/server'
  */
 
 const CROSS_SELL_KEYWORDS: Record<string, string[]> = {
-  volante: ['cockpit', 'pedal', 'suporte', 'luva', 'câmbio', 'freio de mão'],
-  cockpit: ['volante', 'pedal', 'câmbio', 'freio de mão', 'luva'],
-  pedais: ['volante', 'câmbio', 'cockpit', 'suporte', 'freio de mão'],
-  cambio: ['cockpit', 'pedal', 'suporte', 'luva'],
-  base: ['volante', 'cockpit', 'pedal', 'aro'],
-  acessorio: ['cockpit', 'volante', 'pedal'],
+  volante: ['cockpit', 'pedal', 'suporte', 'luva', 'câmbio', 'freio de mão', 'base'],
+  cockpit: ['volante', 'pedal', 'câmbio', 'freio de mão', 'luva', 'base'],
+  pedais: ['volante', 'câmbio', 'cockpit', 'suporte', 'freio de mão', 'base'],
+  cambio: ['cockpit', 'pedal', 'suporte', 'luva', 'freio de mão'],
+  base: ['volante', 'cockpit', 'pedal', 'aro', 'câmbio'],
+  suporte: ['teclado', 'mousepad', 'acessório', 'mouse', 'tapete'],
+  acessorio: ['cockpit', 'volante', 'pedal', 'base'],
 }
 
 function detectCategory(title: string): string {
   const t = title.toLowerCase()
+  
+  // Acessórios e partes (capturar antes para não classificar "Mola de Pedal" como "Pedal")
+  if (t.includes('mola') || t.includes('acessório') || t.includes('kit') || t.includes('cabo') || t.includes('adaptador') || t.includes('performance') || t.includes('borracha') || t.includes('plate')) {
+    if (t.includes('suporte para volante')) return 'cockpit'
+    if (t.includes('suporte')) return 'suporte'
+    return 'acessorio'
+  }
+
   if (t.includes('cockpit') || t.includes('suporte para volante')) return 'cockpit'
-  if (t.includes('volante') || t.includes('aro') || t.includes('addon')) return 'volante'
-  if (t.includes('pedal') || t.includes('load cell') || t.includes('crp')) return 'pedais'
+  if (t.includes('suporte')) return 'suporte'
+  if (t.includes('volante') || t.includes('aro') || t.includes('addon') || t.includes('wheel')) return 'volante'
+  if (t.includes('pedal') || t.includes('load cell') || t.includes('crp') || t.includes('srp')) return 'pedais'
   if (t.includes('câmbio') || t.includes('shifter')) return 'cambio'
-  if (t.includes('base') || t.includes('direct drive') || t.includes(' dd ') || t.includes(' r5') || t.includes(' r9') || t.includes(' r21')) return 'base'
+  if (t.includes('base') || t.includes('direct drive') || t.includes(' dd ') || t.match(/\br5\b/) || t.match(/\br9\b/) || t.match(/\br12\b/) || t.match(/\br16\b/) || t.match(/\br21\b/)) return 'base'
+  if (t.includes('freio de mão') || t.includes('handbrake')) return 'freio de mao'
+  
   return 'acessorio'
+}
+
+function getFamilies(title: string): string[] {
+  const t = title.toLowerCase()
+  const families: string[] = []
+  if (t.includes('crp')) families.push('crp')
+  if (t.match(/\bsrp\b/) || t.includes('sr-p') || t.includes('srp')) families.push('srp')
+  if (t.match(/\br5\b/)) families.push('r5')
+  if (t.match(/\br9\b/)) families.push('r9')
+  if (t.match(/\br12\b/)) families.push('r12')
+  if (t.match(/\br16\b/)) families.push('r16')
+  if (t.match(/\br21\b/)) families.push('r21')
+  if (t.match(/\bfsr\b/)) families.push('fsr')
+  if (t.match(/\bks\b/)) families.push('ks')
+  if (t.match(/\bgs\b/)) families.push('gs')
+  if (t.match(/\bcs\b/)) families.push('cs')
+  if (t.match(/\brs\b/)) families.push('rs')
+  return families
+}
+
+// Fisher-Yates shuffle
+function shuffleArray(array: any[]) {
+  const arr = [...array]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -35,9 +75,13 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ suggestions: [] })
     }
 
-    // 1. Detectar categorias no carrinho
+    // 1. Detectar categorias e famílias no carrinho
     const cartCategories = cartItems.map((item: any) => detectCategory(item.title))
     const cartIds = new Set(cartItems.map((i: any) => i.id))
+    const cartFamilies = new Set<string>()
+    cartItems.forEach((i: any) => {
+      getFamilies(i.title).forEach(f => cartFamilies.add(f))
+    })
 
     // 2. Calcular keywords complementares
     const searchKeywords = new Set<string>()
@@ -63,17 +107,43 @@ export async function POST(request: Request): Promise<NextResponse> {
       .eq('brands.name', storeContext)
       .gt('stock', 0)
       .or(orFilters)
-      .order('price', { ascending: true })
-      .limit(20)
+      .limit(50) // Pegar um pool maior para ter variedade
 
     if (!products || products.length === 0) {
       return NextResponse.json({ suggestions: [] })
     }
 
-    // 4. Filtrar: remover itens que já estão no carrinho e sem imagem
-    const suggestions = products
-      .filter((p: any) => !cartIds.has(p.id))
-      .filter((p: any) => p.images && p.images.length > 0 && p.images[0])
+    // 4. Filtrar itens incompatíveis ou já no carrinho
+    const validProducts = products.filter((p: any) => {
+      // Remover se já está no carrinho ou sem imagem
+      if (cartIds.has(p.id) || !p.images || p.images.length === 0 || !p.images[0]) {
+        return false
+      }
+
+      const pCategory = detectCategory(p.title)
+      const pFamilies = getFamilies(p.title)
+
+      // Regra de Compatibilidade: se for um acessório de uma família específica, 
+      // OBRIGATORIAMENTE o carrinho deve ter algum item dessa família.
+      // Isso impede sugerir "Mola SRP" para quem comprou "Pedal CRP".
+      if (pCategory === 'acessorio' && pFamilies.length > 0) {
+        const matchesFamily = pFamilies.some(f => cartFamilies.has(f))
+        if (!matchesFamily) return false
+      }
+
+      // Regra de Conflito de Família em Itens Principais (opcional):
+      // Se o usuário tem "Pedal CRP", e sugerimos "Pedal SRP", não tem tanto problema porque
+      // estamos filtrando "itens que ele já tem" pelas categorias complementares.
+      // Mas para evitar redundância, se ele já tem um pedal, as keywords NÃO vão buscar outro pedal, 
+      // a menos que o título do cockpit tenha "pedal" no nome.
+
+      return true
+    })
+
+    // 5. Randomizar para evitar mostrar sempre os mesmos itens (como os mais baratos)
+    const shuffled = shuffleArray(validProducts)
+
+    const suggestions = shuffled
       .slice(0, limit)
       .map((p: any) => ({
         id: p.id,
