@@ -75,5 +75,16 @@ BEGIN
 END;
 $$;
 
--- 2. Execute the seed
-SELECT public.seed_mock_seller();
+-- 2. Execute the seed — SOMENTE em ambientes dev/staging.
+-- Guard: a GUC customizada `app.seed_environment` deve ser setada explicitamente
+-- para 'dev' ou 'staging' (via configuração do projeto Supabase local/staging)
+-- para que o seed rode. Em qualquer outro caso (produção, ou GUC ausente — o
+-- estado padrão de um projeto Supabase de produção), o seed é pulado.
+DO $$
+BEGIN
+  IF current_setting('app.seed_environment', true) IN ('dev', 'staging') THEN
+    PERFORM public.seed_mock_seller();
+  ELSE
+    RAISE NOTICE 'Pulando seed_mock_seller(): app.seed_environment não é dev/staging (atual: %). Defina a GUC para rodar o seed localmente.', current_setting('app.seed_environment', true);
+  END IF;
+END $$;

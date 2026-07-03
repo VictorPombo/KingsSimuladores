@@ -5,12 +5,10 @@ import { createAdminClient } from '@kings/db'
 
 // Verifica a assinatura HMAC-SHA256 enviada pelo Mercado Pago no header x-signature.
 // Documentação: https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks
-// Retorna true se válida, false se inválida. Se MP_WEBHOOK_SECRET não estiver configurado,
-// passa sem bloquear (compatibilidade com ambiente de desenvolvimento).
-function verifyMPSignature(req: Request, rawBody: string): boolean {
-  const secret = process.env.MP_WEBHOOK_SECRET
-  if (!secret) return true
-
+// Retorna true se válida, false se inválida. MP_WEBHOOK_SECRET ausente é tratado
+// como erro de configuração pelo chamador (POST), não como bypass — ver checagem
+// explícita logo no início do handler.
+function verifyMPSignature(req: Request, rawBody: string, secret: string): boolean {
   const xSignature = req.headers.get('x-signature')
   const xRequestId = req.headers.get('x-request-id')
   const searchParams = new URL(req.url).searchParams
@@ -37,13 +35,22 @@ function verifyMPSignature(req: Request, rawBody: string): boolean {
 
 export async function POST(req: Request) {
   try {
+    // MP_WEBHOOK_SECRET ausente é um erro de configuração, não um estado válido
+    // de dev: sem ele, qualquer requisição forjada é aceita como pagamento aprovado.
+    // Falha explícita (500) em vez de aceitar sem validar.
+    const webhookSecret = process.env.MP_WEBHOOK_SECRET
+    if (!webhookSecret) {
+      console.error('[Webhook MP] MP_WEBHOOK_SECRET não configurado. Rejeitando requisição — configure a variável de ambiente em produção.')
+      return NextResponse.json({ error: 'Webhook misconfigured: MP_WEBHOOK_SECRET is not set' }, { status: 500 })
+    }
+
     const searchParams = new URL(req.url).searchParams
     const topic = searchParams.get('topic') || searchParams.get('type')
     const body = await req.json()
 
     // Verificação de assinatura HMAC-SHA256 — executada antes de qualquer I/O no banco.
     // Bloqueia requisições forjadas sem custo de query ao Supabase.
-    if (!verifyMPSignature(req, JSON.stringify(body))) {
+    if (!verifyMPSignature(req, JSON.stringify(body), webhookSecret)) {
       console.warn('[Webhook MP] Assinatura inválida rejeitada.')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }

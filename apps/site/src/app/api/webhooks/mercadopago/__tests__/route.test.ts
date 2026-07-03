@@ -1,7 +1,27 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { createHmac } from 'crypto'
 import { POST } from '../route'
 import * as payments from '@kings/payments'
 import * as db from '@kings/db'
+
+// A partir da correção de segurança (rejeitar quando MP_WEBHOOK_SECRET não está
+// configurado), o handler exige assinatura válida em todo teste — sem isso, o
+// teste falharia na checagem de config em vez de exercitar a lógica do webhook.
+const TEST_WEBHOOK_SECRET = 'test-webhook-secret'
+
+function buildSignedRequest(url: string, body: any) {
+  const ts = Date.now().toString()
+  const searchParams = new URL(url).searchParams
+  const dataId = searchParams.get('data.id') || ''
+  const signedTemplate = `id:${dataId};request-id:;ts:${ts};`
+  const v1 = createHmac('sha256', TEST_WEBHOOK_SECRET).update(signedTemplate).digest('hex')
+
+  return new Request(url, {
+    method: 'POST',
+    headers: { 'x-signature': `ts=${ts},v1=${v1}` },
+    body: JSON.stringify(body)
+  })
+}
 
 // 1. Mocks de dependências externas
 vi.mock('@kings/payments', () => ({
@@ -50,6 +70,11 @@ vi.mock('@kings/db', () => ({
 describe('Mercado Pago Webhook (Integração MSU)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    process.env.MP_WEBHOOK_SECRET = TEST_WEBHOOK_SECRET
+  })
+
+  afterEach(() => {
+    delete process.env.MP_WEBHOOK_SECRET
   })
 
   it('Deve calcular 15% de taxa de plataforma e injetar o status "held" em payouts', async () => {
@@ -88,11 +113,11 @@ describe('Mercado Pago Webhook (Integração MSU)', () => {
       return builder
     })
 
-    // Construindo o Request Fake
-    const req = new Request('http://localhost:3000/api/webhooks/mercadopago?topic=payment', {
-      method: 'POST',
-      body: JSON.stringify({ action: 'payment.created', data: { id: 'PAY-999' } })
-    })
+    // Construindo o Request Fake, assinado com o HMAC esperado pelo webhook
+    const req = buildSignedRequest(
+      'http://localhost:3000/api/webhooks/mercadopago?topic=payment',
+      { action: 'payment.created', data: { id: 'PAY-999' } }
+    )
 
     // Executando o POST
     const res = await POST(req)
