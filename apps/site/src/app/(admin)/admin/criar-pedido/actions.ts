@@ -66,8 +66,52 @@ export async function createOrder(formData: {
   const supabase = createAdminClient()
 
   // Validações básicas
-  if (!formData.email || !formData.name) return { error: 'Dados do cliente obrigatórios.' }
   if (formData.items.length === 0) return { error: 'Adicione pelo menos um produto.' }
+
+  // ─── FLUXO LINK DE PAGAMENTO ───
+  // Cria apenas um cart_link com token. O pedido real nasce quando o cliente pagar via checkout.
+  if (formData.generatePaymentLink) {
+    // Buscar dados dos produtos para montar o payload do carrinho
+    const productIds = formData.items.map(i => i.productId)
+    const { data: products } = await supabase
+      .from('products')
+      .select('id, title, price, images, attributes')
+      .in('id', productIds)
+
+    const cartItems = formData.items.map(item => {
+      const product = products?.find((p: any) => p.id === item.productId)
+      return {
+        id: item.productId,
+        title: item.title || product?.title || 'Produto',
+        price: item.unitPrice,
+        quantity: item.quantity,
+        imageUrl: product?.images?.[0] || '',
+        brand: 'kings',
+        storeOrigin: 'kings' as const,
+      }
+    })
+
+    const token = randomBytes(8).toString('base64url')
+
+    const { error: linkError } = await supabase.from('cart_links').insert({
+      token,
+      items: cartItems,
+      coupon_code: formData.couponCode || null,
+      discount: formData.discount || 0,
+      customer_name: formData.name || null,
+      notes: formData.notes || null,
+    })
+
+    if (linkError) return { error: 'Erro ao gerar link: ' + linkError.message }
+
+    const baseUrl = process.env.NEXT_PUBLIC_URL_KINGS || 'https://www.kingssimuladores.com.br'
+    const linkUrl = `${baseUrl}/carrinho/${token}`
+
+    return { cartLink: linkUrl, token }
+  }
+
+  // ─── FLUXO PEDIDO MANUAL (PAGO) ───
+  if (!formData.email || !formData.name) return { error: 'Dados do cliente obrigatórios.' }
 
   let customerId = formData.customerId
   let generatedPassword = null
@@ -90,7 +134,6 @@ export async function createOrder(formData: {
 
     customerId = authData.user.id;
 
-    // A trigger no banco cria um profile automaticamente, então só precisamos fazer o update
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -107,11 +150,9 @@ export async function createOrder(formData: {
 
   if (!customerId) return { error: 'Cliente não selecionado.' }
 
-  // Calcular totais
   const subtotal = formData.items.reduce((a, i) => a + i.unitPrice * i.quantity, 0)
   const total = subtotal + formData.shippingCost - formData.discount
 
-  // Tratar cupom
   let couponId = null;
   if (formData.couponCode) {
     const { data: coupon } = await supabase.from('coupons').select('id, usage_count').eq('code', formData.couponCode).single()
@@ -121,19 +162,18 @@ export async function createOrder(formData: {
     }
   }
 
-  // Criar pedido
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
       customer_id: customerId,
       brand_origin: 'kings',
       order_type: 'direct',
-      status: 'pending',
+      status: 'paid',
       subtotal,
       shipping_cost: formData.shippingCost,
       discount: formData.discount,
       total,
-      payment_method: formData.generatePaymentLink ? 'link' : 'manual',
+      payment_method: 'manual',
       shipping_address: formData.address,
       notes: formData.notes || null,
       coupon_id: couponId,
@@ -143,7 +183,6 @@ export async function createOrder(formData: {
 
   if (orderError) return { error: 'Erro ao criar pedido: ' + orderError.message }
 
-  // Inserir itens
   const orderItems = formData.items.map(item => ({
     order_id: order.id,
     product_id: item.productId,
@@ -155,7 +194,6 @@ export async function createOrder(formData: {
   const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
   if (itemsError) return { error: 'Erro ao adicionar itens: ' + itemsError.message }
 
-  // Atualizar estoque
   for (const item of formData.items) {
     const { data: product } = await supabase.from('products').select('stock').eq('id', item.productId).single()
     if (product) {
@@ -163,55 +201,43 @@ export async function createOrder(formData: {
     }
   }
 
-  // Pedido manual (sem link de pagamento) → marcar como pago e enfileirar jobs
-  if (!formData.generatePaymentLink) {
-    await supabase.from('orders').update({ status: 'paid' }).eq('id', order.id)
+  // Enfileirar jobs (ERP + notificações)
+  const { data: fullItems } = await supabase
+    .from('order_items')
+    .select('product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, ncm, ean)')
+    .eq('order_id', order.id)
 
-    // Buscar itens completos com dados do produto para o payload dos jobs
-    const { data: fullItems } = await supabase
-      .from('order_items')
-      .select('product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, ncm, ean)')
-      .eq('order_id', order.id)
-
-    const sharedPayload = {
-      profile: {
-        full_name: formData.name,
-        email: formData.email,
-        cpf_cnpj: formData.cpfCnpj,
-        phone: formData.phone,
-      },
-      order: {
-        id: order.id,
-        brand_origin: 'kings',
-        total,
-        shipping_cost: formData.shippingCost,
-        shipping_address: formData.address,
-      },
-      items: (fullItems || []).map((i: any) => ({
-        product_id: i.product_id,
-        quantity: i.quantity,
-        unit_price: i.unit_price,
-        total_price: i.total_price,
-        store_origin: i.store_origin || 'kings',
-        product: i.product,
-      })),
-    }
-
-    const jobsToEnqueue = [
-      'olist_erp',
-      'notify_customer_whatsapp',
-      'notify_customer_email',
-      'notify_admin_email',
-    ]
-
-    await supabase.from('order_jobs').insert(
-      jobsToEnqueue.map(job_type => ({
-        order_id: order.id,
-        job_type,
-        payload: sharedPayload,
-      }))
-    )
+  const sharedPayload = {
+    profile: {
+      full_name: formData.name,
+      email: formData.email,
+      cpf_cnpj: formData.cpfCnpj,
+      phone: formData.phone,
+    },
+    order: {
+      id: order.id,
+      brand_origin: 'kings',
+      total,
+      shipping_cost: formData.shippingCost,
+      shipping_address: formData.address,
+    },
+    items: (fullItems || []).map((i: any) => ({
+      product_id: i.product_id,
+      quantity: i.quantity,
+      unit_price: i.unit_price,
+      total_price: i.total_price,
+      store_origin: i.store_origin || 'kings',
+      product: i.product,
+    })),
   }
+
+  await supabase.from('order_jobs').insert(
+    ['olist_erp', 'notify_customer_whatsapp', 'notify_customer_email', 'notify_admin_email'].map(job_type => ({
+      order_id: order.id,
+      job_type,
+      payload: sharedPayload,
+    }))
+  )
 
   return { orderId: order.id, generatedPassword }
 }

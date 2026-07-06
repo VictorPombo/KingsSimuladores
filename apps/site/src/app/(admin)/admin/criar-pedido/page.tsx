@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Search, Plus, Minus, Trash2, Loader2, CheckCircle, User, MapPin, Package, Truck, CreditCard, FileText, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Search, Plus, Minus, Trash2, Loader2, CheckCircle, User, MapPin, Package, Truck, CreditCard, FileText, AlertTriangle, Copy, Check, Send } from 'lucide-react'
 import { searchProducts, searchClients, createOrder } from './actions'
 
 const ESTADOS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
@@ -67,6 +67,8 @@ export default function CriarPedidoPage() {
   // Resultado
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [generatedLink, setGeneratedLink] = useState('')
+  const [copied, setCopied] = useState(false)
 
   // ─── CEP Auto-fill ───
   async function fetchAddressData(targetCep: string) {
@@ -233,6 +235,7 @@ export default function CriarPedidoPage() {
   async function handleSubmit() {
     setError('')
     setSuccess('')
+    setGeneratedLink('')
     startTransition(async () => {
       try {
         const result = await createOrder({
@@ -249,6 +252,9 @@ export default function CriarPedidoPage() {
 
         if ((result as any).error) {
           setError((result as any).error)
+        } else if ((result as any).cartLink) {
+          setGeneratedLink((result as any).cartLink)
+          setSuccess('Link de pagamento gerado com sucesso!')
         } else if ((result as any).generatedPassword) {
           setSuccess(`Pedido #${(result as any).orderId.split('-')[0]} criado! Senha provisória: ${(result as any).generatedPassword}`)
           setTimeout(() => router.push('/admin/pedidos'), 8000)
@@ -622,8 +628,63 @@ export default function CriarPedidoPage() {
         </div>
       )}
       {success && (
-        <div style={{ padding: '12px 16px', background: '#10b98118', border: '1px solid #10b98130', borderRadius: '8px', marginBottom: '16px', color: '#10b981', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <CheckCircle size={16} /> {success}
+        <div style={{ padding: '16px', background: '#10b98118', border: '1px solid #10b98130', borderRadius: '8px', marginBottom: '16px' }}>
+          <div style={{ color: '#10b981', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: generatedLink ? '12px' : 0 }}>
+            <CheckCircle size={16} /> {success}
+          </div>
+          {generatedLink && (
+            <div style={{ marginTop: '8px' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: '#1f2025', borderRadius: '6px', padding: '10px 14px',
+                border: '1px solid #3f424d', marginBottom: '12px',
+              }}>
+                <input
+                  readOnly
+                  value={generatedLink}
+                  style={{ flex: 1, background: 'transparent', border: 'none', color: '#00e5ff', fontSize: '0.85rem', fontFamily: 'monospace', outline: 'none' }}
+                />
+                <button
+                  onClick={() => { navigator.clipboard.writeText(generatedLink); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600,
+                    background: copied ? '#10b98120' : '#3b82f620',
+                    color: copied ? '#10b981' : '#3b82f6',
+                    border: `1px solid ${copied ? '#10b98130' : '#3b82f630'}`,
+                    cursor: 'pointer', whiteSpace: 'nowrap',
+                  }}
+                >
+                  {copied ? <><Check size={12} /> Copiado</> : <><Copy size={12} /> Copiar</>}
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Olá! Aqui está o link do seu carrinho Kings Simuladores:\n${generatedLink}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 16px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600,
+                    background: '#25D366', color: '#fff', textDecoration: 'none', border: 'none', cursor: 'pointer',
+                  }}
+                >
+                  <Send size={14} /> Enviar via WhatsApp
+                </a>
+                <a
+                  href="/admin/link-carrinho"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 16px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600,
+                    background: '#3b82f618', color: '#3b82f6', textDecoration: 'none',
+                    border: '1px solid #3b82f630',
+                  }}
+                >
+                  Ver todos os links
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -642,7 +703,7 @@ export default function CriarPedidoPage() {
           display: 'inline-flex', alignItems: 'center', gap: '8px',
           transition: 'all 0.2s'
         }}>
-          {isPending ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Criando...</> : 'Criar pedido'}
+          {isPending ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {generatePaymentLink ? 'Gerando link...' : 'Criando...'}</> : generatePaymentLink ? '🔗 Gerar Link de Pagamento' : 'Criar pedido'}
         </button>
       </div>
 
