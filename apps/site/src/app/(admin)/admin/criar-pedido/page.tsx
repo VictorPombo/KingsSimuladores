@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Search, Plus, Minus, Trash2, Loader2, CheckCircle, User, MapPin, Package, Truck, CreditCard, FileText, AlertTriangle, Copy, Check, Send } from 'lucide-react'
+import { ArrowLeft, Search, Plus, Minus, Trash2, Loader2, CheckCircle, User, MapPin, Package, Truck, CreditCard, FileText, AlertTriangle, Copy, Check, Send, ShoppingCart, Link2 } from 'lucide-react'
 import { searchProducts, searchClients, createOrder } from './actions'
 
 const ESTADOS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
@@ -58,8 +58,8 @@ export default function CriarPedidoPage() {
   const [deliveryDays, setDeliveryDays] = useState(1)
   const [notes, setNotes] = useState('')
 
-  // Pagamento
-  const [generatePaymentLink, setGeneratePaymentLink] = useState(false)
+  // Modo do pedido
+  const [orderMode, setOrderMode] = useState<'manual' | 'cart_link' | 'payment_link'>('manual')
   const [applyDiscount, setApplyDiscount] = useState(false)
   const [discount, setDiscount] = useState(0)
   const [couponCode, setCouponCode] = useState('')
@@ -229,7 +229,8 @@ export default function CriarPedidoPage() {
   // ─── Cálculos ───
   const subtotal = cart.reduce((a, i) => a + i.price * i.quantity, 0)
   const finalDiscount = applyDiscount ? discount : 0
-  const total = Math.max(0, subtotal + shippingCost - finalDiscount)
+  const needsShipping = orderMode === 'manual' || orderMode === 'payment_link'
+  const total = Math.max(0, subtotal + (needsShipping ? shippingCost : 0) - finalDiscount)
 
   // ─── Submit ───
   async function handleSubmit() {
@@ -244,9 +245,9 @@ export default function CriarPedidoPage() {
           email, name, cpfCnpj, phone, personType,
           address: { cep, receiver: receiver || name, street, number, complement, neighborhood, city, state },
           items: cart.map(i => ({ productId: i.id, quantity: i.quantity, unitPrice: i.price, title: i.title })),
-          shippingMethod, shippingCost, deliveryDays, 
+          shippingMethod, shippingCost: needsShipping ? shippingCost : 0, deliveryDays, 
           notes: (applyDiscount && couponCode.trim()) ? (notes ? `${notes}\n\n[Cupom Aplicado: ${couponCode.trim()}]` : `[Cupom Aplicado: ${couponCode.trim()}]`) : notes,
-          discount: finalDiscount, generatePaymentLink,
+          discount: finalDiscount, generatePaymentLink: orderMode === 'cart_link', orderMode,
           couponCode: (applyDiscount && couponCode.trim()) ? couponCode.trim() : null
         })
 
@@ -255,6 +256,9 @@ export default function CriarPedidoPage() {
         } else if ((result as any).cartLink) {
           setGeneratedLink((result as any).cartLink)
           setSuccess('Link de carrinho gerado com sucesso!')
+        } else if ((result as any).paymentLink) {
+          setGeneratedLink((result as any).paymentLink)
+          setSuccess(`Pedido #${(result as any).orderId.split('-')[0]} criado! Link de pagamento gerado.`)
         } else if ((result as any).generatedPassword) {
           setSuccess(`Pedido #${(result as any).orderId.split('-')[0]} criado! Senha provisória: ${(result as any).generatedPassword}`)
           setTimeout(() => router.push('/admin/pedidos'), 8000)
@@ -288,19 +292,38 @@ export default function CriarPedidoPage() {
       {/* ═══ MODO DO PEDIDO ═══ */}
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><CreditCard size={20} color="#10b981" /> Tipo de pedido</h2>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: '#cbd5e1', fontSize: '0.9rem' }}>
-          <input type="checkbox" checked={generatePaymentLink} onChange={e => setGeneratePaymentLink(e.target.checked)} style={{ accentColor: '#10b981', width: '18px', height: '18px' }} />
-          Enviar carrinho montado para o cliente?
-        </label>
-        {generatePaymentLink && (
-          <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '10px', marginBottom: 0, lineHeight: 1.5 }}>
-            O cliente receberá um link com os produtos já no carrinho. Ele preenche os dados e paga no checkout da loja.
-          </p>
-        )}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+          {[
+            { key: 'manual' as const, icon: <CheckCircle size={22} />, title: 'Pedido Manual', desc: 'Já pago. Cria o pedido e envia para Olist.', color: '#10b981' },
+            { key: 'cart_link' as const, icon: <ShoppingCart size={22} />, title: 'Carrinho Montado', desc: 'Envia link com itens. Cliente preenche dados e paga.', color: '#3b82f6' },
+            { key: 'payment_link' as const, icon: <Link2 size={22} />, title: 'Link de Pagamento', desc: 'Cria pedido com dados do cliente e gera link do Mercado Pago.', color: '#f59e0b' },
+          ].map(mode => (
+            <div
+              key={mode.key}
+              onClick={() => setOrderMode(mode.key)}
+              style={{
+                padding: '20px 16px', borderRadius: '10px', cursor: 'pointer',
+                border: `2px solid ${orderMode === mode.key ? mode.color : '#3f424d'}`,
+                background: orderMode === mode.key ? `${mode.color}10` : '#1f2025',
+                transition: 'all 0.2s', textAlign: 'center',
+              }}
+            >
+              <div style={{ color: orderMode === mode.key ? mode.color : '#64748b', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
+                {mode.icon}
+              </div>
+              <div style={{ color: orderMode === mode.key ? '#fff' : '#94a3b8', fontSize: '0.85rem', fontWeight: 700, marginBottom: '4px' }}>
+                {mode.title}
+              </div>
+              <div style={{ color: '#64748b', fontSize: '0.72rem', lineHeight: 1.4 }}>
+                {mode.desc}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Nome de referência para link de carrinho */}
-      {generatePaymentLink && (
+      {orderMode === 'cart_link' && (
         <div style={sectionStyle}>
           <h2 style={sectionTitleStyle}><User size={20} color="#3b82f6" /> Referência do cliente (opcional)</h2>
           <input type="text" placeholder="Nome do cliente (apenas para sua referência)" value={name} onChange={e => setName(e.target.value)} style={inputStyle}
@@ -309,7 +332,7 @@ export default function CriarPedidoPage() {
       )}
 
       {/* ═══ SEÇÃO 1: DADOS DO CLIENTE ═══ */}
-      {!generatePaymentLink && (
+      {orderMode !== 'cart_link' && (
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><User size={20} color="#3b82f6" /> Dados do cliente</h2>
 
@@ -395,7 +418,7 @@ export default function CriarPedidoPage() {
       )}
 
       {/* ═══ SEÇÃO 2: ENDEREÇO ═══ */}
-      {!generatePaymentLink && (
+      {orderMode !== 'cart_link' && (
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><MapPin size={20} color="#f59e0b" /> Endereço</h2>
         <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '-12px', marginBottom: '20px' }}>Informe o CEP para preencher os dados automaticamente</p>
@@ -550,7 +573,7 @@ export default function CriarPedidoPage() {
       </div>
 
       {/* ═══ SEÇÃO 4: ENTREGA ═══ */}
-      {!generatePaymentLink && (
+      {orderMode !== 'cart_link' && (
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><Truck size={20} color="#22d3ee" /> Informações de entrega</h2>
 
@@ -723,7 +746,12 @@ export default function CriarPedidoPage() {
           display: 'inline-flex', alignItems: 'center', gap: '8px',
           transition: 'all 0.2s'
         }}>
-          {isPending ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {generatePaymentLink ? 'Gerando link...' : 'Criando...'}</> : generatePaymentLink ? '🔗 Gerar Link do Carrinho' : 'Criar pedido'}
+          {isPending
+            ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {orderMode === 'cart_link' ? 'Gerando link...' : orderMode === 'payment_link' ? 'Gerando link...' : 'Criando...'}</>
+            : orderMode === 'cart_link' ? '🛒 Gerar Link do Carrinho'
+            : orderMode === 'payment_link' ? '🔗 Gerar Link de Pagamento'
+            : '✅ Criar Pedido Manual'
+          }
         </button>
       </div>
 

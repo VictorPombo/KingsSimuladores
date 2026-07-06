@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient, createServerSupabaseClient } from '@kings/db'
+import { createPreference } from '@kings/payments'
 import { randomBytes } from 'crypto'
 
 /** Valida que o caller é admin autenticado. Lança erro se não for. */
@@ -60,6 +61,7 @@ export async function createOrder(formData: {
   notes: string
   discount: number
   generatePaymentLink: boolean
+  orderMode: 'manual' | 'cart_link' | 'payment_link'
   couponCode?: string | null
 }) {
   await requireAdmin()
@@ -110,7 +112,7 @@ export async function createOrder(formData: {
     return { cartLink: linkUrl, token }
   }
 
-  // ─── FLUXO PEDIDO MANUAL (PAGO) ───
+  // ─── FLUXO PEDIDO MANUAL (PAGO) ou LINK DE PAGAMENTO (PENDING + MP) ───
   if (!formData.email || !formData.name) return { error: 'Dados do cliente obrigatórios.' }
 
   let customerId = formData.customerId
@@ -162,18 +164,20 @@ export async function createOrder(formData: {
     }
   }
 
+  const isPaymentLink = formData.orderMode === 'payment_link'
+
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
       customer_id: customerId,
       brand_origin: 'kings',
       order_type: 'direct',
-      status: 'paid',
+      status: isPaymentLink ? 'pending' : 'paid',
       subtotal,
       shipping_cost: formData.shippingCost,
       discount: formData.discount,
       total,
-      payment_method: 'manual',
+      payment_method: isPaymentLink ? 'link' : 'manual',
       shipping_address: formData.address,
       notes: formData.notes || null,
       coupon_id: couponId,
@@ -201,7 +205,33 @@ export async function createOrder(formData: {
     }
   }
 
-  // Enfileirar jobs (ERP + notificações)
+  // ─── LINK DE PAGAMENTO (MERCADO PAGO) ───
+  if (isPaymentLink) {
+    try {
+      const mpItems = formData.items.map(i => ({
+        id: i.productId,
+        title: i.title,
+        quantity: i.quantity,
+        price: i.unitPrice,
+      }))
+
+      const preference = await createPreference(
+        mpItems,
+        { nome: formData.name, email: formData.email, cpf: formData.cpfCnpj, telefone: formData.phone },
+        order.id,
+        undefined,
+        'kings',
+        formData.shippingCost > 0 ? formData.shippingCost : undefined,
+        false
+      )
+
+      return { orderId: order.id, paymentLink: preference.init_point, generatedPassword }
+    } catch (err: any) {
+      return { error: 'Pedido criado, mas erro ao gerar link do Mercado Pago: ' + err.message }
+    }
+  }
+
+  // ─── PEDIDO MANUAL (JÁ PAGO) → Enfileirar jobs ───
   const { data: fullItems } = await supabase
     .from('order_items')
     .select('product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, ncm, ean)')
