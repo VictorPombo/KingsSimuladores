@@ -254,7 +254,7 @@ export default function CriarPedidoPage() {
           setError((result as any).error)
         } else if ((result as any).cartLink) {
           setGeneratedLink((result as any).cartLink)
-          setSuccess('Link de pagamento gerado com sucesso!')
+          setSuccess('Link de carrinho gerado com sucesso!')
         } else if ((result as any).generatedPassword) {
           setSuccess(`Pedido #${(result as any).orderId.split('-')[0]} criado! Senha provisória: ${(result as any).generatedPassword}`)
           setTimeout(() => router.push('/admin/pedidos'), 8000)
@@ -563,7 +563,7 @@ export default function CriarPedidoPage() {
         <h2 style={sectionTitleStyle}><CreditCard size={20} color="#10b981" /> Forma de pagamento</h2>
         <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: '#cbd5e1', fontSize: '0.9rem' }}>
           <input type="checkbox" checked={generatePaymentLink} onChange={e => setGeneratePaymentLink(e.target.checked)} style={{ accentColor: '#10b981', width: '18px', height: '18px' }} />
-          Gerar link de pagamento para o pedido?
+          Enviar carrinho montado para o cliente?
         </label>
       </div>
 
@@ -703,7 +703,7 @@ export default function CriarPedidoPage() {
           display: 'inline-flex', alignItems: 'center', gap: '8px',
           transition: 'all 0.2s'
         }}>
-          {isPending ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {generatePaymentLink ? 'Gerando link...' : 'Criando...'}</> : generatePaymentLink ? '🔗 Gerar Link de Pagamento' : 'Criar pedido'}
+          {isPending ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {generatePaymentLink ? 'Gerando link...' : 'Criando...'}</> : generatePaymentLink ? '🔗 Gerar Link do Carrinho' : 'Criar pedido'}
         </button>
       </div>
 
