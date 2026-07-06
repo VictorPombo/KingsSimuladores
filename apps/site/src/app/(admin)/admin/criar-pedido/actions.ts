@@ -151,5 +151,55 @@ export async function createOrder(formData: {
     }
   }
 
+  // Pedido manual (sem link de pagamento) → marcar como pago e enfileirar jobs
+  if (!formData.generatePaymentLink) {
+    await supabase.from('orders').update({ status: 'paid' }).eq('id', order.id)
+
+    // Buscar itens completos com dados do produto para o payload dos jobs
+    const { data: fullItems } = await supabase
+      .from('order_items')
+      .select('product_id, quantity, unit_price, total_price, store_origin, product:product_id(title, sku, ncm, ean)')
+      .eq('order_id', order.id)
+
+    const sharedPayload = {
+      profile: {
+        full_name: formData.name,
+        email: formData.email,
+        cpf_cnpj: formData.cpfCnpj,
+        phone: formData.phone,
+      },
+      order: {
+        id: order.id,
+        brand_origin: 'kings',
+        total,
+        shipping_cost: formData.shippingCost,
+        shipping_address: formData.address,
+      },
+      items: (fullItems || []).map((i: any) => ({
+        product_id: i.product_id,
+        quantity: i.quantity,
+        unit_price: i.unit_price,
+        total_price: i.total_price,
+        store_origin: i.store_origin || 'kings',
+        product: i.product,
+      })),
+    }
+
+    const jobsToEnqueue = [
+      'olist_erp',
+      'notify_customer_whatsapp',
+      'notify_customer_email',
+      'notify_admin_email',
+    ]
+
+    await supabase.from('order_jobs').insert(
+      jobsToEnqueue.map(job_type => ({
+        order_id: order.id,
+        job_type,
+        payload: sharedPayload,
+      }))
+    )
+  }
+
   return { orderId: order.id, generatedPassword }
 }
