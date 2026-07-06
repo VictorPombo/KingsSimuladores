@@ -285,7 +285,31 @@ export default function CriarPedidoPage() {
         </div>
       </div>
 
+      {/* ═══ MODO DO PEDIDO ═══ */}
+      <div style={sectionStyle}>
+        <h2 style={sectionTitleStyle}><CreditCard size={20} color="#10b981" /> Tipo de pedido</h2>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: '#cbd5e1', fontSize: '0.9rem' }}>
+          <input type="checkbox" checked={generatePaymentLink} onChange={e => setGeneratePaymentLink(e.target.checked)} style={{ accentColor: '#10b981', width: '18px', height: '18px' }} />
+          Enviar carrinho montado para o cliente?
+        </label>
+        {generatePaymentLink && (
+          <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '10px', marginBottom: 0, lineHeight: 1.5 }}>
+            O cliente receberá um link com os produtos já no carrinho. Ele preenche os dados e paga no checkout da loja.
+          </p>
+        )}
+      </div>
+
+      {/* Nome de referência para link de carrinho */}
+      {generatePaymentLink && (
+        <div style={sectionStyle}>
+          <h2 style={sectionTitleStyle}><User size={20} color="#3b82f6" /> Referência do cliente (opcional)</h2>
+          <input type="text" placeholder="Nome do cliente (apenas para sua referência)" value={name} onChange={e => setName(e.target.value)} style={inputStyle}
+            onFocus={(e: any) => e.currentTarget.style.borderColor = '#10b981'} onBlur={(e: any) => e.currentTarget.style.borderColor = '#3f424d'} />
+        </div>
+      )}
+
       {/* ═══ SEÇÃO 1: DADOS DO CLIENTE ═══ */}
+      {!generatePaymentLink && (
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><User size={20} color="#3b82f6" /> Dados do cliente</h2>
 
@@ -368,8 +392,10 @@ export default function CriarPedidoPage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* ═══ SEÇÃO 2: ENDEREÇO ═══ */}
+      {!generatePaymentLink && (
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><MapPin size={20} color="#f59e0b" /> Endereço</h2>
         <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '-12px', marginBottom: '20px' }}>Informe o CEP para preencher os dados automaticamente</p>
@@ -427,6 +453,7 @@ export default function CriarPedidoPage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* ═══ SEÇÃO 3: PRODUTOS ═══ */}
       <div style={sectionStyle}>
@@ -523,6 +550,7 @@ export default function CriarPedidoPage() {
       </div>
 
       {/* ═══ SEÇÃO 4: ENTREGA ═══ */}
+      {!generatePaymentLink && (
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}><Truck size={20} color="#22d3ee" /> Informações de entrega</h2>
 
@@ -557,15 +585,7 @@ export default function CriarPedidoPage() {
             onFocus={(e: any) => e.currentTarget.style.borderColor = '#10b981'} onBlur={(e: any) => e.currentTarget.style.borderColor = '#3f424d'} />
         </div>
       </div>
-
-      {/* ═══ SEÇÃO 5: PAGAMENTO ═══ */}
-      <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}><CreditCard size={20} color="#10b981" /> Forma de pagamento</h2>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: '#cbd5e1', fontSize: '0.9rem' }}>
-          <input type="checkbox" checked={generatePaymentLink} onChange={e => setGeneratePaymentLink(e.target.checked)} style={{ accentColor: '#10b981', width: '18px', height: '18px' }} />
-          Enviar carrinho montado para o cliente?
-        </label>
-      </div>
+      )}
 
       {/* ═══ SEÇÃO 6: RESUMO ═══ */}
       <div style={sectionStyle}>
