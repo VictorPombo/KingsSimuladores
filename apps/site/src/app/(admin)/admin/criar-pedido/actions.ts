@@ -1,9 +1,19 @@
 'use server'
 
-import { createAdminClient } from '@kings/db'
-import { redirect } from 'next/navigation'
+import { createAdminClient, createServerSupabaseClient } from '@kings/db'
+import { randomBytes } from 'crypto'
+
+/** Valida que o caller é admin autenticado. Lança erro se não for. */
+async function requireAdmin() {
+  const supabaseUser = await createServerSupabaseClient()
+  const { data: { user } } = await supabaseUser.auth.getUser()
+  if (!user) throw new Error('Não autorizado')
+  const { data: profile } = await supabaseUser.from('profiles').select('role').eq('auth_id', user.id).single()
+  if (profile?.role !== 'admin') throw new Error('Acesso negado')
+}
 
 export async function searchProducts(query: string) {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { data } = await supabase
     .from('products')
@@ -15,6 +25,7 @@ export async function searchProducts(query: string) {
 }
 
 export async function searchClients(query: string) {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { data } = await supabase
     .from('profiles')
@@ -51,6 +62,7 @@ export async function createOrder(formData: {
   generatePaymentLink: boolean
   couponCode?: string | null
 }) {
+  await requireAdmin()
   const supabase = createAdminClient()
 
   // Validações básicas
@@ -62,7 +74,7 @@ export async function createOrder(formData: {
 
   // Criar cliente novo se necessário
   if (formData.customerType === 'new') {
-    generatedPassword = 'kings123'
+    generatedPassword = randomBytes(6).toString('base64url')
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: formData.email,
       password: generatedPassword,
