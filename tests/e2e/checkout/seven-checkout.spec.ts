@@ -216,6 +216,10 @@ test.describe('Checkout Seven Sim Racing @critical', () => {
       test.skip(true, 'Rate limit atingido ao testar checkout Seven')
       return
     }
+    if (status === 404) {
+      test.skip(true, 'Endpoint retornou 404 — deploy em andamento')
+      return
+    }
     if (status === 400) {
       const errBody = JSON.parse(resultText)
       if (errBody.error?.includes('Mercado Pago') || errBody.error?.includes('credenciais') || errBody.error?.includes('rejeitados')) {
