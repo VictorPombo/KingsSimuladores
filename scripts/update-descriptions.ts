@@ -663,6 +663,193 @@ const descriptions: Record<string, string> = {
 <h4><strong>Como Funciona</strong></h4>
 <p>Após a compra, nossa equipe entrará em contato para agendar o horário da sessão. A consultoria é feita por videochamada (WhatsApp, Google Meet ou Zoom) e tem duração de acordo com a complexidade do seu setup.</p>
 `,
+
+// ═══════════════════════════════════════════
+// NOVOS TEMPLATES — Produtos sem descrição
+// ═══════════════════════════════════════════
+
+'volante-truck-moza-racing': `
+<h3><strong>Volante TSW Truck — Moza Racing: Imersão Total em Simulação de Caminhões</strong></h3>
+<p>O <strong>TSW Truck</strong> foi projetado especificamente para simulação de caminhões e máquinas agrícolas. Com <strong>400mm de diâmetro</strong> — o padrão real de volantes de caminhão — ele entrega autenticidade e conforto em sessões longas no Euro Truck Simulator 2, American Truck Simulator e Farming Simulator.</p>
+
+<h4><strong>Destaques Técnicos</strong></h4>
+<ul>
+<li><p><strong>Diâmetro de 400mm:</strong> Tamanho idêntico ao de volantes reais de caminhão, proporcionando esterço natural e preciso, sem a sensação artificial de volantes menores.</p></li>
+<li><p><strong>14 Botões Retroiluminados:</strong> Botões mecânicos de curso curto com iluminação integrada, posicionados para acesso rápido a buzina, faróis, setas e funções do painel.</p></li>
+<li><p><strong>2 Thumb Encoders + 2 Joysticks Direcionais:</strong> Permitem navegar menus, ajustar espelhos e controlar câmeras sem tirar as mãos do volante.</p></li>
+<li><p><strong>10 LEDs RGB de Alta Luminosidade:</strong> Totalmente customizáveis via MOZA Pit House para telemetria, RPM ou indicadores visuais personalizados.</p></li>
+</ul>
+
+<h4><strong>Construção Premium</strong></h4>
+<p>Aro fabricado em <strong>alumínio de alta resistência</strong> revestido com <strong>couro microfibra perfurado</strong> e costura manual — a mesma qualidade encontrada em volantes reais de veículos pesados. O design clássico de quatro raios com detalhes cromados transmite autenticidade visual.</p>
+
+<h4><strong>Compatibilidade Universal</strong></h4>
+<p>Compatível com todas as bases Direct Drive Moza Racing (R3, R5, R9, R12, R21, R25) via <strong>Quick Release em alumínio</strong>. Também funciona com bases de outros fabricantes quando utilizado com o MOZA Universal Hub.</p>
+
+<h4><strong>Especificações</strong></h4>
+<ul>
+<li><p><strong>Diâmetro:</strong> 400mm</p></li>
+<li><p><strong>Botões:</strong> 14 mecânicos retroiluminados</p></li>
+<li><p><strong>Encoders:</strong> 2 thumb encoders</p></li>
+<li><p><strong>Joysticks:</strong> 2 direcionais (4 vias)</p></li>
+<li><p><strong>LEDs:</strong> 10 RGB configuráveis</p></li>
+<li><p><strong>Material:</strong> Alumínio + couro microfibra</p></li>
+<li><p><strong>Quick Release:</strong> Alumínio (incluso)</p></li>
+<li><p><strong>Conectividade:</strong> Wireless e com fio</p></li>
+<li><p><strong>Software:</strong> MOZA Pit House</p></li>
+</ul>
+`,
+
+'moza-racing-volante-rsv2': `
+<h3><strong>Volante Moza Racing RS V2: O GT Round Definitivo</strong></h3>
+<p>O <strong>RS V2</strong> é o volante round mais completo do ecossistema Moza. Com <strong>330mm de diâmetro</strong>, 10 botões mecânicos retroiluminados e paletas magnéticas em <strong>fibra de carbono forjada</strong>, ele combina ergonomia de corrida com versatilidade para qualquer categoria — de GT3 a Rally.</p>
+
+<h4><strong>Destaques Técnicos</strong></h4>
+<ul>
+<li><p><strong>330mm de Diâmetro:</strong> Tamanho ideal para GT, touring e carros de rua. Grande o suficiente para movimentos suaves, compacto o bastante para reações rápidas.</p></li>
+<li><p><strong>10 Botões Mecânicos Retroiluminados:</strong> Com 8 opções de cor, cada botão é programável via MOZA Pit House para funções como traction control, ABS, pit limiter e mais.</p></li>
+<li><p><strong>Paletas Magnéticas em Fibra de Carbono Forjada:</strong> Troca de marchas com feedback tátil preciso e durabilidade excepcional. A fibra de carbono forjada garante leveza e rigidez superiores.</p></li>
+<li><p><strong>Dual Clutch Paddles:</strong> Embreagem dupla com ajuste de bite point independente — essencial para saídas paradas perfeitas e técnicas de heel-and-toe.</p></li>
+</ul>
+
+<h4><strong>Controles Avançados</strong></h4>
+<p>Além dos botões, o RS V2 conta com <strong>2 joysticks multidirecionais pressionáveis</strong> e <strong>2 encoders rotativos</strong> para ajustes on-the-fly de mapa de motor, brake bias, TC e configurações de setup sem sair da pista.</p>
+
+<h4><strong>Indicador de RPM Sequencial</strong></h4>
+<p>Faixa de <strong>LEDs RGB sequenciais</strong> totalmente configurável via MOZA Pit House: use como shift light, indicador de RPM, flag de bandeira ou telemetria de combustível. Cada LED pode ter cor, brilho e comportamento individuais.</p>
+
+<h4><strong>Especificações</strong></h4>
+<ul>
+<li><p><strong>Diâmetro:</strong> 330mm (13")</p></li>
+<li><p><strong>Formato:</strong> Round (circular)</p></li>
+<li><p><strong>Botões:</strong> 10 mecânicos retroiluminados (8 cores)</p></li>
+<li><p><strong>Joysticks:</strong> 2 multidirecionais pressionáveis</p></li>
+<li><p><strong>Encoders:</strong> 2 rotativos</p></li>
+<li><p><strong>Paletas:</strong> Magnéticas em fibra de carbono forjada</p></li>
+<li><p><strong>Embreagem:</strong> Dual clutch com bite point</p></li>
+<li><p><strong>LEDs RPM:</strong> Sequenciais RGB configuráveis</p></li>
+<li><p><strong>Material:</strong> Alumínio aeronáutico + couro microfibra</p></li>
+<li><p><strong>Quick Release:</strong> Alumínio (incluso)</p></li>
+</ul>
+`,
+
+'volante-moza-racing-cs': `
+<h3><strong>Volante Moza Racing CS V2: Versatilidade Round para Toda Categoria</strong></h3>
+<p>O <strong>CS V2</strong> é o volante round mais versátil da Moza. Com <strong>330mm de diâmetro</strong> e construção em <strong>alumínio de grau aeronáutico</strong>, ele foi pensado para quem compete em múltiplas categorias — de GT a touring, de rally a road cars — sem trocar de equipamento.</p>
+
+<h4><strong>Destaques Técnicos</strong></h4>
+<ul>
+<li><p><strong>Chassis em Alumínio 6061 CNC:</strong> Liga de alumínio de grau aviação usinada em CNC, combinando rigidez extrema com peso controlado. Zero flex em qualquer nível de Force Feedback.</p></li>
+<li><p><strong>6 Botões Mecânicos Programáveis:</strong> Posicionados ergonomicamente para acesso rápido a TC, ABS, pit limiter e funções personalizadas.</p></li>
+<li><p><strong>2 Joysticks Multidirecionais + 2 Encoders Rotativos:</strong> Ajuste brake bias, mapa de motor e configurações de setup direto do volante durante a corrida.</p></li>
+<li><p><strong>Paletas Magnéticas em Fibra de Carbono Forjada:</strong> Sensores fotoelétricos sem contato garantem durabilidade infinita e troca de marchas com feedback tátil preciso.</p></li>
+</ul>
+
+<h4><strong>Grip Premium</strong></h4>
+<p>Aro revestido em <strong>couro microfibra de alta aderência</strong> que absorve umidade sem perder tração. Design round clássico que se adapta a qualquer posição de mão — ideal para quem alterna entre categorias com ângulos de esterço diferentes.</p>
+
+<h4><strong>Indicador Sequencial RGB</strong></h4>
+<p>LEDs RGB integrados funcionam como shift light, indicador de RPM ou telemetria configurável. Cada LED é ajustável individualmente via <strong>MOZA Pit House</strong>.</p>
+
+<h4><strong>Especificações</strong></h4>
+<ul>
+<li><p><strong>Diâmetro:</strong> 330mm (13")</p></li>
+<li><p><strong>Formato:</strong> Round (circular clássico)</p></li>
+<li><p><strong>Botões:</strong> 6 mecânicos programáveis</p></li>
+<li><p><strong>Joysticks:</strong> 2 multidirecionais pressionáveis</p></li>
+<li><p><strong>Encoders:</strong> 2 rotativos</p></li>
+<li><p><strong>Paletas:</strong> Magnéticas em fibra de carbono forjada</p></li>
+<li><p><strong>LEDs:</strong> RGB sequenciais configuráveis</p></li>
+<li><p><strong>Material:</strong> Alumínio 6061 CNC + couro microfibra</p></li>
+<li><p><strong>Quick Release:</strong> Alumínio (incluso)</p></li>
+<li><p><strong>Conectividade:</strong> Wireless/com fio</p></li>
+</ul>
+`,
+
+'volante-moza-racing-esx-xbox': `
+<h3><strong>Volante MOZA Racing ESX: Licenciado Oficialmente para Xbox + PC</strong></h3>
+<p>O <strong>ESX</strong> é o primeiro volante Moza com <strong>licença oficial Xbox</strong>. Com <strong>280mm de diâmetro</strong> e <strong>22 botões totalmente customizáveis</strong>, ele transforma qualquer base Direct Drive Moza em um setup compatível com Xbox Series X|S, Xbox One e PC — plug-and-play, sem adaptadores.</p>
+
+<h4><strong>Destaques Técnicos</strong></h4>
+<ul>
+<li><p><strong>Licença Oficial Xbox:</strong> Certificado pela Microsoft. Basta conectar e jogar — sem emuladores, sem drivers adicionais, sem perda de funcionalidade.</p></li>
+<li><p><strong>22 Botões Customizáveis:</strong> A maior quantidade de inputs de qualquer volante Moza. Inclui botões mecânicos, joysticks multidirecionais e mapeamento completo dos botões Xbox (A, B, X, Y, Menu, View).</p></li>
+<li><p><strong>280mm de Diâmetro:</strong> Formato compacto inspirado em fórmula/GT, ideal para reações rápidas e corridas intensas.</p></li>
+<li><p><strong>Grip ISF PU Antiderrapante:</strong> Material exclusivo resistente a suor e abrasão, mantendo aderência perfeita mesmo em sessões longas.</p></li>
+</ul>
+
+<h4><strong>Troca entre Xbox e PC</strong></h4>
+<p>Alterne entre os modos com um toque: pressione <strong>S1 + S2 por 3 segundos</strong>. No modo Xbox, os LEDs fluem das laterais ao centro; no modo PC, exibem efeito de respiração. A transição é instantânea, sem reiniciar o jogo.</p>
+
+<h4><strong>10 LEDs RPM RGB</strong></h4>
+<p>Faixa de LEDs de alta luminosidade configurável como shift light, indicador de RPM, bandeiras ou telemetria. Cada LED pode ser ajustado individualmente via <strong>MOZA Pit House</strong>.</p>
+
+<h4><strong>Especificações</strong></h4>
+<ul>
+<li><p><strong>Diâmetro:</strong> 280mm</p></li>
+<li><p><strong>Botões:</strong> 22 customizáveis (mecânicos + joysticks)</p></li>
+<li><p><strong>LEDs:</strong> 10 RGB de alta luminosidade</p></li>
+<li><p><strong>Grip:</strong> ISF PU antiderrapante</p></li>
+<li><p><strong>Paletas:</strong> Alumínio de alta precisão</p></li>
+<li><p><strong>Quick Release:</strong> Alumínio (incluso)</p></li>
+<li><p><strong>Plataformas:</strong> Xbox Series X|S, Xbox One, PC</p></li>
+<li><p><strong>Bases Compatíveis:</strong> R3, R5, R9, R12, R21, R25</p></li>
+</ul>
+`,
+
+'embreagem-para-crp2': `
+<h3><strong>Módulo de Embreagem para Pedal CRP2 — Moza Racing</strong></h3>
+<p>Complete seu set de pedais CRP2 com o <strong>módulo de embreagem dedicado</strong>. Projetado com sistema de <strong>3 estágios progressivos</strong>, ele reproduz com fidelidade a sensação de uma embreagem real — do curso leve inicial à resistência firme do ponto de embreamento até a liberação nítida.</p>
+
+<h4><strong>Destaques Técnicos</strong></h4>
+<ul>
+<li><p><strong>Sistema de 3 Estágios:</strong> Curso inicial suave, resistência média progressiva e liberação definida. Cada estágio simula o comportamento mecânico de uma embreagem automotiva real.</p></li>
+<li><p><strong>Sensor de Ângulo 15-bit (32.768 PPR):</strong> Precisão absoluta na captura do ponto de embreamento (bite point), permitindo saídas paradas perfeitas e técnicas avançadas de heel-and-toe.</p></li>
+<li><p><strong>Mola Dupla com Tensão Ajustável:</strong> Sistema de resistência continuamente ajustável sem ferramentas. Adapte a rigidez ao seu estilo — leve para GT, firme para rally e drift.</p></li>
+<li><p><strong>Curso Ajustável de 15° a 25°:</strong> Personalize o comprimento do curso para reproduzir diferentes tipos de embreagem, de corrida a estradeiro.</p></li>
+</ul>
+
+<h4><strong>Construção de Grau Aeroespacial</strong></h4>
+<p>Estrutura em <strong>alumínio 6061 CNC</strong> com placa de calcanhar em <strong>fibra de carbono 3K</strong>. Ajustes de altura do pedal (até 30mm) e ângulo (0°–15°) garantem ergonomia perfeita para qualquer posição de pilotagem.</p>
+
+<h4><strong>Especificações</strong></h4>
+<ul>
+<li><p><strong>Sensor:</strong> 15-bit / 32.768 PPR</p></li>
+<li><p><strong>Curso:</strong> 15° a 25° (ajustável)</p></li>
+<li><p><strong>Peso:</strong> 1,45 kg</p></li>
+<li><p><strong>Dimensões:</strong> 145 x 300 x 200mm</p></li>
+<li><p><strong>Material:</strong> Alumínio 6061 CNC + fibra de carbono 3K</p></li>
+<li><p><strong>Compatibilidade:</strong> Pedais CRP2 (acelerador + freio)</p></li>
+<li><p><strong>Plataforma:</strong> PC + Xbox (via base Moza)</p></li>
+<li><p><strong>Software:</strong> MOZA Pit House</p></li>
+</ul>
+`,
+
+'suporte-triplo-para-monitor-de-corrida-pro-thermaltake-branco-suporte_snow': `
+<h3><strong>Suporte Triplo para Monitor PRO — Thermaltake — Branco (Snow)</strong></h3>
+<p>O <strong>Suporte Triplo PRO</strong> da Thermaltake na edição <strong>Snow (branco)</strong> oferece campo de visão panorâmico com até <strong>3 monitores de até 32 polegadas</strong>. Projetado para cockpits Thermaltake GR300 e GR500, ele combina rigidez estrutural com ajuste milimétrico de ângulo e altura.</p>
+
+<h4><strong>Destaques</strong></h4>
+<ul>
+<li><p><strong>Suporte para 3 Monitores:</strong> Acomoda até 3 telas de 27" a 32" cada, proporcionando imersão total com campo de visão de até 180°.</p></li>
+<li><p><strong>Ajuste de Ângulo e Altura:</strong> Regulagem independente de cada braço lateral para alinhamento perfeito com a posição dos olhos, eliminando reflexos e distorções.</p></li>
+<li><p><strong>Acabamento Snow Premium:</strong> Pintura eletrostática branca de alta durabilidade, resistente a arranhões e manchas, mantendo a estética clean ao longo do tempo.</p></li>
+<li><p><strong>Estrutura em Aço Reforçado:</strong> Tubular de aço carbono que suporta o peso combinado de 3 monitores sem flexão ou vibração perceptível.</p></li>
+</ul>
+
+<h4><strong>Compatibilidade</strong></h4>
+<p>Compatível com cockpits Thermaltake GR300, GR500 (preto e alabaster) e suportes de monitor padrão VESA 75x75 / 100x100. Montagem por parafusos com gabarito incluso.</p>
+
+<h4><strong>Especificações</strong></h4>
+<ul>
+<li><p><strong>Monitores:</strong> Até 3x 32" (VESA 75x75 / 100x100)</p></li>
+<li><p><strong>Cor:</strong> Branco (Snow)</p></li>
+<li><p><strong>Material:</strong> Aço carbono com pintura eletrostática</p></li>
+<li><p><strong>Ajustes:</strong> Ângulo + Altura (independente por braço)</p></li>
+<li><p><strong>Compatibilidade:</strong> Cockpits GR300 e GR500 Thermaltake</p></li>
+</ul>
+`,
+
 }
 
 // ────────────────────────────────────────────────────────────────────
