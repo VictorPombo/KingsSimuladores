@@ -32,8 +32,7 @@ async function addFirstAvailableProductToCart(page: Page): Promise<boolean> {
     waitUntil: 'load',
     timeout: TIMEOUTS.payment,
   })
-
-  const productLinks = page.locator('a[href*="/produtos/"]')
+  const productLinks = page.locator('a[href*="/produtos/"]:visible')
   const count = await productLinks.count()
   if (count === 0) return false
 
@@ -42,7 +41,7 @@ async function addFirstAvailableProductToCart(page: Page): Promise<boolean> {
       waitUntil: 'load',
       timeout: TIMEOUTS.payment,
     })
-    const link = page.locator('a[href*="/produtos/"]').nth(i)
+    const link = page.locator('a[href*="/produtos/"]:visible').nth(i)
     await link.click()
     await page.waitForLoadState('domcontentloaded', { timeout: TIMEOUTS.long })
 

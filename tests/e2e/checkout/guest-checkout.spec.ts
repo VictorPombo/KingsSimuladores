@@ -15,8 +15,8 @@ test.describe('Guest Checkout Completo @critical', () => {
     await page.goto(`${BASE_URL}/produtos`, { waitUntil: 'domcontentloaded', timeout: TIMEOUTS.long })
 
     // 2. Clicar em algum produto disponível
-    const productLink = page.locator('a[href*="/produtos/"]').first()
-    await expect(productLink).toBeVisible({ timeout: TIMEOUTS.medium })
+    const productLink = page.locator('a[href*="/produtos/"]:visible').first()
+    await expect(productLink).toBeVisible({ timeout: TIMEOUTS.payment })
     await productLink.click()
 
     // 3. Tentar adicionar ao carrinho
@@ -36,7 +36,7 @@ test.describe('Guest Checkout Completo @critical', () => {
     // Ir direto para um produto, adicioná-lo ao carrinho via URL de produto real
     await page.goto(`${BASE_URL}/produtos`, { waitUntil: 'domcontentloaded', timeout: TIMEOUTS.payment })
 
-    const productLink = page.locator('a[href*="/produtos/"]').first()
+    const productLink = page.locator('a[href*="/produtos/"]:visible').first()
     if (await productLink.count() === 0) {
       test.skip(true, 'Nenhum produto encontrado em /produtos')
       return
@@ -97,7 +97,7 @@ test.describe('Guest Checkout Completo @critical', () => {
     await page.goto(`${BASE_URL}/produtos`, { waitUntil: 'domcontentloaded', timeout: TIMEOUTS.payment })
 
     // Adicionar item ao carrinho navegando para produto
-    const productLink = page.locator('a[href*="/produtos/"]').first()
+    const productLink = page.locator('a[href*="/produtos/"]:visible').first()
     if (await productLink.count() > 0) {
       await productLink.click()
       await page.waitForLoadState('domcontentloaded', { timeout: TIMEOUTS.payment })

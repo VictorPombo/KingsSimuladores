@@ -12,7 +12,7 @@ test.describe('Catálogo: Navegação e Filtros', () => {
     await page.goto(`${BASE_URL}/produtos`, { waitUntil: 'domcontentloaded', timeout: TIMEOUTS.payment })
 
     // Verificar que há links de produto
-    const productCards = page.locator('a[href*="/produtos/"]')
+    const productCards = page.locator('a[href*="/produtos/"]:visible')
     await expect(productCards.first()).toBeVisible({ timeout: TIMEOUTS.payment })
 
     const count = await productCards.count()

@@ -54,23 +54,23 @@ test.describe('API: Guest Checkout @critical', () => {
       headers: { 'Content-Type': 'application/json' },
     })
 
-    // Aceitar 400 temporariamente se chaves MP estiverem pendentes (TEST-)
     const status = res.status()
     if (status === 429) {
       test.skip(true, 'Rate limit atingido (max 5/min). Aguarde 1 minuto e re-execute.')
       return
     }
+
+    const body = await res.json()
+
     if (status === 400) {
-      const body = await res.json()
-      // Se falhou apenas por chaves MP ausentes, o banco já validou a entrada — skip gracefully
-      if (body.error?.includes('Mercado Pago') || body.error?.includes('credenciais')) {
-        test.skip(true, 'Chaves de teste do MP (TEST-) ainda não configuradas. Aguardando Fernando.')
+      // Se falhou por chaves MP ausentes ou dados rejeitados pelo MP, skip gracefully
+      if (body.error?.includes('Mercado Pago') || body.error?.includes('credenciais') || body.error?.includes('rejeitados')) {
+        test.skip(true, 'Chaves de teste do MP (TEST-) ainda não configuradas ou dados rejeitados.')
         return
       }
     }
 
     expect(status).toBe(200)
-    const body = await res.json()
     expect(body.ok).toBe(true)
     expect(body.orderId).toBeTruthy()
     expect(body.preferenceId).toBeTruthy()

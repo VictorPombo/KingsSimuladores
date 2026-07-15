@@ -177,12 +177,19 @@ test.describe('API: emit_nfe job handler @critical', () => {
   })
 
   test('cron /api/cron/process-jobs responde 401 sem autenticação @critical', async ({ request }) => {
+    // Contra servidor remoto o comportamento do cron depende do CRON_SECRET de produção
+    const isRemote = BASE_URL.includes('kingssimuladores.com.br')
+    if (isRemote) {
+      // Contra produção, apenas verificar que não retorna 200 sem auth
+      const res = await request.get(`${BASE_URL}/api/cron/process-jobs`)
+      expect(res.status()).not.toBe(200)
+      return
+    }
+
     const res = await request.get(`${BASE_URL}/api/cron/process-jobs`)
-    // Com CRON_SECRET configurado, deve bloquear sem Bearer token
     if (CRON_SECRET) {
       expect(res.status()).toBe(401)
     } else {
-      // Sem secret configurado, o cron está em modo aberto (dev) — aceita qualquer request
       expect([200, 401]).toContain(res.status())
     }
   })

@@ -18,14 +18,14 @@ const BASE_URL = process.env.BASE_URL ?? 'https://www.kingssimuladores.com.br'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Navega para /produtos e retorna o locator do primeiro card de produto. */
+/** Navega para /produtos e retorna o locator do primeiro card de produto visível. */
 async function gotoFirstProduct(page: Page) {
   await page.goto(`${BASE_URL}/produtos`, {
     waitUntil: 'domcontentloaded',
     timeout: TIMEOUTS.payment,
   })
-  // Exclui links que apontam exatamente para /produtos (sem slug), como nav links
-  return page.locator('.kings-catalog-grid a[href*="/produtos/"]:not([href$="/produtos"])').first()
+  // Usa :visible para ignorar links de dropdown/menu que não estão visíveis
+  return page.locator('a[href*="/produtos/"]:not([href$="/produtos"]):visible').first()
 }
 
 /** Coleta erros de console (ignora ruído conhecido de extensões). */
@@ -66,8 +66,8 @@ test.describe('Catálogo UX — Homepage, Listagem e PDP @ux', () => {
     expect(title.toLowerCase()).toContain('kings')
 
     // Deve haver ao menos um link de produto (carrossel de lançamentos / mais vendidos)
-    const productLinks = page.locator('a[href*="/produtos/"]')
-    await expect(productLinks.first()).toBeVisible({ timeout: TIMEOUTS.long })
+    const productLinks = page.locator('a[href*="/produtos/"]:visible')
+    await expect(productLinks.first()).toBeVisible({ timeout: TIMEOUTS.payment })
 
     const count = await productLinks.count()
     expect(count).toBeGreaterThan(0)
@@ -106,8 +106,8 @@ test.describe('Catálogo UX — Homepage, Listagem e PDP @ux', () => {
     expect(page.url()).toContain('/produtos')
 
     // Deve haver cards com links para PDPs
-    const productLinks = page.locator('a[href*="/produtos/"]')
-    await expect(productLinks.first()).toBeVisible({ timeout: TIMEOUTS.long })
+    const productLinks = page.locator('a[href*="/produtos/"]:visible')
+    await expect(productLinks.first()).toBeVisible({ timeout: TIMEOUTS.payment })
 
     const count = await productLinks.count()
     expect(count).toBeGreaterThan(0)

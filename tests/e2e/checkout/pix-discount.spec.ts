@@ -13,13 +13,14 @@ test.describe('Desconto Pix 12% @critical', () => {
     await page.goto(`${BASE_URL}/produtos`, { waitUntil: 'domcontentloaded', timeout: TIMEOUTS.payment })
 
     // Pegar primeiro produto disponível
-    const productLink = page.locator('a[href*="/produtos/"]').first()
+    const productLink = page.locator('a[href*="/produtos/"]:visible').first()
 
     if (await productLink.count() === 0) {
       test.skip(true, 'Nenhum produto encontrado na página de catálogo')
       return
     }
 
+    await expect(productLink).toBeVisible({ timeout: TIMEOUTS.payment })
     await productLink.click()
     await page.waitForLoadState('domcontentloaded', { timeout: TIMEOUTS.payment })
 
