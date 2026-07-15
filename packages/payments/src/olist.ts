@@ -58,6 +58,17 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
     return null;
   }
 
+  // Validação de endereço — campos obrigatórios para SEFAZ/NF-e
+  const endereco = orderPayload.shipping?.street || orderPayload.shipping?.logradouro || '';
+  const numero = orderPayload.shipping?.number || orderPayload.shipping?.numero || '';
+  const bairroVal = orderPayload.shipping?.neighborhood || orderPayload.shipping?.bairro || '';
+  const cepVal = (orderPayload.shipping?.zip || orderPayload.shipping?.cep || '').replace(/\D/g, '');
+  
+  if (!endereco || !numero || !bairroVal || cepVal.length < 8) {
+    console.error(`[Tiny ERP] ❌ Rejeitado: Pedido ${orderPayload.id} com endereço incompleto. Endereço="${endereco}", Nº="${numero}", Bairro="${bairroVal}", CEP="${cepVal}". Sincronização cancelada.`);
+    return null;
+  }
+
   try {
     console.log(`[Tiny ERP] Injetando Pedido ${orderPayload.id} (Empresa: ${brand_origin})...`)
     
@@ -94,10 +105,14 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
 
     let forma_pagamento = 'Pix'
     const paymentType = orderPayload.paymentData?.payment_type_id
-    if (paymentType === 'credit_card') forma_pagamento = 'Cartão de Crédito'
-    else if (paymentType === 'debit_card') forma_pagamento = 'Cartão de Débito'
+    const paymentMethodId = orderPayload.paymentData?.payment_method_id
+
+    if (paymentMethodId === 'pix') forma_pagamento = 'Pix'
+    else if (paymentType === 'credit_card') forma_pagamento = 'Cartão de crédito'
+    else if (paymentType === 'debit_card') forma_pagamento = 'Cartão de débito'
     else if (paymentType === 'ticket') forma_pagamento = 'Boleto'
     else if (paymentType === 'bank_transfer') forma_pagamento = 'Transferência Bancária'
+    else if (paymentType === 'account_money') forma_pagamento = 'Mercado Pago'
 
     const parcelas = Number(orderPayload.paymentData?.installments) || 1
     const totalOrderValue = orderPayload.total || 0;
@@ -133,7 +148,7 @@ export const pushOrderToOlist = async (orderPayload: OlistOrderInput, brand_orig
         valor_frete: orderPayload.shipping_cost || 0,
         valor_desconto: 0,
         forma_pagamento: forma_pagamento,
-        forma_recebimento: 'Mercado Pago',
+        forma_recebimento: 'Mercado Pago', // Se no Tiny o nome do gateway estiver diferente (ex: "MercadoPago"), precisa ajustar aqui
         situacao: 'Aprovado',
         parcelas: Array.from({ length: parcelas }).map((_, i) => ({
           parcela: {

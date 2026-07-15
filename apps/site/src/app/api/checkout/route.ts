@@ -143,9 +143,17 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Validate input minimally
+    // 2. Validação completa — todos os campos obrigatórios para NF-e e Olist
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 })
+    }
+
+    if (!customer?.nome || customer.nome.trim().length < 3) {
+      return NextResponse.json({ error: 'Nome completo é obrigatório (mínimo 3 caracteres).' }, { status: 400 })
+    }
+
+    if (!customer?.email || !customer.email.includes('@')) {
+      return NextResponse.json({ error: 'E-mail válido é obrigatório para envio da Nota Fiscal.' }, { status: 400 })
     }
 
     if (!customer?.cpf || customer.cpf.replace(/\D/g, '').length < 11) {
@@ -154,6 +162,27 @@ export async function POST(req: Request) {
 
     if (!customer?.telefone || customer.telefone.replace(/\D/g, '').length < 10) {
       return NextResponse.json({ error: 'Telefone/WhatsApp é obrigatório para contato logístico.' }, { status: 400 })
+    }
+
+    // Validação de endereço — obrigatório para entrega (pode ser ignorado se retirada na loja)
+    const isPickup = shipping?.id === 'pickup' || shipping?.name?.toLowerCase().includes('retirada')
+    if (!isPickup) {
+      if (!address?.cep || address.cep.replace(/\D/g, '').length < 8) {
+        return NextResponse.json({ error: 'CEP é obrigatório para entrega.' }, { status: 400 })
+      }
+      const logradouro = address?.logradouro || address?.rua || ''
+      if (!logradouro || logradouro.trim().length < 3) {
+        return NextResponse.json({ error: 'Endereço (logradouro) é obrigatório.' }, { status: 400 })
+      }
+      if (!address?.numero || address.numero.trim().length === 0) {
+        return NextResponse.json({ error: 'Número do endereço é obrigatório.' }, { status: 400 })
+      }
+      if (!address?.bairro || address.bairro.trim().length < 2) {
+        return NextResponse.json({ error: 'Bairro é obrigatório.' }, { status: 400 })
+      }
+      if (!address?.cidade || address.cidade.trim().length < 2) {
+        return NextResponse.json({ error: 'Cidade é obrigatória.' }, { status: 400 })
+      }
     }
 
     // Permite itens misturados livremente. A lógica define o storeContext com base no primeiro item.

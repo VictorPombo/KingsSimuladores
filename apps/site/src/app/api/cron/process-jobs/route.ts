@@ -134,6 +134,47 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
       .eq('order_id', order_id)
 
     console.log(`[emit_nfe] ✅ NFe emitida para pedido ${order_id}. PDF: ${pdfUrl ?? 'n/a'}`)
+
+    // Enviar NF-e por e-mail ao cliente
+    if (pdfUrl) {
+      try {
+        const { data: orderData } = await supabase
+          .from('orders')
+          .select('customer_id, profiles(email, full_name)')
+          .eq('id', order_id)
+          .single()
+
+        const profileData = Array.isArray(orderData?.profiles) ? orderData.profiles[0] : orderData?.profiles
+        if (profileData?.email) {
+          const nome = profileData.full_name?.split(' ')[0] || 'Cliente'
+          const shortId = order_id.split('-')[0]
+          const emailResult = await sendEmailMessage({
+            to: profileData.email,
+            subject: `Sua Nota Fiscal - Pedido #${shortId}`,
+            html: `
+              <div style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;border:1px solid #eaeaea;border-radius:8px;overflow:hidden;">
+                <div style="background-color:#00e5ff;padding:20px;text-align:center;">
+                  <h1 style="color:#fff;margin:0;font-size:24px;">📄 Nota Fiscal Disponível</h1>
+                </div>
+                <div style="padding:30px;">
+                  <p style="font-size:16px;">Olá <strong>${nome}</strong>,</p>
+                  <p style="font-size:16px;line-height:1.5;">A Nota Fiscal do seu pedido <strong>#${shortId}</strong> foi emitida com sucesso!</p>
+                  <div style="margin:30px 0;text-align:center;">
+                    <a href="${pdfUrl}" style="display:inline-block;background:#00e5ff;color:#fff;text-decoration:none;padding:15px 30px;border-radius:8px;font-weight:bold;font-size:16px;">Baixar NF-e (PDF)</a>
+                  </div>
+                  <p style="font-size:14px;color:#666;">Se o botão não funcionar, copie e cole este link no navegador:</p>
+                  <p style="font-size:13px;color:#00e5ff;word-break:break-all;">${pdfUrl}</p>
+                  <p style="font-size:15px;margin-top:20px;"><strong>Equipe KingsHub</strong></p>
+                </div>
+              </div>`,
+          })
+          console.log(`[emit_nfe] E-mail NF-e enviado para ${profileData.email}: ${emailResult.success ? '✅' : '❌'}`)
+        }
+      } catch (emailErr: any) {
+        console.error(`[emit_nfe] Falha ao enviar e-mail da NF-e para pedido ${order_id}:`, emailErr?.message)
+        // Não lançar erro — a NF-e já foi emitida, o e-mail é best-effort
+      }
+    }
   },
 
   async frenet_label(payload, supabase) {
@@ -211,7 +252,7 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
   async notify_admin_email(payload) {
     const { profile, order } = payload
     const shortId = order.id.split('-')[0]
-    await sendEmailMessage({
+    const result = await sendEmailMessage({
       to: ['contato@kingssimuladores.com.br', 'Fernando.Albertoni@kingssimuladores.com.br'],
       subject: `💰 Nova Venda! Pedido #${shortId} aprovado`,
       html: `
@@ -226,10 +267,15 @@ const JOB_HANDLERS: Record<string, (payload: any, supabase: any) => Promise<void
             <p><strong>Cliente:</strong> ${profile?.full_name || '—'} (${profile?.email || '—'})</p>
             <p><strong>CPF:</strong> ${profile?.cpf_cnpj || '—'}</p>
             <p><strong>Telefone:</strong> ${profile?.phone || '—'}</p>
+            <p><strong>Endereço:</strong> ${order.shipping_address?.logradouro || '—'}, ${order.shipping_address?.numero || '—'} - ${order.shipping_address?.bairro || '—'}, ${order.shipping_address?.cidade || '—'} - CEP ${order.shipping_address?.cep || '—'}</p>
             <p style="margin-top:20px;">Acesse o painel para separação e geração da etiqueta.</p>
           </div>
         </div>`,
     })
+    console.log(`[notify_admin_email] Pedido #${shortId} → Resend ${result.success ? '✅ enviado (ID: ' + result.messageId + ')' : '❌ FALHOU'}`)
+    if (!result.success) {
+      throw new Error(`[notify_admin_email] Resend falhou para pedido #${shortId}. Será retentado.`)
+    }
   },
 
   async msu_split(payload, supabase) {
