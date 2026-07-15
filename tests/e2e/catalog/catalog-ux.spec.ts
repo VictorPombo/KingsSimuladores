@@ -12,7 +12,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test'
-import { TIMEOUTS, TEST_CUSTOMER } from '../../qa-config'
+import { TIMEOUTS, TEST_CUSTOMER, SELECTORS } from '../../qa-config'
 
 const BASE_URL = process.env.BASE_URL ?? 'https://www.kingssimuladores.com.br'
 
@@ -24,8 +24,8 @@ async function gotoFirstProduct(page: Page) {
     waitUntil: 'domcontentloaded',
     timeout: TIMEOUTS.payment,
   })
-  // Usa :visible para ignorar links de dropdown/menu que não estão visíveis
-  return page.locator('a[href*="/produtos/"]:not([href$="/produtos"]):visible').first()
+  // Usa o seletor do grid de catálogo para pegar cards de produto reais (não links de menu)
+  return page.locator(SELECTORS.productCard).first()
 }
 
 /** Coleta erros de console (ignora ruído conhecido de extensões). */
@@ -66,7 +66,8 @@ test.describe('Catálogo UX — Homepage, Listagem e PDP @ux', () => {
     expect(title.toLowerCase()).toContain('kings')
 
     // Deve haver ao menos um link de produto (carrossel de lançamentos / mais vendidos)
-    const productLinks = page.locator('a[href*="/produtos/"]:visible')
+    // Na homepage, pode não ter o grid de catálogo — usar links visíveis como fallback
+    const productLinks = page.locator(`${SELECTORS.productCard}, a[href*="/produtos/"]:visible`)
     await expect(productLinks.first()).toBeVisible({ timeout: TIMEOUTS.payment })
 
     const count = await productLinks.count()
@@ -106,7 +107,7 @@ test.describe('Catálogo UX — Homepage, Listagem e PDP @ux', () => {
     expect(page.url()).toContain('/produtos')
 
     // Deve haver cards com links para PDPs
-    const productLinks = page.locator('a[href*="/produtos/"]:visible')
+    const productLinks = page.locator(SELECTORS.productCard)
     await expect(productLinks.first()).toBeVisible({ timeout: TIMEOUTS.payment })
 
     const count = await productLinks.count()

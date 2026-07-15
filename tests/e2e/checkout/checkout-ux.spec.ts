@@ -17,7 +17,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test'
-import { TIMEOUTS, TEST_CUSTOMER } from '../../qa-config'
+import { TIMEOUTS, TEST_CUSTOMER, SELECTORS } from '../../qa-config'
 
 const BASE_URL = process.env.BASE_URL ?? 'https://www.kingssimuladores.com.br'
 
@@ -32,7 +32,7 @@ async function addFirstAvailableProductToCart(page: Page): Promise<boolean> {
     waitUntil: 'load',
     timeout: TIMEOUTS.payment,
   })
-  const productLinks = page.locator('a[href*="/produtos/"]:visible')
+  const productLinks = page.locator(SELECTORS.productCard)
   const count = await productLinks.count()
   if (count === 0) return false
 
@@ -41,7 +41,7 @@ async function addFirstAvailableProductToCart(page: Page): Promise<boolean> {
       waitUntil: 'load',
       timeout: TIMEOUTS.payment,
     })
-    const link = page.locator('a[href*="/produtos/"]:visible').nth(i)
+    const link = page.locator(SELECTORS.productCard).nth(i)
     await link.click()
     await page.waitForLoadState('domcontentloaded', { timeout: TIMEOUTS.long })
 

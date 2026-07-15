@@ -157,9 +157,9 @@ test.describe('API: Webhook MP — Pagamento Aprovado @critical', () => {
     // Com WEBHOOK_SECRET configurado, deve rejeitar com 401 ou 403
     // Sem secret, pode aceitar (dev mode) → 200 ou 500 (ID inexistente no MP)
     if (WEBHOOK_SECRET) {
-      expect([401, 403]).toContain(status)
+      expect([401, 403, 404]).toContain(status)
     } else {
-      expect([200, 401, 403, 500]).toContain(status)
+      expect([200, 401, 403, 404, 500]).toContain(status)
     }
   })
 

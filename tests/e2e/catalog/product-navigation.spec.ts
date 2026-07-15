@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { TIMEOUTS } from '../../qa-config'
+import { TIMEOUTS, SELECTORS } from '../../qa-config'
 
 const BASE_URL = process.env.BASE_URL ?? 'https://www.kingssimuladores.com.br'
 
@@ -11,8 +11,8 @@ test.describe('Catálogo: Navegação e Filtros', () => {
   test('Página de produtos carrega catálogo @critical', async ({ page }) => {
     await page.goto(`${BASE_URL}/produtos`, { waitUntil: 'domcontentloaded', timeout: TIMEOUTS.payment })
 
-    // Verificar que há links de produto
-    const productCards = page.locator('a[href*="/produtos/"]:visible')
+    // Verificar que há cards de produto no grid (não links de menu/categoria)
+    const productCards = page.locator(SELECTORS.productCard)
     await expect(productCards.first()).toBeVisible({ timeout: TIMEOUTS.payment })
 
     const count = await productCards.count()

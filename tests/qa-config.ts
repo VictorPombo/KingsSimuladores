@@ -29,7 +29,8 @@ export const SELECTORS = {
   inputCpf: 'input[name="cpf"], input[placeholder*="CPF" i], input[id*="cpf" i]',
   inputTelefone: 'input[name="telefone"], input[placeholder*="telefone" i], input[id*="telefone" i]',
   inputCep: 'input[name="cep"], input[placeholder*="CEP" i], input[id*="cep" i]',
-  // Links de produto (rota: /produtos/[slug])
+  // Links de produto dentro do grid (evita pegar links de menu/dropdown/categorias)
+  productCard: '.kings-catalog-grid a[href*="/produtos/"]',
   productLink: 'a[href*="/produtos/"]',
   // Carrinho
   btnAddToCart: 'text=Adicionar ao Carrinho, button[aria-label*="carrinho" i]',

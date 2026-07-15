@@ -182,7 +182,8 @@ test.describe('API: emit_nfe job handler @critical', () => {
     if (isRemote) {
       // Contra produção, apenas verificar que não retorna 200 sem auth
       const res = await request.get(`${BASE_URL}/api/cron/process-jobs`)
-      expect(res.status()).not.toBe(200)
+      // 401, 403 ou 404 são todos respostas válidas de rejeição
+      expect([401, 403, 404]).toContain(res.status())
       return
     }
 
