@@ -65,11 +65,16 @@ export async function POST(req: Request) {
     let formattedOptions = []
 
     if (data.ShippingSevicesArray && Array.isArray(data.ShippingSevicesArray)) {
-      const blockedServices = ['pac', 'mini envios', 'jamef']
       const validServices = data.ShippingSevicesArray.filter((s: any) => {
         if (s.Error || !s.ShippingPrice) return false;
         const lowerDesc = (s.ServiceDescription || '').toLowerCase();
-        return !blockedServices.some(blocked => lowerDesc.includes(blocked));
+        const isCorreios = (s.Carrier || '').toLowerCase().includes('correios');
+        
+        // Bloqueia PAC apenas dos Correios, e também Mini Envios
+        if (isCorreios && lowerDesc.includes('pac')) return false;
+        if (lowerDesc.includes('mini envios')) return false;
+
+        return true;
       })
       
       formattedOptions = validServices.map((s: any) => ({
